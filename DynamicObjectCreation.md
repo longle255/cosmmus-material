@@ -4,16 +4,14 @@
  
 Current implementation of SSMR assumes every object exists everywhere across the partitions on the system, but not necessarily up-to-date. This require an initialization of objects on each partition on starting up phase. 
 
-The question now is: Can we introduce an dynamic creation of objects while still maintain the accuracy and performance of the system
+On the other hand, when object is created on one partition, other partitions with their associated oracle don't have knowledge of newly created object, thus can't access the object when needed.
 
-**Current implementation issues**
-
-- Object is created on one partition, other partitions with their associated oracle don't have knowledge of newly created object, thus can't access the object when needed.
+The question is: Can we introduce an dynamic creation of objects that accessible across the partitions
 
 **Possible solutions and issues need to be addressed:**
 
 - When create object dynamically, create it globally: application server multicast create command to all available partitions. So object is accessible across partitions
-    + Need some mechanisms to set Object owner which is main partition that actually own the object.
+    + Need to set Object owner which is main partition that actually own the object.
    
 - Implement a broker oracle which have information of all objects on the SSMR system. So partition create object locally, then inform the global oracle about the object. Whenever a partition need an object, it can ask the broker oracle and fetch the object from the destination.
     + Issues: during the time asking-answering of partition-oracle, object's location could be changed. thus need some verification/retry mechanism.
