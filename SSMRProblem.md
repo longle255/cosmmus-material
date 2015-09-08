@@ -1,5 +1,23 @@
 ###Scalable State Machine Replication Implementation
 
+
+| Revision | Review Date |                       Changes                       |
+|----------|-------------|-----------------------------------------------------|
+|        1 | 2 Sept 2015 | Initial commit                                      |
+|        2 | 9 Sept 2015 | - Multicast Create command to Oracle and Partitions |
+|          |             | - Add locking mechanism for creating & updating     |
+|          |             | - Adding caching mechanism for read command         |
+
+<!-- MarkdownTOC -->
+
+- [SSMR](#ssmr)
+- [Enhancing Oracle](#enhancing-oracle)
+    - [Creating object scenarios](#creating-object-scenarios)
+    - [Updating object location scenarios](#updating-object-location-scenarios)
+
+<!-- /MarkdownTOC -->
+
+## SSMR
 **State Machine Replication** (SMR) is a well known method for implementing a fault-tolerant, high availability service. By having clients commands executed in the same other on all replicas, following the deterministic execution, producing same state of all replica for each client command. The original SMR model was not quite efficient since adding replica doesn't increase the performance or throughput, because all replicas still execute same number of commands. **Scalable State Machine Replication** (SSMR) then was introduced to address that problem by partitioning the application state, that allow client commands go through a combination of replicas, but not necessary all the replicas, while still maintain the consistency of the system.
 
 SSMR implementation then bring into use the concept of **Oracle** which is the core of partitioning algorithms, which tell the system which partition(s) a command should be forwarded to, or on which partition(s) a state object could be located. The implementation of SSMR uses a basic version of Oracle which runs simple algorithm to return the combination of involved partition. It thus leaves an open door for the application designers to determine where a command/object should be located.
@@ -12,7 +30,7 @@ The current executing flow of the SSMR could be describe as
 - 5. Oracles return set of partitions which contain the objects
 - 6. Partitions exchange object execute the command and return response to the client
 
-<div style="text-align:center"><img src ="./figures/ssmr_simple_execution_flow.png" /></div>
+<div style="text-align:center"><img src ="./figures/1_ssmr_simple_execution_flow.png" /></div>
 
 **Notes**
 - Oracle is running independently on each client and partition. 
@@ -22,21 +40,52 @@ The current executing flow of the SSMR could be describe as
 - In the case Oracle fails to return the set of partitions, a superset (which mean **all**) of partitions will be returned.
 - Oracle's result has to be consistent for querying from both client and partition side.
 - **All objects have to be available on all partitions** So all the objects have to be defined and created during the starting phase of the system.
-- Under the above assumtion, object can't be created, nor exchanged between partition on the fly, since Oracles running independently, one won't know if another is updated (which will happend to reflect the changes of partition's object), thus it could lead to an out sync state between Oracles 
+- Under the above assumption, object can't be created, nor exchanged between partition on the fly, since Oracles running independently, one won't know if another is updated (which will happen to reflect the changes of partition's object), thus it could lead to an out sync state between Oracles 
 - Due to out of sync between oracle, one Oracle might return incorrect set of partition, which eventually brings down the consistency of the whole system.
 
-###Enhancing Oracle
+## Enhancing Oracle
 
 By observing the SSMR execution flow, we can see the important role of the proper implementation of the Oracle in the SSMR:
 - Bases on the command and objects involved in the command, tell the client the combination of partitions to send the command to
 - Base on the objects, tell partitions in the replica the partition(s) the objects are located.
 - Return the most optimize set of partitions where the command is involved.
-- Should be able to update itself in the case new objects are created, or moving accross the partitions.
+- Should be able to update itself in the case new objects are created, or moving across the partitions.
+- Should be able handle all possible cases together with their exceptions
 - Works transparently to the upper layers. The application designers should now concerned about having the application run on multiple partitions, where to put the object, or where to forward the command, rather than only focus on developing application on a single partition as common sense.
 
-<div style="text-align:center"><img src ="./figures/oracle_update_create.png" /></div>
+### Creating object scenarios
 
-<div style="text-align:center"><img src ="./figures/oracle_update_location.png" /></div>
+**Case 1**: Read command and create command are not overlapping.
+
+<div style="text-align:center"><img src ="./figures/2_oracle_update_create.png" /></div>
+<!--- <p align='center'> Figure 2 </p> -->
+
+> 1. On the first **read** request, client 1 ask Oracle for location of X. Oracle doesn't have information of X at that time, thus return an empty response to the **read** request of the client 1, the request is finish when client 1 get the response from the oracle
+> 2. Then another client (client 2) emits a **create** request, first it has to consult Oracle to get the associated partition, then multicast the **create** command to both Oracle and Partition(s). The partition P1 create object then response to the client. The request finish when client get the response from partition P1. Oracle also has the updated location of the object X
+> 3. Client 1 issues another **read** command, at this time Oracle return the correct location of X (P1), then client 1 multicast the **read** command to the Partition to read the object value, the request finish when client get the response from P1
+
+**Case 2**: Read command and create command are overlapping when Oracle has not updated object's location
+
+<div style="text-align:center"><img src ="./figures/3_read_write_overlapping_case_2.png" /></div>
+
+> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). In the moment between consulting oracle and multicasting command, Client 1 asks Oracle for location of X, Oracle still return empty result to client 1
+
+**Case 3**: Read command and create command are overlapping when Oracle has object's location but the object have not created.
+
+<div style="text-align:center"><img src ="./figures/4_read_write_overlapping_case_3.png" /></div>
+
+> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicast step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1 ->? 
 
 
-Possible issues: Oracle may return wrong answer overlaping of update command.
+**Performance Optimization by using Caching**
+
+<div style="text-align:center"><img src ="./figures/5_oracle_cached.png" /></div>
+
+> Client and partition have a copy of oracle in local cache. Every time Oracle update, it also multicast the update command too all related Client, Partition
+
+### Updating object location scenarios
+
+<div style="text-align:center"><img src ="./figures/6_oracle_update_location.png" /></div>
+
+
+Possible issues: Oracle may return wrong answer overlapping of update command.
