@@ -70,22 +70,30 @@ By observing the SSMR execution flow, we can see the important role of the prope
 
 > 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). In the moment between consulting oracle and multicasting command, Client 1 asks Oracle for location of X, Oracle still return empty result to client 1
 
-**Case 3**: Read command and create command are overlapping when Oracle has object's location but the object have not created.
+**Case 3.1**: Read command and create command are overlapping when Oracle has object's location but the object is in creating process
 
-<div style="text-align:center"><img src ="./figures/4_read_write_overlapping_case_3.png" /></div>
+<div style="text-align:center"><img src ="./figures/4_read_write_overlapping_case_3.1.png" /></div>
+
+> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicast step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1. Then Client sends the read command C1 to P1 while P1 is running creating command X C2. Since P1's execution is atomic, C1 will be executed after C2 finish
+
+**Case 3.2**: Read command and create command are overlapping when Oracle has object's location but the object is not created
+<div style="text-align:center"><img src ="./figures/5_read_write_overlapping_case_3.2.png" /></div>
 
 > 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicast step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1 ->? 
 
 
+
 **Performance Optimization by using Caching**
 
-<div style="text-align:center"><img src ="./figures/5_oracle_cached.png" /></div>
+<div style="text-align:center"><img src ="./figures/6_oracle_cached.png" /></div>
 
-> Client and partition have a copy of oracle in local cache. Every time Oracle update, it also multicast the update command too all related Client, Partition
+> Client and partition have a copy of oracle in local cache. Every time Oracle update, it also multicast the update command to all associated Client, Partition
 
 ### Updating object location scenarios
 
-<div style="text-align:center"><img src ="./figures/6_oracle_update_location.png" /></div>
-
+<div style="text-align:center"><img src ="./figures/7_oracle_update_location_1.png" /></div>
+<div style="text-align:center"><img src ="./figures/7_oracle_update_location_2.png" /></div>
+<div style="text-align:center"><img src ="./figures/7_oracle_update_location_3.png" /></div>
+<div style="text-align:center"><img src ="./figures/7_oracle_update_location_4.png" /></div>
 
 Possible issues: Oracle may return wrong answer overlapping of update command.
