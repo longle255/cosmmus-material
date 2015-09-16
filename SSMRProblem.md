@@ -1,19 +1,22 @@
 ###Scalable State Machine Replication Implementation
 
 
-| Revision | Review Date |                       Changes                       |
-|----------|-------------|-----------------------------------------------------|
-|        1 | 2 Sept 2015 | Initial commit                                      |
-|        2 | 9 Sept 2015 | - Multicast Create command to Oracle and Partitions |
-|          |             | - Add locking mechanism for creating & updating     |
-|          |             | - Adding caching mechanism for read command         |
+| Revision | Review Date  |                       Changes                       |
+|----------|--------------|-----------------------------------------------------|
+|        1 | 2 Sept 2015  | Initial commit                                      |
+|        2 | 9 Sept 2015  | - Multicast Create command to Oracle and Partitions |
+|          |              | - Add locking mechanism for creating & updating     |
+|          |              | - Adding caching mechanism for read command         |
+|        3 | 16 Sept 2015 | - Command requires lock from first step             |
+|          |              | - Add detail for caching mechanism                  |
+|          |              | - Add summary figure for cases with detail steps    |
+
 
 <!-- MarkdownTOC -->
 
-- [SSMR](#ssmr)
-- [Enhancing Oracle](#enhancing-oracle)
-    - [Creating object scenarios](#creating-object-scenarios)
-    - [Updating object location scenarios](#updating-object-location-scenarios)
+- SSMR
+- Enhancing Oracle
+- ummary Case
 
 <!-- /MarkdownTOC -->
 
@@ -57,12 +60,13 @@ By observing the SSMR execution flow, we can see the important role of the prope
 
 **Case 1**: Read command and create command are not overlapping.
 
+
 <div style="text-align:center"><img src ="./figures/2_oracle_update_create.png" /></div>
 <!--- <p align='center'> Figure 2 </p> -->
 
 > 1. On the first **read** request, client 1 ask Oracle for location of X. Oracle doesn't have information of X at that time, thus return an empty response to the **read** request of the client 1, the request is finish when client 1 get the response from the oracle
 > 2. Then another client (client 2) emits a **create** request, first it has to consult Oracle to get the associated partition, then multicast the **create** command to both Oracle and Partition(s). The partition P1 create object then response to the client. The request finish when client get the response from partition P1. Oracle also has the updated location of the object X
-> 3. Client 1 issues another **read** command, at this time Oracle return the correct location of X (P1), then client 1 multicast the **read** command to the Partition to read the object value, the request finish when client get the response from P1
+> 3. Client 1 issues another **read** command, at this time Oracle return the correct location of X (P1), then client 1 multicasts the **read** command to the Partition to read the object value, the request finish when client get the response from P1
 
 **Case 2**: Read command and create command are overlapping when Oracle has not updated object's location
 
@@ -74,12 +78,12 @@ By observing the SSMR execution flow, we can see the important role of the prope
 
 <div style="text-align:center"><img src ="./figures/4_read_write_overlapping_case_3.1.png" /></div>
 
-> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicast step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1. Then Client sends the read command C1 to P1 while P1 is running creating command X C2. Since P1's execution is atomic, C1 will be executed after C2 finish
+> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicasts step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1. Then Client sends the read command C1 to P1 while P1 is running creating command X C2. Since P1's execution is atomic, C1 will be executed after C2 finish
 
 **Case 3.2**: Read command and create command are overlapping when Oracle has object's location but the object is not created
 <div style="text-align:center"><img src ="./figures/5_read_write_overlapping_case_3.2.png" /></div>
 
-> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicast step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1 ->? 
+> 1. Client 2 asks Oracle for partition for **create** command, then multicasts command to Oracle and Partition (P1). After multicasts step, Oracle updates object's location and Partition P1 starts creating object. In the moment after Oracle already has X's location and Partition is creating X, Client 1 asks Oracle for location of X, Oracle returns P1 ->? 
 
 
 
@@ -87,13 +91,36 @@ By observing the SSMR execution flow, we can see the important role of the prope
 
 <div style="text-align:center"><img src ="./figures/6_oracle_cached.png" /></div>
 
+
+
 > Client and partition have a copy of oracle in local cache. Every time Oracle update, it also multicast the update command to all associated Client, Partition
 
 ### Updating object location scenarios
 
+
 <div style="text-align:center"><img src ="./figures/7_oracle_update_location_1.png" /></div>
 <div style="text-align:center"><img src ="./figures/7_oracle_update_location_2.png" /></div>
 <div style="text-align:center"><img src ="./figures/7_oracle_update_location_3.png" /></div>
-<div style="text-align:center"><img src ="./figures/7_oracle_update_location_4.png" /></div>
 
 Possible issues: Oracle may return wrong answer overlapping of update command.
+
+
+##Summary Case
+<div style="text-align:center"><img src ="./figures/summary.png" /></div>
+
+###Question:
+- When will version increase? When will the cache be updated
+  + Client: 
+- Should client update object location it self?
+
+
+
+
+1. If clients don't have cached version of object's location, it will consult oracle for that information. 
+2. Client A multicast read command to partition P1, together with cache version number of object X, if the P1 checks matched version, it will process the command, then return the result to A.
+3. Client B multicast move command (which move object X from P1 to P2) with cache number to partition P1, P2 and the Oracle. Both check the version, update local cache, then execute the command
+	- **Command which change the version of object**: Create, Move, *Update*(?)
+4. Client A want to read X again, it multicasts command to P1 (as local cache version of X), P1 check not matched version then return fails, A consult Oracle again to get the new location of X. Then multicast command to P2. 
+	- **Command involve Oracle need to require lock of that Object on Oracle**
+	- **Command which require lock on object** read vs move
+5. 
