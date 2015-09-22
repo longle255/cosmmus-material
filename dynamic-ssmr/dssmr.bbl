@@ -1,0 +1,75 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{Attiya04}
+Attiya, H., Welch, J.: Distributed Computing: Fundamentals, Simulations, and
+  Advanced Topics. Wiley-Interscience (2004)
+
+\bibitem{BJ87b}
+Birman, K.P., Joseph, T.A.: Reliable communication in the presence of failures.
+  ACM Transactions on Computer Systems (TOCS)  5(1),  47--76 (feb 1987)
+
+\bibitem{CT96}
+Chandra, T.D., Toueg, S.: Unreliable failure detectors for reliable distributed
+  systems. Journal of the ACM  43(2),  225--267 (1996)
+
+\bibitem{DSU04}
+D{\'e}fago, X., Schiper, A., Urb{\'a}n, P.: Total order broadcast and multicast
+  algorithms: Taxonomy and survey. ACM Comput. Surv.  36(4),  372--421 (2004)
+
+\bibitem{FLP85}
+Fischer, M.J., Lynch, N.A., Paterson, M.S.: Impossibility of distributed
+  consensus with one faulty processor. Journal of the ACM  32(2),  374--382
+  (1985)
+
+\bibitem{Glendenning:2011kj}
+Glendenning, L., Beschastnikh, I., Krishnamurthy, A., Anderson, T.E.: {Scalable
+  consistency in Scatter.} SOSP pp. 15--28 (2011)
+
+\bibitem{Guo:2014jp}
+Guo, Z., Hong, C., Yang, M., Zhou, D., Zhou, L., Zhuang, L.: {Rex: replication
+  at the speed of multi-core.} EuroSys :1-11:14 p.~11 (2014)
+
+\bibitem{Kapritsos:2012um}
+Kapritsos, M., 0009, Y.W., Qu{\'e}ma, V., Clement, A., Alvisi, L., Dahlin, M.:
+  {All about Eve: Execute-Verify Replication for Multi-Core Servers.} OSDI pp.
+  237--250 (2012)
+
+\bibitem{Kotla:2004ep}
+Kotla, R., Dahlin, M.: {High Throughput Byzantine Fault Tolerance.} DSN pp.
+  575--584 (2004)
+
+\bibitem{Lam78}
+Lamport, L.: Time, clocks, and the ordering of events in a distributed system.
+  Communications of the ACM  21(7),  558--565 (1978)
+
+\bibitem{Lamport:1998ea}
+Lamport, L.: {The Part-Time Parliament.} ACM Trans. Comput. Syst. ()  16(2),
+  133--169 (1998)
+
+\bibitem{Mencius}
+Mao, Y., Junqueira, F.P., Marzullo, K.: Mencius: building efficient replicated
+  state machines for wans. In: Proceedings of the 8th USENIX conference on
+  Operating systems design and implementation (OSDI). pp. 369--384 (2008)
+
+\bibitem{Marandi:2014bj}
+Marandi, P.J., Bezerra, C.E.B., Pedone, F.: {Rethinking State-Machine
+  Replication for Parallelism.} ICDCS pp. 368--377 (2014)
+
+\bibitem{Marandi:2011dj}
+Marandi, P.J., Primi, M., Pedone, F.: {High performance state-machine
+  replication.} DSN pp. 454--465 (2011)
+
+\bibitem{Marandi:2012hb}
+Marandi, P.J., Primi, M., Pedone, F.: {Multi-Ring Paxos.} DSN pp. 1--12 (2012)
+
+\bibitem{Moraru:2013gw}
+Moraru, I., Andersen, D.G., Kaminsky, M.: {There is more consensus in
+  Egalitarian parliaments.} SOSP pp. 358--372 (2013)
+
+\bibitem{Sch90}
+Schneider, F.B.: Implementing fault-tolerant services using the state machine
+  approach: {A} tutorial. ACM Computing Surveys  22(4),  299--319 (1990)
+
+\end{thebibliography}

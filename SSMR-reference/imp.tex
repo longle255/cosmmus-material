@@ -1,0 +1,228 @@
+%
+% include the class file for USI-INF Technical Reports
+%
+\documentclass{usiinftr}
+
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+%\usepackage{graphicx}
+%\usepackage{color}
+%\usepackage{amssymb}
+%\usepackage[noend]{distribalgo}
+\usepackage[draft]{fixme}
+\usepackage{enumerate}
+
+\newcommand{\mv}[1]{\ensuremath{\operatorname{\mathit{#1}}}}
+%\definecolor{dark}{gray}{.6}
+\newcommand{\bc}[1]{\textcolor{dark}{#1}}
+\newtheorem{lems}{Lemma}
+\newtheorem{props}{Proposition}
+\newtheorem{thms}{Theorem}
+\newtheorem{defs}{Definition}
+\newtheorem{obs}{Observation}
+
+%
+% if you want to create a cover page only (e.g. to put it in front
+% of a WORD document or the like), use the "coverpage" option
+%
+%\documentclass[coverpage]{usiinftr}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%
+% put the title of the Technical Report here
+%
+\title{Impossibility(?)}
+
+%
+% put the author names here; use the second argument as a
+% reference to the list of affiliations
+%
+\author{Eduardo}{1}
+\author{Fernando}{1}
+
+%
+% put the affiliations of the authors here
+% NOTE: use the macro "\USIINF" for our Faculty of Informatics
+%
+\affiliation{1}{\USIINF}
+
+%
+% put the number of your Technical Report here; in order to determine
+% the number, take the number of the most recent USI INF Technical Report
+% (on top of the list at http://www.inf.usi.ch/techreports/) and increment
+% it by one; the format is "[year]-[number]"
+%
+\TRnumber{2010-4}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\rr}{$\mathcal{R}$}
+\newcommand{\rrm}{\mathcal{R}}
+\newcommand{\sst}{$\mathcal{S}$}
+\newcommand{\ssm}{\mathcal{S}}
+\newcommand{\ts}{\text{\textit{ts}}}
+\newcommand{\sendersTo}{\text{\textit{sendersTo}}}
+\newcommand{\readv}{\text{\textit{read}}}
+\newcommand{\writev}{\text{\textit{write}}}
+\newcommand{\comp}{\text{\textit{computation}}}
+\newcommand{\send}{\text{\textit{send}}}
+\newcommand{\recv}{\text{\textit{receive}}}
+
+%
+% by default, the current month and year are used as the publication date
+% of your Technical Report; if you want to change this, then you can do it here, e.g.
+%
+%\date{February~\the\year}
+%\date{August 2011}
+
+%
+% the rest is as usual
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+\begin{abstract}
+-
+\end{abstract}
+
+\section{...}
+
+We consider a system consisting of an unbounded set of clients $\ccm = \{c_1, c_2, ...\}$, a set of $n$ servers $\ssm = \{s_1, ..., s_n\}$, a set of $p$ partitions (subsets of \sst) $\ppm = \{P_1, ..., P_p\}$ and a set of $m$ variables $\vvm = \{v_1, ..., v_m\}$. Clients send commands to servers, which execute them. Every variable is stored in some server, and every server stores at least one variable. Every server belongs to a partition; servers in the same partition store the same set of variables.
+
+In a given execution \ex, every command $C$ comprises a set of accessed variables $\vvm_C$ (which, in turn, consists of the union of a set of read-variables and a set of written-variables), a set of input values, a start time $C.s$ and a finish time $C.f$ (both in real-time).
+%Two commands are \emph{dependent} if there is at least one variable accessed by both. They are \emph{independent} otherwise.
+In \ex, a single matching response is associated with each command executed. There is a sequential specification for the variables: given a sequence of commands $\sigma$, the response matching any command $x$ that reads some variable $v$ must be consistent with the most recent command that writes $v$ and precedes $x$ in $\sigma$. A permutation $\pi$ of all commands in execution \ex\ is legal if $\pi$ respects the sequential specification of every variable. Execution \ex\ is \emph{linearizable} if there is such a permutation that respects the sequential specification of all variables and also respects the real-time ordering of commands, i.e., given commands $x$ and $y$ in \ex, if $x.f < y.s$ then $x \prec y$ (meaning ``$x$ precedes $y$'') in $\pi$.
+
+Using atomic multicast to define command precedence ensures that a legal permutation of commands can be found for every execution \ex, even if amcast does not define precedence for all pairs of commands (Prove.).
+
+\subsection{SSMR}
+
+In SSMR, each partition is mapped to a multicast group. If there is only one partition in the system, then replication is full and can be solved trivially by atomic-broadcasting commands to all servers; otherwise, replication is partial and each command $C$ is multicast only to the partitions that store at least one variable accessed by $C$. Each partition that delivers $C$ executes a subcommand $s$ of $C$ upon delivering $C$. A command that is delivered by only one partition has only one subcommand. Each subcommand $s$ has its own start and finish times $s.s$ and $s.f$, which depend on when it is executed by the partition. The execution of a command is finished when the execution of every one of its subcommands is finished.
+%
+% being continuous does not ensure linearizability
+% Command $C$ is said to be \emph{continuous} if there is no instant, between its start and its finish, in which no subcommand of $C$ is being executed. More formally, if $C_{sub}$ is the set of all subcommands of $C$, then there exists no instant $t$ such that $C.s < t < C.f \wedge \nexists s \in C_{sub}: s.s < t < s.f$.
+%
+Command $C$ is said to be \emph{overlapping} if there is an instant when every subcommand of $C$ is being executed. More formally, if $C_{sub}$ is the set of all subcommands of $C$, then there exists an instant $t$ such that $s.s < t < s.f$ for every $s \in C_{sub}$.
+
+\begin{props}
+%Suppose a system whose partition set is $\ppm = \{P_1, ..., P_p\}$.
+\textsc{(Linearizability)}.\\If every command in execution \ex\ of SSMR is overlapping, then \ex\ is linearizable.
+\end{props}
+
+
+\begin{proof}
+Suppose, by means of contradiction, that there exist two commands $x$ and $y$, where $x$ finishes before $y$ starts, but $y \prec x$ in the execution. There are two possibilities for this:
+
+\begin{enumerate}[i)]
+
+\item $x$ and $y$ access some variable in common $v$
+
+In this case, at least one partition $P_v$ (which contains $v$) delivers both $x$ and $y$. As $x$ finishes before $y$ starts, then $P_v$ delivers $x$, then $y$. From the properties of atomic multicast, and since each partition is mapped to a multicast group, no partition delivers $y$, then $x$. Moreover, atomic multicast ensures acyclic order, so there are no commands $z_0, ..., z_m$ such that their atomic order is $y \prec z_0 \prec \cdots \prec z_m \prec x$. So, we reached a contradiction in this case.
+
+\item $x$ and $y$ access no variable in common
+
+In this case, if there were no other command in \ex, then the execution of $x$ and $y$ could be done in any order, which would contradict the supposition that $y \prec x$. Suppose, then, that there are commands $z_1, ..., z_n$ such that their atomic order is $y \prec z_1 \prec \cdots \prec z_n \prec x$.
+
+As $y \prec z_1$, then both commands $y$ and $z_1$ are delivered by some partition $P_1$, which executes their subcommands $s_y$ and $s_{z_1}$ in the order of atomic delivery. Therefore, $s_y.f < s_{z_1}.s$. Since $z_1 \prec z_2$, some partition $P_2$ delivers both $z_1$ and $z_2$ and executes their subcommands $s_{z_1}'$ and $s_{z_2}$, with $s_{z_1}'.f < s_{z_2}.s$. Since every command in the execution is overlapping, there is a time $t_1$, such that $s_{z_1}.s < t_1 < s_{z_1}.f$ and $s_{z_1}'.s < t_1 < s_{z_1}'.f$. Therefore, $s_y.f < t_1 < s_{z_2}.s$.
+
+Following similar steps, we can conclude that there are times $t_1, ..., t_n$ such that $s_y.f < t_1 < \cdots < t_n < s_x.s$, where $s_x$ is a subcommand of $x$, meaning that $y.s < x.f$, which is also a contradiction.
+
+\end{enumerate}
+
+\end{proof}
+
+
+\subsubsection{Commands and subcommands}
+
+In SSMR, every command contains a set $\varsigma$ of operations. Each operation can be:
+
+\begin{enumerate}[a)]
+
+\item $\readv(x)$: retrieve the value of variable $x$;
+
+\item $\writev(x, v)$: assign the value $v$ to variable $x$;
+
+%\item some \comp, which may depend on some previously read variable.
+\item some computation, which may depend on some previously read variable.
+
+\end{enumerate}
+
+Every partition $P$, upon delivering a command $C$, translates it into a subcommand $s$, which depends on what variables read and written by $C$ are stored in $P$. This way, the sequence of operations $\varsigma$ of $C$ is translated into $\varsigma_s$, which is the sequence of operations that compose $s$. There are different ways to do such mapping. A simple such way is by having every operation in $\varsigma_s$ as the same as in $\varsigma$, except in the following cases:
+
+\begin{enumerate}[i)]
+
+\item If the $i$-th operation of $\varsigma$ is $\readv(v)$, it translates into:
+
+\begin{enumerate}
+
+\item If $v$ is stored in $P$, then $P$ sends $v$ to every partition that delivers $C$ and does not store $v$.
+
+\item If $v$ is not stored in $P$, it consists of waiting until the value of $v$ has arrived at $P$.
+
+\end{enumerate}
+
+\item If the $i$-th operation in $\varsigma$ is $\writev(x,v)$ and $P$ does not contain $v$, then $P$ does nothing for the $i$-th operation.
+
+\end{enumerate}
+
+Besides, to ensure linearizability, SSMR forces all subcommands of each command to overlap. This may be done in a straightforward way. Let $\ppm_C$ be the set of all partitions that deliver $C$. Every $P_i \in \ppm_C$ sends a message \textit{sig}$^C_i$ to every $P_j \in \ppm_C$. After doing this, and before finishing the execution of $C$'s subcommand, $P_i$ waits for \textit{sig}$^C_j$ from every $P_j \in \ppm_C$. Except for the fact that sending obviously must precede the receiving of such signals, they can be sent and waited for at any time during the execution of the subcommand, e.g., sending may be the first thing to be done, and waiting may be the last one, in order to minimize waiting time.
+
+(What about sending the reply? Who sends it?)
+
+Every partition that executed a subcommand of $C$ replies to the client that issued it, piggybacking any information required to assemble the full reply based on the partial replies sent by the different partitions.
+
+
+%An operation is defined as the execution of a single command $C$, from the moment a client issues it (including any arguments sent along with $C$) to the moment when the client finishes receiving the response for $C$ (including all returned values). Therefore, an operation may be seen as a tuple $(C, t_0, t_f, I, V, O)$, where $t_0$ and $t_f$ represent the start and finish time of the operation (in real-time), $I$ represent the set of parameters sent along with $C$, $V$ is the set of variables read/written by $C$ and $O$ represents the set of values returned along with the response.
+
+%def.: client, command, operation, execution, sequential specification, object.
+
+%Operations may be \emph{dependent} or \emph{independent}. Operations $O_1$ and $O_2$ in \ex are dependent if there is only one order (denoted by ``$\prec$'') in which they can be done, e.g., if $O_1 \prec O_2$, then $O_1$ must be done before $O_2$, otherwise the sequential specification of some object is violated.
+
+
+%Operations $O_1$ and $O_2$ are independent if, there being no other operation in \ex, $O_1$ and $O_2$ can be done in any order without violating the sequential specification of any object. Operations $C_1$ and $C_2$ are dependent when they have to follow a specific order; changing such order always violates the sequential specification of some object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

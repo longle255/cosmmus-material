@@ -1,0 +1,14 @@
+\begin{abstract}
+
+State machine replication (SMR) is a well-known technique able to provide fault-tolerance. 
+SMR consists of sequencing client requests and executing them against replicas in the same order; thanks to deterministic execution, every replica will reach the same state after the execution of each request. 
+However, SMR is not scalable since any replica added to the system will execute all requests, and so throughput does not increase with the number of replicas. 
+Scalable SMR \mbox{(S-SMR)} addresses this issue in two ways: (i) by partitioning the application state, while allowing every command to access any combination of partitions, and (ii) by using a caching algorithm to reduce the communication across partitions.
+%
+We describe Eyrie, a library in Java that implements S-SMR, and Volery, an application that implements Zookeeper's API.
+We assess the performance of Volery and compare the results against Zookeeper.
+Our experiments show that Volery scales throughput with the number of partitions.
+
+allows application developers to create services that use partially replicated data, without worrying about implementation details. All communication between partitions, including remote reads and signals necessary to ensure linearizability, is done transparently by Eyrie. We evaluate Scalable SMR by implementing and testing Volery, an S-SMR-based implementation of Zookeeper. We compare its performance to that of the original Zookeeper and to ZKsmr, a replicated implementation based on traditional state-machine replication. Our experiments show that the throughput of Volery scale with the number of partitions.
+
+\end{abstract}

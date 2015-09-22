@@ -1,0 +1,122 @@
+\documentclass[10pt, conference, compsocconf, letterpaper]{IEEEtranv17}
+
+\pagestyle{plain}
+
+\usepackage{algorithm}
+%\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage[noend]{distribalgo}
+\usepackage[draft]{fixme}
+\usepackage{soul}
+% natbib and cite added by me, not part of the ieeetran template!
+%\usepackage[numbers]{natbib}
+%\usepackage{cite}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\rr}{$\mathcal{R}$}
+\newcommand{\rrm}{\mathcal{R}}
+\newcommand{\sst}{$\mathcal{S}$}
+\newcommand{\ssm}{\mathcal{S}}
+\newcommand{\ts}{\text{\textit{ts}}}
+\newcommand{\sendersTo}{\text{\textit{sendersTo}}}
+\newcommand{\readv}{\text{\textit{read}}}
+\newcommand{\writev}{\text{\textit{write}}}
+\newcommand{\comp}{\text{\textit{computation}}}
+\newcommand{\send}{\text{\textit{send}}}
+\newcommand{\recv}{\text{\textit{receive}}}
+
+\begin{document}
+
+%\title{Scalable State-Machine Replication}
+%
+%
+%\author{
+%    \IEEEauthorblockN{Carlos Eduardo Bezerra\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}, Fernando Pedone\IEEEauthorrefmark{1}, Robbert van Renesse\IEEEauthorrefmark{2}}
+%    \IEEEauthorblockA  {
+%       \IEEEauthorrefmark{1}University of Lugano,
+%       \IEEEauthorrefmark{2}Cornell University,
+%       \IEEEauthorrefmark{3}Universidade Federal do Rio Grande do Sul
+%    }
+%}
+
+\title {Scalable State-Machine Replication\\[-3.0ex]}
+\author {
+    \IEEEauthorblockN {
+        Carlos Eduardo Bezerra\IEEEauthorrefmark{1}\IEEEauthorrefmark{3},
+        Fernando Pedone\IEEEauthorrefmark{1},
+        Robbert van Renesse\IEEEauthorrefmark{2}
+    }
+    \IEEEauthorblockA {\IEEEauthorrefmark{1}University of Lugano, Switzerland}
+    \IEEEauthorblockA {\IEEEauthorrefmark{2}Cornell University, USA}
+    \IEEEauthorblockA {\IEEEauthorrefmark{3}Universidade Federal do Rio Grande do Sul, Brazil}
+    \\[-3.0ex]
+}
+
+%\title{Scalable State-Machine Replication\\[3.0ex] 
+%  {\normalfont\normalsize
+%    Carlos Eduardo Bezerra\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}, Fernando Pedone\IEEEauthorrefmark{1}, Robbert van Renesse\IEEEauthorrefmark{2}
+%  }\\[-4.5ex]}
+%
+%\author{
+%    \IEEEauthorblockA  {
+%        \IEEEauthorrefmark{1}University of Lugano\\
+%        Switzerland\\
+%    }
+%    \and
+%    \IEEEauthorblockA  {
+%        \IEEEauthorrefmark{2}Cornell University\\
+%        United States of America
+%    }
+%    \and
+%    \IEEEauthorblockA  {
+%        \IEEEauthorrefmark{3}Universidade Federal do Rio Grande do Sul\\
+%        Brazil
+%    }
+%}
+
+\maketitle
+
+
+
+\input{abstract}
+
+\input{introduction}
+
+\input{model_and_definitions}
+
+\input{state_machine_replication}
+
+\input{scalable_smr}
+
+\input{implementation}
+
+\input{performance_evaluation}
+
+\input{related_work}
+
+\input{conclusion}
+
+\input{acknowledgements}
+
+%\section*{Acknowledgment}
+%Thank the reviewrs
+
+%\bibliographystyle{IEEEtran}
+\bibliographystyle{ieeetr}
+%\bibliographystyle{abbrvnat}
+\bibliography{references_short}
+%\bibliography{references}
+
+
+
+\end{document}

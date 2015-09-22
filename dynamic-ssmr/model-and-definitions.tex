@@ -1,0 +1,21 @@
+\section{Model and definitions}
+
+A distributed system is considered as a system consisting of an unbounded set of client processes $C = \{c_1, c_2, ...\}$ and a bounded set of server processes $S = \{s_1, ..., s_n\}$. Set $S$ is divided into $P$ disjoint groups of servers, $s_1, ..., s_P$. 
+Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise. 
+In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
+Processes communicate by message passing, using either one-to-one or one-to-many communication, as defined next.
+The system is asynchronous: there is no bound on message delay or on relative process speed.
+
+We consider a scalable state machine replication system 
+One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process $m$ is addressed to. 
+If sender and receiver are correct, then every message sent is eventually received. 
+%
+One-to-many communication relies on atomic multicast, defined by the primitives \emph{multicast}$(\gamma, m)$ and \emph{deliver}$(m)$, where $\gamma$ is a set of server groups.
+%
+Let relation $\prec$ be defined such that $m \prec m'$ if there is a server that delivers $m$ before $m'$.
+Atomic multicast ensures that 
+(i) if a server delivers $m$, then all correct servers in $\gamma$ deliver $m$ \emph{(agreement)};
+(ii) if a correct process multicasts $m$ to groups in $\gamma$, then all correct servers in every group in $\gamma$ deliver $m$ \emph{(validity)}; and
+(iii) relation $\prec$ is acyclic \emph{(order)}.\footnote{Solving atomic multicast requires additional assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence of an atomic multicast oracle.}
+The order property implies that if $s$ and $r$ deliver messages $m$ and $m'$, then they deliver them in the same order. 
+Atomic broadcast is a special case of atomic multicast in which there is a single group with all servers.

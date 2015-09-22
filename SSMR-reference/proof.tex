@@ -1,0 +1,203 @@
+%
+% include the class file for USI-INF Technical Reports
+%
+\documentclass{usiinftr}
+
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+%\usepackage{graphicx}
+%\usepackage{color}
+%\usepackage{amssymb}
+%\usepackage[noend]{distribalgo}
+\usepackage[draft]{fixme}
+\usepackage{enumerate}
+
+\newcommand{\mv}[1]{\ensuremath{\operatorname{\mathit{#1}}}}
+%\definecolor{dark}{gray}{.6}
+\newcommand{\bc}[1]{\textcolor{dark}{#1}}
+\newtheorem{lems}{Lemma}
+\newtheorem{props}{Proposition}
+\newtheorem{thms}{Theorem}
+\newtheorem{defs}{Definition}
+\newtheorem{obs}{Observation}
+
+%
+% if you want to create a cover page only (e.g. to put it in front
+% of a WORD document or the like), use the "coverpage" option
+%
+%\documentclass[coverpage]{usiinftr}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%
+% put the title of the Technical Report here
+%
+\title{Proof}
+
+%
+% put the author names here; use the second argument as a
+% reference to the list of affiliations
+%
+\author{Eduardo}{1}
+\author{Fernando}{1}
+
+%
+% put the affiliations of the authors here
+% NOTE: use the macro "\USIINF" for our Faculty of Informatics
+%
+\affiliation{1}{\USIINF}
+
+%
+% put the number of your Technical Report here; in order to determine
+% the number, take the number of the most recent USI INF Technical Report
+% (on top of the list at http://www.inf.usi.ch/techreports/) and increment
+% it by one; the format is "[year]-[number]"
+%
+\TRnumber{2010-4}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\ts}{\text{\textit{ts}}}
+\newcommand{\sendersTo}{\text{\textit{sendersTo}}}
+
+%
+% by default, the current month and year are used as the publication date
+% of your Technical Report; if you want to change this, then you can do it here, e.g.
+%
+%\date{February~\the\year}
+%\date{August 2011}
+
+%
+% the rest is as usual
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+\begin{abstract}
+-
+\end{abstract}
+
+\section{...}
+
+%Let $\Psi$ be the set of $m$ partitions $\{P_1, \cdots, P_m\}$. 
+Variables are distributed among partitions based on a function $h(i)$ that maps each variable $v_i$ to one partition $P_{h(i)}$. Therefore, no two partitions contain the same variable. The set \cc contains all commands allowed by the application. Every command $C$ in \cc is associated with a variable set \vv and a partition set \pp. Set \vv contains the variables accessed (read/written) by $C$, while \pp is the set of partitions that hold variables in \vv, i.e., $\ppm~=~\{P_{h(i)} : v_i \in \vvm\}$.
+%$C$ is executed by partition $P_x$, where $x$ is the lowest subscript in \pp, i.e., $x = \text{\textit{min}}_{P_i \in \ppm}(i)$.
+$\vvm_R$ (resp. $\vvm_W$) is the set of variables read (resp. written) by $C$. Obviously, $\vvm_R \cup \vvm_W = \vvm$; analogously, we have $\ppm_R$ and $\ppm_W$.
+
+%a set \vv of one or more variables, e.g., $C(v_1, \cdots, v_n)$ accesses $\vvm = \{v_1, \cdots, v_n\}$, which are stored in partitions $P_{h(1)}$ to $P_{h(n)}$. Command $C$ is executed in partition $P_{l}$, where $l$ is the lowest subscript among the partitions that hold variables accessed by $C$, i.e., $l = min_{\{i : C\text{ \textit{accesses} }v_i\}}(h(i))$.
+
+Communication between partitions is done with oam-cast, mapping each partition to a multicast group. Such multicast protocol is quasi-genuine, requiring the creating of a \textit{sendersTo} relation. We define it as follows: if the application allows a command $C$ to be associated with a certain partition set \pp, then every partition in \pp can send to any partition in \pp. More formally, we have:
+
+\begin{center}
+$\exists C \in \ccm \Rightarrow P_i \in \text{\textit{sendersTo}}(P_j) : P_i \in \ppm \wedge P_j \in \ppm$
+\end{center}
+
+
+% if there may be a command that accesses variables $v_1$ to $v_n$ then every partition $P_h(i)$ can send to and receive from every partition $P_h(j)$, where $i$ and $j$ are both in $[1 .. n]$.
+
+(I'm not sure the following is necessary, but here it goes)
+
+To issue a command $C$, a client simply sends $C$ to a replica $r_{\text{\textit{ini}}}$ in some partition $P$ in \pp, which will then proceed with oam-cast: $r_{\text{\textit{ini}}}$ oam-casts $C$ to \pp; upon delivery, every partition $P$ in \pp checks whether there is some variable in $\vvm_R$ that is held by $P$. 
+
+Upon delivery, every replica $r \in P_x$ executes $C$. At least one of such replicas sends the reply back to the client. If $C$ reads some variable $v$, $r$ waits for every partition in $\ppm_R$ to oam-cast the corresponding value(s) to $P_x$. Every replica in \pp delivers a new command only after finishing the execution of $C$.
+
+\subsection{Proof}
+
+\begin{props}
+\textsc{(Linearizability)}.\\Let \ex be any execution of SSMR. Let $C_1$ and $C_2$ be any two commands in \ex such that $C_1$ finishes before $C_2$ starts (in real-time). $C_2$ does not precede $C_1$ in \ex.
+\end{props}
+
+\begin{proof}
+For a command to precede another in an execution, we need one of the following:
+
+\begin{enumerate}[i)]
+
+\item $C_1$ anc $C_2$ access variable $v$.
+
+Which unfolds to:
+
+\begin{enumerate}[a)]
+
+\item $C_1$ and $C_2$ are delivered only by $P$.
+
+In this case, every replica $r$ in $P$ will deliver $C_1$, execute it, and only then deliver $C_2$. Therefore linearizability in this case is trivial.
+
+\item $C_1$ and $C_2$ are delivered by $P$ and also some other partition.
+
+Suppose, by means of contradiction, that there is a command $C$ such that $C_2 \prec C$ and $C \prec C_1$. As $P$ delivers both, it means also that $C_1 \prec C_2$, creating a cycle. From the atomic order property of multicast, this is a contradiction.
+
+\end{enumerate}
+
+\item $C_1$ and $C_2$ are such that $\ppm_1 \cap \ppm_2 = \emptyset$
+
+As in i-b) we want prove this case by way of contradiction. Differently from the previous case, though, there is no intersection between $\ppm_1$ and $\ppm_2$, so we do not have a cycle and thus cannot use oam-cast's atomic order property to reach a contradiction.
+
+However, we are using specifically oam-cast, whose message delivery order follows a timestamp order. Each message $m$ is given a unique timestamp $m.\ts$ based on which the atomic order of oam-cast is built. If $m_1.\ts < m_2.\ts$, then $m_2$ does not precede $m_1$ in the order given by oam-cast. Another peculiarity of oam-cast is the \sendersTo\ relation: a group (mapped to a partition in SSMR) $P_x$ can only multicast messages to $P_y$ if $P_x \in \sendersTo(P_y)$. Finally, processes in group $P$ can only deliver $m$ after receiving some message $m_i$ with $m_i.\ts > m.\ts$ from every group $P_i$ in $\sendersTo(P)$.
+
+Again, we define for SSMR that if the application allows a command $C$ to be associated with a certain partition set \pp, then every partition in \pp can send to any partition in \pp. As every command is a message multicast and every partition is a group, we have that $\exists C \in \ccm \Rightarrow P_i \in \text{\textit{sendersTo}}(P_j) : P_i \in \ppm \wedge P_j \in \ppm$.
+
+To make this proof easier to understand, we can divide it into:
+
+\begin{enumerate}[a)]
+
+\item $C_1$ is delivered only by $P_1$ and $C_2$ is delivered only by $P_2$.
+
+Suppose, by means of contradiction, that there is a command $C$, such that: $C$ is delivered by both $P_1$ and $P_2$, $C_2 \prec C$ and $C \prec C_1$. This means that $C_2.\ts < C.\ts < C_1.\ts$. To deliver $C_1$, $P_1$ had to deliver some message $b$ from $P_2$, where $b.\ts > C_1.\ts$. Since the execution of $C_1$ finishes before the execution of $C_2$ starts, $P_2$ has to multicast $b$ before $C_2$ begins (otherwise $C_1$ and $C_2$ would overlap in real-time).
+
+Therefore $b.\ts < C_2.\ts$.(NOT NECESSARILY!!!!!!!! this proof seems to be wrong!)
+
+Now, we have that $b.\ts < C_2.\ts < C_1.\ts < b.\ts$, which is impossible. 
+
+
+\end{enumerate}
+
+
+
+
+\end{enumerate}
+
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

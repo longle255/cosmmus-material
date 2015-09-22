@@ -1,0 +1,8 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+This work introduces S-SMR, a scalable variant of the well-known state-machine replication technique. 
+S-SMR differs from previous related works in that it allows throughput to scale with the number of partitions without weakening consistency. 
+To evaluate S-SMR, we developed the Eyrie library and implemented Volery, a Zookeeper clone, with Eyrie.
+Our experiments demonstrate that in deployments with 8 partitions (the largest configuration we can deploy in our infrastructure) and under certain workloads, throughput experienced an 8-time improvement, resulting in ideal scalability.
+Moreover, Volery's throughput proved to be significantly higher than Zookeeper's.

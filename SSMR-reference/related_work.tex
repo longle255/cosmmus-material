@@ -1,0 +1,37 @@
+%!TEX root =  ssmr_ieee.tex
+\section{Related work}
+\label{sec:related_work}
+
+State-machine replication is a well-known approach to replication and has been extensively studied (e.g., \cite{Lam78, Sch90, santos2011htsmr, kotla2004htbft, kapritzos2012eve}). 
+State-machine replication requires replicas to execute commands deterministically, which implies sequential execution. 
+Even though increasing the performance of state-machine replication is non-trivial, different techniques have been proposed for achieving scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm). 
+In \cite{kapritsos2010scalable}, the authors propose to have clients sending their requests to multiple clusters, where each of such clusters executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica. The server replicas, then, must deterministically merge all different partial orders received from the ordering clusters.
+In \cite{biely2012spaxos}, Paxos \cite{Lam98} is used to order commands, but it is implemented in a way such that the task of ordering messages is evenly distributed among replicas, as opposed to having a leader process that performs more work than the others and may eventually become a bottleneck. 
+%Other techniques for increasing system throughput include executing commands concurrently with multiple processing cores and relaxing consistency.
+
+%State-machine replication usually requires execution to be deterministic, so that the order in which commands are delivered and the service state prior to the execution are enough to determine the outcome of each command. 
+State-machine replication seems at first to prevent multi-threaded execution since it may lead to non-determinism. 
+However, some works have proposed multi-threaded implementations of state-machine replication, circumventing the non-determinism caused by concurrency in some way. 
+In \cite{santos2011htsmr}, for instance, the authors propose organizing the replica in multiple modules that perform different tasks concurrently, such as receiving messages, batching and dispatching commands to be executed. 
+The execution of commands is still done sequentially, by a single thread, but the replica performs all other tasks in parallel. We also implemented such kind of parallelism in Eyrie.
+
+Some works have proposed to parallelize the execution of commands in SMR. 
+In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another). 
+Upon delivery, commands are directed to a parallelizer thread that uses application-supplied rules to schedule multi-threaded execution. 
+Another way of dealing with non-determinism is proposed in \cite{kapritzos2012eve}, where commands are speculatively executed concurrently.
+After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially. 
+Both \cite{kotla2004htbft} and \cite{kapritzos2012eve} assume a Byzantine failure model and in both cases, a single thread is responsible for receiving and scheduling commands to be executed. 
+In the Byzantine failure model, command execution typically includes signature handling, which can result in expensive commands.
+Under benign failures, command execution is less expensive and the thread responsible for command reception and scheduling may become a performance bottleneck.
+%For commands that take long to execute, this may not be a problem, but for workloads where the command execution time is shorter than the parallelization time, those approaches may not scale.
+
+In \cite{Marandi11}, the authors propose to partition the service state and use atomic broadcast to totally order commands submitted by the clients. 
+To ensure that linearizability holds for read-only commands that span multiple partitions, there is a single sequencer that ensures acyclic order; therefore, the approach cannot scale with the number of partitions, as the sequencer eventually becomes a bottleneck.
+%Moreover, the approach can only handle update commands that are entirely local to a partition.
+Also, the approach can only handle single-partition update commands.
+
+%The total order \cite{DUS04} is used to ensure linearizability for certain workloads. However, linearizability may be violated for some executions: if the workload includes multi-partition commands that update variables, the execution is not guaranteed to be linearizable. Besides, totally ordering commands forces all commands to pass through the same sequencer (or pass through multiple sequencers and be deterministically merged at the server replicas), which effectively limits scalability for any workload.
+
+Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure strong consistency as we define it here (i.e., as linearizability). Many works (e.g., \cite{sciascia2012sdur, SousaOMP01, chun96dur, kobus2013hybrid}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} and snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. For some applications, this kind of consistency is good enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
+
+%Scalable state-machine replication employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even in the presence of multi-partition commands.

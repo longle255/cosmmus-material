@@ -1,0 +1,2 @@
+# read-rate tp lat@tp cpu@tp bwr@tp bww@tp
+0.0 # avg(tp, lat, bwr, bww, cpu, tps, brps, bwps)

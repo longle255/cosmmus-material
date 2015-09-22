@@ -1,0 +1,61 @@
+%!TEX root =  ssmr_ieee.tex
+
+\section{Introduction}
+\label{sec:introduction}
+
+Many current online services have stringent availability and performance requirements.
+High availability entails tolerating component failures and is typically accomplished with replication.
+For many online services, ``high performance" essentially means the ability to serve an arbitrarily large load, something that can be achieved if the service can scale throughput with the number of replicas.
+% as the load increases (i.e., as more client requests are submitted by unit of time).
+%
+State machine replication (SMR)~\cite{Lam78, Sch90} is a well-known technique to provide fault tolerance without sacrificing strong consistency (i.e., linearizability).
+%
+%\ul{SMR consists of having replicas executing all clients requests in the same order. It usually requires each request execution to be deterministic, in which case the execution will lead to the same state in every replica.} 
+SMR regulates how client commands are propagated to and executed by the replicas: every \mbox{non-faulty} replica must receive and execute every command in the same order. Moreover, command execution must be deterministic.
+%
+SMR provides configurable availability, by setting the number of replicas, but limited scalability: every replica added to the system must execute all requests; hence, throughput does not increase as replicas join the system.
+
+Distributed systems usually rely on state partitioning to scale (e.g., \cite{facebookTAO, sciascia2012sdur}).
+If requests can be served simultaneously by multiple partitions, then augmenting the number of partitions results in an overall increase in system throughput.
+%, i.e., the system can scale throughput with the number of partitions.
+However, exploiting state partitioning in SMR is challenging:
+First, ensuring linearizability efficiently when state is partitioned is tricky.  
+To see why, note that the system must be able to order multiple streams of commands simultaneously (e.g., one stream per partition) since totally ordering all commands cannot scale.
+But with independent streams of ordered commands, how to handle commands that address multiple partitions?
+%
+Second, SMR hides from the service designer much of the complexity involved in replication; all the service designer must provide is a sequential implementation of each service command.
+If state is partitioned, then some commands may need data from multiple partitions.
+Should the service designer introduce additional logic in the implementation to handle such cases?
+Should the service be limited to commands that access a single partition?
+
+This paper presents Scalable State Machine Replication (S-SMR), an approach that achieves scalable throughput and strong consistency (i.e., linearizability) without constraining service commands or adding additional complexity to their implementation.
+%
+S-SMR partitions the service state and relies on an atomic multicast primitive to consistently order commands within and across partitions.
+We show in the paper that simply ordering commands consistently across partitions is not enough to ensure strong consistency in partitioned state machine replication.
+S-SMR implements \emph{execution atomicity}, a property that prevents command interleaves that violate strong consistency. 
+%Together with atomic multicast, it ensures linearizability for S-SMR (a detailed description is given in Section~\ref{sec:scalablesmr}).
+%
+To assess the performance of S-SMR, we developed Eyrie, a Java library that allows developers to implement partitioned-state services transparently, abstracting partitioning details, and Volery, a service that implements Zookeeper's API~\cite{ZOO2010}. 
+All communication between partitions is handled internally by Eyrie, including remote object transfers. 
+%To evaluate both S-SMR and the library, we used Eyrie to implemented Volery, a service that provides some functionalities of Zookeeper~\cite{ZOO2010}. 
+In the experiments we conducted with Volery, throughput scaled with the number of partitions, in some cases linearly.
+%, reaching 8 times the throughput of a single-partition Volery deployment when using 8 partitions. 
+In some deployments, Volery reached over 250 thousand commands per second, largely outperforming Zookeeper, which served 45 thousand commands per second under the same workload.
+
+
+The paper makes the following contributions: 
+(1)~It introduces S-SMR and discusses several performance optimizations, including caching techniques.
+(2)~It details Eyrie, a library to simplify the design of services based on S-SMR. 
+(3)~It describes Volery to demonstrate how Eyrie can be used to implement a service that provides Zookeeper's API.
+(4)~It presents a detailed experimental evaluation of Volery and compares its performance to Zookeeper.
+
+The remainder of this paper is organized as follows.
+Section~\ref{sec:model} describes our system model.
+Section~\ref{sec:smr} presents state-machine replication and the motivation for this work.
+Section~\ref{sec:scalablesmr} introduces S-SMR; we explain the technique in detail and argue about its correctness.
+Section~\ref{sec:implementation} details the implementation of Eyrie and Volery.
+Section~\ref{sec:evaluation} reports on the performance of the Volery service.
+Section~\ref{sec:related_work} surveys related work and
+Section~\ref{sec:conclusion} concludes the paper.
+
+\clearpage
