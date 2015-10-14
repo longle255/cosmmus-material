@@ -210,6 +210,89 @@ $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 \end{distribalgo}
 \end{algorithm}
 
+
+\begin{algorithm}
+\small
+\begin{distribalgo}[1]
+\vspace{1mm}
+
+\INDENT{\emph{Initialization:}}
+    \STATE  oracle: $\vvm\_loc \leftarrow \emptyset$
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is submitted by a client as follows:}}
+	\STATE multicast query $Q(oracle, C)$ \label{algline:query_oracle} 
+    \STATE $dests \leftarrow O(C)$ \label{algline:oracle_response} 
+    \IF {$dests$ is $\emptyset$}
+    	\STATE terminate $C$ \label{algline:cli_terminate}
+    \ELSE
+    	\STATE multicast$(dests, C)$ \label{algline:cli_mcast}
+    	\STATE wait for response from one server
+    \ENDIF
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
+	\INDENT{\textbf{upon} deliver $Q(C)$}
+		\STATE $v \leftarrow get part(C)$
+		\IF {$v$ in $\vvm\_loc$}
+			\STATE send reply to client $\vvm\_loc\{v.id\}$
+		\ELSE
+			\STATE send reply to client $\emptyset$
+		\ENDIF
+	\ENDINDENT
+
+	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
+		\STATE $\vvm\_loc\{v.id\} \leftarrow \ppm$
+	\ENDINDENT
+
+\ENDINDENT
+
+\vspace{1.5mm}
+\emph{TODO: Should give the detail algorithm of SSMR? or give short description of dssmr}
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
+	\INDENT{\textbf{upon} deliver$(C)$}	    
+		\STATE execute $op$ \label{algline:executeopck}
+		\STATE send reply to client \label{algline:sendreply}
+	\ENDINDENT
+\ENDINDENT
+
+
+\vspace{1.5mm}
+%\vspace{2mm}
+
+\textbf{Algorithm variables:}
+
+\vspace{1mm}
+
+$\vvm\_loc$: the set of locations of all state variables in the system.
+
+\vspace{1mm}
+
+$Q(oracle, C)$: multicast command to oracle for querying involved partition of command C
+
+\vspace{1mm}
+
+$O(C)$: response of oracle that returns a superset of $part(C)$
+
+\vspace{1mm}
+
+$dests$: set of partitions to which $C$ is multicast
+
+\vspace{1mm}
+
+$C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
+
+\caption{Dynamic Scalable State-Machine Replication with locking mechanism}
+\label{alg:dssmr}
+\end{distribalgo}
+\end{algorithm}
+
 \subsection{Performance optimizations}
 \label{sec:optm}
 TODO: add content, talk about caching
