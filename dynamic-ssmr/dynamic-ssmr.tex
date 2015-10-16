@@ -59,7 +59,7 @@ There are possibilities that a client could fail in the middle of the execution 
 In Algorithm \ref{alg:dssmr}, we show the basic operation of D-SSMR. 
 To submit a command $C$, the client queries an oracle to get set $dests$~(line \ref{algline:query_oracle}, \ref{algline:oracle_response}), which is a superset of $part(C)$ used by the client as destination set for $C$~(line \ref{algline:cli_mcast}). If the $dests$ is empty, client stop the command there. (line \ref{algline:cli_terminate})
 
-Upon delivering $Q(C)$, oracle $O$ runs function $getPart(C)$ which returns a set $\vvm$ of involved state variables of command $C$. If there exists a variable $v_i \in \vvm$ in oracle memory, which indicates the variable $v_i$ exists on a partition $p_i \in \ppm$, oracle reply to client with $p_i$ value, or an empty result otherwise. In addition, upon delivering $C(v, \ppm)$, oracle update its memory with new location of $v$: $\vvm\_loc\{v.id\} \leftarrow \ppm$
+Upon delivering $Q(C)$, oracle $O$ runs function $getPart(C)$ which returns a set $\vvm$ of involved state variables of command $C$. If there exists a variable $v_i \in \vvm$ in oracle memory, which indicates the variable $v_i$ exists on a partition $p_i \in \ppm$, oracle reply to client with $p_i$ value, or an empty result otherwise. In addition, upon delivering $C(v, \ppm)$, oracle update its memory with new location of $v$: $\vvm\_part\{v.id\} \leftarrow \ppm$
 
 Upon delivering $C$, server $P$ execute $C$ and reply to the client. 
 % Upon delivering $C$, server $s$ in partition \pp\ multicasts $signal(C)$ to $others$, which is the set containing all other partitions involved in $C$ (lines \ref{algline:others} and \ref{algline:mcastsignals}). 
@@ -85,7 +85,7 @@ Upon delivering $C$, server $P$ execute $C$ and reply to the client.
 \vspace{1mm}
 
 \INDENT{\emph{Initialization:}}
-    \STATE  oracle: $\vvm\_loc \leftarrow \emptyset$
+    \STATE  oracle: $\vvm\_part \leftarrow \emptyset$
     % \STATE $\forall C \in \mathcal{K} : rcvd\_signals(C) \leftarrow \emptyset$
     % \STATE $\forall C \in \mathcal{K} : rcvd\_variables(C) \leftarrow \emptyset$
 \ENDINDENT
@@ -109,21 +109,19 @@ Upon delivering $C$, server $P$ execute $C$ and reply to the client.
 \INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
 	\INDENT{\textbf{upon} deliver $Q(C)$}
 		\STATE $v \leftarrow get part(C)$
-		\IF {$v$ in $\vvm\_loc$}
-			\STATE send reply to client $\vvm\_loc\{v.id\}$
+		\IF {$v$ in $\vvm\_part$}
+			\STATE send reply to client $\vvm\_part\{v.id\}$
 		\ELSE
 			\STATE send reply to client $\emptyset$
 		\ENDIF
 	\ENDINDENT
 
 	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
-		\STATE $\vvm\_loc\{v.id\} \leftarrow \ppm$
+		\STATE $\vvm\_part\{v.id\} \leftarrow \ppm$
 	\ENDINDENT
 
 \ENDINDENT
 
-\vspace{1.5mm}
-\emph{TODO: Should give the detail algorithm of SSMR? or give short description of dssmr}
 \vspace{1.5mm}
 
 \INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
@@ -133,37 +131,6 @@ Upon delivering $C$, server $P$ execute $C$ and reply to the client.
 	\ENDINDENT
 \ENDINDENT
 
-% \INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
-% 	\INDENT{\textbf{upon} deliver$(C)$}
-% 	    \STATE $others \leftarrow dests \setminus \{\ppm\}$ \label{algline:others}
-% 	    \STATE multicast$(others, signal(C))$ \label{algline:mcastsignals}
-% 		\FOR{each operation $op$ in $C$}
-% 			\IF{$op$ is $read(v)$}
-% 			    \IF{$v \in \ppm$}
-% 			        \STATE multicast$(others, \{v,C.id\})$ \label{algline:multicastv}
-% 			    \ELSE
-% 			        \STATE \textbf{wait until} $v \in rcvd\_variables(C)$ \label{algline:waitvariable}
-% 			        \STATE update $v$ with the value in $rcvd\_variables(C)$
-% 			    \ENDIF
-% 			\ENDIF
-% 			\STATE execute $op$ \label{algline:executeopck}
-% 		\ENDFOR
-% 		\STATE \textbf{wait until} $rcvd\_signals(C) = others$ \label{algline:waitsignals}
-% 		\STATE send reply to client \label{algline:sendreply}
-% 	\ENDINDENT
-	
-% 	\vspace{2.0mm}
-% 	\INDENT{\textbf{upon} deliver$(signal(C))$ from partition $\ppm'$}
-% 	    \STATE $rcvd\_signals(C) \leftarrow rcvd\_signals(C) \cup \{\ppm'\}$
-% 	\ENDINDENT
-
-% 	\vspace{2.0mm}
-% 	\INDENT{\textbf{upon} deliver$(\{v, C.id\})$}
-% 	    \STATE $rcvd\_variables(C) \leftarrow rcvd\_variables(C) \cup \{v\}$
-% 	\ENDINDENT
-			
-% \ENDINDENT
-
 \vspace{1.5mm}
 %\vspace{2mm}
 
@@ -171,7 +138,7 @@ Upon delivering $C$, server $P$ execute $C$ and reply to the client.
 
 \vspace{1mm}
 
-$\vvm\_loc$: the set of locations of all state variables in the system.
+$\vvm\_part$: the set of partitions of all state variables in the system.
 
 \vspace{1mm}
 
@@ -189,24 +156,11 @@ $dests$: set of partitions to which $C$ is multicast
 
 $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 
-% \vspace{1mm}
 
-% $others$: set of partitions waiting for signals and variables from \pp; also, \pp\ waits for signals from all such partitions
+In the Algoritm \ref{alg:dssmr_with_lock}, we improve the first one with the locking mechanism, let Oracle control access to state variable on partitions. 
 
-% \vspace{1mm}
-
-% $signal(C)$: a synchronization message that allows S-SMR to ensure $C$ to be execution atomic
-
-% \vspace{1mm}
-
-% $rcvd\_signals(C)$: a set containing all partitions that already signaled \pp\ regarding the execution of $C$
-
-% \vspace{1mm}
-
-% $rcvd\_variables(C)$: a set containing all variables that must be received from other partitions in order to execute $C$
-
-\caption{Dynamic Scalable State-Machine Replication (D-SSMR)}
-\label{alg:dssmr}
+\caption{Dynamic Scalable State-Machine Replication with locking (D-SSMR)}
+\label{alg:dssmr_with_lock}
 \end{distribalgo}
 \end{algorithm}
 
@@ -217,7 +171,9 @@ $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 \vspace{1mm}
 
 \INDENT{\emph{Initialization:}}
-    \STATE  oracle: $\vvm\_loc \leftarrow \emptyset$
+    \STATE  oracle: $\vvm\_part \leftarrow \emptyset$
+    \STATE  oracle: $\vvm\_lock \leftarrow [false]$
+    \STATE  oracle: $Q_q \leftarrow \emptyset$
 \ENDINDENT
 
 \vspace{1.5mm}
@@ -236,29 +192,37 @@ $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 \vspace{1.5mm}
 
 \INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
-	\INDENT{\textbf{upon} deliver $Q(C)$}
+	\INDENT{\textbf{upon} deliver $Q(C)$} \label{algline:oracle_deliver_C} 
 		\STATE $v \leftarrow get part(C)$
-		\IF {$v$ in $\vvm\_loc$}
-			\STATE send reply to client $\vvm\_loc\{v.id\}$
+		\IF {$\vvm\_lock\{v.id\}$ is false}
+			\IF {}
+				\STATE require lock  $\vvm\_part\{v.id\} \leftarrow true$
+				\STATE send reply to client $\vvm\_part\{v.id\}$
+			\ELSE
+				\STATE queue $\vvm\_part\{v.id\}$
+			\ENDIF
 		\ELSE
-			\STATE send reply to client $\emptyset$
+			\STATE queue command for later execution $Q_q \leftarrow Q(C)$
 		\ENDIF
 	\ENDINDENT
 
 	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
-		\STATE $\vvm\_loc\{v.id\} \leftarrow \ppm$
+		\STATE $\vvm\_part\{v.id\} \leftarrow \ppm$
 	\ENDINDENT
 
+	\INDENT{\textbf{upon} deliver $R(v)$}
+		\STATE release lock $\vvm\_lock\{v.id\}$
+		\IF {$Q_q is not \emptyset$}
+			\STATE return to line \ref{algline:oracle_deliver_C} 
+		\ENDIF
+	\ENDINDENT
 \ENDINDENT
-
-\vspace{1.5mm}
-\emph{TODO: Should give the detail algorithm of SSMR? or give short description of dssmr}
-\vspace{1.5mm}
 
 \INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
 	\INDENT{\textbf{upon} deliver$(C)$}	    
 		\STATE execute $op$ \label{algline:executeopck}
 		\STATE send reply to client \label{algline:sendreply}
+		\STATE send release lock to oracle \label{algline:send_release_lock}
 	\ENDINDENT
 \ENDINDENT
 
@@ -270,7 +234,15 @@ $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 
 \vspace{1mm}
 
-$\vvm\_loc$: the set of locations of all state variables in the system.
+$\vvm\_part$: the set of locations of all state variables in the system.
+
+\vspace{1mm}
+
+$\vvm\_lock$: the set of lock to variable 
+
+\vspace{1mm}
+
+$Q_q$: queue of query command on oracle
 
 \vspace{1mm}
 
@@ -279,6 +251,10 @@ $Q(oracle, C)$: multicast command to oracle for querying involved partition of c
 \vspace{1mm}
 
 $O(C)$: response of oracle that returns a superset of $part(C)$
+
+\vspace{1mm}
+
+$R(v)$: command send to Oracle to release lock to variable $v$
 
 \vspace{1mm}
 
@@ -307,7 +283,6 @@ Algorithm 1 can be optimized in many ways. In this section, we briefly mention s
 \caption{Execution flow of D-SSMR with oracle caching on client}
 \label{fig:cache}
 \end{figure*}
-
 
 \subsection{Correctness}
 \label{sec:correctness}
