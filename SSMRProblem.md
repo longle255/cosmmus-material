@@ -14,9 +14,9 @@
 
 <!-- MarkdownTOC -->
 
-- SSMR
-- Enhancing Oracle
-- ummary Case
+- [SSMR](#ssmr)
+- [Enhancing Oracle](#enhancing-oracle)
+- [ummary Case](#ummary-case)
 
 <!-- /MarkdownTOC -->
 
