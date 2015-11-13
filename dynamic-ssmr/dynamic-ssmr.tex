@@ -11,11 +11,11 @@ To execute command $C$, the client multicasts $C$ to all partitions that hold a 
 Consequently, the client must be able to determine the partitions accessed by $C$, denoted by $part(C)$. If the client cannot accurately estimate which partitions are accessed by $C$, it must determine a superset of these partitions, in the worst case assuming all partitions.
 In order for clients to provide a close approximation to the command's actually accessed partitions, there is an oracle that tells the client which partitions should receive each command.
 
-Dynamic SSMR improves on SSMR implementation by adding a central Oracle which has the information of all state variables $\vvm$, as well as provides a mechanism of controlling the access to those variable that ensure linearizability. 
+Dynamic S-SMR improves on S-SMR implementation by adding a central Oracle which has the information of all state variables $\vvm$, as well as provides a mechanism of controlling the access to those variable that ensure linearizability. 
 
 We distinguish between three operation types: $update(v)$, an operation that updates the value of a state variable, $v$, $create(v, P)$, an operation that create a state variable at a specific partition P, and $move(v, \ppm_n)$, an operation that move $v$ to partition $\ppm_n$.
 
-Consider the execution depicted in Figure~\ref{fig:read}~(a), where state variables $x$ is created on partition $\ppm_1$ in the middle of the execution of SSMR. Command $C_1(x)$ and $C_3(x)$ reads the value of $x$, $C_2(x,\ppm_1)$ create $x$ on partition $\ppm_1$. Client a first multicasts query to the $Oracle$ for location of $x$, which is not available at that time, hence $Oracle$ return empty result, which tell client a to end the execution. Client b then wants to create variable $x$ on $\ppm_1$, before sending actual creating command, client b also multicasts query to $Oracle$ to get the involved partition (eg., $\ppm_1$), then multicasts $C_2(x,\ppm_1)$ to both $Oracle$ and $\ppm_1$. Oracle will update information of $x$, and $\ppm_1$ will execute create $x$ command. From then, for every read command to $x$ (eg., $C_3(x)$), $Oracle$ could answer with partition $\ppm_1$ which is the one holds $x$.
+Consider the execution depicted in Figure~\ref{fig:read}~(a), where state variables $x$ is created on partition $\ppm_1$ in the middle of the execution of S-SMR. Command $C_1(x)$ and $C_3(x)$ reads the value of $x$, $C_2(x,\ppm_1)$ create $x$ on partition $\ppm_1$. Client a first multicasts query to the $Oracle$ for location of $x$, which is not available at that time, hence $Oracle$ return empty result, which tell client a to end the execution. Client b then wants to create variable $x$ on $\ppm_1$, before sending actual creating command, client b also multicasts query to $Oracle$ to get the involved partition (eg., $\ppm_1$), then multicasts $C_2(x,\ppm_1)$ to both $Oracle$ and $\ppm_1$. Oracle will update information of $x$, and $\ppm_1$ will execute create $x$ command. From then, for every read command to $x$ (eg., $C_3(x)$), $Oracle$ could answer with partition $\ppm_1$ which is the one holds $x$.
 
 \begin{figure*}
 \begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
@@ -23,7 +23,7 @@ Consider the execution depicted in Figure~\ref{fig:read}~(a), where state variab
       \includegraphics[width=0.6\linewidth]{figures/read_simple}
 \end{minipage}
 \centering
-	\caption{Execution flow of D-SSMR with $create$ command}
+	\caption{Execution flow of DS-SMR with $create$ command}
 \label{fig:read}
 \end{figure*}
 
@@ -49,7 +49,7 @@ There are possibilities that a client could fail in the middle of the execution 
 \centering
       \includegraphics[width=1\linewidth]{figures/update_overlap}
 \end{minipage}
-\caption{Execution flow of D-SSMR with overlapping read-update commands}
+\caption{Execution flow of DS-SMR with overlapping read-update commands}
 \label{fig:updateoverlap}
 \end{figure*}
 
@@ -57,7 +57,7 @@ There are possibilities that a client could fail in the middle of the execution 
 \subsection{Detailed algorithm}
 \label{sec:detailalg}
 
-In Algorithm \ref{alg:dssmr}, we show the operation of D-SSMR. 
+In Algorithm \ref{alg:dssmr}, we show the operation of DS-SMR. 
 To submit a command $C$, the client first check its cache to get the lastest information $dests$ of the state objects in command. Then it can either uses that info if exists, or sends a query to the Oracle to get set $dests$~(line \ref{algline:query_oracle}, \ref{algline:oracle_response}), which is a superset of $part(C)$ used by the client as destination set for $C$~(line \ref{algline:cli_mcast}). 
 
 Upon delivering $Q(C)$, oracle $O$ runs function $getPart(C)$ which returns a set $\vvm$ of involved state variables of command $C$. If there exists a variable $v_i \in \vvm$ in oracle memory, which indicates the variable $v_i$ exists on a partition $p_i \in \ppm$, oracle reply to client with $p_i$ value, or an empty result otherwise. In addition, upon delivering $C(v, \ppm)$, oracle update its memory with new location of $v$: $\vvm\_part\{v.id\} \leftarrow \ppm$
@@ -176,8 +176,8 @@ $dests$: set of partitions to which $C$ is multicast
 
 $C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
 
-\caption{Dynamic Scalable State-Machine Replication (DSSMR)}
-\label{alg:ssmr}
+\caption{Dynamic Scalable State-Machine Replication (DS-SMR)}
+\label{alg:dynssmr}
 \end{distribalgo}
 \end{algorithm}
 
@@ -193,7 +193,7 @@ Client can have a cache copy of the variable location on local. Thus when client
 \centering
       \includegraphics[width=0.85\linewidth]{figures/cache}
 \end{minipage}
-\caption{Execution flow of D-SSMR with oracle caching on client}
+\caption{Execution flow of DS-SMR with oracle caching on client}
 \label{fig:cache}
 \end{figure*}
 
