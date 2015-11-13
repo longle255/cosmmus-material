@@ -1,5 +1,5 @@
-\documentclass{llncs}
-\usepackage{llncsdoc}
+\documentclass[conference]{IEEEtran}
+%\usepackage{llncsdoc}
 \usepackage{graphicx}
 \usepackage{}
 \usepackage{algorithm}
@@ -21,14 +21,20 @@
 
 \title{Dynamic Scalable State Machine Replication}
 
-\author{L. H. Le,  E. Bezerra, F. Pedone}
-
-\institute{University of Lugano, Switzerland}
+\author{\IEEEauthorblockN{L. H. Le}
+\IEEEauthorblockA{University of Lugano\\Switzerland}
+\and
+\IEEEauthorblockN{E. Bezerra}
+\IEEEauthorblockA{University of Lugano\\Switzerland}
+\and
+\IEEEauthorblockN{F. Pedone}
+\IEEEauthorblockA{University of Lugano\\Switzerland}}
 
 \maketitle
 %
 \input{abstract}
 \input{introduction}
+\clearpage
 \input{model-and-definitions}
 \input{background-and-motivation}
 \input{dynamic-ssmr}
