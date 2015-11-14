@@ -47,16 +47,16 @@ We added the $cons\_executed$ ordered set, which will later be used by the optim
 %Since S-SMR does not handle opt-delivered commands, we omit this part of the algorithm.
 In all algorithms presented in the paper, no two \textbf{when} clauses are executed concurrently, the only exception being the \textbf{wait} statement, which yields for other clauses until the wait condition becomes true (i.e., similarly to a \emph{monitor}).
 
-S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
-Under certain workloads, however, it subjects commands to high latency. 
-The increased latency is due to the overhead of (i) atomic multicast and (ii) the coordination across partitions. 
-Atomic multicast ensures consistent command ordering for single- and multi-partition commands, but this strong ordering comes at the cost of higher latency. 
-Coordination among partitions is needed to execute multi-partition commands.
+%S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
+%Under certain workloads, however, it subjects commands to high latency. 
+%The increased latency is due to the overhead of (i) atomic multicast and (ii) the coordination across partitions. 
+%Atomic multicast ensures consistent command ordering for single- and multi-partition commands, but this strong ordering comes at the cost of higher latency. 
+%Coordination among partitions is needed to execute multi-partition commands.
 %
 %Some works have been proposed with the purpose of reducing the latency of traditional SMR by means of optimistic execution~\citep{kapritzos2012eve, marandi2014ops, Marandi11}. 
 %Differently from those works, in S-SMR there is state exchange between partitions, and each server usually knows only about a subset of all commands executed. 
 %Both these things significantly increase the complexity of an optimistic algorithm for S-SMR, when verifying the optimistic execution and also when repairing it so that it can continue. 
-In the next section, we address both problems.
+%In the next section, we address both problems.
 
 \begin{algorithm}[h!]
 \small
