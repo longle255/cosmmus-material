@@ -4,20 +4,20 @@
 
 | Node # |           Role           |
 |--------|--------------------------|
-| 21-29  | Muilticast Agent         |
-| 35,36  | Replica 1,2; Partition 1 |
-| 37.38  | Replica 1,2; Partition 2 |
-| 39     | Monitor                  |
+| 01-09  | Muilticast Agent         |
+| 15,16  | Replica 1,2; Partition 1 |
+| 17,18  | Replica 1,2; Partition 2 |
+| 41     | Monitor                  |
 | 65-88  | Clients                  |
 
 * DSSMR
 
 | Node # |           Role           |
 |--------|--------------------------|
-| 21-32  | Muilticast Agent         |
-| 35,36  | Replica 1,2; Partition 1 |
-| 37.38  | Replica 1,2; Partition 2 |
-| 39,40  | Oracle                   |
+| 01-12  | Muilticast Agent         |
+| 15,16  | Replica 1,2; Partition 1 |
+| 17,18  | Replica 1,2; Partition 2 |
+| 19,20  | Oracle                   |
 | 41     | Monitor                  |
 | 65-88  | Clients                  |
 
