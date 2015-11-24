@@ -1,20 +1,20 @@
 \section{Background and motivation}
 State-machine replication is a fundamental approach to implement a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
-State-machine replication ensures strong consistency (i.e., linearizability~\cite{Attiya04}) by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: \emph{read(v)}, \emph{write(v, val)}, or a deterministic computation.
+State-machine replication ensures strong consistency (i.e., linearizability~\cite{Attiya04}) by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
 
 \subsection{Scaling state machine replication}
 By starting in the same initial state and executing the same sequence of deterministic commands, servers make the same state changes and produce the same reply for each command. To guarantee that servers deliver the same sequence of commands, SMR can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
 
 Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a few reasons. First, the underlying communication protocol needed to ensure ordered message delivery may not scale itself (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
 
-Several approaches have been proposed to address SMR’s scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{CT96,Lamport:1998ea}).
+Several approaches have been proposed to address SMR's scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{CT96,Lamport:1998ea}).
 
-Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}. In the following section, we review Scalable State-Machine Replication (S-SMR), a proposal in the second category.
+Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the following section, we review Scalable State Machine Replication (\ssmr), a proposal in the second category.
 
 \subsection{Scalable State Machine Replication}
 
-In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is divided into $P$ partitions, and a group of server replicas $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
-S-SMR relies on an oracle that tells which partitions are accessed by each command.%
+In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is divided into $k$ partitions, and a group of server replicas $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
+S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by each command.%
 \footnote{The oracle returns a set with the partitions accessed by the command, but this set does not need to be minimal; it may contain all partitions in the worst case, when the partitions accessed by the command cannot be determined before the command is executed.}
 
 To execute a command, the client multicasts the command to the appropriate partitions, as determined by the oracle.
@@ -22,138 +22,40 @@ Commands that access a single partition are executed as in classical SMR: replic
 In the case of a multi-partition command, replicas of the involved partitions deliver the command and then may need to exchange state in order to execute the command since some partitions may not have all the values read in the command.
 This mechanism allows commands to execute seamlessly despite the partitioned state.
 
-More precisely, when a server $s$ of partition $\ppm$, while executing a command $C$, reaches a $read(v)$ operation, there are two possibilities: either $v$ belongs to the local partition $\ppm$, or it is part of a remote partition $\ppm'$. 
-If $v$ is local, $s$ will retrieve its value and send it to the servers of other partitions concerned by $C$; if $v$ is remote, $s$ will wait until its value is received from a server of $\ppm'$. 
-A $write(v, val)$ operation does not depend on the previous value of $v$, not requiring communication between partitions, even if $v$ is not assigned to the partition of the server executing $C$. 
+\input{algorithm_ssmr}
 
-%Finally, to ensure linearizability, all partitions involved in the execution of a multi-partition command $C$ must coordinate before a reply can be sent to the client.
-%To understand why, consider the non-linearizable execution shown in Figure~\ref{fig:whysignals}.
-%This execution is not linearizable because the only equivalent sequential execution requires $C_3$ to precede $C_1$ and $C_2$ to succeed $C_1$, thus $C_3$ would precede $C_2$, which violates the real-time ordering of $C_2$ and $C_3$.
-%Note that this execution does not violate atomic order.
-%By requiring partitions to coordinate while executing $C_1$, we guarantee that they overlap in time, and prevent $C_2$ and $C_3$ from slipping in between $C_1$'s execution.
-%%Coordination among the partitions involved in the execution of a multi-partition command is needed to prevent the situation in which 
-%
-%\begin{figure}[h]
-%    \begin{center}
-%        \includegraphics[width=0.9\linewidth]{figures/nonlinear}
-%        \caption{No coordination among partitions during the execution of multi-partition command $C_1$ results in non-linearizable execution. (To simplify the figure, we show a single replica per partition.)}
-%        \label{fig:whysignals}
-%    \end{center}
-%\end{figure}
+Algorithm~\ref{alg:ssmr} shows precisely how S-SMR operates. When a server $s$ of partition $\ppm$, while executing a command $C$, reaches a $read(v)$ operation, there are two possibilities:
+either $v$ belongs to the local partition $\ppm$,
+or it is part of a remote partition $\ppm'$. 
+If $v$ is local, $s$ will retrieve its value and send it to the servers of other partitions concerned by $C$;
+if $v$ is remote, $s$ will wait until its value is received from a server of $\ppm'$. 
+A $write(v, val)$ operation does not depend on the previous value of $v$, not requiring communication between partitions, even if $v$ is not assigned to the partition of the server executing $C$.
 
+To ensure linearizability, all partitions involved in the execution of a multi-partition command $C$ must coordinate before a reply can be sent to the client.
+To understand why, consider the non-linearizable execution shown in Figure~\ref{fig:whysignals}~(a).
+This execution is not linearizable because the only equivalent sequential execution requires $C_y$ to precede $C_{xy}$ and $C_{xy}$ to precede $C_x$, thus $C_y$ would precede $C_x$.
+Although this execution does not violate atomic order, it contradicts real-time ordering, in which $C_x$ precedes $C_y$.
+In \ssmr{}, partitions exchange signals while executing multi-partition commands, as in Figure~\ref{fig:whysignals}~(b), guaranteeing linearizability at the cost of synchronizing partitions.
 
-Algorithm~\ref{alg:ssmr} shows the basic operation of S-SMR. 
-We added the $cons\_executed$ ordered set, which will later be used by the optimistic S-SMR.
-%Since S-SMR does not handle opt-delivered commands, we omit this part of the algorithm.
-In all algorithms presented in the paper, no two \textbf{when} clauses are executed concurrently, the only exception being the \textbf{wait} statement, which yields for other clauses until the wait condition becomes true (i.e., similarly to a \emph{monitor}).
+\begin{figure*}
+\begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=0.85\linewidth]{figures/whysignals}
+\end{minipage}
+\caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+\label{fig:whysignals}
+\end{figure*}
 
-%S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
-%Under certain workloads, however, it subjects commands to high latency. 
-%The increased latency is due to the overhead of (i) atomic multicast and (ii) the coordination across partitions. 
-%Atomic multicast ensures consistent command ordering for single- and multi-partition commands, but this strong ordering comes at the cost of higher latency. 
-%Coordination among partitions is needed to execute multi-partition commands.
-%
-%Some works have been proposed with the purpose of reducing the latency of traditional SMR by means of optimistic execution~\citep{kapritzos2012eve, marandi2014ops, Marandi11}. 
-%Differently from those works, in S-SMR there is state exchange between partitions, and each server usually knows only about a subset of all commands executed. 
-%Both these things significantly increase the complexity of an optimistic algorithm for S-SMR, when verifying the optimistic execution and also when repairing it so that it can continue. 
-%In the next section, we address both problems.
+S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
+Under workloads with multi-partition commands, however, it has limited performance, in terms of latency and throughput scalability. 
+Such decreased performance when executing multi-partition commands is due to
+partitions (i) exchanging state variables
+and (ii) synchronizing by exchanging signals.
+As we can see, \ssmr\ likely performs better as the number of multi-partition commands decreases.
 
-\begin{algorithm}[h!]
-\small
-%\footnotesize
-\begin{distribalgo}[1]
-%\STATE \textbf{Algorithm 1:\\} Scalable State-Machine Replication (S-SMR)
-\vspace{1mm}
+One way to reduce the number of multi-partition commands is by dynamically changing the partitioning, putting variables that are usually accessed together in the same partition.
+However, the partitioning oracle of \ssmr\ relies on a static mapping of variables to partitions.
+One advantage of this implementation is that all clients and servers can have their own local oracle, which always returns a correct set of partitions for every query.
+Such a static mapping has the major limitation of not allowing the service to dynamically adapt to different access patterns.
 
-\INDENT{\emph{Initialization:}}
-    \STATE $cons\_executed \leftarrow$ empty ordered set
-    \STATE $\forall C \in \mathcal{K} : rcvd\_signals(C) \leftarrow \emptyset$
-    \STATE $\forall C \in \mathcal{K} : rcvd\_variables(C) \leftarrow \emptyset$
-\ENDINDENT
-
-\vspace{1.25mm}
-\INDENT{\emph{Command $C$ is submitted by a client as follows:}}
-    \STATE $C.dests \leftarrow oracle(C)$ \label{algline:oracle} 
-	\STATE multicast$(C.dests, C)$ \label{algline:climcast}
-	\STATE wait for reply
-\ENDINDENT
-
-\vspace{1.25mm}
-\INDENT{\emph{Server $s$ of partition \pp\ executes command $C$ as follows:}}
-	\INDENT{\textbf{when} cons-deliver$(C)$}
-	    \STATE reliable-multicast$(C.dests, signal(C))$ \label{algline:mcastsignals}
-		\FOR{each operation $op$ in $C$}
-			\IF{$op$ is $read(v)$}
-			    \IF{$v \in \ppm$}
-			        \STATE reliable-multicast$(C.dests, \langle v, C.id \rangle)$ \label{algline:multicastv}
-			    \ELSE
-			        \STATE \textbf{wait until} $v \in rcvd\_variables(C)$ \label{algline:waitvariable}
-			        \STATE update $v$ with the value in $rcvd\_variables(C)$
-			    \ENDIF
-			\ENDIF
-			\STATE execute $op$ \label{algline:executeopck}
-		\ENDFOR
-		\STATE \textbf{wait until} $rcvd\_signals(C) = C.dests$ \label{algline:waitsignals}
-		\STATE send reply to client \label{algline:sendreply}
-		\STATE append $C$ to $cons\_executed$
-	\ENDINDENT
-	
-	\vspace{1.25mm}
-	\INDENT{\textbf{when} reliable-deliver$(signal(C))$ from partition $\ppm'$}
-	    \STATE $rcvd\_signals(C) \leftarrow rcvd\_signals(C) \cup \{\ppm'\}$
-	\ENDINDENT
-
-	\vspace{1.25mm}
-	\INDENT{\textbf{when} reliable-deliver$(\langle v, C.id \rangle)$}
-	    \STATE $rcvd\_variables(C) \leftarrow rcvd\_variables(C) \cup \{v\}$
-	\ENDINDENT
-			
-\ENDINDENT
-
-\vspace{1.7mm}
-
-\textbf{Algorithm variables:}
-
-\vspace{1.25mm}
-
-$\mathcal{K}$: the set of all possible commands
-
-\vspace{1mm}
-
-$C.id$: unique identifier of command $C$
-
-\vspace{1mm}
-
-$oracle(C)$: function that returns a superset of the partitions accessed by $C$
-
-\vspace{1mm}
-
-$C.dests$: set of partitions to which $C$ is multicast
-
-\vspace{1mm}
-
-%$others$: set of partitions waiting for signals and variables from \pp; also, \pp\ waits for signals from all such partitions
-%
-%\vspace{1.5mm}
-
-$signal(C)$: signal exchanged to ensure linearizability
-
-\vspace{1mm}
-
-$rcvd\_signals(C)$: set of all partitions that already signaled \pp\ regarding $C$
-
-\vspace{1mm}
-
-$rcvd\_variables(C)$: set of all variables received from other partitions in order to execute $C$
-
-\vspace{1mm}
-
-$cons\_executed$: commands executed, in order of execution
-
-\caption{Scalable State-Machine Replication (S-SMR)}
-\label{alg:ssmr}
-\end{distribalgo}
-\end{algorithm}
-
-
-S-SMR implementation brings into use the concept of \emph{Oracle}, the core of partitioning algorithms, which runs a static deterministic algorithm to return the combination of involved partitions of a command; all clients and partitions have their own version of Oracle, and assumed to be identical. By doing that way, SSMR can ensure Oracle return same results for query from both clients and partitions. However, this implementation leads to some limitations: (i) the Oracles on all parties are not synchronized, thus they need to have the knowledge of all $v \in \vvm$ during the life-cycle of the system, and (ii) a change in $\vvm$ on one Oracle will not be recognized by the others. Therefore, SSMR doesn't support creating state variable $v_n$ on the fly, and has to initialize the whole $\vvm$ on the starting phase.
+%(i) the oracles on all parties are not synchronized, thus they need to have the knowledge of all $v \in \vvm$ during the life-cycle of the system, and (ii) a change in $\vvm$ on one oracle will not be recognized by the others. Therefore, SSMR doesn't support creating state variable $v_n$ on the fly, and has to initialize the whole $\vvm$ on the starting phase.
