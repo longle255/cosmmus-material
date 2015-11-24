@@ -12,7 +12,7 @@ INPUTS = dssmr.tex \
 default: $(PDFOUT)
 
 $(PDFOUT): $(INPUTS)
-	$(LATEX) $(PDFOUT) && $(BIBTEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(EMBED) $(PDFOUT).pdf
+	$(LATEX) $(PDFOUT) && $(BIBTEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(EMBED) $(PDFOUT)
 
 clean:
 	for EXT in blg aux log bbl blg out idx log lot lof toc ; do rm -f *.$${EXT} */*.$${EXT} */*/*.$${EXT} $(MWPDF).pdf ; done
