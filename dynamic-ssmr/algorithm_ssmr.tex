@@ -1,12 +1,11 @@
 \begin{algorithm}[h!]
 \small
-%\footnotesize
+
 \begin{distribalgo}[1]
-%\STATE \textbf{Algorithm 1:\\} Scalable State-Machine Replication (S-SMR)
+
 \vspace{1mm}
 
 \INDENT{\emph{Initialization:}}
-    \STATE $cons\_executed \leftarrow$ empty ordered set
     \STATE $\forall C \in \mathcal{K} : rcvd\_signals(C) \leftarrow \emptyset$
     \STATE $\forall C \in \mathcal{K} : rcvd\_variables(C) \leftarrow \emptyset$
 \ENDINDENT
@@ -14,18 +13,19 @@
 \vspace{1.25mm}
 \INDENT{\emph{Command $C$ is submitted by a client as follows:}}
     \STATE $C.dests \leftarrow oracle(C)$ \label{algline:oracle} 
-	\STATE multicast$(C.dests, C)$ \label{algline:climcast}
+	\STATE \amcast$(C.dests, C)$ \label{algline:climcast}
 	\STATE wait for reply
 \ENDINDENT
 
 \vspace{1.25mm}
 \INDENT{\emph{Server $s$ of partition \pp\ executes command $C$ as follows:}}
-	\INDENT{\textbf{when} cons-deliver$(C)$}
-	    \STATE reliable-multicast$(C.dests, signal(C))$ \label{algline:mcastsignals}
+	\INDENT{\textbf{when} \amdel$(C)$}
+	    \STATE $others \leftarrow C.dests \setminus \{\ppm{}\}$
+	    \STATE \rmcast$(others, signal(C))$ \label{algline:mcastsignals}
 		\FOR{each operation $op$ in $C$}
 			\IF{$op$ is $read(v)$}
 			    \IF{$v \in \ppm$}
-			        \STATE reliable-multicast$(C.dests, \langle v, C.id \rangle)$ \label{algline:multicastv}
+			        \STATE \rmcast$(others, \langle v, C.id \rangle)$ \label{algline:multicastv}
 			    \ELSE
 			        \STATE \textbf{wait until} $v \in rcvd\_variables(C)$ \label{algline:waitvariable}
 			        \STATE update $v$ with the value in $rcvd\_variables(C)$
@@ -33,18 +33,17 @@
 			\ENDIF
 			\STATE execute $op$ \label{algline:executeopck}
 		\ENDFOR
-		\STATE \textbf{wait until} $rcvd\_signals(C) = C.dests$ \label{algline:waitsignals}
+		\STATE \textbf{wait until} $rcvd\_signals(C) = others$ \label{algline:waitsignals}
 		\STATE send reply to client \label{algline:sendreply}
-		\STATE append $C$ to $cons\_executed$
 	\ENDINDENT
 	
 	\vspace{1.25mm}
-	\INDENT{\textbf{when} reliable-deliver$(signal(C))$ from partition $\ppm'$}
+	\INDENT{\textbf{when} \rmdel$(signal(C))$ from partition $\ppm'$}
 	    \STATE $rcvd\_signals(C) \leftarrow rcvd\_signals(C) \cup \{\ppm'\}$
 	\ENDINDENT
 
 	\vspace{1.25mm}
-	\INDENT{\textbf{when} reliable-deliver$(\langle v, C.id \rangle)$}
+	\INDENT{\textbf{when} \rmdel$(\langle v, C.id \rangle)$}
 	    \STATE $rcvd\_variables(C) \leftarrow rcvd\_variables(C) \cup \{v\}$
 	\ENDINDENT
 			
@@ -72,9 +71,9 @@ $C.dests$: set of partitions to which $C$ is multicast
 
 \vspace{1mm}
 
-%$others$: set of partitions waiting for signals and variables from \pp; also, \pp\ waits for signals from all such partitions
-%
-%\vspace{1.5mm}
+$others$: set of all partitions, other than \pp{}, where $C$ is executed.
+
+\vspace{1mm}
 
 $signal(C)$: signal exchanged to ensure linearizability
 
@@ -86,11 +85,7 @@ $rcvd\_signals(C)$: set of all partitions that already signaled \pp\ regarding $
 
 $rcvd\_variables(C)$: set of all variables received from other partitions in order to execute $C$
 
-\vspace{1mm}
-
-$cons\_executed$: commands executed, in order of execution
-
-\caption{Scalable State-Machine Replication (S-SMR)}
+\caption{Scalable State Machine Replication (\ssmr)}
 \label{alg:ssmr}
 \end{distribalgo}
 \end{algorithm}
