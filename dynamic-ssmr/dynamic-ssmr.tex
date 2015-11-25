@@ -11,7 +11,51 @@ In this section, we introduce Dynamic \ssmr{} (\dssmr), discuss performance opti
 %Consequently, the client must be able to determine the partitions accessed by $C$, denoted by $part(C)$. If the client cannot accurately estimate which partitions are accessed by $C$, it must determine a superset of these partitions, in the worst case assuming all partitions.
 %In order for clients to provide a close approximation to the command's actually accessed partitions, there is an oracle that tells the client which partitions should receive each command.
 
-Dynamic S-SMR improves on S-SMR implementation by adding a central oracle that has the information of all state variables in $\vvm$ and provides a mechanism of controlling the access to those variable that ensure linearizability. We distinguish between three operation types: $update(v)$, an operation that updates the value of a state variable, $v$, $create(v, P)$, an operation that create a state variable at a specific partition P, and $move(v, \ppm_n)$, an operation that move $v$ to partition $\ppm_n$.
+Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
+Each variable $v$ is mapped to partition $part(v)$, meaning that $v \in part(v)$.
+Such a mapping is managed by a partitioning oracle, which is implemented as a replicated service run by a group of processes.
+The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
+In more detail, \dssmr\ distinguishes five types of commands:
+$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
+$consult(C)$ asks the oracle which partitions are accessed by command $C$,
+$create(v, \ppm)$ creates a new variable $v$ mapped to partition $\ppm$,
+$move(\omega,\ppm)$ moves all variables in set $\omega$ to partition $\ppm$,
+and $delete(v)$ removes variable $v$ from the service state, resulting in $part(v) = \emptyset$.
+
+% explain which partitions deliver each partitioning command:
+% how are access, consult, create, move and delete implemented?
+
+Once the oracle is in place, clients can consult it to know to which partitions each command should be multicast, based on which variables are accessed by the command.
+If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
+If the command accesses variables from multiple partitions, the client first multicasts a $move$ command to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
+Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
+If a subsequent command accesses the same variables, it will also access a single partition.
+With this scheme, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
+
+Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dssmr{}.
+It may happen that, between those operations, the partitioning changes.
+We illustrate this in Figure~\ref{fig:move_case_1}.
+Command $C_x$ reads the value of variale $x$.
+Since partitioning is dynamic, the client issuing $C_x$ first consults the oracle and is told to multicast the command to $\ppm_1$.
+However, before $C_x$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
+When $C_x$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
+A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting three commands separately: $consult$, $move$ and $access$.
+The parttioning can change between the execution of any two of those commands.
+
+\begin{figure}[b!]
+  \includegraphics[width=\linewidth]{figures/move_case_1}
+  \caption{Consulting the oracle and issuing an application command consist of multiple calls to \amcast{}.}
+  \label{fig:move_case_1}
+\end{figure}
+
+% TODO : mention retry x times
+
+To solve this problem, \dssmr\ implements a versioning mechanism.
+Each state variable $v$ has a version number $version(v)$ associated to it.
+\\
+RIGHT? OR IS IT A SINGLE VERSION NUMBER FOR THE WHOLE SYSTEM?
+\\
+Whenever a command that changes the partitioning is executed (i.e., $create$, $move$ or $delete$), 
 
 Consider the execution depicted in Figure~\ref{fig:read}~(a), where state variables $x$ is created on partition $\ppm_1$ in the middle of the execution of S-SMR. Command $C_1(x)$ and $C_3(x)$ reads the value of $x$, $C_2(x,\ppm_1)$ create $x$ on partition $\ppm_1$. Client a first multicasts query to the $Oracle$ for location of $x$, which is not available at that time, hence $Oracle$ return empty result, which tell client a to end the execution. Client b then wants to create variable $x$ on $\ppm_1$, before sending actual creating command, client b also multicasts query to $Oracle$ to get the involved partition (eg., $\ppm_1$), then multicasts $C_2(x,\ppm_1)$ to both $Oracle$ and $\ppm_1$. Oracle will update information of $x$, and $\ppm_1$ will execute create $x$ command. From then, for every read command to $x$ (eg., $C_3(x)$), $Oracle$ could answer with partition $\ppm_1$ which is the one holds $x$.
 
@@ -77,107 +121,7 @@ Upon delivering $C$, server $P$ execute $C$ and reply to the client.
 % %The purpose of $signal(C)$ is to let servers in other partitions know that there is a server in \pp\ that started executing $C$. 
 % It might happen that $s$ receives signals concerning $C$ from other partitions even before $s$ started executing $C$. For this reason, $s$ must buffer signals and check if there are signals buffered already when starting the execution of $C$. For the sake of simplicity, Algorithm \ref{alg:dssmr} simply initializes such buffers as $\emptyset$ for all possible commands. In practice, buffers for $C$ are created when the first message concerning $C$ is delivered.
 
-
-\begin{algorithm}
-\small
-%\footnotesize
-\begin{distribalgo}[1]
-\vspace{1mm}
-
-\INDENT{\emph{Initialization:}}
-    \STATE oracle: $\vvm\_part \leftarrow \emptyset$
-    \STATE client: $cache \leftarrow \emptyset$
-    \STATE $p \in P$: $variables \leftarrow \emptyset$
-\ENDINDENT
-
-\vspace{1.5mm}
-
-\INDENT{\emph{Command $C$ is submitted by a client as follows:}}
-	\IF {$getPart(C) \in cache$ and $retryQuery = false$}
-		\STATE $dests \leftarrow cache(C)$
-	\ELSE
-		\STATE multicast query $Q(oracle, C)$ \label{algline:query_oracle} 		
-		\STATE $dests \leftarrow O(C)$ \label{algline:oracle_response} 
-	\ENDIF
-    
-    \IF {$dests$ is $\emptyset$}
-    	\STATE terminate $C$ \label{algline:cli_terminate}
-    \ELSE
-    	\STATE multicast$(dests, C)$ \label{algline:cli_mcast}
-    \ENDIF
-
-    \INDENT{receive retry request from server}
-    	\STATE $retryQuery \leftarrow true$
-	\ENDINDENT
-\ENDINDENT
-
-\vspace{1.5mm}
-
-\INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
-	\INDENT{\textbf{upon} deliver $Q(C)$}
-		\STATE $v \leftarrow get part(C)$
-		\IF {$v$ in $\vvm\_part$}
-			\STATE send reply to client $\vvm\_part\{v.id\}$
-		\ELSE
-			\STATE send reply to client $\emptyset$
-		\ENDIF
-	\ENDINDENT
-
-	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
-		\STATE $\vvm\_part\{v.id\} \leftarrow \ppm$
-	\ENDINDENT
-\ENDINDENT
-
-\vspace{1.5mm}
-
-\INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
-	\INDENT{\textbf{upon} deliver$(C)$}
-		\IF {$ \vvm = getVar(C) \in variables$ and ${v.version = v' \in variable}$}
-			\IF {C is MOVE command and p.id = C.source}
-				\STATE $dest \leftarrow C.target$
-				\STATE $multicast SYNC(dest,\vvm)$
-			\ELSE
-				\STATE execute $op$ \label{algline:executeopck}
-			\ENDIF
-			\STATE send reply to client \label{algline:sendreply}
-		\ELSE
-			\STATE require client to retry
-		\ENDIF
-	\ENDINDENT
-	\INDENT{\textbf{upon} deliver $SYNC(\vvm)$}
-		\STATE $variable \leftarrow \vvm$
-	\ENDINDENT
-\ENDINDENT
-
-\vspace{1.5mm}
-%\vspace{2mm}
-
-\textbf{Algorithm variables:}
-
-\vspace{1mm}
-
-$\vvm\_part$: the set of partitions of all state variables in the system.
-
-\vspace{1mm}
-
-$Q(oracle, C)$: multicast command to oracle for querying involved partition of command C
-
-\vspace{1mm}
-
-$O(C)$: response of oracle that returns a superset of $part(C)$
-
-\vspace{1mm}
-
-$dests$: set of partitions to which $C$ is multicast
-
-\vspace{1mm}
-
-$C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
-
-\caption{Dynamic Scalable State-Machine Replication (DS-SMR)}
-\label{alg:dynssmr}
-\end{distribalgo}
-\end{algorithm}
+\input{algorithm_dssmr}
 
 \subsection{Performance optimizations}
 \label{sec:optm}
