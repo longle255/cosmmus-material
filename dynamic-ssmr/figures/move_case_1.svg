@@ -14,7 +14,7 @@
    height="1052.3622"
    id="svg3973"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="move_case_1.svg">
+   sodipodi:docname="move_case_1.eps">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -28,9 +28,15 @@
      inkscape:window-height="1026"
      id="namedview3642"
      showgrid="false"
+<<<<<<< HEAD
      inkscape:zoom="2.36"
      inkscape:cx="122.08933"
      inkscape:cy="602.21384"
+=======
+     inkscape:zoom="1.78"
+     inkscape:cx="117.38385"
+     inkscape:cy="500.51892"
+>>>>>>> b3831a671186747e75c1c49f5b0e58c5bd737e91
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -796,7 +802,7 @@
      style="fill:none;stroke:#000000;stroke-width:2.99999976;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-end:none"
      id="line5036"
      y2="556.7641"
-     x2="129.80128"
+     x2="110.88126"
      y1="556.7641"
      x1="-61.212299" />
   <text
@@ -812,12 +818,16 @@
        id="tspan6252"
        sodipodi:role="line">availability of x</tspan></text>
   <line
-     x1="130.39333"
+     x1="110.58685"
      y1="612.85138"
-     x2="402.04007"
+     x2="402.0401"
      y2="612.85138"
      id="line6254"
+<<<<<<< HEAD
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-end:none" />
+=======
+     style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;marker-end:none" />
+>>>>>>> b3831a671186747e75c1c49f5b0e58c5bd737e91
   <g
      id="g7045"
      transform="translate(0,55.289124)">

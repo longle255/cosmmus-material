@@ -19,8 +19,8 @@ In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
 $consult(C)$ asks the oracle which partitions are accessed by command $C$,
 $create(v, \ppm)$ creates a new variable $v$ mapped to partition $\ppm$,
-$move(\omega,\ppm)$ moves all variables in set $\omega$ to partition $\ppm$,
-and $delete(v)$ removes variable $v$ from the service state, resulting in $part(v) = \emptyset$.
+$move(v,\ppm)$ moves variable $v$ to partition $\ppm$,
+and $delete(v)$ removes $v$ from the service state, resulting in $part(v) = \emptyset$.
 
 % explain which partitions deliver each partitioning command:
 % how are access, consult, create, move and delete implemented?
