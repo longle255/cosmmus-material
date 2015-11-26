@@ -28,7 +28,7 @@
      inkscape:window-height="1026"
      id="namedview3642"
      showgrid="false"
-     inkscape:zoom="1.78"
+     inkscape:zoom="1.9077568"
      inkscape:cx="117.38385"
      inkscape:cy="500.51892"
      inkscape:window-x="65"
@@ -796,7 +796,7 @@
      style="fill:none;stroke:#000000;stroke-width:2.99999976;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-end:none"
      id="line5036"
      y2="556.7641"
-     x2="110.88126"
+     x2="129.16983"
      y1="556.7641"
      x1="-61.212299" />
   <text
@@ -812,9 +812,9 @@
        id="tspan6252"
        sodipodi:role="line">availability of x</tspan></text>
   <line
-     x1="110.58685"
+     x1="134.94807"
      y1="612.85138"
-     x2="402.0401"
+     x2="402.04013"
      y2="612.85138"
      id="line6254"
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;marker-end:none" />
@@ -879,4 +879,21 @@
        id="path3533"
        d="m 158.35133,473.90575 13.1907,-60.76721" />
   </g>
+  <path
+     d="m 131.16032,555.28469 2.69634,28.85328"
+     id="path8011"
+     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:5,2.5;stroke-dashoffset:0;marker-end:url(#Arrow2Mendxg)"
+     inkscape:connector-curvature="0" />
+  <text
+     x="132.99907"
+     y="558.70831"
+     id="text8013"
+     style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
+     sodipodi:linespacing="125%">
+    <tspan
+       x="134.03056"
+       y="571.20831"
+       id="tspan8015"
+       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">x</tspan>
+  </text>
 </svg>
