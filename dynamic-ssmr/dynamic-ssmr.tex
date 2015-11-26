@@ -17,7 +17,7 @@ Such a mapping is managed by a partitioning oracle, which is implemented as a re
 The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
 In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
-$consult(C)$ asks the oracle which partitions are accessed by command $C$,
+$consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them,
 $create(v, \ppm)$ creates a new variable $v$ mapped to partition $\ppm$,
 $move(v,\ppm)$ moves variable $v$ to partition $\ppm$,
 and $delete(v)$ removes $v$ from the service state, resulting in $part(v) = \emptyset$.
@@ -27,7 +27,7 @@ and $delete(v)$ removes $v$ from the service state, resulting in $part(v) = \emp
 
 Once the oracle is in place, clients can consult it to know to which partitions each command should be multicast, based on which variables are accessed by the command.
 If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
-If the command accesses variables from multiple partitions, the client first multicasts a $move$ command to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
+If the command accesses variables from multiple partitions, the client first multicasts one or more $move$ commands to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
 Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
 If a subsequent command accesses the same variables, it will also access a single partition.
 With this scheme, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
@@ -39,7 +39,7 @@ Command $C_x$ reads the value of variale $x$.
 Since partitioning is dynamic, the client issuing $C_x$ first consults the oracle and is told to multicast the command to $\ppm_1$.
 However, before $C_x$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
 When $C_x$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
-A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting three commands separately: $consult$, $move$ and $access$.
+A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting at least three commands separately: $consult$, $move$ and $access$.
 The parttioning can change between the execution of any two of those commands.
 
 \begin{figure}[b!]
