@@ -14,7 +14,7 @@
    height="1052.3622"
    id="svg3973"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="move_case_1.eps">
+   sodipodi:docname="move_case_1.svg">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -28,15 +28,9 @@
      inkscape:window-height="1026"
      id="namedview3642"
      showgrid="false"
-<<<<<<< HEAD
-     inkscape:zoom="2.36"
-     inkscape:cx="122.08933"
-     inkscape:cy="602.21384"
-=======
      inkscape:zoom="1.78"
      inkscape:cx="117.38385"
      inkscape:cy="500.51892"
->>>>>>> b3831a671186747e75c1c49f5b0e58c5bd737e91
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -437,7 +431,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -823,11 +817,7 @@
      x2="402.0401"
      y2="612.85138"
      id="line6254"
-<<<<<<< HEAD
-     style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-end:none" />
-=======
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;marker-end:none" />
->>>>>>> b3831a671186747e75c1c49f5b0e58c5bd737e91
   <g
      id="g7045"
      transform="translate(0,55.289124)">
