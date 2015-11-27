@@ -14,6 +14,7 @@ Several approaches have been proposed to address SMR's scalability limitations. 
 Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the following section, we review Scalable State Machine Replication (\ssmr), a proposal in the second category.
 
 \subsection{Scalable State Machine Replication}
+\label{sec:ssmr}
 
 In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is divided into $k$ partitions, and a group of server replicas $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
 S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by each command.%
