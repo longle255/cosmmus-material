@@ -1,0 +1,100 @@
+\begin{algorithm}
+\small
+%\footnotesize
+\begin{distribalgo}[1]
+\vspace{1mm}
+
+\INDENT{\emph{Initialization:}}
+    \STATE oracle: $\vvm\_part \leftarrow \emptyset$
+    \STATE client: $cache \leftarrow \emptyset$
+    \STATE $p \in P$: $variables \leftarrow \emptyset$
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is submitted by a client as follows:}}
+	\IF {$getPart(C) \in cache$ and $retryQuery = false$}
+		\STATE $dests \leftarrow cache(C)$
+	\ELSE
+		\STATE multicast query $Q(oracle, C)$ \label{algline:query_oracle} 		
+		\STATE $dests \leftarrow O(C)$ \label{algline:oracle_response} 
+	\ENDIF
+    
+    \IF {$dests$ is $\emptyset$}
+    	\STATE terminate $C$ \label{algline:cli_terminate}
+    \ELSE
+    	\STATE multicast$(dests, C)$ \label{algline:cli_mcast}
+    \ENDIF
+
+    \INDENT{receive retry request from server}
+    	\STATE $retryQuery \leftarrow true$
+	\ENDINDENT
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
+	\INDENT{\textbf{upon} deliver $Q(C)$}
+		\STATE $v \leftarrow get part(C)$
+		\IF {$v$ in $\vvm\_part$}
+			\STATE send reply to client $\vvm\_part\{v.id\}$
+		\ELSE
+			\STATE send reply to client $\emptyset$
+		\ENDIF
+	\ENDINDENT
+
+	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
+		\STATE $\vvm\_part\{v.id\} \leftarrow \ppm$
+	\ENDINDENT
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
+	\INDENT{\textbf{upon} deliver$(C)$}
+		\IF {$ \vvm = getVar(C) \in variables$ and ${v.version = v' \in variable}$}
+			\IF {C is MOVE command and p.id = C.source}
+				\STATE $dest \leftarrow C.target$
+				\STATE $multicast SYNC(dest,\vvm)$
+			\ELSE
+				\STATE execute $op$ \label{algline:executeopck}
+			\ENDIF
+			\STATE send reply to client \label{algline:sendreply}
+		\ELSE
+			\STATE require client to retry
+		\ENDIF
+	\ENDINDENT
+	\INDENT{\textbf{upon} deliver $SYNC(\vvm)$}
+		\STATE $variable \leftarrow \vvm$
+	\ENDINDENT
+\ENDINDENT
+
+\vspace{1.5mm}
+%\vspace{2mm}
+
+\textbf{Algorithm variables:}
+
+\vspace{1mm}
+
+$\vvm\_part$: the set of partitions of all state variables in the system.
+
+\vspace{1mm}
+
+$Q(oracle, C)$: multicast command to oracle for querying involved partition of command C
+
+\vspace{1mm}
+
+$O(C)$: response of oracle that returns a superset of $part(C)$
+
+\vspace{1mm}
+
+$dests$: set of partitions to which $C$ is multicast
+
+\vspace{1mm}
+
+$C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
+
+\caption{Dynamic Scalable State-Machine Replication (DS-SMR)}
+\label{alg:dynssmr}
+\end{distribalgo}
+\end{algorithm}

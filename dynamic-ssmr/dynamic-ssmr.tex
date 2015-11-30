@@ -85,7 +85,11 @@ Figure~\ref{fig:arch} illustrates the architecture of \dssmr{}.
 \subsection{Detailed algorithm}
 \label{sec:algorithm}
 
-\input{algorithm_dssmr}
+When issuing a command, the application client simply forwards the command to the the client proxy and waits for the reply.
+Consulting the oracle and multicasting the command to different partitions is done internally by the proxy at the client.
+Algorithm~\ref{alg:dssmr} describes in detail how the \dssmr\ proxy works, at the clients, servers and partitions.
+
+\input{algorithm_dynssmr}
 
 \subsection{Performance optimizations}
 \label{sec:optm}

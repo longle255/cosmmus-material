@@ -1,100 +1,91 @@
-\begin{algorithm}
+\begin{algorithm}[h!]
 \small
-%\footnotesize
+
 \begin{distribalgo}[1]
+
 \vspace{1mm}
 
 \INDENT{\emph{Initialization:}}
-    \STATE oracle: $\vvm\_part \leftarrow \emptyset$
-    \STATE client: $cache \leftarrow \emptyset$
-    \STATE $p \in P$: $variables \leftarrow \emptyset$
+    \STATE $\forall C \in \mathcal{K} : rcvd\_signals(C) \leftarrow \emptyset$
+    \STATE $\forall C \in \mathcal{K} : rcvd\_variables(C) \leftarrow \emptyset$
 \ENDINDENT
 
-\vspace{1.5mm}
-
+\vspace{1.25mm}
 \INDENT{\emph{Command $C$ is submitted by a client as follows:}}
-	\IF {$getPart(C) \in cache$ and $retryQuery = false$}
-		\STATE $dests \leftarrow cache(C)$
-	\ELSE
-		\STATE multicast query $Q(oracle, C)$ \label{algline:query_oracle} 		
-		\STATE $dests \leftarrow O(C)$ \label{algline:oracle_response} 
-	\ENDIF
-    
-    \IF {$dests$ is $\emptyset$}
-    	\STATE terminate $C$ \label{algline:cli_terminate}
-    \ELSE
-    	\STATE multicast$(dests, C)$ \label{algline:cli_mcast}
-    \ENDIF
-
-    \INDENT{receive retry request from server}
-    	\STATE $retryQuery \leftarrow true$
-	\ENDINDENT
+    \STATE $C.dests \leftarrow oracle(C)$ \label{algline:oracle} 
+	\STATE \amcast$(C.dests, C)$ \label{algline:climcast}
+	\STATE wait for reply
 \ENDINDENT
 
-\vspace{1.5mm}
-
-\INDENT{\emph{Command $C$ is executed by a oracle as follows:}}
-	\INDENT{\textbf{upon} deliver $Q(C)$}
-		\STATE $v \leftarrow get part(C)$
-		\IF {$v$ in $\vvm\_part$}
-			\STATE send reply to client $\vvm\_part\{v.id\}$
-		\ELSE
-			\STATE send reply to client $\emptyset$
-		\ENDIF
-	\ENDINDENT
-
-	\INDENT{\textbf{upon} deliver $C(v, \ppm)$}
-		\STATE $\vvm\_part\{v.id\} \leftarrow \ppm$
-	\ENDINDENT
-\ENDINDENT
-
-\vspace{1.5mm}
-
-\INDENT{\emph{Command $C$ is executed by a server in partition \pp\ as follows:}}
-	\INDENT{\textbf{upon} deliver$(C)$}
-		\IF {$ \vvm = getVar(C) \in variables$ and ${v.version = v' \in variable}$}
-			\IF {C is MOVE command and p.id = C.source}
-				\STATE $dest \leftarrow C.target$
-				\STATE $multicast SYNC(dest,\vvm)$
-			\ELSE
-				\STATE execute $op$ \label{algline:executeopck}
+\vspace{1.25mm}
+\INDENT{\emph{Server $s$ of partition \pp\ executes command $C$ as follows:}}
+	\INDENT{\textbf{when} \amdel$(C)$}
+	    \STATE $others \leftarrow C.dests \setminus \{\ppm{}\}$
+	    \STATE \rmcast$(others, signal(C))$ \label{algline:mcastsignals}
+		\FOR{each operation $op$ in $C$}
+			\IF{$op$ is $read(v)$}
+			    \IF{$v \in \ppm$}
+			        \STATE \rmcast$(others, \langle v, C.id \rangle)$ \label{algline:multicastv}
+			    \ELSE
+			        \STATE \textbf{wait until} $v \in rcvd\_variables(C)$ \label{algline:waitvariable}
+			        \STATE update $v$ with the value in $rcvd\_variables(C)$
+			    \ENDIF
 			\ENDIF
-			\STATE send reply to client \label{algline:sendreply}
-		\ELSE
-			\STATE require client to retry
-		\ENDIF
+			\STATE execute $op$ \label{algline:executeopck}
+		\ENDFOR
+		\STATE \textbf{wait until} $rcvd\_signals(C) = others$ \label{algline:waitsignals}
+		\STATE send reply to client \label{algline:sendreply}
 	\ENDINDENT
-	\INDENT{\textbf{upon} deliver $SYNC(\vvm)$}
-		\STATE $variable \leftarrow \vvm$
+	
+	\vspace{1.25mm}
+	\INDENT{\textbf{when} \rmdel$(signal(C))$ from partition $\ppm'$}
+	    \STATE $rcvd\_signals(C) \leftarrow rcvd\_signals(C) \cup \{\ppm'\}$
 	\ENDINDENT
+
+	\vspace{1.25mm}
+	\INDENT{\textbf{when} \rmdel$(\langle v, C.id \rangle)$}
+	    \STATE $rcvd\_variables(C) \leftarrow rcvd\_variables(C) \cup \{v\}$
+	\ENDINDENT
+			
 \ENDINDENT
 
-\vspace{1.5mm}
-%\vspace{2mm}
+\vspace{1.7mm}
 
 \textbf{Algorithm variables:}
 
-\vspace{1mm}
+\vspace{1.25mm}
 
-$\vvm\_part$: the set of partitions of all state variables in the system.
-
-\vspace{1mm}
-
-$Q(oracle, C)$: multicast command to oracle for querying involved partition of command C
+$\mathcal{K}$: the set of all possible commands
 
 \vspace{1mm}
 
-$O(C)$: response of oracle that returns a superset of $part(C)$
+$C.id$: unique identifier of command $C$
 
 \vspace{1mm}
 
-$dests$: set of partitions to which $C$ is multicast
+$oracle(C)$: function that returns a superset of the partitions accessed by $C$
 
 \vspace{1mm}
 
-$C(v, \ppm)$: command that create variable $v$ in partition $\ppm$
+$C.dests$: set of partitions to which $C$ is multicast
 
-\caption{Dynamic Scalable State-Machine Replication (DS-SMR)}
-\label{alg:dynssmr}
+\vspace{1mm}
+
+$others$: set of all partitions, other than \pp{}, where $C$ is executed.
+
+\vspace{1mm}
+
+$signal(C)$: signal exchanged to ensure linearizability
+
+\vspace{1mm}
+
+$rcvd\_signals(C)$: set of all partitions that already signaled \pp\ regarding $C$
+
+\vspace{1mm}
+
+$rcvd\_variables(C)$: set of all variables received from other partitions in order to execute $C$
+
+\caption{Scalable State Machine Replication (\ssmr)}
+\label{alg:ssmr}
 \end{distribalgo}
 \end{algorithm}
