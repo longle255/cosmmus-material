@@ -17,14 +17,17 @@
             \STATE $prophecy \leftarrow \emptyset$
 
             \IF{$C_c$ is an $access(\omega)$ command}
-                \FOR{each $v \in \omega$}
-                    \IF{$\exists P : v \in P$}
-                        \STATE $P_v \leftarrow P$
-                    \ELSE
-                        \STATE $P_v \leftarrow \emptyset$
-                    \ENDIF
-                    \STATE $prophecy \leftarrow prophecy \cup \langle v, P_v \rangle$
-                \ENDFOR
+                \IF{$\exists v \in \omega : (\nexists P : v \in P)$)}
+                    \STATE $prophecy \leftarrow nok$
+                \ELSE
+                    \FOR{each $v \in \omega$}
+                        \IF{$\exists P : v \in P$}
+                            \STATE $prophecy \leftarrow prophecy \cup \{\langle v, P_v \rangle \}$
+                        \ELSE
+                            \STATE $prophecy \leftarrow prophecy \cup \{\langle v, \emptyset \rangle \}$
+                        \ENDIF
+                    \ENDFOR
+                \ENDIF
 
             \ELSIF{$C_c$ is a $create(v)$ command}
                 \IF{$\exists P : v \in P$}
