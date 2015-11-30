@@ -12,29 +12,33 @@
     \INDENT{\textbf{do}}
         \STATE \amcast$($oracle, $consult(C))$
         \STATE wait for $prophecy$
-        \STATE $C.vars \leftarrow \{v: \exists P : \langle v, P \rangle \in prophecy \}$
-        \STATE $C.dests \leftarrow \{P: \exists v : \langle v, P \rangle \in prophecy \}$
-        \IF{$C$ is an $access$ command and $|C.dests| > 1$}
-            \STATE let $P_d$ be one of the partitions in $C.dests$
-            \FOR{every $v \in C.vars$}
-                \STATE // \textit{move $v$ partition $P_d$}
-                \STATE let $P_o$ be $P : \langle v, P \rangle \in prophecy$
-                \IF{$P_o \neq P_d$}
-                    \STATE $C_{move} \leftarrow move(v,P_d)$
-                    \STATE $C_{move}.dests \leftarrow \{$oracle$,P_o,P_d\}$
-                    \STATE \amcast$(C_{move}.dests$, $C_{move})$
-                \ENDIF
-            \ENDFOR
-            \STATE $C.dests \leftarrow \{ P_s \}$
+        \IF{$prophecy \in \{ok, nok\}$}
+            \STATE $reply \leftarrow prophecy$
+        \ELSE
+            \STATE $C.vars \leftarrow \{v: \exists P : \langle v, P \rangle \in prophecy \}$
+            \STATE $C.dests \leftarrow \{P: \exists v : \langle v, P \rangle \in prophecy \}$
+            \IF{$C$ is an $access$ command and $|C.dests| > 1$}
+                \STATE let $P_d$ be one of the partitions in $C.dests$
+                \FOR{every $v \in C.vars$}
+                    \STATE // \textit{move $v$ partition $P_d$}
+                    \STATE let $P_o$ be $P : \langle v, P \rangle \in prophecy$
+                    \IF{$P_o \neq P_d$}
+                        \STATE $C_{move} \leftarrow move(v,P_d)$
+                        \STATE $C_{move}.dests \leftarrow \{$oracle$,P_o,P_d\}$    
+                        \STATE \amcast$(C_{move}.dests$, $C_{move})$
+                    \ENDIF
+                \ENDFOR
+                \STATE $C.dests \leftarrow \{ P_s \}$
+            \ENDIF
+            \IF{$C$ is $create$ or $delete$}
+                \STATE $C.dests \leftarrow dests \cup \{oracle\}$
+            \ENDIF
+            \STATE \amcast$(C.dests$, $C)$
+            \STATE wait for $reply$
         \ENDIF
-        \IF{$C$ is $create$ or $delete$}
-            \STATE $C.dests \leftarrow dests \cup \{oracle\}$
-        \ENDIF
-        \STATE \amcast$(C.dests$, $C)$
-        \STATE wait for reply
     \ENDINDENT
-    \STATE{\textbf{while} reply = $retry$ // \textit{after $n$ retries, fall back to \ssmr}}
-    \STATE return reply to the application client
+    \STATE{\textbf{while} $reply = retry$ // \textit{after $n$ retries, fall back to \ssmr}}
+    \STATE return $reply$ to the application client
 \ENDINDENT
 
 \caption{\dssmr\ Client Proxy}
