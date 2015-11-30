@@ -1,0 +1,58 @@
+\begin{algorithm}[h!]
+\small
+
+\begin{distribalgo}[1]
+
+\vspace{1.0mm}
+
+\INDENT{To execute a command $C$, the oracle proxy does:}
+
+    \vspace{1.0mm}
+    
+    \INDENT{\textbf{when} \amdel$(C)$}
+
+    \vspace{1.0mm}
+
+        \IF{$C$ is a $consult(C_c)$ command}
+            \STATE let the caralho begin!
+
+        \vspace{1.0mm}
+
+        \ELSIF{$C$ is a $move(v,P_d)$ command}
+            \STATE let $P_o$ be $P : \{P\} = C.dests \setminus \{$oracle, $P_d\}$
+            \IF{$v \in P_o$}
+                \STATE $P_o \leftarrow P_o \setminus \{v\}$
+                \STATE $P_d \leftarrow P_d \cup      \{v\}$
+            \ENDIF
+
+        \vspace{1.0mm}
+    
+        \ELSIF{$C$ is a $create(v)$ command}
+            \STATE let $P_c$ be $P : \{P\} = C.dests \setminus \{$oracle, $P_d\}$
+            \IF{$\nexists P : v \in P$}
+                \STATE $outcome \leftarrow ok$
+            \ELSE
+                \STATE $outcome \leftarrow nok$
+            \ENDIF
+            \STATE \rmcast$(P_c, \langle outcome, C \rangle )$
+            \STATE send $outcome$ to the client
+        
+        \vspace{1.0mm}
+        
+        \ELSIF{$C$ is a $delete(v)$ command}
+            \STATE let $P_d$ be $P : \{P\} = C.dests \setminus \{$oracle$\}$
+            \IF{$\nexists P : v \in P \vee v \in P_d$}
+                \STATE send $ok$    to the client
+            \ELSE
+                \STATE send $retry$ to the client
+            \ENDIF
+            
+            
+        \ENDIF
+    \ENDINDENT
+\ENDINDENT
+
+\caption{\dssmr\ Oracle Proxy}
+\label{alg:oracle_proxy}
+\end{distribalgo}
+\end{algorithm}

@@ -3,11 +3,17 @@
 
 \begin{distribalgo}[1]
 
-\vspace{1.25mm}
+\vspace{1.0mm}
 
 \INDENT{To execute a command $C$, the server proxy in partition $P$ does:}
 
-\vspace{1.0mm}
+    \vspace{1.0mm}
+    
+    \INDENT{\textbf{when} \rmdel$( \langle val, C \rangle )$}
+        \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+    \ENDINDENT
+
+    \vspace{1.0mm}
 
     \INDENT{\textbf{when} \amdel$(C)$}
 
@@ -46,9 +52,9 @@
             \STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
             \IF{$val = ok$}
                 \STATE $P \leftarrow P \cup \{v\}$
-                \STATE reply with $success$
-            \ELSE
-                \STATE reply with $retry$
+%                \STATE reply with $success$
+%            \ELSE
+%                \STATE reply with $retry$
             \ENDIF
         
         \vspace{1.0mm}
@@ -56,9 +62,9 @@
         \ELSIF{$C$ is a $delete(v)$ command}
             \IF{$v \in P$}
                 \STATE $P \leftarrow P \setminus \{v\}$
-                \STATE reply with $success$
-            \ELSE
-                \STATE reply with $retry$
+%                \STATE reply with $success$
+%            \ELSE
+%                \STATE reply with $retry$
             \ENDIF
         \ENDIF
     \ENDINDENT
