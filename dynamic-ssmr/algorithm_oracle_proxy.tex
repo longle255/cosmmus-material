@@ -3,22 +3,49 @@
 
 \begin{distribalgo}[1]
 
-\vspace{1.0mm}
+\vspace{1.5mm}
 
 \INDENT{To execute a command $C$, the oracle proxy does:}
 
-    \vspace{1.0mm}
-    
+    \vspace{1.5mm}
+
     \INDENT{\textbf{when} \amdel$(C)$}
 
-    \vspace{1.0mm}
+    \vspace{1.5mm}
 
-        \IF{$C$ is a $consult(C_c)$ command}
-            \STATE let the caralho begin!
+        \IF{\underline{$C$ is a $consult(C_c)$ command}}
+            \STATE $prophecy \leftarrow \emptyset$
 
-        \vspace{1.0mm}
+            \IF{$C_c$ is an $access(\omega)$ command}
+                \FOR{each $v \in \omega$}
+                    \IF{$\exists P : v \in P$}
+                        \STATE $P_v \leftarrow P$
+                    \ELSE
+                        \STATE $P_v \leftarrow \emptyset$
+                    \ENDIF
+                    \STATE $prophecy \leftarrow prophecy \cup \langle v, P_v \rangle$
+                \ENDFOR
 
-        \ELSIF{$C$ is a $move(v,P_d)$ command}
+            \ELSIF{$C_c$ is a $create(v)$ command}
+                \IF{$\exists P : v \in P$}
+                    \STATE $prophecy \leftarrow nok$
+                \ELSE
+                    \STATE $P_c \leftarrow$ initial partition, defined by application rules
+                    \STATE $prophecy \leftarrow \{\langle v, P_c \rangle \}$
+                \ENDIF
+
+            \ELSIF{$C_c$ is a $delete(v)$ command}
+                \IF{$\nexists P_d : v \in P_d$}
+                    \STATE $prophecy \leftarrow ok$
+                \ELSE
+                    \STATE $prophecy \leftarrow \{\langle v, P_d \rangle \}$
+                \ENDIF
+                
+            \ENDIF
+
+        \vspace{1.5mm}
+
+        \ELSIF{\underline{$C$ is a $move(v,P_d)$ command}}
             \STATE let $P_o$ be $P : \{P\} = C.dests \setminus \{$oracle, $P_d\}$
             \IF{$v \in P_o$}
                 \STATE $P_o \leftarrow P_o \setminus \{v\}$
@@ -27,7 +54,7 @@
 
         \vspace{1.0mm}
     
-        \ELSIF{$C$ is a $create(v)$ command}
+        \ELSIF{\underline{$C$ is a $create(v)$ command}}
             \STATE let $P_c$ be $P : \{P\} = C.dests \setminus \{$oracle, $P_d\}$
             \IF{$\nexists P : v \in P$}
                 \STATE $outcome \leftarrow ok$
@@ -39,7 +66,7 @@
         
         \vspace{1.0mm}
         
-        \ELSIF{$C$ is a $delete(v)$ command}
+        \ELSIF{\underline{$C$ is a $delete(v)$ command}}
             \STATE let $P_d$ be $P : \{P\} = C.dests \setminus \{$oracle$\}$
             \IF{$\nexists P : v \in P \vee v \in P_d$}
                 \STATE send $ok$    to the client

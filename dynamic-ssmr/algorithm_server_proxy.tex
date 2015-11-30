@@ -19,7 +19,7 @@
 
     \vspace{1.0mm}
 
-        \IF{$C$ is an $access$ command}
+        \IF{\underline{$C$ is an $access$ command}}
             \IF{$\exists v \in C.vars : v \not\in P$}
                 \STATE reply with $retry$
             \ELSE
@@ -30,7 +30,7 @@
 
         \vspace{1.0mm}
     
-        \ELSIF{$C$ is a $move(v,P_d)$ command}
+        \ELSIF{\underline{$C$ is a $move(v,P_d)$ command}}
             \IF{$P \neq P_d$}
                 \IF{$v \in P$}
                     \STATE \rmcast$(P_d$,$\langle v, C \rangle)$
@@ -48,7 +48,7 @@
         
         \vspace{1.0mm}
     
-        \ELSIF{$C$ is a $create(v)$ command}
+        \ELSIF{\underline{$C$ is a $create(v)$ command}}
             \STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
             \IF{$val = ok$}
                 \STATE $P \leftarrow P \cup \{v\}$
@@ -59,7 +59,7 @@
         
         \vspace{1.0mm}
         
-        \ELSIF{$C$ is a $delete(v)$ command}
+        \ELSIF{\underline{$C$ is a $delete(v)$ command}}
             \IF{$v \in P$}
                 \STATE $P \leftarrow P \setminus \{v\}$
 %                \STATE reply with $success$
