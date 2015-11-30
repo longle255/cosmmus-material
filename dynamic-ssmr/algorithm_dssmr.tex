@@ -3,89 +3,69 @@
 
 \begin{distribalgo}[1]
 
-\vspace{1mm}
+\vspace{1.25mm}
 
-\INDENT{\emph{Initialization:}}
-    \STATE $\forall C \in \mathcal{K} : rcvd\_signals(C) \leftarrow \emptyset$
-    \STATE $\forall C \in \mathcal{K} : rcvd\_variables(C) \leftarrow \emptyset$
+\INDENT{To issue a command $C$, the client proxy does:}
+
+\vspace{1.0mm}
+
+    \INDENT{\textbf{do}}
+        \STATE \amcast$($oracle, $consult(C))$
+        \STATE wait for $prophecy$
+        \STATE $C.vars \leftarrow \{v: \exists P : \langle v, P \rangle \in prophecy \}$
+        \STATE $C.dests \leftarrow \{P: \exists v : \langle v, P \rangle \in prophecy \}$
+        \IF{$|C.dests| > 1$}
+            \STATE $P_d \leftarrow$ one of the partitions in $C.dests$
+            \FOR{every $v \in C.vars$}
+                \STATE // \textit{move $v$ partition $P_d$}
+                \STATE $P_o \leftarrow P : \langle v, P \rangle \in prophecy$
+                \STATE $C_{move} \leftarrow move(v,P_d)$
+                \STATE $C_{move}.dests \leftarrow \{$oracle$,P_o,P_d\}$
+                \STATE \amcast$(C_{move}.dests$, $C_{move})$
+            \ENDFOR
+            \STATE $C.dests \leftarrow \{ P_s \}$
+        \ENDIF
+        \IF{$C$ is $create$ or $delete$}
+            \STATE $C.dests \leftarrow dests \cup \{oracle\}$
+        \ENDIF
+        \STATE \amcast$(C.dests$, $C)$
+        \STATE wait for reply
+    \ENDINDENT
+    \STATE{\textbf{while} reply = $retry$ // \textit{after $n$ retries, fall back to \ssmr}}
 \ENDINDENT
 
 \vspace{1.25mm}
-\INDENT{\emph{Command $C$ is submitted by a client as follows:}}
-    \STATE $C.dests \leftarrow oracle(C)$ \label{algline:oracle} 
-	\STATE \amcast$(C.dests, C)$ \label{algline:climcast}
-	\STATE wait for reply
+
+\INDENT{To execute a command $C$, the server proxy in partition $P$ does:}
+
+\vspace{1.0mm}
+
+    \INDENT{\textbf{when} \amdel$(C)$, where $C$ is an $access$ command}
+        \IF{$\exists v \in C.vars : v \not\in P$}
+            \STATE reply with $retry$
+        \ELSE
+            \STATE have the command executed by the application server
+            \STATE send the reply to the client
+        \ENDIF
+    \ENDINDENT
+
+\vspace{1.0mm}
+    \INDENT{\textbf{when} \amdel$(C)$, where $C$ is a $move$ command}
+        \IF{$P_d = P$}
+            \IF{$v \in P$}
+                \STATE \rmcast$(P_d$,$\langle v, C \rangle)$
+            \ELSE
+                \STATE \rmcast$(P_d$,$\langle null, C \rangle)$
+            \ENDIF
+        \ENDIF
+                \STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_vars$
+                \IF{$val \neq null$}
+                    \STATE $P \leftarrow P \cup \{v\}$
+                \ENDIF
+    \ENDINDENT
 \ENDINDENT
 
-\vspace{1.25mm}
-\INDENT{\emph{Server $s$ of partition \pp\ executes command $C$ as follows:}}
-	\INDENT{\textbf{when} \amdel$(C)$}
-	    \STATE $others \leftarrow C.dests \setminus \{\ppm{}\}$
-	    \STATE \rmcast$(others, signal(C))$ \label{algline:mcastsignals}
-		\FOR{each operation $op$ in $C$}
-			\IF{$op$ is $read(v)$}
-			    \IF{$v \in \ppm$}
-			        \STATE \rmcast$(others, \langle v, C.id \rangle)$ \label{algline:multicastv}
-			    \ELSE
-			        \STATE \textbf{wait until} $v \in rcvd\_variables(C)$ \label{algline:waitvariable}
-			        \STATE update $v$ with the value in $rcvd\_variables(C)$
-			    \ENDIF
-			\ENDIF
-			\STATE execute $op$ \label{algline:executeopck}
-		\ENDFOR
-		\STATE \textbf{wait until} $rcvd\_signals(C) = others$ \label{algline:waitsignals}
-		\STATE send reply to client \label{algline:sendreply}
-	\ENDINDENT
-	
-	\vspace{1.25mm}
-	\INDENT{\textbf{when} \rmdel$(signal(C))$ from partition $\ppm'$}
-	    \STATE $rcvd\_signals(C) \leftarrow rcvd\_signals(C) \cup \{\ppm'\}$
-	\ENDINDENT
-
-	\vspace{1.25mm}
-	\INDENT{\textbf{when} \rmdel$(\langle v, C.id \rangle)$}
-	    \STATE $rcvd\_variables(C) \leftarrow rcvd\_variables(C) \cup \{v\}$
-	\ENDINDENT
-			
-\ENDINDENT
-
-\vspace{1.7mm}
-
-\textbf{Algorithm variables:}
-
-\vspace{1.25mm}
-
-$\mathcal{K}$: the set of all possible commands
-
-\vspace{1mm}
-
-$C.id$: unique identifier of command $C$
-
-\vspace{1mm}
-
-$oracle(C)$: function that returns a superset of the partitions accessed by $C$
-
-\vspace{1mm}
-
-$C.dests$: set of partitions to which $C$ is multicast
-
-\vspace{1mm}
-
-$others$: set of all partitions, other than \pp{}, where $C$ is executed.
-
-\vspace{1mm}
-
-$signal(C)$: signal exchanged to ensure linearizability
-
-\vspace{1mm}
-
-$rcvd\_signals(C)$: set of all partitions that already signaled \pp\ regarding $C$
-
-\vspace{1mm}
-
-$rcvd\_variables(C)$: set of all variables received from other partitions in order to execute $C$
-
-\caption{Scalable State Machine Replication (\ssmr)}
-\label{alg:ssmr}
+\caption{Dynamic \ssmr\ (\dssmr)}
+\label{alg:dssmr}
 \end{distribalgo}
 \end{algorithm}
