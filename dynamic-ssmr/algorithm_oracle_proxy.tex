@@ -21,11 +21,7 @@
                     \STATE $prophecy \leftarrow nok$
                 \ELSE
                     \FOR{each $v \in \omega$}
-                        \IF{$\exists P : v \in P$}
-                            \STATE $prophecy \leftarrow prophecy \cup \{\langle v, P_v \rangle \}$
-                        \ELSE
-                            \STATE $prophecy \leftarrow prophecy \cup \{\langle v, \emptyset \rangle \}$
-                        \ENDIF
+                        \STATE $prophecy \leftarrow prophecy \cup \{\langle v, P_v \rangle \}:v \in P_v$
                     \ENDFOR
                 \ENDIF
 
