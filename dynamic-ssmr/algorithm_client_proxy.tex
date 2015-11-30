@@ -36,41 +36,7 @@
     \STATE{\textbf{while} reply = $retry$ // \textit{after $n$ retries, fall back to \ssmr}}
 \ENDINDENT
 
-\vspace{1.25mm}
-
-\INDENT{To execute a command $C$, the server proxy in partition $P$ does:}
-
-\vspace{1.0mm}
-
-    \INDENT{\textbf{when} \amdel$(C)$, where $C$ is an $access$ command}
-        \IF{$\exists v \in C.vars : v \not\in P$}
-            \STATE reply with $retry$
-        \ELSE
-            \STATE have the command executed by the application server
-            \STATE send the reply to the client
-        \ENDIF
-    \ENDINDENT
-
-\vspace{1.0mm}
-    \INDENT{\textbf{when} \amdel$(C)$, where $C = move(v,P_d)$}
-        \IF{$P \neq P_d$}
-            \IF{$v \in P$}
-                \STATE \rmcast$(P_d$,$\langle v, C \rangle)$
-                \STATE $P \leftarrow P \setminus \{v\}$
-            \ELSE
-                \STATE \rmcast$(P_d$,$\langle null, C \rangle)$
-            \ENDIF
-        \ELSE
-            \STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_vars$
-            \IF{$val \neq null$}
-                \STATE $v \leftarrow val$
-                \STATE $P \leftarrow P \cup \{v\}$
-            \ENDIF
-        \ENDIF
-    \ENDINDENT
-\ENDINDENT
-
-\caption{Dynamic \ssmr\ (\dssmr)}
-\label{alg:dssmr}
+\caption{\dssmr\ Client Proxy}
+\label{alg:client_proxy}
 \end{distribalgo}
 \end{algorithm}
