@@ -15,8 +15,8 @@
         \IF{$prophecy \in \{ok, nok\}$}
             \STATE $reply \leftarrow prophecy$
         \ELSE
-            \STATE $C.vars \leftarrow \{v: (\exists P : \langle v, P \rangle \in prophecy) \}$
-            \STATE $C.dests \leftarrow \{P : (\exists v : \langle v, P \rangle \in prophecy ) \wedge P \neq \emptyset\}$
+            \STATE $C.vars \leftarrow \{v: \exists \langle v, P \rangle \in prophecy \}$
+            \STATE $C.dests \leftarrow \{P : \exists \langle v, P \rangle \in prophecy \}$
             \IF{$C$ is an $access$ command and $|C.dests| > 1$}
                 \STATE let $P_d$ be one of the partitions in $C.dests$
                 \FOR{each $v \in C.vars$}
