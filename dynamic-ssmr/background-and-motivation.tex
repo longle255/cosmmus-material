@@ -16,7 +16,7 @@ Two directions of research have been suggested to overcome execution bottlenecks
 \subsection{Scalable State Machine Replication}
 \label{sec:ssmr}
 
-In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is divided into $k$ partitions, and a group of server replicas $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
+In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$ partitions, in set $\Psi = \{\ppm_1, ..., \ppm_k\}$. Server group $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
 S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by each command.%
 \footnote{The oracle returns a set with the partitions accessed by the command, but this set does not need to be minimal; it may contain all partitions in the worst case, when the partitions accessed by the command cannot be determined before the command is executed.}
 

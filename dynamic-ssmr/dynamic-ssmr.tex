@@ -5,7 +5,7 @@ In this section, we introduce Dynamic \ssmr{} (\dssmr), discuss performance opti
 \subsection{General idea}
 \label{sec:generalidea}
 
-%S-SMR divides the state variables $v$ into $P$ partitions $\ppm_1, ..., \ppm_P$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$, and each variable $v$ in $\vvm$ has to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$. Each partition $\ppm_i$ is replicated by servers in group $s_i$. For brevity, the server $s$ belongs to $\ppm_i$ with the meaning that $s \in \ssm_i$, and say that client $c$ multicasts command $C$ to partition $\ppm_i$ means that $c$ multicasts $C$ to group $\ssm_i$.
+%S-SMR divides the state variables $v$ into $k$ partitions $\ppm_1, ..., \ppm_k$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$, and each variable $v$ in $\vvm$ has to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$. Each partition $\ppm_i$ is replicated by servers in group $s_i$. For brevity, the server $s$ belongs to $\ppm_i$ with the meaning that $s \in \ssm_i$, and say that client $c$ multicasts command $C$ to partition $\ppm_i$ means that $c$ multicasts $C$ to group $\ssm_i$.
 %
 %To execute command $C$, the client multicasts $C$ to all partitions that hold a variable read or updated by $C$.
 %Consequently, the client must be able to determine the partitions accessed by $C$, denoted by $part(C)$. If the client cannot accurately estimate which partitions are accessed by $C$, it must determine a superset of these partitions, in the worst case assuming all partitions.
@@ -19,11 +19,11 @@ In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
 $delete(v)$ removes $v$ from the service state, resulting in $part(v) = \emptyset$,
-$move(v,\ppm)$ moves variable $v$ to partition $\ppm$,
+$move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
 and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
 The reply from the oracle to a $consult$ command is called a $prophecy$.
 Each prophecy consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$ is mapped to partition $\ppm$.
-If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain $\langle v, \emptyset \rangle$.
+If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
 
 % explain which partitions deliver each partitioning command:
 % how are access, consult, create, move and delete implemented?
@@ -85,6 +85,8 @@ Figure~\ref{fig:arch} illustrates the architecture of \dssmr{}.
 \subsection{Detailed algorithm}
 \label{sec:algorithm}
 
+% each proxy has only partial information
+
 When issuing a command, the application client simply forwards the command to the the client proxy and waits for the reply.
 Consulting the oracle and multicasting the command to different partitions is done internally by the proxy at the client.
 Algorithm~\ref{alg:client_proxy}, Algorithm~\ref{alg:server_proxy}, and Algorithm~\ref{alg:oracle_proxy} describe in detail how the \dssmr\ proxy works respective at client, server and oracle processes.
@@ -96,15 +98,38 @@ The oracle knows all state variables and which partition contains each of them.
 Because of this, the oracle may already tell the client whether the command can be executed or not.
 Such is the case of the $access(\omega)$ command: if there is a variable $v \in \omega$ that the command tries to read or write and $v$ does not exist, the oracle already tells the client that the command cannot be executed, by sending a $nok$ value as the prophecy.
 A $nok$ prophecy is also returned for a $create(v)$ command when $v$ already exists, and an $ok$ prophecy for a $delete(v)$ command when $v$ does not exist.
-Otherwise, the client proxy receives a prophecy containing pairs $\langle v, P \rangle$, meaning that $v \in P$, for every $v$ accessed by the command.
-If the prophecy contains multiple partitions, the proxy chooses one of them, $P_d$, and moves all variables in the prophecy to $P_d$.
-Then, the command $C$ itself is multicast to $P_d$.
+Otherwise, the client proxy receives a prophecy containing pairs $\langle v, \ppm \rangle$, meaning that $v \in \ppm$, for every $v$ accessed by the command.
+If the prophecy contains multiple partitions, the proxy chooses one of them, $\ppm_d$, and moves all variables in the prophecy to $\ppm_d$.
+Then, the command $C$ itself is multicast to $\ppm_d$.
 There is no guarantee that an interleave of commands as discussed in Section~\ref{sec:generalidea} will not happen, even if the client waits for a reply to the move commands.
 For this reason, and to save time, the client proxy multicast all move commands at once (not waiting for a reply).
 If the reply received to $C$ is $retry$, the procedure restarts: the proxy consults the oracle, possibly moves variables across partitions, and multicasts the $C$ again.
-After a given threshold $n$ of retries, the proxy falls back to \ssmr{}, issuing the command as a multi-partition command.
+After a given threshold $n$ of retries, the proxy falls back to \ssmr{}, multicasting the command to all partitions, which ensures the command's termination.
 
 \input{algorithm_server_proxy}
+
+The server proxy intercepts access commands before they are executed by the application server.
+In \dssmr{}, every access command is executed in a single partition.
+If a server proxy in partition $\ppm$ intercepts an $access(\omega)$ command that accesses a variable $v \in \omega$ that does belong to $\ppm$, it means that the variable is in some other partition, or it does not exist.
+Either way, the client should retry with a different set of partitions, if the variable does exist.
+To execute a $delete(v)$ command, the server proxy at partition $\ppm$ simply removes $v$ from partition $\ppm$, in case $v \in \ppm$.
+In case $v \not\in \ppm$, it might be that the variable exists but belongs to some other partition $\ppm'$.
+Since only the oracle and the servers at $\ppm'$ have this sort of knowledge, it is the oracle who replies to delete commands.
+
+\dssmr\ server and oracle proxies coordinate to execute commands that create or move variables.
+Such coordination is done by means of \rmcast{}.
+When a $create(v)$ command is delivered at $\ppm$, the server proxy waits for a message from the oracle telling whether the variable can be created or not to be \rmdel{}ed.
+The message from the oracle is necessary because $v$ might not belong to $\ppm$, but it might belong to some other partition $\ppm'$ that servers of $\ppm$ have no knowledge of.
+If the create command can be executed, the oracle can already reply to the client with a positive acknowledgement, saving time.
+This can be done thanks to the guarantees of atomic multicast and reliable multicast.
+As for move commands, each $move(v,\ppm_s,\ppm_d)$ command consists of moving variable $v$ from a source partition $\ppm_s$ to a destination partition $\ppm_d$.
+If $\ppm$ is the source partition, the server proxy checks whether $v$ belongs to $\ppm$.
+If $v \in \ppm$, the proxy \rmcast{}s $\langle v, C \rangle$ to $\ppm_d$, so servers at the destination partition know that $v$ is the variable associated to that move command.
+If $v \not\in \ppm$, a $\langle null, C \rangle$ message is \rmcast\ to $\ppm_d$, informing that the move will not be executed.
+
+
+
+
 
 \input{algorithm_oracle_proxy}
 

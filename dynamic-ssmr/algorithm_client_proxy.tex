@@ -15,20 +15,19 @@
         \IF{$prophecy \in \{ok, nok\}$}
             \STATE $reply \leftarrow prophecy$
         \ELSE
-            \STATE $C.vars \leftarrow \{v: \exists \langle v, P \rangle \in prophecy \}$
-            \STATE $C.dests \leftarrow \{P : \exists \langle v, P \rangle \in prophecy \}$
-            \IF{$C$ is an $access$ command and $|C.dests| > 1$}
-                \STATE let $P_d$ be one of the partitions in $C.dests$
-                \FOR{each $v \in C.vars$}
-                    \STATE // \textit{move $v$ to partition $P_d$}
-                    \STATE let $P_s$ be $P : \langle v, P \rangle \in prophecy$
-                    \IF{$P_s \neq P_d$}
-                        \STATE $C_{move} \leftarrow move(v,P_d)$
-                        \STATE $C_{move}.dests \leftarrow \{$oracle$,P_s,P_d\}$    
+            \STATE $C.dests \leftarrow \{\ppm : \exists \langle v, \ppm \rangle \in prophecy \}$
+            \IF{$C$ is an $access(\omega)$ command and $|C.dests| > 1$}
+                \STATE let $\ppm_d$ be one of the partitions in $C.dests$
+                \FOR{each $v \in \omega$}
+                    \STATE // \textit{move $v$ to partition $\ppm_d$}
+                    \STATE let $\ppm_s$ be $\ppm : \langle v, \ppm \rangle \in prophecy$
+                    \IF{$\ppm_s \neq \ppm_d$}
+                        \STATE $C_{move} \leftarrow move(v,\ppm_s,\ppm_d)$
+                        \STATE $C_{move}.dests \leftarrow \{$oracle$,\ppm_s,\ppm_d\}$    
                         \STATE \amcast$(C_{move}.dests$, $C_{move})$
                     \ENDIF
                 \ENDFOR
-                \STATE $C.dests \leftarrow \{ P_d \}$
+                \STATE $C.dests \leftarrow \{ \ppm_d \}$
             \ENDIF
             \IF{$C$ is $create$ or $delete$}
                 \STATE $C.dests \leftarrow dests \cup \{oracle\}$
