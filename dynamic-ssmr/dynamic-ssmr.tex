@@ -90,6 +90,9 @@ Figure~\ref{fig:arch} illustrates the architecture of \dssmr{}.
 When issuing a command, the application client simply forwards the command to the the client proxy and waits for the reply.
 Consulting the oracle and multicasting the command to different partitions is done internally by the proxy at the client.
 Algorithm~\ref{alg:client_proxy}, Algorithm~\ref{alg:server_proxy}, and Algorithm~\ref{alg:oracle_proxy} describe in detail how the \dssmr\ proxy works respectively at client, server and oracle processes.
+Every server proxy at a server in $\ssm_i$ has only partial knowledge of the partitioning: it knows only which variables belong to $\ppm_i$.
+The oracle proxy has knowledge of every $\ppm \in \Psi$.
+To maintain such a gloabl knowledge, the oracle must \amdel{} every command that creates, moves, or deletes variables.
 
 \input{algorithm_client_proxy}
 
