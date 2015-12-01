@@ -24,7 +24,7 @@ However, SMR lacks scalability: every replica executes all commands, so adding s
 Scalable SMR (\ssmr) addresses this problem by partitioning the service state, allowing commands to execute only in some replicas, providing scalability while still ensuring linearizability.
 One problem is that ssmr quickly saturates when executing multi-partition commands,
 as partitions must communicate.
-Dynamic S-SMR (\dssmr) solves this issue by repartitioning the state dynamically, based on the workload.
+\dssmrshort\ (\dssmr) solves this issue by repartitioning the state dynamically, based on the workload.
 Variables that are usually accessed together are moved to the same partition, which significantly improves scalability.
 We evaluate the performance of \dssmr\ with a scalable social network application.
 

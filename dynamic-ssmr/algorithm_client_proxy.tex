@@ -20,15 +20,15 @@
             \IF{$C$ is an $access$ command and $|C.dests| > 1$}
                 \STATE let $P_d$ be one of the partitions in $C.dests$
                 \FOR{each $v \in C.vars$}
-                    \STATE // \textit{move $v$ partition $P_d$}
-                    \STATE let $P_o$ be $P : \langle v, P \rangle \in prophecy$
-                    \IF{$P_o \neq P_d$}
+                    \STATE // \textit{move $v$ to partition $P_d$}
+                    \STATE let $P_s$ be $P : \langle v, P \rangle \in prophecy$
+                    \IF{$P_s \neq P_d$}
                         \STATE $C_{move} \leftarrow move(v,P_d)$
-                        \STATE $C_{move}.dests \leftarrow \{$oracle$,P_o,P_d\}$    
+                        \STATE $C_{move}.dests \leftarrow \{$oracle$,P_s,P_d\}$    
                         \STATE \amcast$(C_{move}.dests$, $C_{move})$
                     \ENDIF
                 \ENDFOR
-                \STATE $C.dests \leftarrow \{ P_s \}$
+                \STATE $C.dests \leftarrow \{ P_d \}$
             \ENDIF
             \IF{$C$ is $create$ or $delete$}
                 \STATE $C.dests \leftarrow dests \cup \{oracle\}$
