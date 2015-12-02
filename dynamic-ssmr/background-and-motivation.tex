@@ -33,23 +33,21 @@ or it is part of a remote partition $\ppm'$.
 If $v$ is local, $s$ will retrieve its value and send it to the servers of other partitions concerned by $C$;
 if $v$ is remote, $s$ will wait until its value is received from a server of $\ppm'$. 
 A $write(v, val)$ operation does not depend on the previous value of $v$, not requiring communication between partitions, even if $v$ is not assigned to the partition of the server executing $C$.
-
-\pagebreak
-
 To ensure linearizability, all partitions involved in the execution of a multi-partition command $C$ must coordinate before a reply can be sent to the client.
-To understand why, consider the non-linearizable execution shown in Figure~\ref{fig:whysignals}~(a).
-This execution is not linearizable because the only equivalent sequential execution requires $C_y$ to precede $C_{xy}$ and $C_{xy}$ to precede $C_x$, thus $C_y$ would precede $C_x$.
-Although this execution does not violate atomic order, it contradicts real-time ordering, in which $C_x$ precedes $C_y$.
-In \ssmr{}, partitions exchange signals while executing multi-partition commands, as in Figure~\ref{fig:whysignals}~(b), guaranteeing linearizability at the cost of synchronizing partitions.
+%To understand why, consider the non-linearizable execution shown in Figure~\ref{fig:whysignals}~(a).
+%This execution is not linearizable because the only equivalent sequential execution requires $C_y$ to precede $C_{xy}$ and $C_{xy}$ to precede $C_x$, thus $C_y$ would precede $C_x$.
+%Although this execution does not violate atomic order, it contradicts real-time ordering, in which $C_x$ precedes $C_y$.
+In \ssmr{}, partitions exchange signals while executing multi-partition commands~\cite{bezerra2014ssmr}.
+This guarantees linearizability, at the cost of synchronizing partitions.
 
-\begin{figure*}
-\begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
-\centering
-      \includegraphics[width=0.85\linewidth]{figures/whysignals}
-\end{minipage}
-\caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
-\label{fig:whysignals}
-\end{figure*}
+%\begin{figure*}
+%\begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
+%\centering
+%      \includegraphics[width=0.85\linewidth]{figures/whysignals}
+%\end{minipage}
+%\caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+%\label{fig:whysignals}
+%\end{figure*}
 
 S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
 Under workloads with multi-partition commands, however, it has limited performance, in terms of latency and throughput scalability. 
