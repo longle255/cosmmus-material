@@ -1,13 +1,13 @@
 \section{Background and motivation}
 \label{sec:background}
 
-State-machine replication is a fundamental approach to implement a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
-State-machine replication ensures strong consistency (i.e., linearizability~\cite{Attiya04}) by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
+State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
+State machine replication ensures strong consistency (i.e., linearizability~\cite{Attiya04}) by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
 
 \subsection{Scaling state machine replication}
 By starting in the same initial state and executing the same sequence of deterministic commands, servers make the same state changes and produce the same reply for each command. To guarantee that servers deliver the same sequence of commands, SMR can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
 
-Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a few reasons. First, the underlying communication protocol needed to ensure ordered message delivery may not scale itself (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
+Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple reasons. First, the underlying communication protocol needed to ensure ordered message delivery may not scale itself (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
 
 Several approaches have been proposed to address SMR's scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{CT96,Lamport:1998ea}).
 
@@ -16,7 +16,7 @@ Two directions of research have been suggested to overcome execution bottlenecks
 \subsection{Scalable State Machine Replication}
 \label{sec:ssmr}
 
-In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$ partitions, in set $\Psi = \{\ppm_1, ..., \ppm_k\}$. Server group $\ssm_i$ is assigned to each partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
+In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$ partitions, in set $\Psi = \{\ppm_1, ..., \ppm_k\}$. Server group $\ssm_i$ is assigned to partition $\ppm_i$. For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$, and say ``multicast to $\ppm_i$" meaning ``multicast to server group $\ssm_i$".
 S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by each command.%
 \footnote{The oracle returns a set with the partitions accessed by the command, but this set does not need to be minimal; it may contain all partitions in the worst case, when the partitions accessed by the command cannot be determined before the command is executed.}
 
@@ -54,7 +54,7 @@ Under workloads with multi-partition commands, however, it has limited performan
 Such decreased performance when executing multi-partition commands is due to
 partitions (i) exchanging state variables
 and (ii) synchronizing by exchanging signals.
-As we can see, \ssmr\ likely performs better as the number of multi-partition commands decreases.
+\ssmr\ likely performs better as the number of multi-partition commands decreases.
 
 One way to reduce the number of multi-partition commands is by dynamically changing the partitioning, putting variables that are usually accessed together in the same partition.
 However, the partitioning oracle of \ssmr\ relies on a static mapping of variables to partitions.

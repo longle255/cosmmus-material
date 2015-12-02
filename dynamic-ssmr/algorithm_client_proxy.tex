@@ -18,6 +18,7 @@
             \STATE $C.dests \leftarrow \{\ppm : \exists \langle v, \ppm \rangle \in prophecy \}$
             \IF{$C$ is an $access(\omega)$ command and $|C.dests| > 1$}
                 \STATE let $\ppm_d$ be one of the partitions in $C.dests$
+                \label{algline:client:partition}
                 \FOR{each $v \in \omega$}
                     \STATE // \textit{move $v$ to partition $\ppm_d$}
                     \STATE let $\ppm_s$ be $\ppm : \langle v, \ppm \rangle \in prophecy$
@@ -36,7 +37,7 @@
             \STATE wait for $reply$
         \ENDIF
     \ENDINDENT
-    \STATE{\textbf{while} $reply = retry$ // \textit{after $n$ retries, fall back to \ssmr}}
+    \STATE{\textbf{while} $reply = retry$ // \textit{after many retries, fall back to \ssmr}}
     \STATE return $reply$ to the application client
 \ENDINDENT
 

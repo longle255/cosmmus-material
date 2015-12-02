@@ -12,8 +12,8 @@ One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
 If sender and receiver are correct, then every message sent is eventually received. 
 %
 One-to-many communication relies on reliable multicast and atomic multicast,\footnote{Solving atomic multicast requires additional assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence of an atomic multicast oracle.}
-defined in Section~\ref{sec:rmcast} and Section~\ref{sec:amcast}.
-Atomic broadcast is a special case of atomic multicast in which there is a single group with all servers.
+defined in sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
+%Atomic broadcast is a special case of atomic multicast in which there is a single group with all servers.
 
 Our consistency criterion is linearizability.
 A system is \emph{linearizable} if there is a way to reorder the client commands in a sequence that (i)~respects the semantics of the commands, as defined in their sequential specifications, and (ii)~respects the real-time precedence of commands~\cite{Attiya04}.
@@ -53,3 +53,5 @@ Atomic multicast ensures the following properties:
     \item[--] No two processes $p$ and $q$ in both $\gamma$ and $\gamma'$ \amdel\ $m$ and $m'$ in different orders \emph{(atomic order)}.
     
 \end{itemize}
+
+Atomic broadcast is a special case of atomic multicast in which there is a single group of processes.
