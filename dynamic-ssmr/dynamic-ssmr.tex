@@ -12,18 +12,20 @@ In this section, we introduce Dynamic \ssmr{} (\dssmr), discuss performance opti
 %In order for clients to provide a close approximation to the command's actually accessed partitions, there is an oracle that tells the client which partitions should receive each command.
 
 Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
-Each variable $v$ is mapped to partition $part(v)$, meaning that $v \in part(v)$.
+Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$.
 Such a mapping is managed by a partitioning oracle, which is implemented as a replicated service run by a group of processes.
 The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
 In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
-$delete(v)$ removes $v$ from the service state, resulting in $part(v) = \emptyset$,
+$delete(v)$ removes $v$ from the service state,
+% resulting in $part(v) = \emptyset$,
 $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
 and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
 The reply from the oracle to a $consult$ command is called a $prophecy$.
-Each prophecy consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$ is mapped to partition $\ppm$.
-If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
+A prophecy usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$ is mapped to partition $\ppm$.
+The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively.
+%If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
 
 % explain which partitions deliver each partitioning command:
 % how are access, consult, create, move and delete implemented?
