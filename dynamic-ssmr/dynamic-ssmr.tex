@@ -123,7 +123,7 @@ There is no guarantee that an interleave of commands as discussed in Section~\re
 For this reason, and to save time, the client proxy multicasts all move commands at once.
 Commands that change the partitioning, i.e., create and delete, are also multicast to the oracle.
 If the reply received to the command is $retry$, the procedure restarts: the proxy consults the oracle again, possibly moves variables across partitions, and multicasts $C$ to the appropriate partitions once more.
-After reaching a given threshold of retries for $C$, the proxy falls back to \ssmr{}, multicasting $C$ to all partitions, which ensures the command's termination.
+After reaching a given threshold of retries for $C$, the proxy falls back to \ssmr{}, multicasting $C$ to all partitions (and the oracle, in case $C$ is a create or delete command), which ensures the command's termination.
 
 \input{algorithm_server_proxy}
 
