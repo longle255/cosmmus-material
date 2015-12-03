@@ -1,8 +1,8 @@
 LATEX  = pdflatex -synctex=1 -interaction=nonstopmode -halt-on-error
 BIBTEX = bibtex
 EMBED  = ./embed_fonts.sh
-PDFOUT = dssmr
-INPUTS = dssmr.tex \
+PDFOUT = main
+INPUTS = main.tex \
          abstract.tex \
          background-and-motivation.tex \
          dynamic-ssmr.tex \
