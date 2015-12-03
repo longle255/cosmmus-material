@@ -1,0 +1,37 @@
+\section{Related work}
+\label{sec:rw}
+
+State machine replication is a well-known approach to replication and has been extensively studied (e.g., \cite{kapritsos2012eve, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
+State machine replication requires replicas to execute commands deterministically, which implies sequential execution.
+Even though increasing the performance of state machine replication is non-trivial, different techniques have been proposed for achieving scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
+In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
+The server replicas, then, must deterministically merge all different partial orders received from the ordering clusters.
+In~\cite{biely2012spaxos}, Paxos~\cite{Lam98} is used to order commands, but it is implemented in a way such that the task of ordering messages is evenly distributed among replicas, as opposed to having a leader process that performs more work than the others and may eventually become a bottleneck. 
+
+State machine replication seems at first to prevent multi-threaded execution since it may lead to non-determinism. 
+However, some works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way. 
+In \cite{santos2013htsmr}, for instance, the authors propose organizing each replica in multiple modules that perform different tasks concurrently, such as receiving messages, batching, and dispatching commands to be executed.
+The execution of commands is still sequential, but the replica performs all other tasks in parallel. We also implemented such kinds of parallelism in Eyrie.
+
+Some works have proposed to parallelize the execution of commands in SMR. 
+In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another). 
+Upon delivery, commands are directed to a parallelizer thread that uses application-supplied rules to schedule multi-threaded execution. 
+Another way of dealing with non-determinism is proposed in \cite{kapritsos2012eve}, where commands are speculatively executed concurrently.
+After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially. 
+Both \cite{kotla2004htbft} and \cite{kapritsos2012eve} assume a Byzantine failure model and in both cases, a single thread is responsible for receiving and scheduling commands to be executed. 
+In the Byzantine failure model, command execution typically includes signature handling, which can result in expensive commands.
+Under benign failures, command execution is less expensive and the thread responsible for command reception and scheduling may become a performance bottleneck.
+%For commands that take long to execute, this may not be a problem, but for workloads where the command execution time is shorter than the parallelization time, those approaches may not scale.
+
+Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure strong consistency as we define it here (i.e., as linearizability). Many works (e.g., \cite{chundi96dur, kobus2013hybrid, sciascia2012sdur, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. For some applications, this kind of consistency is good enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
+
+Other works have tried to make linearizable systems scalable~\cite{corbett2013spanner, Glendenning2011, Marandi11}.
+In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
+In \cite{Marandi11}, a partitioned variant of SMR is proposed, supporting single-partition updates and multi-partition read operations.
+It relies on total order: all commands have to be ordered by a single sequencer (e.g., a Paxos group of acceptors), so that linearizability is ensured.
+The replication scheme proposed in \cite{Marandi11} does not allow multi-partition update commands.
+Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition.
+To ensure strong consistency across partitions, it assumes that clocks are synchronized within a certain bound that may change over time.
+The authors say that Spanner works well with GPS and atomic clocks.
+
+Scalable State Machine Replication employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even in the presence of multi-partition commands and unsynchronized clocks.
