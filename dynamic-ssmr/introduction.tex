@@ -48,15 +48,16 @@ In classical SMR, every command requested by a non-faulty client always succeeds
 The second requirement imposes a similar constraint on DS-SMR.
 
 DS-SMR has been designed to exploit workload locality.
-Our scheme captures simple instantiations of locality such as when some commands tend to access the same set of state variables and more complex cases such as the structural locality in social network applications, where users with common interests have a higher probability of being interconnected in the social graph.
-We adopt a simple but effective approach to state reconfiguration: whenever a command requires data from multiple partitions, the variables involved are relocated to the same partition, chosen randomly to reduce the chances of skewed load among partitions.
-Although DS-SMR could use more sophisticated forms of partitioning, by analyzing the workload (e.g., \cite{curino2010sch}) or optimizing for access patterns (e.g., \cite{taft2014est}), our technique does not require any prior information about the workload and does not need on complex optimization problems.
+Our scheme captures simple instantiations of locality such as when some commands access the same state variables and more complex instantiations such as the structural locality in social network applications, where users with common interests have a higher probability of being interconnected in the social graph.
+Focusing on locality allows us to adopt a simple but effective approach to state reconfiguration: whenever a command requires data from multiple partitions, the variables involved are relocated to the same partition.
+To reduce the chances of skewed load among partitions, the target partition is chosen randomly.
+Although DS-SMR could use more sophisticated forms of partitioning (e.g., based on the workload~\cite{curino2010sch}, optimized for access patterns~\cite{taft2014est}), our technique does not need any prior information about the workload and does not require to solve complex optimization problems.
 
 
 
 To track object locations without compromising scalability, in addition to a centralized oracle that keeps track of variable locations, each client caches previous consults to the oracle.
-As a result, the oracle is only consulted the first time a client accesses a variable of after a variable changed location.
-
+As a result, the oracle is only consulted the first time a client accesses a variable of after a variable changes its partition.
+Under the assumption of locality, we expect that after a few accesses, the location of most commands will be accurately provided by the client's cache.
 
 
 
