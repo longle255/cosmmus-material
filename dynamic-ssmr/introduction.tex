@@ -1,2 +1,39 @@
+%!TEX root =  main.tex
 \section{Introduction}
-TODO: add content
+
+State machine replication (SMR) is a well-established technique to develop highly available services (e.g., \cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}).
+In essence, the idea is that replicas deterministically execute the same sequence of client commands in the same order and in doing so traverse the same sequence of states and produce the same results.
+State machine replication provides configurable fault tolerance in the sense that the system can be set to tolerate any number of faulty replicas.
+%Increasing the number of replicas, however, will not scale performance since each replica must execute every command.
+Unfortunately, increasing the number of replicas will not scale performance since each replica must execute every command.
+
+%For many online services, caping performance is a serious drawback.
+Conceptually, scalable performance can be achieved with state partitioning (e.g., \cite{facebookTAO, sciascia2012sdur, Aguilera:2007}).
+Ideally, if the service state can be divided such that commands access one partition only and are equally distributed among partitions, then system throughput (i.e., the number of commands that can be executed per time unit) will increase linearly with the number of partitions.
+Although promising, exploiting partitioning in SMR is challenging.
+First, most applications cannot be partitioned in such a way that commands always fall within a single partition.
+Therefore, a partitioning scheme must cope with multi-partition commands.
+Second, determining an efficient partitioning of the state is computationally expensive and requires an accurate characterization of the workload.
+
+There are two general solutions to handle multi-partition commands.
+One solution is to weaken the guarantees of commands that involve multiple partitions (e.g., \cite{facebookTAO}).
+In the context of SMR, this would mean that single-partition commands are strongly consistent (i.e., linearizable) but multi-partition commands are not.
+Another solution is to provide strong consistency guarantees for both single- and multi-partition commands, at the cost of a more complex execution path for commands that involve multiple partitions.
+Scalable State Machine Replication (S-SMR)~\cite{bezerra2014ssmr} is a solution in this category.
+S-SMR partitions the service state and replicates each partition.
+It relies on an atomic multicast primitive to consistently order commands within and across partitions. 
+Single-partition commands are multicast to their concerned partition and executed just like in classical SMR.
+Multi-partition commands are multicast to all involved partitions; to prevent command interleaves that violate strong consistency, S-SMR implements execution atomicity.
+With execution atomicity, partitions coordinate during the execution of multi-partition commands.
+Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
+
+
+
+
+the problem with workload skew
+
+
+
+
+
+
