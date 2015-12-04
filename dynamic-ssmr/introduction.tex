@@ -27,8 +27,8 @@ Multi-partition commands are multicast to all involved partitions; to prevent co
 With execution atomicity, partitions coordinate during the execution of multi-partition commands.
 Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
 
-Determining a partitioning of the state that avoids load imbalances and favors single-partition commands requires a good understanding about the workload. 
-Even if this information is available, it represents a complex optimization problem~\cite{curino2010sch,taft2014est}.
+Determining a partitioning of the state that avoids load imbalances and favors single-partition commands normally requires a good understanding about the workload. 
+Even if enough information is available, finding a good partitioning is a complex optimization problem~\cite{curino2010sch,taft2014est}.
 Moreover, many online applications experience variations in demand. 
 These happen for a number of reasons. 
 In social networks, some users may experience a surge increase in their number of followers (e.g., new ``celebrities");
@@ -40,27 +40,35 @@ Given these issues, it is crucial that highly available partitioned systems be a
 In this paper, we present dynamic scalable state machine replication (DS-SMR), a technique that allows a partitioned SMR system to reconfigure its data placement on-the-fly.
 DS-SMR achieves dynamic data reconfiguration without sacrificing scalability and violating the properties of classical SMR.
 These requirements introduce significant challenges.
-Since state variables may change location, clients must have some means to track the current location of a variable.
+Since state variables may change location, clients must find the current location of variables.
 The scalability requirement rules out the use of a centralized oracle that clients can consult to find out the partitions a command must be multicast to.
-Even if clients can determine the current location of the state variables needed by a command to execute, by the time the command is delivered at the involved partitions one or more variables may have changed their location.
-Although the client can retry the command with the new partitions, how to guarantee that the command will succeed in the second attempt?
-In classical SMR, every command requested by a non-faulty client always succeeds.
-The second requirement imposes a similar constraint on DS-SMR.
+Even if clients can determine the current location of the variables needed to execute a command, by the time the command is delivered at the involved partitions one or more variables may have changed their location.
+Although the client can retry the command with the new locations, how to guarantee that the command will succeed in the second attempt?
+In classical SMR, every command invoked by a non-faulty client always succeeds.
+DS-SMR should provide similar guarantees.
 
-DS-SMR has been designed to exploit workload locality.
-Our scheme captures simple instantiations of locality such as when some commands access the same state variables and more complex instantiations such as the structural locality in social network applications, where users with common interests have a higher probability of being interconnected in the social graph.
-Focusing on locality allows us to adopt a simple but effective approach to state reconfiguration: whenever a command requires data from multiple partitions, the variables involved are relocated to the same partition.
-To reduce the chances of skewed load among partitions, the target partition is chosen randomly.
-Although DS-SMR could use more sophisticated forms of partitioning (e.g., based on the workload~\cite{curino2010sch}, optimized for access patterns~\cite{taft2014est}), our technique does not need any prior information about the workload and does not require to solve complex optimization problems.
+DS-SMR was designed to exploit workload locality.
+Our scheme benefits from simple manifestations of locality, such as commands that repeatedly access the same state variables, and more complex manifestations, such as structural locality in social network applications, where users with common interests have a higher probability of being interconnected in the social graph.
+Focusing on locality allows us to adopt a simple but effective approach to state reconfiguration: whenever a command requires data from multiple partitions, the variables involved are moved to a single partition and the command is executed against this partition.
+To reduce the chances of skewed load among partitions, the destination partition is chosen randomly.
+Although DS-SMR could use more sophisticated forms of partitioning, formulated as an optimization problem (e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that it does not need any prior information about the workload and is not computationally expensive.
 
+To track object locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the location of state variables, each client caches previous consults to the oracle.
+As a result, the oracle is only contacted the first time a client accesses a variable or after a variable changes its partition.
+Under the assumption of locality, we expect that most queries to the oracle will be accurately resolved by the client's cache.
+To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, DS-SMR retries the command using S-SMR's execution atomicity and involving all partitions. 
+Doing so increases the cost to execute the command but guarantees that relocations will not interfere with the execution of the command.
 
+We have fully implemented DS-SMR and performed a number of experiments using a social network application exhibiting weak and strong locality.
+Our results show that DS-SMR outperforms S-SMR by a factor of XXX. SOME MORE DATA HERE ABOUT PERFORMANCE RESULTS. (this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... )
 
-To track object locations without compromising scalability, in addition to a centralized oracle that keeps track of variable locations, each client caches previous consults to the oracle.
-As a result, the oracle is only consulted the first time a client accesses a variable of after a variable changes its partition.
-Under the assumption of locality, we expect that after a few accesses, the location of most commands will be accurately provided by the client's cache.
+The paper makes the following contributions:
+\begin{itemize}
+\item
+\item
+\end{itemize}
 
-
-
+The rest of the paper is structured as follows.
 
 
 
