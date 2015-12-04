@@ -31,6 +31,15 @@ The authors say that Spanner works well with GPS and atomic clocks.
 However, this is orthogonal to what \dssmr\ proposes.
 \dssmrlong\ consists of allowing the \emph{state partitioning}, that is, which state variables belong to which partition, to change dynamically.
 The greatest challenge that is addressed by \dssmr\ is how to provide such a solution, with a dynamic partitioning oracle, while ensuring the strongest level of consistency (linearizability), as variables are created, deleted, and moved across partitions, based on the access patterns of the workload.
-Schism~\cite{curino2010sch} proposes an automatic graph-based partitioning of a transactional database that uses the workload to decide where to place data items.
-The authors detail how the transactions are used to create a graph that captures dependencies between data items, but they do not provide much detail about how the repartitioning can be done dynamically without violating consistency.
+
+
+Schism~\cite{curino2010sch} proposes an automatic graph-based partitioning of transactional databases that uses the workload to decide where to place data items.
+The authors detail how the workload is used to create a graph that captures dependencies between data items, but they do not provide much detail about how the repartitioning can be done dynamically without violating consistency.
+E-Store~\cite{taft2014est} is a reconfiguration system for transactional databases that repartitions the data according to the access patterns detected in the workload.
+It strives to minimize the number of multi-partition accesses and is able to redistribute data items among partitions during execution.
+However, E-Store assumes that all non-replicated tables form a tree-schema based on foreign key relationships.
+This has the drawback of ruling out graph-structured schemas and \mbox{$m$-$n$} relationships.
+\dssmr\ is a more general approach that works with any kind of relationship between data items, while also ensuring the strongest level of consistency.
+
+
 
