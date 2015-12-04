@@ -28,9 +28,9 @@
      inkscape:window-height="1026"
      id="namedview3642"
      showgrid="false"
-     inkscape:zoom="0.775"
-     inkscape:cx="247.13141"
-     inkscape:cy="678.92643"
+     inkscape:zoom="1.55"
+     inkscape:cx="-19.278799"
+     inkscape:cy="559.34095"
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -435,6 +435,45 @@
          id="path3886-3"
          style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
     </marker>
+    <marker
+       refX="0"
+       refY="0"
+       orient="auto"
+       id="Arrow1Mend-5"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         id="path3886-5"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
+    </marker>
+    <marker
+       refX="0"
+       refY="0"
+       orient="auto"
+       id="Arrow1Mend-50"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         id="path3886-36"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
+    </marker>
+    <marker
+       refX="0"
+       refY="0"
+       orient="auto"
+       id="Arrow1Mend-6"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         id="path3886-9"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
+    </marker>
   </defs>
   <metadata
      id="metadata3978">
@@ -449,37 +488,37 @@
     </rdf:RDF>
   </metadata>
   <line
-     x1="-61.212303"
+     x1="-324.76886"
      y1="342.27625"
-     x2="704.31909"
+     x2="705.19421"
      y2="342.27625"
      id="line57-1"
      style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
   <line
-     x1="-61.212307"
+     x1="-324.76886"
      y1="486.98718"
-     x2="703.58643"
+     x2="705.19336"
      y2="486.98718"
      id="line3204"
      style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
   <line
-     x1="-61.212307"
+     x1="-324.76886"
      y1="598.52631"
-     x2="703.58643"
+     x2="705.19336"
      y2="598.52631"
      id="line3192"
      style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
   <line
-     x1="-61.212307"
+     x1="-324.76886"
      y1="542.27631"
-     x2="703.58643"
+     x2="705.19336"
      y2="542.27631"
      id="line3190"
      style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
   <line
-     x1="-61.212307"
+     x1="-324.76886"
      y1="398.52625"
-     x2="703.58643"
+     x2="705.19336"
      y2="398.52625"
      id="line59"
      style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
@@ -488,36 +527,36 @@
      style="font-size:15px;text-align:center;line-height:125%;text-anchor:middle;fill:#000000;stroke:none"
      id="text87"
      y="331.82123"
-     x="-94.806778">
+     x="-371.31165">
     <tspan
        style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
        id="tspan89"
        y="345.57123"
-       x="-94.402725">client a</tspan>
+       x="-370.90759">client a</tspan>
   </text>
   <text
      sodipodi:linespacing="125%"
      style="font-size:15px;text-align:center;line-height:125%;text-anchor:middle;fill:#000000;stroke:none"
      id="text93"
      y="388.07123"
-     x="-94.806778">
+     x="-371.22165">
     <tspan
        style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
        id="tspan95"
        y="401.82123"
-       x="-94.402725">client b</tspan>
+       x="-370.8176">client b</tspan>
   </text>
   <text
      sodipodi:linespacing="125%"
      style="font-size:15px;text-align:center;line-height:125%;text-anchor:middle;fill:#000000;stroke:none"
      id="text3119"
      y="588.60864"
-     x="-107.83888">
+     x="-371.39542">
     <tspan
        style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
        id="tspan3121"
        y="602.35883"
-       x="-107.43483">partition <tspan
+       x="-370.99136">partition <tspan
    id="tspan3646"
    style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium">P</tspan>
 <tspan
@@ -530,12 +569,12 @@
      style="font-size:15px;text-align:center;line-height:125%;text-anchor:middle;fill:#000000;stroke:none"
      id="text3113"
      y="532.35883"
-     x="-107.78383">
+     x="-370.49341">
     <tspan
        style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
        id="tspan3115"
        y="546.10883"
-       x="-107.37978">partition <tspan
+       x="-370.08936">partition <tspan
    id="tspan3644"
    style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium">P</tspan>
 <tspan
@@ -544,13 +583,13 @@
 </tspan>
   </text>
   <text
-     x="-107.78383"
+     x="-371.18414"
      y="477.06967"
      id="text3206"
      style="font-size:15px;text-align:center;line-height:125%;text-anchor:middle;fill:#000000;stroke:none"
      sodipodi:linespacing="125%">
     <tspan
-       x="-107.37978"
+       x="-370.78009"
        y="490.81967"
        id="tspan3208"
        style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">oracle</tspan>
@@ -587,134 +626,129 @@
   <text
      xml:space="preserve"
      style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
-     x="-135.56326"
+     x="-398.27286"
      y="559.59113"
      id="text5032"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan5034"
-       x="-135.56326"
+       x="-398.27286"
        y="559.59113"
        style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">locality of x</tspan></text>
   <line
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-end:none"
      id="line5036"
      y2="556.7641"
-     x2="145.14342"
+     x2="154.20201"
      y1="556.7641"
-     x1="-61.212303" />
+     x1="-325.03296" />
   <text
      sodipodi:linespacing="125%"
      id="text6250"
      y="615.67841"
-     x="-134.71631"
+     x="-398.27286"
      style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
      xml:space="preserve"><tspan
        style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
        y="615.67841"
-       x="-134.71631"
+       x="-398.27286"
        id="tspan6252"
        sodipodi:role="line">locality of x</tspan></text>
   <line
-     x1="150.71564"
-     y1="612.85138"
-     x2="699.09088"
-     y2="612.85138"
+     x1="161.64175"
+     y1="613.49652"
+     x2="701.66455"
+     y2="613.49652"
      id="line6254"
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;marker-end:none" />
-  <rect
-     style="fill:#d9d9d9;fill-opacity:1;stroke:#000000;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-     id="rect5188"
-     width="639.58948"
-     height="48.128876"
-     x="1.9548211"
-     y="311.7973" />
-  <rect
-     style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
-     id="rect7980"
-     y="475.73718"
-     x="23.766195"
-     height="22.5"
-     width="55.492153" />
-  <text
-     style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-     xml:space="preserve"
-     id="text7982"
-     y="492.2822"
-     x="27.680437"><tspan
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan7984"
-       y="492.2822"
-       x="27.680437">consult</tspan></text>
   <g
-     id="g3342"
-     transform="translate(36.33182,0)">
+     id="g3970">
+    <rect
+       y="311.7973"
+       x="9.9548206"
+       height="48.128876"
+       width="639.58948"
+       id="rect5188"
+       style="fill:#d9d9d9;fill-opacity:1;stroke:#000000;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    <rect
+       width="55.492153"
+       height="22.5"
+       x="31.766195"
+       y="475.73718"
+       id="rect7980"
+       style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+    <text
+       x="35.680435"
+       y="492.2822"
+       id="text7982"
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
+         x="35.680435"
+         y="492.2822"
+         id="tspan7984"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">consult</tspan></text>
     <rect
        width="83.599846"
        height="22.5"
-       x="-28.212793"
+       x="16.119026"
        y="331.02625"
        id="rect63"
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round" />
     <text
-       x="-23.014589"
+       x="21.005707"
        y="346.24374"
        id="text3052"
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-         x="-23.014589"
+         x="21.005707"
          y="346.24374"
          id="tspan3054"
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">consult(C<tspan
    id="tspan3202"
-   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">x</tspan>)</tspan></text>
-  </g>
-  <path
-     inkscape:connector-curvature="0"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     id="line3992"
-     d="m 9.906531,356.37625 13.1907,116.27608" />
-  <path
-     inkscape:connector-curvature="0"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     id="path4327"
-     d="M 78.116753,472.86481 91.307353,357.227" />
-  <text
-     x="44.073593"
-     y="313.27008"
-     id="text3220"
-     style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
-     sodipodi:linespacing="125%">
-    <tspan
-       x="45.10508"
-       y="325.77008"
-       id="tspan3222"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       dx="0 0 0 0 0 0 -6.7934266e-08">reply({⟨x,<tspan
-   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium"
-   id="tspan3228">P</tspan>
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">2</tspan>)</tspan></text>
+    <path
+       d="m 17.906531,356.37625 13.1907,116.27608"
+       id="line3992"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <path
+       d="M 86.116753,472.86481 99.307353,357.227"
+       id="path4327"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <text
+       sodipodi:linespacing="125%"
+       style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
+       id="text3220"
+       y="313.72629"
+       x="52.073593">
+      <tspan
+         dx="0 0 0 0 0 0 -6.7934266e-08"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3222"
+         y="326.22629"
+         x="53.10508">reply({⟨x,<tspan
+   id="tspan3228"
+   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium">P</tspan>
 <tspan
-   style="font-size:11px"
-   id="tspan3226">1</tspan>
+   id="tspan3226"
+   style="font-size:11px">1</tspan>
 ⟩})</tspan>
-  </text>
-  <g
-     id="g5731"
-     transform="translate(36.33182,0)">
+    </text>
     <rect
        width="96.647682"
        height="22.5"
-       x="77.787186"
+       x="122.119"
        y="387.65125"
        id="rect3330"
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round" />
     <text
-       x="88.905281"
+       x="133.23711"
        y="402.77875"
        id="text3332"
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-         x="88.905281"
+         x="133.23711"
          y="402.77875"
          id="tspan3334"
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">move(x,<tspan
@@ -722,110 +756,102 @@
    style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium">P</tspan><tspan
    style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
    id="tspan3338">2</tspan>)</tspan></text>
-  </g>
-  <g
-     id="g5725"
-     transform="translate(36.33182,0)">
     <rect
        width="77.61377"
        height="22.5"
-       x="187.7872"
+       x="232.11902"
        y="331.02625"
        id="rect3374"
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round" />
     <text
-       x="218.21266"
-       y="347.73645"
+       x="262.33548"
+       y="347.66125"
        id="text3376"
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-         x="218.21266"
-         y="347.73645"
+         x="262.33548"
+         y="347.66125"
          id="tspan3378"
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">C<tspan
    id="tspan3402"
-   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">x</tspan></tspan></text>
-  </g>
-  <path
-     inkscape:connector-curvature="0"
-     style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     id="path3390"
-     d="m 225.90653,356.37624 13.1907,171.62018" />
-  <rect
-     style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
-     id="rect3392"
-     y="531.02631"
-     x="239.54468"
-     height="22.5"
-     width="52.895901" />
-  <text
-     style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-     xml:space="preserve"
-     id="text3394"
-     y="546.37054"
-     x="242.63551"><tspan
-       style="font-size:15px;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan3396"
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">2</tspan></tspan></text>
+    <path
+       d="m 233.90653,356.37624 13.1907,171.62018"
+       id="path3390"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <rect
+       width="52.895901"
+       height="22.5"
+       x="247.54468"
+       y="531.02631"
+       id="rect3392"
+       style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+    <text
+       x="250.63551"
        y="546.37054"
-       x="242.63551">access</tspan></text>
-  <path
-     d="m 291.72522,528.94865 9.31973,-171.62017"
-     id="path3400"
-     style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <text
-     xml:space="preserve"
-     style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
-     x="200.52354"
-     y="307.96124"
-     id="text3450"
-     sodipodi:linespacing="125%"><tspan
-       sodipodi:role="line"
-       id="tspan3452"
-       x="200.52354"
-       y="307.96124"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L" /><tspan
-       sodipodi:role="line"
-       x="200.52354"
-       y="326.71124"
-       id="tspan3454"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">read(x)</tspan></text>
-  <text
-     sodipodi:linespacing="125%"
-     id="text3456"
-     y="326.71124"
-     x="265.50125"
-     style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
-     xml:space="preserve"><tspan
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan3460"
-       y="326.71124"
-       x="265.50125"
-       sodipodi:role="line"
-       dx="0 0 0 0 0 0">reply(retry)</tspan></text>
-  <path
-     d="m 114.68315,411.91392 13.1907,115.63782"
-     id="path3493"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <path
-     inkscape:connector-curvature="0"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     id="path3495"
-     d="m 114.68315,411.91392 13.1907,60.76721" />
-  <path
-     d="m 114.68315,411.91391 13.1907,172.0893"
-     id="path3497"
-     style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <g
-     id="g7040"
-     transform="translate(16.33182,0)">
+       id="text3394"
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
+         x="250.63551"
+         y="546.37054"
+         id="tspan3396"
+         style="font-size:15px;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">access</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3400"
+       d="m 299.72522,528.94865 9.31973,-171.62017" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3450"
+       y="307.50504"
+       x="208.52354"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       xml:space="preserve"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         y="307.50504"
+         x="208.52354"
+         id="tspan3452"
+         sodipodi:role="line" /><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3454"
+         y="326.25504"
+         x="208.52354"
+         sodipodi:role="line">read(x)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       x="273.50125"
+       y="326.25504"
+       id="text3456"
+       sodipodi:linespacing="125%"><tspan
+         dx="0 0 0 0 0 0"
+         sodipodi:role="line"
+         x="273.50125"
+         y="326.25504"
+         id="tspan3460"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">reply(retry)</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3493"
+       d="m 122.68315,411.91392 13.1907,115.63782" />
+    <path
+       d="m 122.68315,411.91392 13.1907,60.76721"
+       id="path3495"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3497"
+       d="m 122.68315,411.91391 13.1907,172.0893" />
     <rect
        style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect3527"
        y="475.73718"
-       x="111.21285"
+       x="135.54468"
        height="22.5"
        width="42.774151" />
     <text
@@ -833,115 +859,99 @@
        xml:space="preserve"
        id="text3529"
        y="491.08142"
-       x="114.04774"><tspan
+       x="138.37956"><tspan
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
          id="tspan3531"
          y="491.08142"
-         x="114.04774">move</tspan></text>
-  </g>
-  <g
-     id="g7045"
-     transform="translate(16.33182,55.289124)">
+         x="138.37956">move</tspan></text>
     <rect
        width="42.774151"
        height="22.5"
-       x="111.21285"
-       y="475.73718"
+       x="135.54468"
+       y="531.02631"
        id="rect7047"
        style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
     <text
-       x="114.04774"
-       y="491.08142"
+       x="138.37956"
+       y="546.37054"
        id="text7049"
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-         x="114.04774"
-         y="491.08142"
+         x="138.37956"
+         y="546.37054"
          id="tspan7051"
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">move</tspan></text>
-  </g>
-  <g
-     transform="translate(16.33182,111.53912)"
-     id="g7053">
     <rect
        style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect7055"
-       y="475.73718"
-       x="111.21285"
+       y="587.27631"
+       x="135.54468"
        height="22.5"
        width="42.774151" />
     <text
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
        xml:space="preserve"
        id="text7057"
-       y="491.08142"
-       x="114.04774"><tspan
+       y="602.62054"
+       x="138.37956"><tspan
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
          id="tspan7059"
-         y="491.08142"
-         x="114.04774">move</tspan></text>
-  </g>
-  <g
-     id="g4792"
-     transform="matrix(1.0320347,0,0,1.0070013,6.720294,-2.8924971)">
+         y="602.62054"
+         x="138.37956">move</tspan></text>
     <path
-       d="M 158.53671,584.6058 195.36503,413.63525"
+       d="m 178.33568,585.8063 38.0081,-172.16756"
        id="path3368"
-       style="fill:none;stroke:#000000;stroke-width:1.22616208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
        inkscape:connector-curvature="0" />
     <path
        inkscape:connector-curvature="0"
-       style="fill:none;stroke:#000000;stroke-width:1.22616208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
        id="path3370"
-       d="m 159.05571,529.26687 25.5295,-115.63782" />
+       d="M 178.87131,530.07993 205.21864,413.63249" />
     <path
        inkscape:connector-curvature="0"
-       style="fill:none;stroke:#000000;stroke-width:1.22616208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
        id="path3533"
-       d="m 158.35133,473.90575 13.1907,-60.76721" />
-  </g>
-  <path
-     d="m 147.49214,555.28469 2.69634,28.85328"
-     id="path8011"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:5, 2.5;stroke-dashoffset:0;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <text
-     x="149.33089"
-     y="558.70831"
-     id="text8013"
-     style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
-     sodipodi:linespacing="125%">
-    <tspan
-       x="150.36238"
-       y="571.20831"
-       id="tspan8015"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">x</tspan>
-  </text>
-  <rect
-     width="55.492153"
-     height="22.5"
-     x="379.7662"
-     y="475.73718"
-     id="rect5646"
-     style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
-  <text
-     x="383.68045"
-     y="492.2822"
-     id="text5648"
-     xml:space="preserve"
-     style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-       x="383.68045"
+       d="m 178.14436,474.33121 13.61326,-61.19266" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:5, 2.5;stroke-dashoffset:0;marker-end:url(#Arrow2Mendxg)"
+       id="path8011"
+       d="m 155.49214,555.28469 2.69634,28.85328" />
+    <text
+       sodipodi:linespacing="125%"
+       style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
+       id="text8013"
+       y="558.70831"
+       x="157.33089">
+      <tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan8015"
+         y="571.20831"
+         x="158.36238">x</tspan>
+    </text>
+    <rect
+       style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect5646"
+       y="475.73718"
+       x="387.7662"
+       height="22.5"
+       width="55.492153" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text5648"
        y="492.2822"
-       id="tspan5650"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">consult</tspan></text>
-  <g
-     id="g5652"
-     transform="translate(392.33182,0)">
+       x="391.68045"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan5650"
+         y="492.2822"
+         x="391.68045">consult</tspan></text>
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round"
        id="rect5654"
        y="331.02625"
-       x="-28.212793"
+       x="372.11902"
        height="22.5"
        width="83.599846" />
     <text
@@ -949,51 +959,47 @@
        xml:space="preserve"
        id="text5656"
        y="346.24374"
-       x="-23.014589"><tspan
+       x="377.00571"><tspan
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
          id="tspan5658"
          y="346.24374"
-         x="-23.014589">consult(C<tspan
+         x="377.00571">consult(C<tspan
    style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-   id="tspan5660">x</tspan>)</tspan></text>
-  </g>
-  <path
-     d="m 365.90653,356.37625 13.1907,116.27608"
-     id="path5662"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <path
-     d="M 434.11675,472.86481 447.30735,357.227"
-     id="path5664"
-     style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <text
-     sodipodi:linespacing="125%"
-     style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
-     id="text5666"
-     y="313.27008"
-     x="400.07361">
-    <tspan
-       dx="0 0 0 0 0 0 -6.7934266e-08"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan5668"
-       y="325.77008"
-       x="401.10507">reply({⟨x,<tspan
-   id="tspan5670"
-   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium">P</tspan>
+   id="tspan5660">2</tspan>)</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path5662"
+       d="m 373.90653,356.37625 13.1907,116.27608" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path5664"
+       d="M 442.11675,472.86481 455.30735,357.227" />
+    <text
+       x="408.07361"
+       y="313.72629"
+       id="text5666"
+       style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
+       sodipodi:linespacing="125%">
+      <tspan
+         x="409.10507"
+         y="326.22629"
+         id="tspan5668"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         dx="0 0 0 0 0 0 -6.7934266e-08">reply({⟨x,<tspan
+   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium"
+   id="tspan5670">P</tspan>
 <tspan
-   id="tspan5672"
-   style="font-size:11px">2</tspan>
+   style="font-size:11px"
+   id="tspan5672">2</tspan>
 ⟩})</tspan>
-  </text>
-  <g
-     id="g5719"
-     transform="translate(36.33182,0)">
+    </text>
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round"
        id="rect5676"
        y="331.02625"
-       x="499.7872"
+       x="544.11902"
        height="22.5"
        width="77.61377" />
     <text
@@ -1001,96 +1007,267 @@
        xml:space="preserve"
        id="text5678"
        y="347.73645"
-       x="530.21265"><tspan
+       x="574.33551"><tspan
          style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
          id="tspan5680"
          y="347.73645"
-         x="530.21265">C<tspan
+         x="574.33551">C<tspan
    style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-   id="tspan5682">x</tspan></tspan></text>
-  </g>
-  <path
-     d="m 537.90653,356.37624 13.1907,227.98333"
-     id="path5684"
-     style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     inkscape:connector-curvature="0" />
-  <g
-     id="g5706"
-     transform="translate(36.33182,56.25)">
+   id="tspan5682">2</tspan></tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path5684"
+       d="m 545.90653,356.37624 13.1907,227.98333" />
     <rect
        style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect5686"
-       y="531.02631"
-       x="515.21289"
+       y="587.27631"
+       x="559.54474"
        height="22.5"
        width="52.895901" />
     <text
        style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
        xml:space="preserve"
        id="text5688"
-       y="546.37054"
-       x="518.30371"><tspan
+       y="602.62054"
+       x="562.63556"><tspan
          style="font-size:15px;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
          id="tspan5690"
-         y="546.37054"
-         x="518.30371">access</tspan></text>
+         y="602.62054"
+         x="562.63556">access</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       x="520.52356"
+       y="307.50504"
+       id="text5694"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5696"
+         x="520.52356"
+         y="307.50504"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L" /><tspan
+         sodipodi:role="line"
+         x="520.52356"
+         y="326.25504"
+         id="tspan5698"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">read(x)</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text5700"
+       y="326.25504"
+       x="596.46869"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       xml:space="preserve"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan5702"
+         y="326.25504"
+         x="596.46869"
+         sodipodi:role="line"
+         dx="0 0 0 0 0 0">reply(x)</tspan></text>
+    <path
+       d="m 611.6607,585.62453 9.31973,-227.98331"
+       id="path5704"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text5194"
+       y="306.87454"
+       x="8.6098204"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan5196"
+         y="306.87454"
+         x="8.6098204">C<tspan
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+   id="tspan5198">2</tspan>=read(x)</tspan></text>
+    <text
+       x="730.44733"
+       y="306.87454"
+       id="text5208"
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;text-align:end;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
+         dx="0 0 0 0 0 0 0 0"
+         x="651.33905"
+         y="306.87454"
+         id="tspan5210"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">reply(x)</tspan></text>
   </g>
-  <text
-     sodipodi:linespacing="125%"
-     id="text5694"
-     y="307.96124"
-     x="512.52356"
-     style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
-     xml:space="preserve"><tspan
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       y="307.96124"
-       x="512.52356"
-       id="tspan5696"
-       sodipodi:role="line" /><tspan
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan5698"
-       y="326.71124"
-       x="512.52356"
-       sodipodi:role="line">read(x)</tspan></text>
-  <text
-     xml:space="preserve"
-     style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
-     x="588.46869"
-     y="326.71124"
-     id="text5700"
-     sodipodi:linespacing="125%"><tspan
-       dx="0 0 0 0 0 0"
-       sodipodi:role="line"
-       x="588.46869"
-       y="326.71124"
-       id="tspan5702"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">reply(x)</tspan></text>
-  <path
-     inkscape:connector-curvature="0"
-     style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
-     id="path5704"
-     d="m 603.6607,585.62453 9.31973,-227.98331" />
-  <text
-     x="-34.10778"
-     y="306.87454"
-     id="text5194"
-     xml:space="preserve"
-     style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
-       x="-34.10778"
+  <g
+     id="g3935"
+     transform="translate(3.2903226,0)">
+    <rect
+       style="fill:#d9d9d9;fill-opacity:1;stroke:#000000;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect3415"
+       width="280.56171"
+       height="48.128876"
+       x="-286.04517"
+       y="311.7973" />
+    <rect
+       style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect3417"
+       y="475.73718"
+       x="-264.23376"
+       height="22.5"
+       width="55.492153" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text3419"
+       y="492.2822"
+       x="-260.31958"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3421"
+         y="492.2822"
+         x="-260.31958">consult</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round"
+       id="rect3425"
+       y="331.02625"
+       x="-279.88098"
+       height="22.5"
+       width="83.599846" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text3427"
+       y="346.24374"
+       x="-274.99429"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3429"
+         y="346.24374"
+         x="-274.99429">consult(C<tspan
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+   id="tspan3431">1</tspan>)</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3433"
+       d="m -278.09347,356.37625 13.1907,116.27608" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3435"
+       d="M -209.88325,472.86481 -196.69265,357.227" />
+    <text
+       x="-243.92639"
+       y="313.75504"
+       id="text3437"
+       style="font-size:15px;line-height:125%;fill:#000000;stroke:none"
+       sodipodi:linespacing="125%">
+      <tspan
+         x="-242.8949"
+         y="326.25504"
+         id="tspan3439"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         dx="0 0 0 0 0 0 -6.7934266e-08">reply({⟨x,<tspan
+   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:jsMath-cmsy10;-inkscape-font-specification:jsMath-cmsy10 Medium"
+   id="tspan3441">P</tspan>
+<tspan
+   style="font-size:11px"
+   id="tspan3443">1</tspan>
+⟩})</tspan>
+    </text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.24999988;stroke-linecap:round;stroke-linejoin:round"
+       id="rect3459"
+       y="331.02625"
+       x="-109.88098"
+       height="22.5"
+       width="77.61377" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text3461"
+       y="347.73645"
+       x="-78.76252"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3463"
+         y="347.73645"
+         x="-78.76252">C<tspan
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+   id="tspan3465">1</tspan></tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       id="path3467"
+       d="m -108.09347,356.37624 13.1907,171.62018" />
+    <rect
+       style="fill:#7f7f7f;fill-opacity:1;stroke:#7f7f7f;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect3469"
+       y="531.02631"
+       x="-94.455322"
+       height="22.5"
+       width="52.895901" />
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text3471"
+       y="546.37054"
+       x="-91.364502"><tspan
+         style="font-size:15px;fill:#ffffff;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3473"
+         y="546.37054"
+         x="-91.364502">access</tspan></text>
+    <path
+       d="m -42.27478,528.94865 9.31973,-171.62017"
+       id="path3475"
+       style="fill:none;stroke:#000000;stroke-width:1.25000012;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mendxg)"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       x="-133.47644"
+       y="307.50504"
+       id="text3477"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3479"
+         x="-133.47644"
+         y="307.50504"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L" /><tspan
+         sodipodi:role="line"
+         x="-133.47644"
+         y="326.25504"
+         id="tspan3481"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">read(x)</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3483"
+       y="326.25504"
+       x="-58.17627"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Norasi;-inkscape-font-specification:Norasi"
+       xml:space="preserve"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3485"
+         y="326.25504"
+         x="-58.17627"
+         sodipodi:role="line"
+         dx="0 0 0 0 0 0">reply(x)</tspan></text>
+    <text
+       x="-287.39017"
        y="306.87454"
-       id="tspan5196"
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">C<tspan
-   id="tspan5198"
-   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">x</tspan>=read(x)</tspan></text>
-  <text
-     style="font-size:40px;font-style:normal;font-weight:normal;text-align:end;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-     xml:space="preserve"
-     id="text5208"
-     y="306.87454"
-     x="745.66589"><tspan
-       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
-       id="tspan5210"
+       id="text3591"
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><tspan
+         x="-287.39017"
+         y="306.87454"
+         id="tspan3593"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">C<tspan
+   id="tspan3595"
+   style="font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L">1</tspan>=read(x)</tspan></text>
+    <text
+       style="font-size:40px;font-style:normal;font-weight:normal;text-align:end;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"
+       id="text3597"
        y="306.87454"
-       x="666.55762"
-       dx="0 0 0 0 0 0 0 0">reply(x)</tspan></text>
+       x="75.419586"><tspan
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Nimbus Sans L;-inkscape-font-specification:Nimbus Sans L"
+         id="tspan3599"
+         y="306.87454"
+         x="-3.6886938"
+         dx="0 0 0 0 0 0 0 0">reply(x)</tspan></text>
+  </g>
 </svg>

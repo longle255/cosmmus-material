@@ -14,7 +14,7 @@ In this section, we introduce Dynamic \ssmr{} (\dssmr), discuss performance opti
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
-      \includegraphics[width=0.65\linewidth]{figures/move_case_1}
+      \includegraphics[width=1.0\linewidth]{figures/move_case_1}
 \end{minipage}
 \caption{Consulting the oracle and issuing a command are done in multiple calls to \amcast{}. White boxes represent actions of the client proxy.}
 \label{fig:move_case_1}
@@ -49,10 +49,11 @@ With this scheme, the access patterns of commands will shape the mapping of vari
 Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dssmr{}.
 It may happen that, between those operations, the partitioning changes.
 We illustrate this in Figure~\ref{fig:move_case_1}.
-Command $C_x$ reads the value of variable $x$.
-Since partitioning is dynamic, the client issuing $C_x$ first consults the oracle and is told to multicast the command to $\ppm_1$.
-However, before $C_x$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
-When $C_x$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
+Commands $C_1$ and $C_2$ read variable $x$.
+Since partitioning is dynamic, the client issuing the commands first consults the oracle before multicasting each command.
+$C_1$ executes without the interference of other commands, so consulting the oracle and multicasting the command only once is enough for $C_1$ to be executed.
+However, before $C_2$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
+When $C_2$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
 A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting at least three commands separately: $consult$, $move$ and $access$.
 The partitioning can change between the execution of any two of those commands.
 
@@ -176,7 +177,7 @@ Otherwise, that is, if $v$ exists, but $delete(v)$ was multicast to the wrong pa
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
-      \includegraphics[width=0.65\linewidth]{figures/cache_retry}
+      \includegraphics[width=1.0\linewidth]{figures/cache_retry}
 \end{minipage}
 \caption{Each client proxy in \dssmr\ maintains a cache in order to avoid  consulting the oracle. White boxes represent actions of the client proxy.}
 \label{fig:cache_retry}
@@ -202,9 +203,10 @@ The cache is a local service that follows an algorithm similar to that of the or
 %\end{figure}
 
 Naturally, the cached partitioning information held by the client proxy may be out of date.
-On the one hand, this may lead a command to be multicast to the wrong set of partitions, which will probably incur in the client proxy having to retry executing the command as shown in Figure~\ref{fig:cache_retry}.
-On the other hand, the client proxy may already have to retry commands, even if the oracle is consulted first, as shown in Figure~\ref{fig:move_case_1}.
-Besides, if most commands are executed without consulting the oracle, we avoid turning the oracle into a bottleneck.
+On the one hand, this may lead a command to be multicast to the wrong set of partitions, which will probably incur in the client proxy having to retry executing the command.
+For instance, in Figure~\ref{fig:cache_retry} the client has an out-of-date cache, incurring in a new consultation to the oracle when executing $C_1$.
+On the other hand, the client proxy may already have to retry commands, even if the oracle is always consulted first, as shown in Figure~\ref{fig:move_case_1}.
+Besides, if most commands are executed without consulting the oracle, as in the case of $C_2$ in Figure~\ref{fig:cache_retry}, we avoid turning the oracle into a bottleneck.
 
 \textbf{Load balacing}. When moving variables, the client proxies may try to distribute them in a way that balances the workload among partitions.
 This way, the system is more likely to scale throughput with the number of server groups.
