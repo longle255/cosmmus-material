@@ -27,10 +27,29 @@ Multi-partition commands are multicast to all involved partitions; to prevent co
 With execution atomicity, partitions coordinate during the execution of multi-partition commands.
 Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
 
+Determining a partitioning of the state that avoids load imbalances and favors single-partition commands requires a good understanding about the workload. 
+Even if this information is available, it represents a complex optimization problem~\cite{curino2010sch,Taft:2014}.
+Moreover, many online applications experience variations in demand. 
+These happen for a number of reasons. 
+In social networks, some users may experience a surge increase in their number of followers (e.g., new ``celebrities");
+workload demand may shift along the hours of the day and the days of the week; and unexpected (e.g., a video that goes viral) or planned events (e.g., a new company starts trading in the stock exchange) may lead to exceptional periods when requests increase significantly higher than in normal periods.
+S-SMR assumes a static workload partitioning.
+Any state reorganization requires system shutdown and manual intervention.
+
+Given these issues, it is crucial that highly available partitioned systems be able to dynamically adapt to the workload.
+In this paper, we present dynamic scalable state machine replication (DS-SMR), a technique that allows a partitioned SMR system to reconfigure its data placement on-the-fly.
+DS-SMR achieves dynamic data reconfiguration without sacrificing scalability and violating the properties of classical SMR.
+These requirements introduce significant challenges.
+Since state variables may change location, clients must have some means to track the current location of a variable.
+The scalability requirement rules out the use of a centralized oracle that clients can consult to find out the partitions a command must be multicast to.
+Even if clients can determine the current location of the state variables needed by a command to execute, by the time the command is delivered at the involved partitions one or more variables may have changed their location.
+Although the client can retry the command with the new partitions, how to guarantee that the command will succeed in the second attempt?
+In classical SMR, every command requested by a non-faulty client always succeeds.
+The second requirement imposes a similar constraint on DS-SMR.
 
 
 
-the problem with workload skew
+
 
 
 
