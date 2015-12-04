@@ -25,7 +25,7 @@ To ensure strong consistency across partitions, it assumes that clocks are synch
 The authors say that Spanner works well with GPS and atomic clocks.
 \dssmrlong\ employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even when commands update multiple partitions and without synchronized clocks.
 
-%talk about schism
+%\pagebreak
 
 \dssmr\ is not to be confused with other dynamic replication schemes though. Systems such as~\cite{birman2010dsr,guessoum2003dar,dustdar2007soc} are ``dynamic'' in the sense that they allow the membership to be reconfigured during execution. For instance, a multicast layer based on Paxos can be reconfigured by adding or removing acceptors. They also allow server replicas to be added and removed during execution.
 However, this is orthogonal to what \dssmr\ proposes.
