@@ -2,7 +2,7 @@
 \label{sec:sysmodel}
 
 We consider a distributed system consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of server processes (replicas) $\ssm = \{s_1, ..., s_n\}$. 
-Set $\ssm$ is divided into $k$ disjoint groups of servers, $\ssm_1, ..., \ssm_k$.
+Set $\ssm$ is divided into disjoint groups of servers $\ssm_0, ..., \ssm_k$.
 Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise. 
 In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
 
