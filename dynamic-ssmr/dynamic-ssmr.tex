@@ -22,7 +22,7 @@ In this section, we introduce Dynamic \ssmr{} (\dssmr), discuss performance opti
 
 Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
 Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$.
-Such a mapping is managed by a partitioning oracle, which is implemented as a replicated service run by a group of processes.
+Such a mapping is managed by a partitioning oracle, which is implemented as a replicated service run by group of server processes $\ssm_0$.
 The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
 In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:background}),
