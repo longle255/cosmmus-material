@@ -19,13 +19,13 @@ There are two general solutions to handle multi-partition commands.
 One solution is to weaken the guarantees of commands that involve multiple partitions (e.g., \cite{facebookTAO}).
 In the context of SMR, this would mean that single-partition commands are strongly consistent (i.e., linearizable) but multi-partition commands are not.
 Another solution is to provide strong consistency guarantees for both single- and multi-partition commands, at the cost of a more complex execution path for commands that involve multiple partitions.
-Scalable State Machine Replication (S-SMR)~\cite{bezerra2014ssmr} is a solution in this category.
-S-SMR partitions the service state and replicates each partition.
+\ssmrlong\ (\ssmr)~\cite{bezerra2014ssmr} is a solution in this category.
+\ssmr\ partitions the service state and replicates each partition.
 It relies on an atomic multicast primitive to consistently order commands within and across partitions. 
 Single-partition commands are multicast to their concerned partition and executed just like in classical SMR.
-Multi-partition commands are multicast to all involved partitions; to prevent command interleaves that violate strong consistency, S-SMR implements execution atomicity.
+Multi-partition commands are multicast to all involved partitions; to prevent command interleaves that violate strong consistency, \ssmr\ implements execution atomicity.
 With execution atomicity, partitions coordinate during the execution of multi-partition commands.
-Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
+Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of \ssmr\ is particularly sensitive to the way the service state is partitioned.
 
 Determining a partitioning of the state that avoids load imbalances and favors single-partition commands normally requires a good understanding about the workload. 
 Even if enough information is available, finding a good partitioning is a complex optimization problem~\cite{curino2010sch,taft2014est}.
@@ -33,43 +33,49 @@ Moreover, many online applications experience variations in demand.
 These happen for a number of reasons. 
 In social networks, some users may experience a surge increase in their number of followers (e.g., new ``celebrities");
 workload demand may shift along the hours of the day and the days of the week; and unexpected (e.g., a video that goes viral) or planned events (e.g., a new company starts trading in the stock exchange) may lead to exceptional periods when requests increase significantly higher than in normal periods.
-S-SMR assumes a static workload partitioning.
+\ssmr\ assumes a static workload partitioning.
 Any state reorganization requires system shutdown and manual intervention.
 
 Given these issues, it is crucial that highly available partitioned systems be able to dynamically adapt to the workload.
-In this paper, we present dynamic scalable state machine replication (DS-SMR), a technique that allows a partitioned SMR system to reconfigure its data placement on-the-fly.
-DS-SMR achieves dynamic data reconfiguration without sacrificing scalability and violating the properties of classical SMR.
+In this paper, we present \dssmrlong\ (\dssmr), a technique that allows a partitioned SMR system to reconfigure its data placement on-the-fly.
+\dssmr\ achieves dynamic data reconfiguration without sacrificing scalability or violating the properties of classical SMR.
 These requirements introduce significant challenges.
 Since state variables may change location, clients must find the current location of variables.
 The scalability requirement rules out the use of a centralized oracle that clients can consult to find out the partitions a command must be multicast to.
 Even if clients can determine the current location of the variables needed to execute a command, by the time the command is delivered at the involved partitions one or more variables may have changed their location.
 Although the client can retry the command with the new locations, how to guarantee that the command will succeed in the second attempt?
 In classical SMR, every command invoked by a non-faulty client always succeeds.
-DS-SMR should provide similar guarantees.
+\dssmr\ should provide similar guarantees.
 
-DS-SMR was designed to exploit workload locality.
+\dssmr\ was designed to exploit workload locality.
 Our scheme benefits from simple manifestations of locality, such as commands that repeatedly access the same state variables, and more complex manifestations, such as structural locality in social network applications, where users with common interests have a higher probability of being interconnected in the social graph.
 Focusing on locality allows us to adopt a simple but effective approach to state reconfiguration: whenever a command requires data from multiple partitions, the variables involved are moved to a single partition and the command is executed against this partition.
 To reduce the chances of skewed load among partitions, the destination partition is chosen randomly.
-Although DS-SMR could use more sophisticated forms of partitioning, formulated as an optimization problem (e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that it does not need any prior information about the workload and is not computationally expensive.
+Although \dssmr\ could use more sophisticated forms of partitioning, formulated as an optimization problem (e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that it does not need any prior information about the workload and is not computationally expensive.
 
 To track object locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the location of state variables, each client caches previous consults to the oracle.
 As a result, the oracle is only contacted the first time a client accesses a variable or after a variable changes its partition.
 Under the assumption of locality, we expect that most queries to the oracle will be accurately resolved by the client's cache.
-To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, DS-SMR retries the command using S-SMR's execution atomicity and involving all partitions. 
+To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, \dssmr\ retries the command using \ssmr{}'s execution atomicity and involving all partitions. 
 Doing so increases the cost to execute the command but guarantees that relocations will not interfere with the execution of the command.
 
-We have fully implemented DS-SMR and performed a number of experiments using a social network application exhibiting weak and strong locality.
-Our results show that DS-SMR outperforms S-SMR by a factor of XXX. SOME MORE DATA HERE ABOUT PERFORMANCE RESULTS. (this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... )
+We have fully implemented \dssmr\ as the \libname{} Java library, and we performed a number of experiments using \appname{}, a social network application built with \libname{}, with workloads exhibiting weak and strong locality.
+Our results show that \dssmr\ outperforms \ssmr\ by a factor of XXX. SOME MORE DATA HERE ABOUT PERFORMANCE RESULTS. (this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... this is a place holder... )
 
 The paper makes the following contributions:
-\begin{itemize}
-\item
-\item
-\end{itemize}
+(1) It introduces \dssmr\ and discusses some performance optimizations, including the caching technique. 
+(2) It details \libname{}, a Java library to simplify the design of services based on \dssmr{}.
+(3) It describes \appname{} to demonstrate how \libname{} can be used to implement a scalable social network service.
+(4) It presents a detailed experimental evaluation of \appname{}, deploying it with \ssmr\ and \dssmr{} in order to compare the performance of the two replication techniques.
 
 The rest of the paper is structured as follows.
-
+Section~\ref{sec:sysmodel} describes our system model.
+Section~\ref{sec:background} reviews SMR and \ssmrshort{}.
+Section~\ref{sec:dssmr} introduces \dssmr{}; we explain the technique in detail and argue about its correctness.
+Section~\ref{sec:implementation} details the implementation of \libname\ and \appname{}.
+Section~\ref{sec:experiments} reports on the results of our experiments with \dssmr{}.
+Section~\ref{sec:rw} surveys related work and
+Section~\ref{sec:conclusion} concludes the paper.
 
 
 

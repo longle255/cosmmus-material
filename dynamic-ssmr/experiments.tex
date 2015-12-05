@@ -17,7 +17,3 @@ We kept the clocks synchronized using NTP in order to measure latency components
 
 In all our experiments, clients submit commands asynchronously and handle replies with callbacks.
 We use two kinds of workloads: Timeline (all issued requests are getTimeline) and Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
-State prefetching was enabled for all experiments, including those with the original S-SMR.
-
-We deployed Retwis with a stand-alone Redis server, while Chirper was run with 1, 2, 4 and 8 partitions, with 3 replicas per partition. For consistent ordering, we use Ridge~\cite{bezerra2015ridgetr}, an optimistic atomic multicast protocol implemented in Java that builds on Paxos~\cite{Lam98}.
-In our experiments, each Paxos group has 3 acceptors, with in-memory storage.

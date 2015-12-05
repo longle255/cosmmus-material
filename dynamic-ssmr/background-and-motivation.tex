@@ -27,6 +27,15 @@ This mechanism allows commands to execute seamlessly despite the partitioned sta
 
 \input{algorithm_ssmr}
 
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1.0\linewidth]{figures/move_case_1}
+\end{minipage}
+\caption{Consulting the oracle and issuing a command are done in multiple calls to \amcast{}. White boxes represent actions of the client proxy.}
+\label{fig:move_case_1}
+\end{figure*}
+
 Algorithm~\ref{alg:ssmr} shows precisely how S-SMR operates. When a server $s$ of partition $\ppm$, while executing a command $C$, reaches a $read(v)$ operation, there are two possibilities:
 either $v$ belongs to the local partition $\ppm$,
 or it is part of a remote partition $\ppm'$. 
@@ -40,14 +49,7 @@ To ensure linearizability, all partitions involved in the execution of a multi-p
 In \ssmr{}, partitions exchange signals while executing multi-partition commands~\cite{bezerra2014ssmr}.
 This guarantees linearizability, at the cost of synchronizing partitions.
 
-%\begin{figure*}
-%\begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
-%\centering
-%      \includegraphics[width=0.85\linewidth]{figures/whysignals}
-%\end{minipage}
-%\caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
-%\label{fig:whysignals}
-%\end{figure*}
+
 
 S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
 Under workloads with multi-partition commands, however, it has limited performance, in terms of latency and throughput scalability. 
