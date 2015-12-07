@@ -24,13 +24,13 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1855"
-     inkscape:window-height="1056"
+     inkscape:window-width="1615"
+     inkscape:window-height="1026"
      id="namedview3642"
      showgrid="false"
-     inkscape:zoom="1.0960155"
-     inkscape:cx="135.08377"
-     inkscape:cy="769.41196"
+     inkscape:zoom="8.768124"
+     inkscape:cx="26.176201"
+     inkscape:cy="466.09449"
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -591,9 +591,9 @@
        id="tspan6252"
        sodipodi:role="line">locality of x</tspan></text>
   <line
-     x1="-39.545124"
+     x1="-41.602783"
      y1="612.85138"
-     x2="979.76117"
+     x2="984.53613"
      y2="612.85138"
      id="line6254"
      style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;marker-end:none" />
@@ -639,6 +639,7 @@
 <tspan
    style="font-size:9px"
    id="tspan7067">1</tspan>
+
 ⟩</tspan>
   </text>
   <rect
@@ -704,6 +705,7 @@
 <tspan
    style="font-size:11px"
    id="tspan3226">2</tspan>
+
 
 
 ⟩})</tspan>
@@ -830,6 +832,7 @@
 <tspan
    id="tspan4730"
    style="font-size:11px">1</tspan>
+
 
 
 ⟩})</tspan>
@@ -1034,6 +1037,7 @@
    id="tspan7007">2</tspan>
 
 
+
 ⟩})</tspan>
   </text>
   <text
@@ -1113,6 +1117,7 @@
 <tspan
    id="tspan7097"
    style="font-size:9px">2</tspan>
+
 ⟩</tspan>
   </text>
 </svg>
