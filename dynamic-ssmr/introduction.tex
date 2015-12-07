@@ -59,10 +59,11 @@ Under the assumption of locality, we expect that most queries to the oracle will
 To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, \dssmr\ retries the command using \ssmr{}'s execution atomicity and involving all partitions. 
 Doing so increases the cost to execute the command but guarantees that relocations will not interfere with the execution of the command.
 
-We have fully implemented \dssmr\ as the \libname{} Java library, and we performed a number of experiments using \appname{}, a social network application built with \libname{}, with workloads exhibiting weak and strong locality.
+We have fully implemented \dssmr\ as the \libname{} Java library, and we performed a number of experiments using \appname{}, a social network application built with \libname{}.
+%, with workloads exhibiting weak and strong locality.
 We devised a mixed workload that estimates a real distribution of commands issued in a social network application.
-Under such a workload, and with strong locality of access, \dssmr\ reached 74~kcps (thousands of commands per second), against less than 33~kcps achieved by \ssmr{}, improving by a factor of over 2.2.
-With a weak-locality workload, \dssmr\ reached XX~kcps, against YY~kcps of \ssmr{}.
+Under such a workload, \dssmr\ reached 74~kcps (thousands of commands per second), against less than 33~kcps achieved by \ssmr{}, improving by a factor of over 2.2.
+%With a weak-locality workload, \dssmr\ reached XX~kcps, against YY~kcps of \ssmr{}.
 
 The paper makes the following contributions:
 (1) It introduces \dssmr\ and discusses some performance optimizations, including the caching technique. 
