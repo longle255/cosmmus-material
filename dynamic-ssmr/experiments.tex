@@ -3,10 +3,12 @@
 
 % shouldn't we compare to Retwis as well?
 
-In this section, we present the results found for Chirper with different loads and partitionings and compare them with the original S-SMR~\cite{bezerra2014ssmr}.
+In this section, we present the results found for \appname\ with different loads and partitionings and compare them with the original \ssmr{}~\cite{bezerra2014ssmr}.
+We are interested in assessing \dssmr{}'s performance with workloads that present different levels of locality.
+%By locality, we mean the likelihood that certain groups of data items are accessed together (by the same command).
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
-%In Section~\ref{sec:evaluation:latency}, we evaluate how latency improves with \dssmr{}.
-%In Section~\ref{sec:evaluation:scalability}, we evaluate how \dssmr\ scales throughput with an increasing number of servers.
+In Section~\ref{sec:evaluation:highloc}, we show the results with workloads with strong locality.
+In Section~\ref{sec:evaluation:lowloc}, we show the results for weak locality workloads.
 
 \subsection{Environment setup and configuration parameters}
 \label{sec:evaluation:setup}
@@ -15,5 +17,33 @@ We conducted all experiments on a cluster that had two types of nodes: (a) HP SE
 All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM (build 25.45-b02).
 We kept the clocks synchronized using NTP in order to measure latency components involving events in different computers.
 
-In all our experiments, clients submit commands asynchronously and handle replies with callbacks.
-We use two kinds of workloads: Timeline (all issued requests are getTimeline) and Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+For the experiments, we use the following workloads:
+Timeline (composed only of getTimeline requests),
+Post (only post requests),
+Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
+Mixed workload (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+
+\subsection{Results for strong locality}
+\label{sec:evaluation:highloc}
+
+% THROUGHPUT
+
+In Figure~\ref{fig:highloc}, we can see the results achieved with \appname{}, running with a strong-locality workload.
+For the Timeline workload, the throughput with \dssmr\ and \ssmr\ are very similar.
+This happens because getTimeline requests are optimized to be single-partition:
+all posts in a user's timeline are stored along with the User object.
+Because of this, every getTimeline requests accesses a single User object (of the user whose timeline is being requested).
+This is the ideal workload for \ssmr{}.
+In \dssmr{}, the partitioning does not change and consulting the oracle becomes unnecessary thanks to the local cache at each client.
+This happens because there are no other commands in the Timeline workload.
+
+For the Post workload, every command accesses up to all partitions in the system, which is the worst case for \ssmr{}: the more partitions are involved in the execution of a command, the worst is the system's performance.
+We can see that the throughput of \ssmr\ decreases significantly as the number of partitions increase.
+For \dssmr{}, we can see that the system throughput scales with the number of partitions.
+This happens because objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
+As the execution proceeds, this leads to a lower rate of multi-partition commands, which allows throughput to scale.
+
+
+
+\subsection{Results for weak locality}
+\label{sec:evaluation:lowloc}
