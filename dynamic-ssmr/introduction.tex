@@ -61,8 +61,9 @@ Doing so increases the cost to execute the command but guarantees that relocatio
 
 We have fully implemented \dssmr\ as the \libname{} Java library, and we performed a number of experiments using \appname{}, a social network application built with \libname{}.
 %, with workloads exhibiting weak and strong locality.
-We devised a mixed workload that estimates a real distribution of commands issued in a social network application.
-Under such a workload, \dssmr\ reached 74~kcps (thousands of commands per second), against less than 33~kcps achieved by \ssmr{}, improving by a factor of over 2.2.
+We compared the performance of \dssmr\ to \ssmr\ using different workloads.
+With a mixed workload that combines various operations issued in a social network application, \dssmr\ reached 74~kcps (thousands of commands per second), against less than 33~kcps achieved by \ssmr{}, improving by a factor of over 2.2.
+Moreover, \dssmr's performance scales with the number of partitions under all workloads.
 %With a weak-locality workload, \dssmr\ reached XX~kcps, against YY~kcps of \ssmr{}.
 
 The paper makes the following contributions:

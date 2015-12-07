@@ -45,7 +45,7 @@ DS-SMR	& 28882 & 55925 & 57900 & 86685 & 14874 & 23295 & 35188	 & 54250 & 30215 
 S-SMR	& 3.1 & 6.6 & 5.6 & 7.0  & 3.4	& 5.2		& 7.9		& 8.3		& 3.0		& 5.2		& 7.0		& 8.8		& 3.4		& 3.7		& 3.8		& 7.9	 \\ \hline
 DS-SMR	& 6.9 & 7.1 & 8.6 & 11.4 & 6.7	& 8.6		& 11.3	& 9.1		& 6.6		& 6.1		& 7.4		& 7.0		& 7.3		& 6.5		& 7.8		& 7.9	 \\ \hline
 \end{tabular}
-\label{default}
+\label{tbl:results}
 \vspace{10mm}
 \end{table*}%
 
@@ -67,7 +67,7 @@ Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 % THROUGHPUT
 
-We can see in Figure~\ref{fig:strongloc} the results achieved with \appname{}.
+We can see in Figure~\ref{fig:strongloc} and Table~\ref{tbl:results} the results achieved with \appname{}.
 %, running with a strong-locality workload.
 For the Timeline workload, the throughput with \dssmr\ and \ssmr\ are very similar.
 This happens because getTimeline requests are optimized to be single-partition:
@@ -82,18 +82,22 @@ We can see that the throughput of \ssmr\ decreases significantly as the number o
 For \dssmr{}, we can see that the system throughput scales with the number of partitions.
 This happens because User objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
 As the execution proceeds, this leads to a lower rate of multi-partition commands, which allows throughput to scale.
+As a result the throughput improvement of \dssmr{} with respect to \ssmr\ increases over time.
+With eight partitions, \dssmr{} sports a performance that is 45 times that of \ssmr!
 
 With the Follow/unfollow workload, the system performs in a similar way to that observed with the Post workload.
 The difference is that each follow or unfollow request accesses only two User objects, whereas every post request may affect an unbounded number of users.
 For this reason, each follow/unfollow command is executed at most by two partitions in \ssmr{}.
 In \dssmr{}, a single move command is enough to have all User objects affected by such a command in the same partition.
 For this reason, both replication techniques have better throughput under the Follow/unfollow workload than with Post.
+As with the Post workload, \dssmr{} advantage over \ssmr\ increases with the number of partitions, reaching up to almost 25 times with eight partitions.
 
-We try to estimate a realistic distribution of commands with the Mix workload.
+We approximate a realistic distribution of commands with the Mix workload.
 With such a workload, \ssmr\ does not perform as bad as in the Post or Follow/unfollow workloads, but the system throughput still decreases as partitions are added.
 As with the other workloads, \dssmr\ scaled under the Mix workload.
 With eight partitions, it reached 74~kcps (thousands of commands per second), fairly close to the ideal case (the Timeline workload), where \dssmr\ reached 86~kcps.
-Under the Mix workload, \ssmr\ had less than 33~kcps in the best case (one partition) and less than 4~kcps with eight partitions.
+Under the Mix workload, \ssmr\ had less than 33~kcps in the best case (one partition) and around 10~kcps with eight partitions.
+In the configuration with eight partitions, \dssmr\ reaches almost seven times \ssmr's throughput.
 
 Latency values with \dssmr\ are higher than with \ssmr{}.
 This was expected for two reasons. First, there is an extra group of servers (the oracle) to communicate with.

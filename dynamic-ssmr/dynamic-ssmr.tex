@@ -33,7 +33,8 @@ The other possible values for a prophecy are $ok$ and $nok$, which mean that com
 % explain which partitions deliver each partitioning command:
 % how are access, consult, create, move and delete implemented?
 
-Once the oracle is in place, clients can consult it to know which partitions each command should be multicast to, based on which variables are accessed by the command.
+%Once the oracle is in place, 
+Clients can consult the oracle to know which partitions each command should be multicast to, based on which variables are accessed by the command.
 If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
 If the command accesses variables from multiple partitions, the client first multicasts one or more $move$ commands to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
 Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
