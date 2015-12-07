@@ -83,7 +83,7 @@ The \dssmr\ client consists of the application logic and a client proxy.
 %From the point of view of the application client, there are no partitions, but only state variables to be created, accessed or deleted.
 The application does not see the state variables divided into partitions.
 When the application issues a command, it sends the command to the proxy and eventually receives a reply.
-All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands as decribed in the previous paragraph) are executed by the client proxy, transparently to the application.
+All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands as described in the previous paragraph) are executed by the client proxy, transparently to the application.
 When the client proxy multicasts a partitioning-related command to multiple partitions and the oracle, partitions and oracle exchange signals to ensure linearizability, as described in Section~\ref{sec:ssmr}.
 Every server and oracle process has its own \dssmr\ proxy as well.
 At each server, the proxy checks whether commands can be executed and manages the exchange of data and signals between processes.
@@ -196,11 +196,11 @@ If most commands are executed without consulting the oracle, as in the case of $
 Moreover, such a cache can be updated ahead of time, not having to wait for an actual application command to be issued to only then consult the oracle.
 This way, the client proxy can keep a cache of partitioning information of variables that the proxy deems likely to be accessed in the future.
 
-\textbf{Load balacing}. When moving variables, the client proxies may try to distribute them in a way that balances the workload among partitions.
+\textbf{Load balancing}. When moving variables, the client proxies may try to distribute them in a way that balances the workload among partitions.
 This way, the system is more likely to scale throughput with the number of server groups.
 One way of balancing load is by having roughly the same number of state variables in every partition.
 This can be implemented by having client proxies choosing randomly the partition that will receive all variables concerned by each command (at line~\ref                {algline:client:partition} of Algorithm~\ref{alg:client_proxy}).
-Besides improving performance, balancing the load among partitions prevents the system from degenarating into a single-partition system, with all variables being moved to the same place as commands are executed.
+Besides improving performance, balancing the load among partitions prevents the system from degenerating into a single-partition system, with all variables being moved to the same place as commands are executed.
 
 
 %Algorithm 1 can be optimized in many ways. In this section, we briefly mention some of these optimizations and then detail caching.
