@@ -7,8 +7,8 @@ In this section, we present the results found for \appname\ with different loads
 We are interested in assessing \dssmr{}'s performance with workloads that present different levels of locality.
 %By locality, we mean the likelihood that certain groups of data items are accessed together (by the same command).
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
-In Section~\ref{sec:evaluation:highloc}, we show the results with workloads with strong locality.
-In Section~\ref{sec:evaluation:lowloc}, we show the results for weak locality workloads.
+In Section~\ref{sec:evaluation:highloc}, we show the results with strong-locality workloads.
+In Section~\ref{sec:evaluation:lowloc}, we show the results for weak-locality workloads.
 
 \subsection{Environment setup and configuration parameters}
 \label{sec:evaluation:setup}
@@ -21,27 +21,44 @@ For the experiments, we use the following workloads:
 Timeline (composed only of getTimeline requests),
 Post (only post requests),
 Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
-Mixed workload (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \subsection{Results for strong locality}
 \label{sec:evaluation:highloc}
 
 % THROUGHPUT
 
-In Figure~\ref{fig:highloc}, we can see the results achieved with \appname{}, running with a strong-locality workload.
+We can see in Figure~\ref{fig:highloc} the results achieved with \appname{}, running with a strong-locality workload.
 For the Timeline workload, the throughput with \dssmr\ and \ssmr\ are very similar.
 This happens because getTimeline requests are optimized to be single-partition:
 all posts in a user's timeline are stored along with the User object.
-Because of this, every getTimeline requests accesses a single User object (of the user whose timeline is being requested).
+%Every getTimeline requests accesses a single User object (of the user whose timeline is being requested).
 This is the ideal workload for \ssmr{}.
-In \dssmr{}, the partitioning does not change and consulting the oracle becomes unnecessary thanks to the local cache at each client.
+In \dssmr{}, the partitioning does not change, and consulting the oracle becomes unnecessary thanks to the local cache at each client.
 This happens because there are no other commands in the Timeline workload.
 
-For the Post workload, every command accesses up to all partitions in the system, which is the worst case for \ssmr{}: the more partitions are involved in the execution of a command, the worst is the system's performance.
-We can see that the throughput of \ssmr\ decreases significantly as the number of partitions increase.
+In the Post workload, every command accesses up to all partitions in the system, which is the worst case for \ssmr{}: the more partitions are involved in the execution of a command, the worst is the system's performance.
+We can see that the throughput of \ssmr\ decreases significantly as the number of partitions increases.
 For \dssmr{}, we can see that the system throughput scales with the number of partitions.
-This happens because objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
+This happens because User objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
 As the execution proceeds, this leads to a lower rate of multi-partition commands, which allows throughput to scale.
+
+With the Follow/unfollow workload, the system performs in a similar way to that observed with the Post workload.
+The difference is that each follow or unfollow request accesses only two User objects, whereas every post request may affect an unbounded number of users.
+For this reason, each follow/unfollow command is executed at most by two partitions in \ssmr{}.
+In \dssmr{}, a single move command is enough to have all User objects affected by such a command in the same partition.
+For this reason, both replication techniques have better throughput performance under the Follow/unfollow workload than with Post.
+
+We try to estimate a realistic distribution of commands with the Mix workload.
+With such a workload, \ssmr\ does not perform as bad as in the Post or Follow/unfollow workloads, but the system throughput still decreases as partitions are added.
+As with the other workloads, \dssmr\ scaled under the Mix workload.
+With eight partitions, it reached 74~kcps (thousands of commands per second), fairly close to the ideal case (the Timeline workload), where \dssmr\ reached 86~kcps.
+Under the Mix workload, \ssmr\ had less than 33~kcps in the best case (one partition) and less than 4~kcps with eight partitions.
+
+Latency values with \dssmr\ are higher than with \ssmr{}.
+This was expected for two reasons. First, there is an extra group of servers (the oracle) to communicate with.
+Second, executing a command often means moving all accessed objects to the same partition.
+Taking this into account, we consider the (often slight) increase in latency observed with \dssmr\ a low price to pay for the significant increase in throughput and the scalability that \dssmr\ brought to the system; with \ssmr{}, the system did not scale with multi-partition commands.
 
 
 
