@@ -29,6 +29,26 @@ In Section~\ref{sec:evaluation:strongloc}, we show the results.
 \label{fig:strongloc}
 \end{figure*}
 
+\begin{table*}[htdp]
+\vspace{10mm}
+\caption{Absolute values of Flitter running S-SMR and DS-SMR.}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+& \multicolumn{4}{|c|}{Timeline}	 &  \multicolumn{4}{|c|}{Post} &  \multicolumn{4}{|c|}{Follow/unfollow} &  \multicolumn{4}{|c|}{Mix} \\ \hline
+		& 1	      & 2	   & 4		 & 8	       & 1	     & 2	 & 4		 & 8	     & 1	  & 2		 & 4	        & 8	     & 1	   & 2		& 4	       & 8	 \\ \hline\hline
+		& \multicolumn{16}{|c|}{Throughput (commands per second)} \\ \hline
+S-SMR  	& 31757 & 60699 & 71274 & 84065 & 32151 & 2884  & 1894	 & 1200   & 32541 & 11476 & 8580    & 3371   & 32151 & 22803 & 16822 & 10657 \\ \hline
+DS-SMR	& 28882 & 55925 & 57900 & 86685 & 14874 & 23295 & 35188	 & 54250 & 30215 & 48976 & 54025	& 83880 & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
+		& \multicolumn{16}{|c|}{\textbf{Throughput rate = DS-SMR tput / S-SMR tput}} \\ \hline
+		& \textbf{0.91} & \textbf{0.92}	& \textbf{0.81} & \textbf{1.03}  		& \textbf{0.46}  & \textbf{8.08}	  & \textbf{18.48}	 & \textbf{45.00}  & \textbf{0.93}    & \textbf{4.27}	  & \textbf{6.30}	& \textbf{24.88}  & \textbf{0.84}	    & \textbf{2.00}	& \textbf{3.01}	& \textbf{6.97}	 \\ \hline\hline
+		& \multicolumn{16}{|c|}{Latency (milliseconds)} \\ \hline
+S-SMR	& 3.1 & 6.6 & 5.6 & 7.0  & 3.4	& 5.2		& 7.9		& 8.3		& 3.0		& 5.2		& 7.0		& 8.8		& 3.4		& 3.7		& 3.8		& 7.9	 \\ \hline
+DS-SMR	& 6.9 & 7.1 & 8.6 & 11.4 & 6.7	& 8.6		& 11.3	& 9.1		& 6.6		& 6.1		& 7.4		& 7.0		& 7.3		& 6.5		& 7.8		& 7.9	 \\ \hline
+\end{tabular}
+\label{default}
+\vspace{10mm}
+\end{table*}%
+
 \subsection{Environment setup and configuration parameters}
 \label{sec:evaluation:setup}
 

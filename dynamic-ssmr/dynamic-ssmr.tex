@@ -67,7 +67,7 @@ The partitioning can change between the execution of any two of those commands.
 %  \caption{Consulting the oracle and issuing an application command consist of multiple calls to \amcast{}.}
 %  \label{fig:move_case_1}
 %\end{figure}
-
+\pagebreak
 To solve this problem, the client multicasts the set of variables accessed along with each access command.
 Upon delivery, each server checks the set of variables sent by the client.
 If all variables in the set belong to the local partition, the command is executed; otherwise, a $retry$ message is sent back to the client.
