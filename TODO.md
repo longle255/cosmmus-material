@@ -11,6 +11,7 @@
 - [ ] System monitors graph's connection/behavior, performs auto optimization for objects partitioning
 - [ ] Running test on system with partitions geolocation distributed 
 - [ ] Switch to Genuine Atomic Multicast if possible. *talk to Paulo*
+- [ ] Experiments with more than 8 partitions, by collocating multiple partitions in the same physical server
 - TBD...
 
 
