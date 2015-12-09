@@ -117,3 +117,10 @@ nbproject
 .idea
 .node_history
 .vagrant
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.gz
+*_embedded.pdf
+main.pdf

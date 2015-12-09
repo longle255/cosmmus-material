@@ -1,2 +1,0 @@
-# read-rate zk(tp lat@tp cpu@tp bwr@tp bww@tp) smr(tp lat@tp cpu@tp bwr@tp bww@tp)
-0.0 # avg(tp, lat, bwr, bww, cpu, tps, brps, bwps) # avg(tp, lat, bwr, bww, cpu, tps, brps, bwps)
