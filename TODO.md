@@ -2,9 +2,9 @@
 
 ### Next steps
 
-- [ ] Implementing DELETE command
+- [x] Implementing DELETE command
 - [ ] Fallback to SSMR execution when clients reach a number of RETRY	
-- [ ] Re-run some testcases with clock synchronized. *already got the sudoer permission from Paulo*
+- [x] Re-run some testcases with clock synchronized. ==> [result](./dynamic-ssmr/experiments/rerun-with-sync-clock.md)
 - [ ] Benchmarking DSSMR with TPC-C
 	+ Finding/Creating TPC-C implementation works with in memory data.
 	+ Comparing with Schism
