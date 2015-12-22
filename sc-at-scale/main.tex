@@ -74,7 +74,7 @@
 \subsection{Processes and communication}
 
 We consider a distributed system consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of server processes (replicas) $\ssm = \{s_1, ..., s_n\}$. 
-Set $\ssm$ is divided into disjoint groups of servers $\ssm_0, ..., \ssm_k$.
+Set $\ssm$ is divided into disjoint groups of servers $\ssm_1, ..., \ssm_k$.
 Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise. 
 In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
 
@@ -137,7 +137,7 @@ Atomic broadcast is a special case of atomic multicast in which there is a singl
 \section{State machine replication}
 \label{sec:smr}
 
-State-machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78, Sch90}. 
+State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78, Sch90}. 
 The service is defined by a state machine, which consists of a set of \emph{state variables} $\vvm = \{v_1, ..., v_m\}$ 
 %that encode the service's state 
 and a set of \emph{commands} that may read and modify state variables, and produce a response for the command.
@@ -145,18 +145,18 @@ Each command is implemented by a deterministic program.
 % whose execution is atomic with respect to other commands.
 %The set of variables read by $C$ and the set of variables updated by $C$ are denoted, respectively, by $readset(C)$ and $writeset(C)$.
 %The set of all variables read and updated by $C$ is denoted by $var(C)$. 
-State-machine replication can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands.
+State machine replication can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands.
 
-We are interested in implementations of state-machine replication that ensure linearizability.
+We are interested in implementations of state machine replication that ensure linearizability.
 %
 Linearizability is defined with respect to a sequential specification.
 The \emph{sequential specification} of a service consists of a set of commands and a set of \emph{legal sequences of commands}, which define the behavior of the service when it is accessed sequentially.
 In a legal sequence of commands, every response to the invocation of a command immediately follows its invocation, with no other invocation or response in between them.
-For example, a sequence of operations for a read-write variable $v$ is legal if every read command returns the value of the most recent write command that precedes the read, if there is one, or the initial value otherwise.
+For example, a sequence of operations for a read-write variable $v$ is legal if every read command returns the value of the most recent write command that precedes the read, if there is one, or the initial value, otherwise.
 An execution \ex\ is linearizable if there is some permutation of the commands executed in \ex\ that respects (i)~the service's sequential specification and (ii)~the real-time precedence of commands.
-Command $C_1$ precedes command $C_2$ if the response of $C_1$ occurs before the invocation of $C_2$.
+Command $C_1$ precedes command $C_2$ in real-time if the response of $C_1$ occurs before the invocation of $C_2$.
 
-In classical state-machine replication, throughput does not scale with the number of replicas: each command must be ordered among replicas and executed and replied by every (non-faulty) replica.
+In classical state machine replication, throughput does not scale with the number of replicas: each command must be ordered among replicas and executed and replied by every (non-faulty) replica.
 Some simple optimizations to the traditional scheme can provide improved performance but not scalability.
 For example, although update commands must be ordered and executed by every replica, only one replica can respond to the client, saving resources at the other replicas.
 Commands that only read the state must be ordered with respect to other commands, but can be executed by a single replica, the replica that will respond to the client.
@@ -174,7 +174,7 @@ In this section, we introduce S-SMR, discuss performance optimizations, and argu
 \subsection{General idea}
 \label{sec:generalidea}
 
-S-SMR divides the application state $\vvm$ (i.e., state variables) into $P$ partitions $\ppm_1, ..., \ppm_P$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$. 
+S-SMR divides the application state $\vvm$ (i.e., state variables) into $k$ partitions $\ppm_1, ..., \ppm_k$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$. 
 Moreover, we require each variable $v$ in $\vvm$ to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$. 
 Each partition $\ppm_i$ is replicated by servers in group $\ssm_i$.
 For brevity, we say that server $s$ belongs to $\ppm_i$ with the meaning that $s \in \ssm_i$, and say that client $c$ multicasts command $C$ to partition $\ppm_i$ meaning that $c$ multicasts $C$ to group $\ssm_i$.
@@ -182,10 +182,11 @@ For brevity, we say that server $s$ belongs to $\ppm_i$ with the meaning that $s
 %We also often mention $\ppm_i$ meaning servers in $\ssm_i$.
 
 To execute command $C$, the client multicasts $C$ to all partitions that hold a variable read or updated by $C$.
-Consequently, the client must be able to determine the partitions accessed by $C$, denoted by $part(C)$.
-Note that this assumption does not imply that the client must know all variables accessed by $C$, but it must know the partitions these variables belong to.
-If the client cannot accurately estimate which partitions are accessed by $C$, it must determine a superset of these partitions, in the worst case assuming all partitions.
-For performance, however, clients must strive to provide a close approximation to the command's actually accessed partitions. We assume the existence of an oracle that tells the client which partitions should receive each command.
+Consequently, the client must be able to determine the partitions that may be accessed by $C$.
+Note that this assumption does not imply that the client must know all variables accessed by $C$, nor even the exact set of partitions.
+If the client cannot determine a priori which partitions will be accessed by $C$, it must define a superset of these partitions, in the worst case assuming all partitions.
+For performance, however, clients must strive to provide a close approximation to the command's actually accessed partitions.
+We assume the existence of an oracle that tells the client which partitions should receive each command.
 
 Upon delivering command $C$, if server $s$ does not contain all variables read by $C$, $s$ must communicate with servers in other partitions to execute $C$. 
 Essentially, $s$ must retrieve every variable $v$ read in $C$ from a server that stores $v$ (i.e., a server in a partition in $part(v)$).
@@ -211,7 +212,9 @@ In this case, $s$ executes $op$.
 
 \end{itemize}
 
-As we now show, the procedure above does not ensure linearizability.
+
+%As we now show, the procedure above does not ensure linearizability.
+As we now show, atomically ordering commands and following the procedure above is still not enough to ensure linearizability.
 Consider the execution depicted in Figure~\ref{fig:mcastnonlinssmr}~(a), where state variables $x$ and $y$ have initial value of $10$. 
 Command $C_x$ reads the value of $x$, $C_y$ reads the value of $y$, and $C_{xy}$ sets $x$ and $y$ to value 20.
 Consequently, $C_x$ is multicast to partition $\ppm_x$, $C_y$ is multicast to $\ppm_y$, and $C_{xy}$ is multicast to both $\ppm_x$ and $\ppm_y$. 
@@ -227,27 +230,27 @@ In this execution, the only possible legal permutation for the commands is $C_y$
 \label{fig:mcastnonlinssmr}
 \end{figure*}
 
-Intuitively, the problem with the execution in Figure~\ref{fig:mcastnonlinssmr}~(a) is that commands $C_x$ and $C_y$ execute ``in between" the execution of $C_{xy}$ at partitions $\ppm_x$ and $\ppm_y$.
+Intuitively, the problem with the execution in Figure~\ref{fig:mcastnonlinssmr}~(a) is that commands $C_x$ and $C_y$ execute ``in between'' the execution of $C_{xy}$ at partitions $\ppm_x$ and $\ppm_y$.
 In S-SMR, we avoid such cases by ensuring that the execution of every command is atomic.
 %
-Command $C$ is \emph{execution atomic} if, for each server $s$ that executes $C$, there exists at least one server $r$ in every other partition in $part(C)$ such that the execution of $C$ at $s$ finishes after $r$ delivers $C$.
+Command $C$ is \emph{execution atomic} if, for each server $s$ that executes $C$, there exists at least one server $r$ in every other partition in $part(C)$ such that the execution of $C$ at $s$ finishes only after $r$ starts executing $C$.
 %
-More precisely, let $delivery(C,s)$ and $end(C,s)$ be, respectively, the time when $s$ delivers command $C$ and the time when $s$ completes $C$'s execution.
-Execution atomicity ensures that, for every server $s$ in partition \pp\ that executes $C$, there is a server $r$ in every $\ppm' \in part(C)$ such that $delivery(C,r) < end(C,s)$.
-Intuitively, this condition guarantees that the execution of $C$ at $\ppm$ and $\ppm'$ overlap in time.
+More precisely, let $start(C,p)$ and $end(C,p)$ be, respectively, the time when server $p$ starts executing command $C$ and the time when $p$ finishes $C$'s execution.
+Execution atomicity ensures that, for every server $s$ in partition \pp\ that executes $C$, there is a server $r$ in every $\ppm' \in part(C)$ such that \mbox{$start(C,r) < end(C,s)$}.
+Intuitively, this condition guarantees that the execution of $C$ at $s$ and $r$ overlap in time.
 
 %Back in Fig.~\ref{fig:mcastnonlinssmr}, each black box represents the execution of a subcommand by servers in the partition: it starts when the first server in the partition begins executing the subcommand and ends when there is no more server executing the subcommand in that partition. We can see that $C_{xy}$ is not execution atomic: there is no time $t$ when some servers $s_x$ in $P_x$ and $s_y$ in $P_y$ are executing it. If it were the case, this example would be impossible to build, since $finish(C_y,s_y) < start(C_{xy}, s_y) < t < finish(C_{xy}, s_x) < start(C_x, s_x)$, which would contradict the fact that $C_x$ precedes $C_y$ in real-time.
 
 Replicas can ensure execution atomicity by coordinating the execution of commands.
-After delivering command $C$, servers in each partition send a $signal(C)$ message to servers in the other partitions in $part(C)$.
-Before finishing the execution of $C$, each server must receive a $signal(C)$ message from at least one server in every other partition that executes $C$. 
-%To minimize the waiting time to complete the execution of commands, servers may send such signal as soon as they deliver the command.
-Moreover, if server $s$ in partition $\ppm$ receives the value of a variable from server $r$ in another partition $\ppm'$, as part of the execution of $C$, then $s$ does not need to receive a $signal(C)$ message from servers in $\ppm'$. This way, to tolerate $f$ failures, each partition requires $f+1$ servers; if all servers in a partition fail, service progress is not guaranteed.
+After starting the execution of command $C$, servers in each partition send a $signal(C)$ message to servers in the other partitions in $part(C)$.
+Before finishing the execution of $C$ and sending a reply to the client that issued $C$, each server must receive a $signal(C)$ message from at least one server in every other partition that executes $C$. 
+Because of this scheme, each partition is required to have at least $f+1$ correct servers, where $f$ is the maximum number of tolerated failures per partition; if all servers in a partition fail, service progress is not guaranteed.
 
 Figure \ref{fig:mcastnonlinssmr}~(b) shows an execution of S-SMR. 
-In the example, servers in $P_x$ wait for a signal from $P_y$, therefore delaying $C_{xy}$'s execution in $P_x$ and moving the execution of $C_x$ ahead in time. 
-Note that the outcome of each command execution is the same as in case (a), but the executions of $C_x$, $C_y$ and $C_{xy}$, as seen by clients, now overlap in time with one another. 
-Hence, there is no real-time precedence among them.
+In the example, servers in $\ppm_x$ wait for a signal from $\ppm_y$,
+therefore ensuring that the servers of both partitions are synchronized during the execution of $C_{xy}$.
+Note that the outcome of each command execution is the same as in case (a), but the execution of $C_x$, $C_y$ and $C_{xy}$, as seen by clients, now overlap in time with one another. 
+Hence, there is no real-time precedence among them and linearizability is not violated.
 
 
 
