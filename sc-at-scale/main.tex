@@ -34,8 +34,8 @@
 \newcommand{\dssmrlong}{Dynamic Scalable State Machine Replication}
 %
 % Eyrie and Chirper temporary name (double blind)
-\newcommand{\libname}{Nest}    % rename to Eyrie   after paper is accepted
-\newcommand{\appname}{Flitter} % rename to Chirper after paper is accepted
+\newcommand{\libname}{Eyrie}    % rename to Eyrie   after paper is accepted
+\newcommand{\appname}{Chirper} % rename to Chirper after paper is accepted
 %
 \newcommand{\rmcast}{reliable-multicast}
 \newcommand{\rmdel}{reliable-deliver}
@@ -301,6 +301,38 @@ Server $s$ can only reply to the client that issued $C$ after every variable rea
 
 
 \section{Performance evaluation}
+In this section, we present the results found for \appname{}\, a scalable social network application based on \ssmr{}, with different loads and partitionings and compare them to the performance when \ssmr{} signaling mechanism is turned off.
+In Section~\ref{sec:evaluation:app}, we describe the implementation of \appname.
+In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
+In Section~\ref{sec:evaluation:result}, we show the results.
+
+
+\subsection{\appname}
+We implemented \appname{}, a social network application similar to Twitter in order to evaluate performance of \ssmr{}. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API of \appname{} includes: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
+
+\appname{} partition state based on user id. A function $f(uid)$ returns the partition that contains all up- to-date information regarding user with id uid. Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions.
+
+One detail about the post request is that it needs access to all users that follow the user issuing the post.
+However, the \appname{} client cannot know for sure who follows the user: it keeps a cache of followers, but such cache can become stale if a different user starts following the poster.
+To ensure linearizability when executing a post request, the \appname\ server check if the command is sent to the proper set of partitions. If this is the case, the request is executed.
+Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of additional partitions that command must be multicast to. Upon receiving the $retry(\gamma)$ message, the \appname\ client multicast the command again, now with the destination that includes all partitions in $\gamma$. This repeats until all partitions that contain followers of the poster deliver the command. This is guaranteed to terminate because partitions are only added to the set of destinations for retries, never removed. Therefore, in the worst case scenario, the client will retry until it multicasts the post request to all partitions of the system
+
+\label{sec:evaluation:app}
+\subsection{Environment setup and configuration parameters}
+
+All experiments are conducted on a cluster that had two types of nodes: (a) HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes, equipped with two AMD Opteron 2212 processors running at 2.0 GHz and with 4 GB of main memory. The HP nodes were connected to an HP ProCurve 2920-48G gigabit network switch, and the Dell nodes were connected to another, identical switch. Those switches were interconnected by a 20 Gbps link.
+All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM (build 25.45-b02).
+Before each experiment, We kept the clocks synchronized using NTP in order to measure latency components involving events in different computers.
+
+For the experiments, we use the following workloads:
+Timeline (composed only of getTimeline requests),
+Post (only post requests),
+Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
+Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+
+\label{sec:evaluation:setup}
+\subsection{Results }
+\label{sec:evaluation:result}
 
 
 \section{Related work}
