@@ -306,11 +306,19 @@ In Section~\ref{sec:evaluation:app}, we describe the implementation of \appname.
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
 In Section~\ref{sec:evaluation:result}, we show the results.
 
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1.08\linewidth]{figures/signal-vs-nosignal}
+\end{minipage}
+\caption{Results of \appname\ running with signaling turned on and off. Throughput is shown in thousands of commands per second (kcps).}
+\label{fig:perf}
+\end{figure*}
 
 \subsection{\appname}
 We implemented \appname{}, a social network application similar to Twitter in order to evaluate performance of \ssmr{}. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API of \appname{} includes: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
 
-\appname{} partition state based on user id. A function $f(uid)$ returns the partition that contains all up- to-date information regarding user with id uid. Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions.
+\appname{} partition state based on user id. A function $f(uid)$ returns the partition that contains all up-to-date information regarding user with id uid. Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions.
 
 One detail about the post request is that it needs access to all users that follow the user issuing the post.
 However, the \appname{} client cannot know for sure who follows the user: it keeps a cache of followers, but such cache can become stale if a different user starts following the poster.
@@ -331,7 +339,41 @@ Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
 Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \label{sec:evaluation:setup}
-\subsection{Results }
+\subsection{Results}
+
+We can see in Figure~\ref{fig:perf} the results achieved with \appname{}.
+%, running with a strong-locality workload.
+For the Timeline workload, the throughput and latency when signaling turned on and off are very similar.
+This happens because getTimeline requests are optimized to be single-partition:
+all posts in a user's timeline are stored along with the User object.
+Every getTimeline requests access a single User object (of the user whose timeline is being requested). 
+The whole structure and content of the network don't change, and partitions don't need to exchange either signal or data
+% This is the ideal workload for \ssmr{}.
+Thus enabling or disabling signal would not affect the performance of \appname{}.
+
+In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signal. 
+On the test with only one partition, obviously no signal or data is being exchanged, the command behaves as a single partition command.
+From two partitions, signal and data are being exchanged among partitions. However, we can see that the signaling doesn't affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so on both tests, partitions have to exchange the data. Then even when signaling is turned off, the partitions still have to wait for the data. As a result, the throughput and delay of signaling turned on or off are not much different.
+
+% With the Follow/unfollow workload, the system performs in a similar way to that observed with the Post workload.
+% The difference is that each follow or unfollow request accesses only two User objects, whereas every post request may affect an unbounded number of users.
+% For this reason, each follow/unfollow command is executed at most by two partitions in \ssmr{}.
+% In \dssmr{}, a single move command is enough to have all User objects affected by such a command in the same partition.
+% For this reason, both replication techniques have better throughput under the Follow/unfollow workload than with Post.
+% As with the Post workload, \dssmr{} advantage over \ssmr\ increases with the number of partitions, reaching up to almost 25 times with eight partitions.
+
+We approximate a realistic distribution of commands with the Mix workload.
+% With such a workload, \ssmr\ does not perform as bad as in the Post or Follow/unfollow workloads, but the system throughput still decreases as partitions are added.
+% As with the other workloads, \dssmr\ scaled under the Mix workload.
+% With eight partitions, it reached 74~kcps (thousands of commands per second), fairly close to the ideal case (the Timeline workload), where \dssmr\ reached 86~kcps.
+% Under the Mix workload, \ssmr\ had less than 33~kcps in the best case (one partition) and around 10~kcps with eight partitions.
+% In the configuration with eight partitions, \dssmr\ reaches almost seven times \ssmr's throughput.
+
+% Latency values with \dssmr\ are higher than with \ssmr{}.
+% This was expected for two reasons. First, there is an extra group of servers (the oracle) to communicate with.
+% Second, executing a command often means moving all accessed objects to the same partition.
+% Taking this into account, we consider the (often slight) increase in latency observed with \dssmr\ a low price to pay for the significant increase in throughput and the scalability that \dssmr\ brought to the system; with \ssmr{}, the system did not scale with multi-partition commands.
+
 \label{sec:evaluation:result}
 
 
