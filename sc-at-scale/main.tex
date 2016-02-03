@@ -45,7 +45,7 @@
 \begin{document}
 
 \title{Strong Consistency at Scale}
- 
+
 \author{
   Carlos Eduardo Bezerra\\
   University of Lugano (USI)\\
@@ -73,15 +73,15 @@
 
 \subsection{Processes and communication}
 
-We consider a distributed system consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of server processes (replicas) $\ssm = \{s_1, ..., s_n\}$. 
+We consider a distributed system consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of server processes (replicas) $\ssm = \{s_1, ..., s_n\}$.
 Set $\ssm$ is divided into disjoint groups of servers $\ssm_1, ..., \ssm_k$.
-Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise. 
+Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise.
 In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
 
 Processes communicate by message passing, using either one-to-one or one-to-many communication.
 The system is asynchronous: there is no bound on message delay or on relative process speed.
-One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process $m$ is addressed to. 
-If sender and receiver are correct, then every message sent is eventually received. 
+One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process $m$ is addressed to.
+If sender and receiver are correct, then every message sent is eventually received.
 %
 One-to-many communication relies on reliable multicast and atomic multicast,\footnote{Solving atomic multicast requires additional assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence of an atomic multicast oracle.}
 defined in sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
@@ -98,11 +98,11 @@ Reliable multicast has the following properties:
 \begin{itemize}
 
     \item[--] If a correct process \rmcast{}s $m$, then every correct process in $\gamma$ \rmdel{}s $m$ \emph{(validity)}.
-    
+
     \item[--] If a correct process \rmdel{}s $m$, then every correct process in $\gamma$ \rmdel{}s $m$ \emph{(agreement)}.
-    
+
     \item[--] For any message $m$, every process $p$ in $\gamma$ \rmdel{}s $m$ at most once, and only if some process has \rmcast{} $m$  to $\gamma$ previously \emph{(integrity)}.
-    
+
 \end{itemize}
 
 \subsection{Atomic multicast}
@@ -113,15 +113,15 @@ Message $m$ is delivered at the destinations with \amdel$(m)$.
 Atomic multicast ensures the following properties:
 
 \begin{itemize}
-    
+
     \item[--] If a correct process \amcast{}s $m$, then every correct process in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
-    
+
     \item[--] If a process \amdel{}s $m$, then every correct process in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
-    
+
     \item[--] For any message $m$, every process $p$ in $\gamma$ \amdel{}s $m$ at most once, and only if some process has \amcast{} $m$ to $\gamma$ previously \emph{(integrity)}.
-    
+
     \item[--] No two processes $p$ and $q$ in both $\gamma$ and $\gamma'$ \amdel\ $m$ and $m'$ in different orders; also, the delivery order is acyclic \emph{(atomic order)}.
-    
+
 \end{itemize}
 
 Atomic broadcast is a special case of atomic multicast in which there is a single group of processes.
@@ -137,14 +137,14 @@ Atomic broadcast is a special case of atomic multicast in which there is a singl
 \section{State machine replication}
 \label{sec:smr}
 
-State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78, Sch90}. 
-The service is defined by a state machine, which consists of a set of \emph{state variables} $\vvm = \{v_1, ..., v_m\}$ 
-%that encode the service's state 
+State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78, Sch90}.
+The service is defined by a state machine, which consists of a set of \emph{state variables} $\vvm = \{v_1, ..., v_m\}$
+%that encode the service's state
 and a set of \emph{commands} that may read and modify state variables, and produce a response for the command.
 Each command is implemented by a deterministic program.
 % whose execution is atomic with respect to other commands.
 %The set of variables read by $C$ and the set of variables updated by $C$ are denoted, respectively, by $readset(C)$ and $writeset(C)$.
-%The set of all variables read and updated by $C$ is denoted by $var(C)$. 
+%The set of all variables read and updated by $C$ is denoted by $var(C)$.
 State machine replication can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands.
 
 We are interested in implementations of state machine replication that ensure linearizability.
@@ -174,8 +174,8 @@ In this section, we introduce S-SMR, discuss performance optimizations, and argu
 \subsection{General idea}
 \label{sec:generalidea}
 
-S-SMR divides the application state $\vvm$ (i.e., state variables) into $k$ partitions $\ppm_1, ..., \ppm_k$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$. 
-Moreover, we require each variable $v$ in $\vvm$ to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$. 
+S-SMR divides the application state $\vvm$ (i.e., state variables) into $k$ partitions $\ppm_1, ..., \ppm_k$, where for each $\ppm_i$, $\ppm_i \subseteq \vvm$.
+Moreover, we require each variable $v$ in $\vvm$ to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$.
 Each partition $\ppm_i$ is replicated by servers in group $\ssm_i$.
 For brevity, we say that server $s$ belongs to $\ppm_i$ with the meaning that $s \in \ssm_i$, and say that client $c$ multicasts command $C$ to partition $\ppm_i$ meaning that $c$ multicasts $C$ to group $\ssm_i$.
 % We also say that $\ppm_i$ does something meaning that servers in $\ssm_i$.
@@ -188,7 +188,7 @@ If the client cannot determine a priori which partitions will be accessed by $C$
 For performance, however, clients must strive to provide a close approximation to the command's actually accessed partitions.
 We assume the existence of an oracle that tells the client which partitions should receive each command.
 
-Upon delivering command $C$, if server $s$ does not contain all variables read by $C$, $s$ must communicate with servers in other partitions to execute $C$. 
+Upon delivering command $C$, if server $s$ does not contain all variables read by $C$, $s$ must communicate with servers in other partitions to execute $C$.
 Essentially, $s$ must retrieve every variable $v$ read in $C$ from a server that stores $v$ (i.e., a server in a partition in $part(v)$).
 Moreover, $s$ must retrieve a value of $v$ that is consistent with the order in which $C$ is executed, as we explain next.
 Operations that do not involve reading a variable from a remote partition are executed locally.
@@ -215,10 +215,10 @@ In this case, $s$ executes $op$.
 
 %As we now show, the procedure above does not ensure linearizability.
 As we now show, atomically ordering commands and following the procedure above is still not enough to ensure linearizability.
-Consider the execution depicted in Figure~\ref{fig:mcastnonlinssmr}~(a), where state variables $x$ and $y$ have initial value of $10$. 
+Consider the execution depicted in Figure~\ref{fig:mcastnonlinssmr}~(a), where state variables $x$ and $y$ have initial value of $10$.
 Command $C_x$ reads the value of $x$, $C_y$ reads the value of $y$, and $C_{xy}$ sets $x$ and $y$ to value 20.
-Consequently, $C_x$ is multicast to partition $\ppm_x$, $C_y$ is multicast to $\ppm_y$, and $C_{xy}$ is multicast to both $\ppm_x$ and $\ppm_y$. 
-Servers in $\ppm_y$ deliver $C_y$ and then $C_{xy}$, while servers in $\ppm_x$ deliver $C_{xy}$ and then $C_x$, which is consistent with atomic order. 
+Consequently, $C_x$ is multicast to partition $\ppm_x$, $C_y$ is multicast to $\ppm_y$, and $C_{xy}$ is multicast to both $\ppm_x$ and $\ppm_y$.
+Servers in $\ppm_y$ deliver $C_y$ and then $C_{xy}$, while servers in $\ppm_x$ deliver $C_{xy}$ and then $C_x$, which is consistent with atomic order.
 In this execution, the only possible legal permutation for the commands is $C_y$, $C_{xy}$, and $C_x$, which violates the real-time precedence of the commands, since $C_x$ precedes $C_y$ in real-time.
 
 \begin{figure*}
@@ -243,13 +243,13 @@ Intuitively, this condition guarantees that the execution of $C$ at $s$ and $r$ 
 
 Replicas can ensure execution atomicity by coordinating the execution of commands.
 After starting the execution of command $C$, servers in each partition send a $signal(C)$ message to servers in the other partitions in $part(C)$.
-Before finishing the execution of $C$ and sending a reply to the client that issued $C$, each server must receive a $signal(C)$ message from at least one server in every other partition that executes $C$. 
+Before finishing the execution of $C$ and sending a reply to the client that issued $C$, each server must receive a $signal(C)$ message from at least one server in every other partition that executes $C$.
 Because of this scheme, each partition is required to have at least $f+1$ correct servers, where $f$ is the maximum number of tolerated failures per partition; if all servers in a partition fail, service progress is not guaranteed.
 
-Figure \ref{fig:mcastnonlinssmr}~(b) shows an execution of S-SMR. 
+Figure \ref{fig:mcastnonlinssmr}~(b) shows an execution of S-SMR.
 In the example, servers in $\ppm_x$ wait for a signal from $\ppm_y$,
 therefore ensuring that the servers of both partitions are synchronized during the execution of $C_{xy}$.
-Note that the outcome of each command execution is the same as in case (a), but the execution of $C_x$, $C_y$ and $C_{xy}$, as seen by clients, now overlap in time with one another. 
+Note that the outcome of each command execution is the same as in case (a), but the execution of $C_x$, $C_y$ and $C_{xy}$, as seen by clients, now overlap in time with one another.
 Hence, there is no real-time precedence among them and linearizability is not violated.
 
 
@@ -258,7 +258,7 @@ Hence, there is no real-time precedence among them and linearizability is not vi
 \subsection{Performance optimizations}
 \label{sec:optm}
 
-The scheme described in the previous section can be optimized in many ways. 
+The scheme described in the previous section can be optimized in many ways.
 In this section, we briefly mention some of these optimizations and then detail caching.
 \begin{itemize}
 \item Server $s$ does not need to wait for the execution of command $C$ to reach a $read(v)$ operation to only then multicast $v$ to the other partitions in $part(C)$. If $s$ knows that $v$ will be read by $C$, $s$ can send $v$'s value to the other partitions as soon as $s$ starts executing $C$.
@@ -267,33 +267,33 @@ In this section, we briefly mention some of these optimizations and then detail 
 \item Even though all replicas in all partitions in $part(C)$ execute $C$, a reply from a replica in a single partition suffices for the client to finish the command.
 \end{itemize}
 
-%Caching is a more elaborate optimization. 
-Server $s$ in partition \pp\ can cache variables that belong to other partitions. 
-There are different ways for $s$ to maintain cached variables; here we define two techniques: conservative caching and speculative caching. 
-In both cases, the basic operation is the following: 
+%Caching is a more elaborate optimization.
+Server $s$ in partition \pp\ can cache variables that belong to other partitions.
+There are different ways for $s$ to maintain cached variables; here we define two techniques: conservative caching and speculative caching.
+In both cases, the basic operation is the following:
 When $s$ executes a command that reads variable $x$ from some other partition $\ppm{}_x$, after retrieving the value of $x$ from a server in $\ppm{}_x$, $s$ stores $x$'s value in its cache and uses the cached value in future read operations.
-If a command writes $x$, $s$ updates (or creates) $x$'s local value. 
-Server $s$ will have a valid cache of $x$ until (i)~$s$ discards the entry due to memory constraints, or (ii)~some command not multicast to \pp\ changes the value of $x$. 
+If a command writes $x$, $s$ updates (or creates) $x$'s local value.
+Server $s$ will have a valid cache of $x$ until (i)~$s$ discards the entry due to memory constraints, or (ii)~some command not multicast to \pp\ changes the value of $x$.
 Since servers in $\ppm_x$ deliver all commands that access $x$, these servers know when any possible cached value of $x$ is stale.
 How servers use cached entries distinguishes conservative from speculative caching.
-%; what it does not know, however, is whether \pp\ has discarded $x$'s cache. 
+%; what it does not know, however, is whether \pp\ has discarded $x$'s cache.
 
 
 Servers in $\ppm_x$ can determine which of its variables have a stale value cached in other partitions. This can be done by checking if there was any command that updated a variable $x$ in $\ppm_x$, where such command was not multicast to some other partition $\ppm$ that had a cache of $x$. Say servers in $\ppm_x$ deliver command $C$, which reads $x$, and say the last command that updated the value of $x$ was $C_w$. Since $x \in \ppm_x$, servers in $\ppm_x$ delivered $C_w$. One way for servers in $\ppm_x$ to determine which partitions need to update their cache of $x$ is by checking which destinations of $C$ did not receive $C_w$. This can be further optimized: even if servers in $\ppm$ did not deliver $C_w$, but delivered some other command $C_r$ that reads $x$ and $C_r$ was ordered by multicast after $C_w$, then $\ppm$ already received an up-to-date value of $x$ (sent by servers in $\ppm_x$ during the execution of $C_r$). If servers in $\ppm$ discarded the cache of $x$ (e.g., due to limited memory), they will have to send a request for its value.
 
 
-\emph{Conservative caching}: Once $s$ has a cached value of $x$, before it executes a $read(x)$ operation, it waits for a cache-validation message from a server in $\ppm_x$. The cache validation message contains a set of pairs $(var, val)$, where $var$ is a state variable that belongs to $\ppm_x$ and whose cache in $\ppm$ needs to be validated. 
+\emph{Conservative caching}: Once $s$ has a cached value of $x$, before it executes a $read(x)$ operation, it waits for a cache-validation message from a server in $\ppm_x$. The cache validation message contains a set of pairs $(var, val)$, where $var$ is a state variable that belongs to $\ppm_x$ and whose cache in $\ppm$ needs to be validated.
 If servers in $\ppm_x$ determined that the cache is stale, $val$ contains the new value of $var$; otherwise, $\perp$, telling $s$ that its cached value is up to date.
 If $s$ discarded its cached copy, it sends a request for $x$ to $\ppm_x$.
 If it is possible to determine which variables are accessed by $C$ before $C$'s execution, all such messages can be sent upon delivery of the command, reducing waiting time; messages concerning variables that could not be determined a-priori are sent later, during the execution of $C$, as variables are determined.
 
-\emph{Speculative caching}: It is possible to reduce execution time by speculatively assuming that cached values are up-to-date. 
-Speculative caching requires servers to be able to rollback the execution of commands, in case the speculative assumption fails to hold. 
-Many applications allow rolling back a command, such as databases, as long as no reply has been sent to the client for the command yet. 
-The difference between speculative caching and conservative caching is that in the former servers that keep cached values do not wait for a cache-validation message before reading a cached entry; instead, a $read(x)$ operation returns the cached value immediately. 
-If after reading some variable $x$ from the cache, during the execution of command $C$, server $s$ receives a message from a server in $\ppm_x$ that invalidates the cached value, $s$ rolls back the execution to some point before the $read(x)$ operation and resumes the command execution, now with the up-to-date value of $x$. 
-%This may happen for every variable read by $C$, so $s$ might rollback the execution of $C$ several times until getting it right. 
-%To ensure that a correct execution will be done eventually, 
+\emph{Speculative caching}: It is possible to reduce execution time by speculatively assuming that cached values are up-to-date.
+Speculative caching requires servers to be able to rollback the execution of commands, in case the speculative assumption fails to hold.
+Many applications allow rolling back a command, such as databases, as long as no reply has been sent to the client for the command yet.
+The difference between speculative caching and conservative caching is that in the former servers that keep cached values do not wait for a cache-validation message before reading a cached entry; instead, a $read(x)$ operation returns the cached value immediately.
+If after reading some variable $x$ from the cache, during the execution of command $C$, server $s$ receives a message from a server in $\ppm_x$ that invalidates the cached value, $s$ rolls back the execution to some point before the $read(x)$ operation and resumes the command execution, now with the up-to-date value of $x$.
+%This may happen for every variable read by $C$, so $s$ might rollback the execution of $C$ several times until getting it right.
+%To ensure that a correct execution will be done eventually,
 Server $s$ can only reply to the client that issued $C$ after every variable read from the cache has been validated.
 
 %Both caching algorithms depend on the following condition: each partition $\ppm_x$ keeps track of what was the last command $C$ executed by each partition $\ppm$, for each variable $x$ in $\ppm_x$, such that $C$ reads or writes $x$.\fixme{This part is too complicated.}
@@ -311,7 +311,7 @@ In Section~\ref{sec:evaluation:result}, we report the results.
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
-      \includegraphics[width=1.08\linewidth]{figures/signal-vs-nosignal}
+      \includegraphics[width=1\linewidth]{figures/signal-vs-nosignal}
 \end{minipage}
 \caption{Results of \appname\ running with signaling turned on and off. Throughput is shown in thousands of commands per second (kcps).}
 \label{fig:perf}
@@ -329,6 +329,8 @@ However, the \appname{} client cannot know for sure who follows the user: it kee
 To ensure linearizability when executing a post request, the \appname\ server check if the command is sent to the proper set of partitions. If this is the case, the request is executed.
 Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of additional partitions that command must be multicast to. Upon receiving the $retry(\gamma)$ message, the \appname\ client multicast the command again, now with the destination that includes all partitions in $\gamma$. This repeats until all partitions that contain followers of the poster deliver the command. This is guaranteed to terminate because partitions are only added to the set of destinations for retries, never removed. Therefore, in the worst case scenario, the client will retry until it multicasts the post request to all partitions of the system
 
+Moreover, in order to observe the impact of signaling mechanism described above, we also introduced these two commands: Follow-noop and Unfollow-noop, which demonstrate pure signal exchange, since they don't change the structure of the social network (don't change the list of followers and followed users).
+
 \label{sec:evaluation:app}
 \subsection{Environment setup and configuration parameters}
 
@@ -339,44 +341,28 @@ We kept the clocks synchronized using NTP in order to measure latency components
 For the experiments, we used the following workloads:
 Timeline (composed only of getTimeline requests),
 Post (only post requests),
-Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
-Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+Follow/unfollow (50\% of follow-noop requests and 50\% of unfollow-noop), and
+% Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \label{sec:evaluation:setup}
 \subsection{Results}
 
 We can see in Figure~\ref{fig:perf} the results achieved with \appname{}.
-%, running with a strong-locality workload.
+
 For the Timeline workload, the throughput and latency when signaling turned on and off are very similar.
 This happens because getTimeline requests are optimized to be single-partition:
 all posts in a user's timeline are stored along with the User object.
-Every getTimeline requests access a single User object (of the user whose timeline is being requested). 
+Every getTimeline requests access a single User object (of the user whose timeline is being requested).
 The whole structure and content of the network don't change, and partitions don't need to exchange either signal or data.
-% This is the ideal workload for \ssmr{}.
 Thus, enabling or disabling signal would not affect the performance of \appname{} when executing only getTimeline requests.
 
-In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signals. 
+In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signals.
 On the test with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
 With two partitions or more, signals and data are being exchanged across partitions. However, we can see that the signaling doesn't affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so on both tests, partitions have to exchange the data anyhow. For this reason, even when signaling is turned off, the partitions still have to communicate. As a result, the throughput and delay with signaling turned on or off are similar.
 
-% With the Follow/unfollow workload, the system performs in a similar way to that observed with the Post workload.
-% The difference is that each follow or unfollow request accesses only two User objects, whereas every post request may affect an unbounded number of users.
-% For this reason, each follow/unfollow command is executed at most by two partitions in \ssmr{}.
-% In \dssmr{}, a single move command is enough to have all User objects affected by such a command in the same partition.
-% For this reason, both replication techniques have better throughput under the Follow/unfollow workload than with Post.
-% As with the Post workload, \dssmr{} advantage over \ssmr\ increases with the number of partitions, reaching up to almost 25 times with eight partitions.
-
-We approximate a realistic distribution of commands with the Mix workload.
-% With such a workload, \ssmr\ does not perform as bad as in the Post or Follow/unfollow workloads, but the system throughput still decreases as partitions are added.
-% As with the other workloads, \dssmr\ scaled under the Mix workload.
-% With eight partitions, it reached 74~kcps (thousands of commands per second), fairly close to the ideal case (the Timeline workload), where \dssmr\ reached 86~kcps.
-% Under the Mix workload, \ssmr\ had less than 33~kcps in the best case (one partition) and around 10~kcps with eight partitions.
-% In the configuration with eight partitions, \dssmr\ reaches almost seven times \ssmr's throughput.
-
-% Latency values with \dssmr\ are higher than with \ssmr{}.
-% This was expected for two reasons. First, there is an extra group of servers (the oracle) to communicate with.
-% Second, executing a command often means moving all accessed objects to the same partition.
-% Taking this into account, we consider the (often slight) increase in latency observed with \dssmr\ a low price to pay for the significant increase in throughput and the scalability that \dssmr\ brought to the system; with \ssmr{}, the system did not scale with multi-partition commands.
+In the Follow/unfollow workload, each command accesses up to two partitions in the system, requires partitions to exchange signal (no data exchanged since the noop command doesn't change the content of the network).
+On one partition, \appname{} performs in a similar way to that observed with the Post workload on the test with one partition.
+With two partitions or more, performance of \appname{} decreased when signaling was turned on. This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
 
 \label{sec:evaluation:result}
 
@@ -388,19 +374,19 @@ State machine replication requires replicas to execute commands deterministicall
 Even though increasing the performance of state machine replication is non-trivial, different techniques have been proposed for achieving scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
 In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
 The server replicas, then, must deterministically merge all different partial orders received from the ordering clusters.
-In~\cite{biely2012spaxos}, Paxos~\cite{Lam98} is used to order commands, but it is implemented in a way such that the task of ordering messages is evenly distributed among replicas, as opposed to having a leader process that performs more work than the others and may eventually become a bottleneck. 
+In~\cite{biely2012spaxos}, Paxos~\cite{Lam98} is used to order commands, but it is implemented in a way such that the task of ordering messages is evenly distributed among replicas, as opposed to having a leader process that performs more work than the others and may eventually become a bottleneck.
 
-State machine replication seems at first to prevent multi-threaded execution since it may lead to non-determinism. 
-However, some works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way. 
+State machine replication seems at first to prevent multi-threaded execution since it may lead to non-determinism.
+However, some works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way.
 In \cite{santos2013htsmr}, for instance, the authors propose organizing each replica in multiple modules that perform different tasks concurrently, such as receiving messages, batching, and dispatching commands to be executed.
 The execution of commands is still sequential, but the replica performs all other tasks in parallel. We also implemented this kind of parallelism in Eyrie.
 
-Some works have proposed to parallelize the execution of commands in SMR. 
-In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another). 
-Upon delivery, commands are directed to a parallelizer thread that uses application-supplied rules to schedule multi-threaded execution. 
+Some works have proposed to parallelize the execution of commands in SMR.
+In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another).
+Upon delivery, commands are directed to a parallelizer thread that uses application-supplied rules to schedule multi-threaded execution.
 Another way of dealing with non-determinism is proposed in \cite{kapritsos2012eve}, where commands are speculatively executed concurrently.
-After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially. 
-Both \cite{kotla2004htbft} and \cite{kapritsos2012eve} assume a Byzantine failure model and in both cases, a single thread is responsible for receiving and scheduling commands to be executed. 
+After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially.
+Both \cite{kotla2004htbft} and \cite{kapritsos2012eve} assume a Byzantine failure model and in both cases, a single thread is responsible for receiving and scheduling commands to be executed.
 In the Byzantine failure model, command execution typically includes signature handling, which can result in expensive commands.
 Under benign failures, command execution is less expensive and the thread responsible for command reception and scheduling may become a performance bottleneck.
 %For commands that take long to execute, this may not be a problem, but for workloads where the command execution time is shorter than the parallelization time, those approaches may not scale.
@@ -408,7 +394,7 @@ Under benign failures, command execution is less expensive and the thread respon
 Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure strong consistency as we define it here (i.e., as linearizability). Many works (e.g., \cite{chundi96dur, kobus2013hybrid, sciascia2012sdur, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. For some applications, this kind of consistency is good enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
 Other works have tried to make linearizable systems scalable~\cite{corbett2013spanner, Glendenning2011, Marandi11}.
-In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
+In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key.
 In \cite{Marandi11}, a partitioned variant of SMR is proposed, supporting single-partition updates and multi-partition read operations.
 It relies on total order: all commands have to be ordered by a single sequencer (e.g., a Paxos group of acceptors), so that linearizability is ensured.
 The replication scheme proposed in \cite{Marandi11} does not allow multi-partition update commands.
@@ -420,8 +406,8 @@ Scalable State Machine Replication employs state partitioning and ensures linear
 
 \section{Final remarks}
 
-This paper described S-SMR, a scalable variant of the well-known state machine replication technique. 
-S-SMR differs from previous related works in that it allows throughput to scale with the number of partitions without weakening consistency. 
+This paper described S-SMR, a scalable variant of the well-known state machine replication technique.
+S-SMR differs from previous related works in that it allows throughput to scale with the number of partitions without weakening consistency.
 To evaluate S-SMR, we implemented Chirper, a scalable social network application, using S-SMR.
 Our experiments demonstrate that throughput scales with the number of partitions, with nearly ideal (i.e., linear) scalability for workloads composed solely of single-partition commands.
 Moreover, the results show that ensuring linearizability has a relatively small additional cost (in throughput and latency) than something like serializability.
