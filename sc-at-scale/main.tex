@@ -131,6 +131,7 @@ We consider a distributed system consisting of an unbounded set of client proces
 Set $\ssm$ is divided into disjoint groups of servers $\ssm_1, ..., \ssm_k$.
 Processes are either \emph{correct}, if they never fail, or \emph{faulty}, otherwise.
 In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
+Each server group $S_i$ contains at least $f + 1$ correct processes, where $f$ is the number of faulty processes.
 
 Processes communicate by message passing, using either one-to-one or one-to-many communication.
 The system is asynchronous: there is no bound on message delay or on relative process speed.
@@ -201,7 +202,7 @@ Each command is implemented by a deterministic program.
 %The set of all variables read and updated by $C$ is denoted by $var(C)$.
 State machine replication can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands.
 
-We are interested in implementations of state machine replication that ensure linearizability.
+We consider implementations of state machine replication that ensure linearizability.
 %
 Linearizability is defined with respect to a sequential specification.
 The \emph{sequential specification} of a service consists of a set of commands and a set of \emph{legal sequences of commands}, which define the behavior of the service when it is accessed sequentially.
@@ -215,15 +216,15 @@ Some simple optimizations to the traditional scheme can provide improved perform
 For example, although update commands must be ordered and executed by every replica, only one replica can respond to the client, saving resources at the other replicas.
 Commands that only read the state must be ordered with respect to other commands, but can be executed by a single replica, the replica that will respond to the client.
 
-This is a fundamental limitation: while some optimizations may increase throughput by adding servers, the improvements are limited since fundamentally, the technique does not scale.
-In the next section, we describe an extension to SMR that under certain workloads allows performance to grow proportionally to the number of replicas.
-
+%This is a fundamental limitation: while some optimizations may increase throughput by adding servers, the improvements are limited since fundamentally, the technique does not scale.
+%In the next section, we describe an extension to SMR that under certain workloads allows performance to grow proportionally to the number of replicas.
 
 
 \section{Scalable State Machine Replication}
 \label{sec:scalablesmr}
 
-In this section, we introduce S-SMR, discuss performance optimizations, and argue about S-SMR's correctness.
+In this section, we describe an extension to SMR that under certain workloads allows performance to grow proportionally to the number of replicas~\cite{bezerra2014ssmr}.
+We first recall  S-SMR and then discuss some of its performance optimizations.
 
 \subsection{General idea}
 \label{sec:generalidea}
@@ -245,7 +246,7 @@ We assume the existence of an oracle that tells the client which partitions shou
 Upon delivering command $C$, if server $s$ does not contain all variables read by $C$, $s$ must communicate with servers in other partitions to execute $C$.
 Essentially, $s$ must retrieve every variable $v$ read in $C$ from a server that stores $v$ (i.e., a server in a partition in $part(v)$).
 Moreover, $s$ must retrieve a value of $v$ that is consistent with the order in which $C$ is executed, as we explain next.
-Operations that do not involve reading a variable from a remote partition are executed locally.
+%Operations that do not involve reading a variable from a remote partition are executed locally.
 
 In more detail, let $op$ be an operation in the execution of command $C$.
 We distinguish between three operation types: $read(v)$, an operation that reads the value of a state variable $v$, $write(v, val)$, an operation that updates $v$ with value $val$,
@@ -268,7 +269,7 @@ In this case, $s$ executes $op$.
 
 
 %As we now show, the procedure above does not ensure linearizability.
-As we now show, atomically ordering commands and following the procedure above is still not enough to ensure linearizability.
+It turns out that by atomically ordering commands and following the procedure above is not enough to ensure linearizability~\cite{bezerra2014ssmr}.
 Consider the execution depicted in Figure~\ref{fig:mcastnonlinssmr}~(a), where state variables $x$ and $y$ have initial value of $10$.
 Command $C_x$ reads the value of $x$, $C_y$ reads the value of $y$, and $C_{xy}$ sets $x$ and $y$ to value 20.
 Consequently, $C_x$ is multicast to partition $\ppm_x$, $C_y$ is multicast to $\ppm_y$, and $C_{xy}$ is multicast to both $\ppm_x$ and $\ppm_y$.
@@ -402,11 +403,13 @@ The API of \appname{} includes: post (user publishes a message), follow (user st
 \appname{} partitions the state based on user id. A function $f(uid)$ returns the partition that contains all up-to-date information regarding user with id uid. Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions.
 
 One detail about the post request is that it needs access to all users that follow the user issuing the post.
-However, the \appname{} client cannot know for sure who follows the user: it keeps a cache of followers, but such cache can become stale if a different user starts following the poster.
-To ensure linearizability when executing a post request, the \appname\ server check if the command is sent to the proper set of partitions. If this is the case, the request is executed.
-Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of additional partitions that command must be multicast to. Upon receiving the $retry(\gamma)$ message, the \appname\ client multicast the command again, now with the destination that includes all partitions in $\gamma$. This repeats until all partitions that contain followers of the poster deliver the command. This is guaranteed to terminate because partitions are only added to the set of destinations for retries, never removed. Therefore, in the worst case scenario, the client will retry until it multicasts the post request to all partitions of the system
+Since the \appname{} client cannot know for sure who follows the user, it keeps a cache of followers.
+The client cache can become stale if a different user starts following the poster.
+To ensure linearizability when executing a post request, the \appname\ server checks if the command is sent to the proper set of partitions. 
+If this is the case, the request is executed.
+Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of additional partitions the command must be multicast to. Upon receiving the $retry(\gamma)$ message, the \appname\ client multicasts the command again, now with the destination that includes all partitions in $\gamma$. This repeats until all partitions that contain followers of the poster deliver the command. This is guaranteed to terminate because partitions are only added to the set of destinations for retries, never removed. Therefore, in the worst case scenario, the client will retry until it multicasts the post request to all partitions of the system.
 
-Moreover, in order to observe the impact of signaling mechanism described above, we also introduced these two commands: Follow-noop and Unfollow-noop, which demonstrate pure signal exchange, since they don't change the structure of the social network (don't change the list of followers and followed users).
+Moreover, in order to observe the impact of the signaling mechanism described above, we also introduced these two commands: Follow-noop and Unfollow-noop, which demonstrate pure signal exchange, since they do not change the structure of the social network (i.e., do not change the list of followers and followed users).
 
 \label{sec:evaluation:app}
 \subsection{Environment setup and configuration parameters}
@@ -417,29 +420,31 @@ We kept the clocks synchronized using NTP in order to measure latency components
 
 For the experiments, we used the following workloads:
 Timeline (composed only of getTimeline requests),
-Post (only post requests),
-Follow/unfollow (50\% of follow-noop requests and 50\% of unfollow-noop), and
+Post (only post requests), and
+Follow/unfollow (50\% of follow-noop requests and 50\% of unfollow-noop).
 % Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \label{sec:evaluation:setup}
 \subsection{Results}
 
-We can see in Figure~\ref{fig:perf} the results achieved with \appname{}.
+%We can see in Figure~\ref{fig:perf} the results achieved with \appname{}.
 
-For the Timeline workload, the throughput and latency when signaling turned on and off are very similar.
+For the Timeline workload, the throughput and latency when signaling was turned on and off are very similar (see Figure~\ref{fig:perf}).
 This happens because getTimeline requests are optimized to be single-partition:
 all posts in a user's timeline are stored along with the User object.
-Every getTimeline requests access a single User object (of the user whose timeline is being requested).
-The whole structure and content of the network don't change, and partitions don't need to exchange either signal or data.
+Every getTimeline request accesses a single User object (of the user whose timeline is being requested).
+The whole structure and content of the network do not change, and partitions do not need to exchange either signal or data.
 Thus, enabling or disabling signal would not affect the performance of \appname{} when executing only getTimeline requests.
 
 In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signals.
-On the test with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
-With two partitions or more, signals and data are being exchanged across partitions. However, we can see that the signaling doesn't affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so on both tests, partitions have to exchange the data anyhow. For this reason, even when signaling is turned off, the partitions still have to communicate. As a result, the throughput and delay with signaling turned on or off are similar.
+In the execution with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
+With two partitions or more, signals and data are exchanged across partitions. 
+However, we can see that the signaling does not affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so in both tests, partitions have to exchange data anyhow. For this reason, even when signaling is turned off, the partitions still have to communicate. As a result, the throughput and delay with signaling turned on or off are similar.
 
-In the Follow/unfollow workload, each command accesses up to two partitions in the system, requires partitions to exchange signal (no data exchanged since the noop command doesn't change the content of the network).
-On one partition, \appname{} performs in a similar way to that observed with the Post workload on the test with one partition.
-With two partitions or more, performance of \appname{} decreased when signaling was turned on. This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
+In the Follow/unfollow workload, each command accesses up to two partitions in the system, requires partitions to exchange signal (no data exchanged since the noop command does not change the content of the network).
+With one partition, \appname{} performs in a similar way to that observed with the Post workload in the experiment with one partition.
+With two partitions or more, performance of \appname{} decreased when signaling was turned on. 
+This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
 
 \label{sec:evaluation:result}
 
@@ -447,7 +452,7 @@ With two partitions or more, performance of \appname{} decreased when signaling 
 \section{Related work}
 \label{sec:rwork}
 
-State machine replication is a well-known approach to replication and has been extensively studied (e.g., \cite{kapritsos2012eve, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
+State machine replication is a well-known approach to replication and has been extensively studied (e.g., \cite{Lam78, Sch90, kapritsos2012eve, kotla2004htbft, santos2013htsmr}).
 State machine replication requires replicas to execute commands deterministically, which implies sequential execution.
 Even though increasing the performance of state machine replication is non-trivial, different techniques have been proposed for achieving scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
 In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
@@ -457,7 +462,8 @@ In~\cite{biely2012spaxos}, Paxos~\cite{Lam98} is used to order commands, but it 
 State machine replication seems at first to prevent multi-threaded execution since it may lead to non-determinism.
 However, some works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way.
 In \cite{santos2013htsmr}, for instance, the authors propose organizing each replica in multiple modules that perform different tasks concurrently, such as receiving messages, batching, and dispatching commands to be executed.
-The execution of commands is still sequential, but the replica performs all other tasks in parallel. We also implemented this kind of parallelism in Eyrie.
+The execution of commands is still sequential, but the replica performs all other tasks in parallel. 
+%We also implemented this kind of parallelism in Eyrie.
 
 Some works have proposed to parallelize the execution of commands in SMR.
 In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another).
@@ -487,9 +493,9 @@ Scalable State Machine Replication employs state partitioning and ensures linear
 
 This paper described S-SMR, a scalable variant of the well-known state machine replication technique.
 S-SMR differs from previous related works in that it allows throughput to scale with the number of partitions without weakening consistency.
-To evaluate S-SMR, we implemented Chirper, a scalable social network application, using S-SMR.
+We evaluate S-SMR with Chirper, a scalable social network application.
 Our experiments demonstrate that throughput scales with the number of partitions, with nearly ideal (i.e., linear) scalability for workloads composed solely of single-partition commands.
-Moreover, the results show that ensuring linearizability has a relatively small additional cost (in throughput and latency) than something like serializability.
+Moreover, the results show replica coordination, needed to ensure linearizability, has a relatively small cost (in throughput and latency) and this cost decreases with the number of partitions.
 For multi-partition commands that already require data exchange between partitions, this extra cost is virtually zero.
 
 \bibliographystyle{ieeetr}
