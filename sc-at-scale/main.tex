@@ -67,6 +67,37 @@
 
 \section{Introduction}
 
+In order to meet strict availability and performance requirements, today's online services must be replicated.
+Managing replication without giving up strong consistency, however, is a daunting task.
+State machine replication, one of the most fundamental approaches to replication~\cite{Lam78,Sch90}, achieves strong consistency (i.e., linearizability) by regulating how client commands are propagated to and executed by the replicas: every non-faulty replica must receive and execute every command in the same order. Moreover, command execution must be deterministic. 
+
+State machine replication yields configurable availability but limited scalability.
+Since every replica added to the system must execute all requests, 
+increasing the number of replicas results in bounded improvements in performance.
+%throughput does not steadily increase with the number of replicas.
+Scalable performance can be achieved with state partitioning (also known as \emph{sharding}).
+The idea is to divide the state of a service in multiple partitions so that most commands access on partition only and are equally distributed among partitions. 
+Unfortunately, most services cannot be ``perfectly partitioned", that is, the service state cannot be divided in a way that commands access one partition only.
+As a consequence, partitioned systems must cope with multi-partition commands.
+Scalable State Machine Replication (S-SMR)~\cite{bezerra2014ssmr} divides the service state and replicates each partition. 
+S-SMR relies on an atomic multicast primitive to consistently order commands within and across partitions. 
+Commands that access a single partitioned are multicast to the concerned partition and executed as in classical SMR;
+commands that involve multiple partitions are multicast to and executed at all concerned partitions.
+
+Atomic multicast ensures that commands are consistently ordered within and across partitions---in brief, no two replicas deliver the same commands in different orders.
+However, simply ordering commands consistently is not enough to ensure strong consistency in Scalable State Machine Replication since the execution of commands can interleave in ways that violate strong consistency.
+In order to avoid consistency violations, S-SMR implements execution atomicity. 
+With execution atomicity, replicas coordinate the execution of multi-partition commands.
+Although the execution of any two replicas in the same partition does not need coordination, a replica in one partition must coordinate its execution with a replica in every other partition involved in a multi-partition command.
+
+S-SMR has proved to provide scalable performance, in some cases involving single-partition commands, with improvements in throughput that grow linearly with the number of partitions~\cite{bezerra2014ssmr}.
+Forcing replicas in different partitions to coordinate to ensure strong consistency may slow down the execution of multi-partition commands, since each replica cannot execute at its own pace (i.e., a fast replica in a partition may need to wait for a slower replica in a different partition).
+%
+This paper reviews the Scalable State Machine Replication approach and takes a close look at replica coordination in the execution of multi-partition commands.
+%We seek to understand to which extent coordination among replicas slows down the execution of replicas in S-SMR.
+In summary, we show that 
+
+
 \clearpage
 \section{System model and definitions}
 \label{sec:sysmodel}
@@ -311,7 +342,16 @@ In Section~\ref{sec:evaluation:result}, we report the results.
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
-      \includegraphics[width=1\linewidth]{figures/signal-vs-nosignal}
+      \includegraphics[width=1\linewidth]{figures/sc-at-scale-balance}
+\end{minipage}
+\caption{Results of \appname\ running with signaling turned on and off. Throughput is shown in thousands of commands per second (kcps).}
+\label{fig:perf}
+\end{figure*}
+
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
 \end{minipage}
 \caption{Results of \appname\ running with signaling turned on and off. Throughput is shown in thousands of commands per second (kcps).}
 \label{fig:perf}
