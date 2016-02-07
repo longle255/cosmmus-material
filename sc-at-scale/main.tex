@@ -61,6 +61,12 @@
 }
 
 \begin{abstract}
+Today's online services must meet strict availability and performance requirements.
+State machine replication, one of the most fundamental approaches to increasing the availability of services without sacrificing strong consistency, provides configurable availability but limited performance scalability.
+Scalable State Machine Replication (S-SMR) achieves scalable performance by partitioning the service state and coordinating the ordering and execution of commands.
+While S-SMR scales the performance of single-partition commands with the number of deployed partitions, replica coordination needed by multi-partition commands introduces an overhead in the execution of multi-partition commands.
+In the paper, we review Scalable State Machine Replication and quantify the overhead due to replica coordination in different scenarios.
+In brief, we show that performance overhead is affected by the number of partitions involved in multi-partition commands and data locality.
 \end{abstract}
 
 \maketitle
@@ -95,10 +101,27 @@ Forcing replicas in different partitions to coordinate to ensure strong consiste
 %
 This paper reviews the Scalable State Machine Replication approach and takes a close look at replica coordination in the execution of multi-partition commands.
 %We seek to understand to which extent coordination among replicas slows down the execution of replicas in S-SMR.
-In summary, we show that 
+For multi-partition commands that require replicas in different partitions to exchange data as part of the execution of the command, execution atomicity does not affect performance.
+For multi-partition commands that do not require data exchange, execution atomicity has an impact on performance that depends on the number of partitions involved and data locality.
+The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity, varying from 53\% of performance overhead with two partitions to 12\% of overhead with 16 partitions.
+Moreover, the overhead is slightly higher in workloads that experience locality when compared to settings that do not present data locality.
 
+%2P
+%wi/s		wo/s
+%8024		17242
+%overhead = (17242 - 8024) / 17242 = 
+%16P
+%wi/s		wo/s
+%19708	22443
+%overhead = (22443 - 19708) / 22443 = 
 
-\clearpage
+The remainder of the paper is structured as follows.
+Section~\ref{sec:sysmodel} presents the system model and definitions.
+Sections~\ref{sec:smr} and \ref{sec:scalablesmr} recall classical state machine replication and scalable state machine replication.
+Section~\ref{sec:perfeval} describes our experimental evaluation.
+Section~\ref{sec:rwork} reviews related work and Section~\ref{sec:final} concludes the paper.
+
+%\clearpage
 \section{System model and definitions}
 \label{sec:sysmodel}
 
@@ -332,6 +355,8 @@ Server $s$ can only reply to the client that issued $C$ after every variable rea
 
 
 \section{Performance evaluation}
+\label{sec:perfeval}
+
 In this section, we present the results found with \appname{}, a scalable social network application based on \ssmr{}.
 We compare the performance impact of the \ssmr{} signaling mechanism, by running experiments with, and experiments without signaling turned on.
 This was done for different workloads and numbers of partitions.
@@ -420,6 +445,7 @@ With two partitions or more, performance of \appname{} decreased when signaling 
 
 
 \section{Related work}
+\label{sec:rwork}
 
 State machine replication is a well-known approach to replication and has been extensively studied (e.g., \cite{kapritsos2012eve, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
 State machine replication requires replicas to execute commands deterministically, which implies sequential execution.
@@ -457,6 +483,7 @@ The authors say that Spanner works well with GPS and atomic clocks.
 Scalable State Machine Replication employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even in the presence of multi-partition commands and unsynchronized clocks.
 
 \section{Final remarks}
+\label{sec:final}
 
 This paper described S-SMR, a scalable variant of the well-known state machine replication technique.
 S-SMR differs from previous related works in that it allows throughput to scale with the number of partitions without weakening consistency.
