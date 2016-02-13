@@ -1,0 +1,40 @@
+We thank the reviewers for the constructive comments.
+
+Reviewer B:
+
+1) The oracle is only needed the second time if the object has changed location. Our technique works well when there is locality, which is the case of many workloads and applications. Differently from static approaches, we don't need to know the distribution a priori and we can handle changes in locality without stopping the system for manual intervention.
+
+2) Agreement isn't implied by validity, since validity doesn't cover the case of a correct process that delivers a message multicast by a faulty process (i.e., all correct must deliver the message too, but validity doesn't say that).
+
+3.1) In the case the review presents, obviously p_1 cannot deliver the message right after receiving it for the first time. But this is not how uniform agreement is implemented: before delivering a message, the process must know that other processes have it. Our atomic multicast ensures this.
+
+3.2) We agree. To be strictly correct (and rule out the case raised by the reviewer), we should add one more property to atomic multicast:
+
+Uniform prefix order: For any two messages m and m′ and any two processes p and q such that {p, q} \subseteq m.dst \cap m′.dst, if p delivers m and q delivers m′, then either p delivers m′ before m or q delivers m before m′.
+
+Notice though that the atomic multicast algorithm we use ensures this property.
+
+4) Indeed, it is true for [21] but not for [11].
+
+5) “What happens if the reply is lost?”
+We assume at least one correct server per partition (see Section IV.D), thus at least one reply is received. We should mention this earlier in the paper.
+
+“…move commands are "only" reliably multicast to the partitions…”
+A move command is atomically multicast to the oracle, the source partition S, and the destination partition D. The execution of move requires data to be transferred from S to D. It’s this transferring that relies on reliable multicast.
+
+“Does it have an impact on the order in which these message are handled?”
+Commands are handled in the order they are delivered and are not stored in a set. The data that needs to be exchanged by partitions in the case of a move are stored in a set. Here order doesn't matter.
+
+6) Like other objects, the oracle is a replicated object that delivers commands, executes them in order, and replies to the clients.
+
+7) We also ran experiments on datasets with less locality. Despite the decrease in performance, Dynamic S-SMR still outperformed S-SMR.
+
+Reviewer C:
+
+"How often are users moved"
+In the case of post command on 2 partitions, the number of move commands started ~3kcps, over 23kps of throughput, then reduced to less than 0.1kcps over time.
+
+Reviewer D:
+
+"number of nodes used"
+Each partition has 2 replicas, each replica hosted on one node. We have total of 90 nodes for simulating servers, clients, and multicast primitives.
