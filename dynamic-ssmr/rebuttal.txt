@@ -37,4 +37,4 @@ In the case of post command on 2 partitions, the number of move commands started
 Reviewer D:
 
 "number of nodes used"
-Each partition has 2 replicas, each replica hosted on one node. We have total of 90 nodes for simulating servers, clients, and multicast primitives.
+Each partition has 2 replicas and 3 acceptors (in total five nodes per partition).
