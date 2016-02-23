@@ -148,7 +148,7 @@ One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
 If sender and receiver are correct, then every message sent is eventually received.
 %
 One-to-many communication relies on reliable multicast and atomic multicast,\footnote{Solving atomic multicast requires additional assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence of an atomic multicast oracle.}
-defined in sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
+defined in Sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
 %Atomic broadcast is a special case of atomic multicast in which there is a single group with all servers.
 
 
@@ -402,20 +402,34 @@ Follow/unfollow (50\% of follow-noop requests and 50\% of unfollow-noop).
 \subsection{Results}
 \label{sec:evaluation:result}
 
-For the Timeline workload, the throughput and latency when signaling was turned on and off are very similar (see Figure~\ref{fig:perf}).
+For the Timeline workload, the throughput and latency when signaling was turned on and off are very similar in both workloads without and with locality (Figures~\ref{fig:perf1} and~\ref{fig:perf2}, respectively).
 This happens because getTimeline requests are optimized to be single-partition:
 all posts in a user's timeline are stored along with the User object.
 Every getTimeline request accesses a single User object (of the user whose timeline is being requested).
-The whole structure and content of the network do not change, and partitions do not need to exchange either signal or data.
-Thus, enabling or disabling signal would not affect the performance of \appname{} when executing only getTimeline requests.
+The structure and content of the network do not change, and partitions do not need to exchange either signal or data.
+Thus, signals do not affect the performance of \appname{} when executing getTimeline requests only.
 
-\begin{figure*}
+In the Post workload, every command accesses up to all partitions, which requires partitions to exchange both data and signals.
+In the execution with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
+With two partitions or more, signals and data are exchanged across partitions. 
+However, we can see that the signaling does not affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so in both tests, partitions have to exchange data anyhow. For this reason, even when signaling is turned off, the partitions still have to communicate. 
+As a result, the throughput and delay with signaling on or off are similar.
+
+In the Follow/unfollow workload, each command accesses up to two partitions in the system, requires partitions to exchange signal (no data exchanged since the noop command does not change the content of the network).
+With one partition, \appname{} performs in a similar way to that observed with the Post workload in the experiment with one partition.
+With two partitions or more, performance of \appname{} decreased when signaling was turned on. 
+This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
+
+For both Post and Follow/unfollow workloads, datasets with locality (Figure~\ref{fig:perf2}) result in higher throughput and lower latency than datasets without locality (Figure~\ref{fig:perf1}).
+
+
+\begin{figure*}[h]
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
       \includegraphics[width=1\linewidth]{figures/sc-at-scale-balance}
 \end{minipage}
 \caption{Results of \appname\ running with signaling turned on and off, on a balanced dataset. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
-\label{fig:perf}
+\label{fig:perf1}
 \end{figure*}
 
 \begin{figure*}
@@ -424,21 +438,38 @@ Thus, enabling or disabling signal would not affect the performance of \appname{
       \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
 \end{minipage}
 \caption{Results of \appname\ running with signaling turned on and off, on a dataset with locality. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
-\label{fig:perf}
+\label{fig:perf2}
 \end{figure*}
 
 
-In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signals.
-In the execution with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
-With two partitions or more, signals and data are exchanged across partitions. 
-However, we can see that the signaling does not affect the performance of \appname{} significantly. This happens because the Post command changes the content of the User object (changes in timeline), so in both tests, partitions have to exchange data anyhow. For this reason, even when signaling is turned off, the partitions still have to communicate. As a result, the throughput and delay with signaling turned on or off are similar.
+%2P
+%wi/s		wo/s
+%8024		17242
+%overhead = (17242 - 8024) / 17242 = 
+%16P
+%wi/s		wo/s
+%19708		22443
+%overhead = (22443 - 19708) / 22443 = 
 
-In the Follow/unfollow workload, each command accesses up to two partitions in the system, requires partitions to exchange signal (no data exchanged since the noop command does not change the content of the network).
-With one partition, \appname{} performs in a similar way to that observed with the Post workload in the experiment with one partition.
-With two partitions or more, performance of \appname{} decreased when signaling was turned on. 
-This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
+Table~\ref{tbl:default} shows the overhead in throughput due to signals in workloads that experience locality and in balanced workloads (i.e., without locality).
 
-
+\begin{table}[htp]
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|} \hline
+Dataset...				& Partitions	& Timeline		& Post		& Follow/Unfollow	\\ \hline
+~~~~...with locality		& 2			&			&			&				\\ \cline{2-5}
+					& 4			&			&			&				\\ \cline{2-5}
+					& 8			&			&			&				\\ \cline{2-5}
+					& 16			&			&			&				\\ \hline
+~~~~...without locality	& 2			&			&			&				\\ \cline{2-5}
+					& 4			&			&			&				\\ \cline{2-5}
+					& 8			&			&			&				\\ \cline{2-5}
+					& 16			&			&			&				\\ \hline
+\end{tabular}
+\caption{Overhead in throughput due to signals in datasets with and without locality.}
+\label{tbl:default}
+\end{table}%
 
 
 \section{Related work}
