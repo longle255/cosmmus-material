@@ -2,6 +2,9 @@
 \usepackage{deauthor,times,graphicx}
 \usepackage{amssymb}
 
+\usepackage{xkvltxp}
+\usepackage{fixme}
+
 \graphicspath{{authorname/}}
 
 %
@@ -60,6 +63,8 @@
   Switzerland
 }
 
+\maketitle
+
 \begin{abstract}
 Today's online services must meet strict availability and performance requirements.
 State machine replication, one of the most fundamental approaches to increasing the availability of services without sacrificing strong consistency, provides configurable availability but limited performance scalability.
@@ -68,8 +73,6 @@ While S-SMR scales the performance of single-partition commands with the number 
 In the paper, we review Scalable State Machine Replication and quantify the overhead due to replica coordination in different scenarios.
 In brief, we show that performance overhead is affected by the number of partitions involved in multi-partition commands and data locality.
 \end{abstract}
-
-\maketitle
 
 \section{Introduction}
 
@@ -82,12 +85,12 @@ Since every replica added to the system must execute all requests,
 increasing the number of replicas results in bounded improvements in performance.
 %throughput does not steadily increase with the number of replicas.
 Scalable performance can be achieved with state partitioning (also known as \emph{sharding}).
-The idea is to divide the state of a service in multiple partitions so that most commands access on partition only and are equally distributed among partitions. 
+The idea is to divide the state of a service in multiple partitions so that most commands access one partition only and are equally distributed among partitions. 
 Unfortunately, most services cannot be ``perfectly partitioned", that is, the service state cannot be divided in a way that commands access one partition only.
 As a consequence, partitioned systems must cope with multi-partition commands.
 Scalable State Machine Replication (S-SMR)~\cite{bezerra2014ssmr} divides the service state and replicates each partition. 
 S-SMR relies on an atomic multicast primitive to consistently order commands within and across partitions. 
-Commands that access a single partitioned are multicast to the concerned partition and executed as in classical SMR;
+Commands that access a single partition are multicast to the concerned partition and executed as in classical SMR;
 commands that involve multiple partitions are multicast to and executed at all concerned partitions.
 
 Atomic multicast ensures that commands are consistently ordered within and across partitions---in brief, no two replicas deliver the same commands in different orders.
@@ -96,14 +99,20 @@ In order to avoid consistency violations, S-SMR implements execution atomicity.
 With execution atomicity, replicas coordinate the execution of multi-partition commands.
 Although the execution of any two replicas in the same partition does not need coordination, a replica in one partition must coordinate its execution with a replica in every other partition involved in a multi-partition command.
 
+Execution atomicity captures real-time dependencies between commands, typical of strong consistency criteria such as linearizability and strict serializability.
+In both linearizability and strict serializability, if one operation precedes another in real time (i.e., the first operation finishes before the second operation starts), then this dependency must be reflected in the way the two operations are ordered and executed.
+Respecting real-time dependencies leads to replicated systems that truly behave like single-copy systems, and thus are easier to program.
+Serializability does not need execution atomicity but may lead to non-intuitive behavior.
+We show in the paper that execution atomicity is not as expensive to implement in a partitioned system as one might expect.
+
 S-SMR has proved to provide scalable performance, in some cases involving single-partition commands, with improvements in throughput that grow linearly with the number of partitions~\cite{bezerra2014ssmr}.
 Forcing replicas in different partitions to coordinate to ensure strong consistency may slow down the execution of multi-partition commands, since each replica cannot execute at its own pace (i.e., a fast replica in a partition may need to wait for a slower replica in a different partition).
 %
 This paper reviews the Scalable State Machine Replication approach and takes a close look at replica coordination in the execution of multi-partition commands.
 %We seek to understand to which extent coordination among replicas slows down the execution of replicas in S-SMR.
 For multi-partition commands that require replicas in different partitions to exchange data as part of the execution of the command, execution atomicity does not affect performance.
-For multi-partition commands that do not require data exchange, execution atomicity has an impact on performance that depends on the number of partitions involved and data locality.
-The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity, varying from 53\% of performance overhead with two partitions to 12\% of overhead with 16 partitions.
+For multi-partition commands that do not require data exchange, execution atomicity has an impact on performance that depends on the number of partitions involved in the command and on data locality.
+The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity is, varying from 53\% of performance overhead with two partitions to 12\% of overhead with 16 partitions.\fxfatal[draft]{Check this}
 Moreover, the overhead is slightly higher in workloads that experience locality when compared to settings that do not present data locality.
 
 %2P
@@ -267,9 +276,7 @@ In this case, $s$ executes $op$.
 
 \end{itemize}
 
-
-%As we now show, the procedure above does not ensure linearizability.
-It turns out that by atomically ordering commands and following the procedure above is not enough to ensure linearizability~\cite{bezerra2014ssmr}.
+It turns out that atomically ordering commands and following the procedure above is not enough to ensure linearizability~\cite{bezerra2014ssmr}.
 Consider the execution depicted in Figure~\ref{fig:mcastnonlinssmr}~(a), where state variables $x$ and $y$ have initial value of $10$.
 Command $C_x$ reads the value of $x$, $C_y$ reads the value of $y$, and $C_{xy}$ sets $x$ and $y$ to value 20.
 Consequently, $C_x$ is multicast to partition $\ppm_x$, $C_y$ is multicast to $\ppm_y$, and $C_{xy}$ is multicast to both $\ppm_x$ and $\ppm_y$.
@@ -347,12 +354,7 @@ Speculative caching requires servers to be able to rollback the execution of com
 Many applications allow rolling back a command, such as databases, as long as no reply has been sent to the client for the command yet.
 The difference between speculative caching and conservative caching is that in the former servers that keep cached values do not wait for a cache-validation message before reading a cached entry; instead, a $read(x)$ operation returns the cached value immediately.
 If after reading some variable $x$ from the cache, during the execution of command $C$, server $s$ receives a message from a server in $\ppm_x$ that invalidates the cached value, $s$ rolls back the execution to some point before the $read(x)$ operation and resumes the command execution, now with the up-to-date value of $x$.
-%This may happen for every variable read by $C$, so $s$ might rollback the execution of $C$ several times until getting it right.
-%To ensure that a correct execution will be done eventually,
 Server $s$ can only reply to the client that issued $C$ after every variable read from the cache has been validated.
-
-%Both caching algorithms depend on the following condition: each partition $\ppm_x$ keeps track of what was the last command $C$ executed by each partition $\ppm$, for each variable $x$ in $\ppm_x$, such that $C$ reads or writes $x$.\fixme{This part is too complicated.}
-%Such values are kept by $\ppm_x$ in a table where each entry is $\langle \ppm, x, k \rangle$, where $k$ identifies the last command executed by $\ppm$ that accesses $x$. The initial value of $k$ is $0$ for every partition and every variable. Whenever a command $C$ that accesses $x$ is delivered by $\ppm_x$, it increments the command counter $k$ in $\langle \ppm, x, k \rangle$, for every partition $\ppm$ that delivers $C$. Upon delivery of any command $C'$ that also accesses $x$, $\ppm_x$ checks whether there is any partition $\ppm'$ that $C'$ was multicast to, where the cache of $x$ read by $C'$ will be stale, that is, entries $\langle \ppm_x, x, k \rangle$ and $\langle \ppm', x, k' \rangle$ are such that $k' < k$. Then, $P_x$ sends the cache-validation message(s) to $\ppm'$ accordingly.
 
 
 \section{Performance evaluation}
@@ -365,37 +367,9 @@ In Section~\ref{sec:evaluation:app}, we describe the implementation of \appname{
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
 In Section~\ref{sec:evaluation:result}, we report the results.
 
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-\centering
-      \includegraphics[width=1\linewidth]{figures/sc-at-scale-balance}
-%<<<<<<< HEAD
-%\end{minipage}
-%\caption{Results of \appname\ running with signaling turned on and off. Throughput is shown in thousands of commands per second (kcps).}
-%\label{fig:perf}
-%\end{figure*}
-%
-%\begin{figure*}
-%\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-%\centering
-%      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
-%=======
-%>>>>>>> 2f0702efd1979188cdd89353eecc0cf0c1426c96
-\end{minipage}
-\caption{Results of \appname\ running with signaling turned on and off, on a balanced dataset. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
-\label{fig:perf}
-\end{figure*}
-
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-\centering
-      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
-\end{minipage}
-\caption{Results of \appname\ running with signaling turned on and off, on a dataset with distributed locality. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
-\label{fig:perf}
-\end{figure*}
-
 \subsection{\appname}
+\label{sec:evaluation:app}
+
 We implemented \appname{}, a social network application similar to Twitter, in order to evaluate the performance of \ssmr{}.
 Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users.
 The API of \appname{} includes: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
@@ -411,8 +385,9 @@ Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the com
 
 Moreover, in order to observe the impact of the signaling mechanism described above, we also introduced these two commands: Follow-noop and Unfollow-noop, which demonstrate pure signal exchange, since they do not change the structure of the social network (i.e., do not change the list of followers and followed users).
 
-\label{sec:evaluation:app}
+
 \subsection{Environment setup and configuration parameters}
+\label{sec:evaluation:setup}
 
 All experiments were conducted on a cluster that had two types of nodes: (a) HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes, equipped with two AMD Opteron 2212 processors running at 2.0 GHz and with 4 GB of main memory. The HP nodes were connected to an HP ProCurve 2920-48G gigabit network switch, and the Dell nodes were connected to another, identical switch. Those switches were interconnected by a 20 Gbps link.
 All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM (build 25.45-b02).
@@ -422,12 +397,10 @@ For the experiments, we used the following workloads:
 Timeline (composed only of getTimeline requests),
 Post (only post requests), and
 Follow/unfollow (50\% of follow-noop requests and 50\% of unfollow-noop).
-% Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
-\label{sec:evaluation:setup}
+
 \subsection{Results}
-
-%We can see in Figure~\ref{fig:perf} the results achieved with \appname{}.
+\label{sec:evaluation:result}
 
 For the Timeline workload, the throughput and latency when signaling was turned on and off are very similar (see Figure~\ref{fig:perf}).
 This happens because getTimeline requests are optimized to be single-partition:
@@ -435,6 +408,25 @@ all posts in a user's timeline are stored along with the User object.
 Every getTimeline request accesses a single User object (of the user whose timeline is being requested).
 The whole structure and content of the network do not change, and partitions do not need to exchange either signal or data.
 Thus, enabling or disabling signal would not affect the performance of \appname{} when executing only getTimeline requests.
+
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1\linewidth]{figures/sc-at-scale-balance}
+\end{minipage}
+\caption{Results of \appname\ running with signaling turned on and off, on a balanced dataset. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
+\label{fig:perf}
+\end{figure*}
+
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
+\end{minipage}
+\caption{Results of \appname\ running with signaling turned on and off, on a dataset with locality. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
+\label{fig:perf}
+\end{figure*}
+
 
 In the Post workload, every command accesses up to all partitions in the system, which requires partitions to exchange both data and signals.
 In the execution with only one partition, where signals and data are not exchanged anyway, turning off signaling does not change performance.
@@ -446,7 +438,7 @@ With one partition, \appname{} performs in a similar way to that observed with t
 With two partitions or more, performance of \appname{} decreased when signaling was turned on. 
 This was expected since the partitions started to exchange the signals: partitions had to wait for signal during the execution of the command.
 
-\label{sec:evaluation:result}
+
 
 
 \section{Related work}
