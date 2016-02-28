@@ -425,6 +425,14 @@ This was expected since the partitions started to exchange the signals: partitio
 
 For both Post and Follow/unfollow workloads, datasets with locality (Figure~\ref{fig:perf2}) result in higher throughput and lower latency than datasets without locality (Figure~\ref{fig:perf1}).
 
+\begin{figure*}[h]
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
+\end{minipage}
+\caption{Results of \appname\ running with signaling turned on and off, on a dataset with locality. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
+\label{fig:perf2}
+\end{figure*}
 
 \begin{figure*}[h]
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
@@ -433,15 +441,6 @@ For both Post and Follow/unfollow workloads, datasets with locality (Figure~\ref
 \end{minipage}
 \caption{Results of \appname\ running with signaling turned on and off, on a balanced dataset. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
 \label{fig:perf1}
-\end{figure*}
-
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-\centering
-      \includegraphics[width=1\linewidth]{figures/sc-at-scale-locality}
-\end{minipage}
-\caption{Results of \appname\ running with signaling turned on and off, on a dataset with locality. Throughput is shown in thousands of commands per second (kcps). Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
-\label{fig:perf2}
 \end{figure*}
 
 %Table~\ref{tbl:default} shows the percentage of overhead in throughput due to signals in workloads that experience locality and in balanced workloads (i.e., without locality).
