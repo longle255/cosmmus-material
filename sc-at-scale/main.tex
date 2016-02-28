@@ -112,8 +112,8 @@ This paper reviews the Scalable State Machine Replication approach and takes a c
 %We seek to understand to which extent coordination among replicas slows down the execution of replicas in S-SMR.
 For multi-partition commands that require replicas in different partitions to exchange data as part of the execution of the command, execution atomicity does not affect performance.
 For multi-partition commands that do not require data exchange, execution atomicity has an impact on performance that depends on the number of partitions involved in the command and on data locality.
-For example, in workloads that do not experience locality, the overhead in throughput introduced by execution atomicity in commands that span two partitions is around 7\% in executions with 16 partitions;
-in workloads with data locality, this overhead is around 12\%.
+For example, in workloads that do not experience locality, the overhead in throughput introduced by execution atomicity in commands that span two partitions is around 32\% in executions with 16 partitions;
+in workloads with data locality, this overhead is around 27\%.
 %Since locality results in high throughput, the effects of execution atomicity on performance are more important in such settings.
 %The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity is, varying from 53\% of performance overhead with two partitions to 12\% of overhead with 16 partitions in workloads with locality.
 %Moreover, the overhead is slightly higher in workloads that experience locality when compared to settings that do not present data locality.
@@ -444,43 +444,21 @@ For both Post and Follow/unfollow workloads, datasets with locality (Figure~\ref
 \label{fig:perf2}
 \end{figure*}
 
-
-%2P
-%wi/s		wo/s
-%8024		17242
-%overhead = (17242 - 8024) / 17242 = 
-%16P
-%wi/s		wo/s
-%19708		22443
-%overhead = (22443 - 19708) / 22443 = 
-
 %Table~\ref{tbl:default} shows the percentage of overhead in throughput due to signals in workloads that experience locality and in balanced workloads (i.e., without locality).
-%The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity is, both in workloads that exhibit locality and workloads that do not.
 %
 %\begin{table}[htp]
 %\centering
 %\small
 %\begin{tabular}{|l|c|c|c|c|} \hline
 %Dataset...				& Partitions	& Timeline		& Post		& Follow/Unfollow \\ \hline
-%~~~~...without locality	& 2			&			& 			&	49\%              \\ \cline{2-2}\cline{5-5}
-%              				& 4			& 			& 			&	31\%              \\ \cline{2-2}\cline{5-5}
-%              				& 8			&\raisebox{1.5ex}[0cm][0cm]{$\leq$7\%}&\raisebox{1.5ex}[0cm][0cm]{$\leq$2\%}&	24\% \\ \cline{2-2}\cline{5-5}
-%              				& 16			&			& 			&	7\%               \\ \hline
-%~~~~...with locality		& 2			&			& 			&	53\%              \\ \cline{2-2}\cline{5-5}
-%              				& 4			& 			& 			&	36\%              \\ \cline{2-2}\cline{5-5}
-%              				& 8			&\raisebox{1.5ex}[0cm][0cm]{$\leq$7\%}&\raisebox{1.5ex}[0cm][0cm]{$\leq$1\%}&	23\% \\ \cline{2-2}\cline{5-5}
-%              				& 16			&			& 			&	12\%              \\ \hline
-%\end{tabular}
-%\begin{tabular}{|l|c|c|c|c|} \hline
-%Dataset...			& Partitions	& Timeline		& Post		& Follow/Unfollow \\ \hline
-%~~~~...with locality		& 2			&	0\%	        & 0\%		&	53\%              \\ \cline{2-5}
-%              			& 4			&	0\%	        & 0\%		&	36\%              \\ \cline{2-5}
-%              			& 8			&	7\%	        & -5\%	    	&	23\%              \\ \cline{2-5}
-%              			& 16			&	1\%	        & 1\%		&	12\%              \\ \hline
-%~~~~...without locality	& 2			&	1\%	        & 2\%		&	49\%              \\ \cline{2-5}
-%              			& 4			&	0\%	        & 1\%		&	31\%              \\ \cline{2-5}
-%              			& 8			&	7\%	        & 1\%		&	24\%              \\ \cline{2-5}
-%              			& 16			&	2\%	        & -117\%		&	7\%               \\ \hline
+%~~~~...with locality			& 2			&	0\%	        & 0\%		&	65\%              \\ \cline{2-5}
+%              				& 4			&	0\%	        & 0\%		&	50\%              \\ \cline{2-5}
+%              				& 8			&	7\%	        & -5\%	    	&	32\%              \\ \cline{2-5}
+%              				& 16			&	1\%	        & 1\%		&	27\%              \\ \hline
+%~~~~...without locality		& 2			&	1\%	        & 2\%		&	61\%              \\ \cline{2-5}
+%              				& 4			&	0\%	        & 1\%		&	55\%              \\ \cline{2-5}
+%              				& 8			&	7\%	        & 1\%		&	35\%              \\ \cline{2-5}
+%              				& 16			&	2\%	        & -117\%		&	32\%               \\ \hline
 %\end{tabular}
 %\caption{Overhead in throughput due to signals in datasets with and without locality.}
 %\label{tbl:default}
