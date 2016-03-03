@@ -7,7 +7,7 @@ In this section, we describe \libname{}, a library that implements both \ssmr\ a
 
 To implement a replicated service with \libname{}, the developer (i.e., service designer) must extend three classes: PRObject, StateMachine, OracleStateMachine.
 
-\textbf{The PRObject class.} \libname{} supports partial replication (i.e., some objects may be replicated in some partitions, not all). Therefore, when executing a command, a replica might not have local access to some of the objects involved in the execution of the command. The developer informs to \libname{} which object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but the application code is agnostic to that. All calls to methods of such objects are intercepted by \appname{}, transparently to the developer.
+\textbf{The PRObject class.} \libname{} supports partial replication (i.e., some objects may be replicated in some partitions, not all). Therefore, when executing a command, a replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but the application code is agnostic to that. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer.
 
 % are you still using the aspect? do methods actually get intercepted by D-Eyrie?
 

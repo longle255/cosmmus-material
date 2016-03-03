@@ -51,6 +51,9 @@ Atomic multicast ensures the following properties:
     \item[--] For any message $m$, every process $p$ in $\gamma$ \amdel{}s $m$ at most once, and only if some process has \amcast{} $m$ to $\gamma$ previously \emph{(integrity)}.
     
     \item[--] No two processes $p$ and $q$ in both $\gamma$ and $\gamma'$ \amdel\ $m$ and $m'$ in different orders; also, the delivery order is acyclic \emph{(atomic order)}.
+
+    \item[--] For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that ${p, q} \subseteq m.dst \cap m'.dst$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$. \fxnote[draft]{Add uniform order property}
+
     
 \end{itemize}
 

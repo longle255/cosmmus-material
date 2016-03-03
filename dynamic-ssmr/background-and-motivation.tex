@@ -9,7 +9,7 @@ By starting in the same initial state and executing the same sequence of determi
 
 Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple reasons. First, the underlying communication protocol needed to ensure ordered message delivery may not scale itself (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
 
-Several approaches have been proposed to address SMR's scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{CT96,Lamport:1998ea}).
+Several approaches have been proposed to address SMR's scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{Lamport:1998ea}).\fxnote[draft]{remove inapplicable reference}
 
 Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the following section, we review Scalable State Machine Replication (\ssmr), a proposal in the second category.
 
@@ -56,7 +56,7 @@ Under workloads with multi-partition commands, however, it has limited performan
 Such decreased performance when executing multi-partition commands is due to
 partitions (i) exchanging state variables
 and (ii) synchronizing by exchanging signals.
-\ssmr\ likely performs better as the number of multi-partition commands decreases.
+\ssmr\ performs better as the number of multi-partition commands decreases.
 
 One way to reduce the number of multi-partition commands is by dynamically changing the partitioning, putting variables that are usually accessed together in the same partition.
 However, the partitioning oracle of \ssmr\ relies on a static mapping of variables to partitions.

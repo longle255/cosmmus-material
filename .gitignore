@@ -124,3 +124,6 @@ nbproject
 *.gz
 *_embedded.pdf
 main.pdf
+*.fls
+*.fdb_latexmk
+archives/

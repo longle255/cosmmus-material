@@ -29,7 +29,7 @@ In Section~\ref{sec:evaluation:strongloc}, we show the results.
 \label{fig:strongloc}
 \end{figure*}
 
-\begin{table*}[htdp]
+\begin{table*}[htp]
 \vspace{10mm}
 \caption{Absolute values of \appname\ running \ssmr\ and \dssmr{}.}
 \centering
@@ -81,6 +81,7 @@ In the Post workload, every command accesses up to all partitions in the system,
 We can see that the throughput of \ssmr\ decreases significantly as the number of partitions increases.
 For \dssmr{}, we can see that the system throughput scales with the number of partitions.
 This happens because User objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
+In the case of post command on 2 partitions, the number of move commands started ~3kcps, over 23kps of throughput, then reduced to less than 0.1kcps over time.\fxnote[draft]{Add ratio of move command}
 As the execution proceeds, this leads to a lower rate of multi-partition commands, which allows throughput to scale.
 As a result the throughput improvement of \dssmr{} with respect to \ssmr\ increases over time.
 With eight partitions, \dssmr{} sports a performance that is 45 times that of \ssmr!
@@ -90,7 +91,7 @@ The difference is that each follow or unfollow request accesses only two User ob
 For this reason, each follow/unfollow command is executed at most by two partitions in \ssmr{}.
 In \dssmr{}, a single move command is enough to have all User objects affected by such a command in the same partition.
 For this reason, both replication techniques have better throughput under the Follow/unfollow workload than with Post.
-As with the Post workload, \dssmr{} advantage over \ssmr\ increases with the number of partitions, reaching up to almost 25 times with eight partitions.
+As with the Post workload, \dssmr{}'s advantage over \ssmr\ increases with the number of partitions, reaching up to almost 25 times with eight partitions.
 
 We approximate a realistic distribution of commands with the Mix workload.
 With such a workload, \ssmr\ does not perform as bad as in the Post or Follow/unfollow workloads, but the system throughput still decreases as partitions are added.
