@@ -103,7 +103,8 @@ Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_p
 Every server proxy at a server in $\ssm_i$ has only partial knowledge of the partitioning: it knows only which variables belong to $\ppm_i$.
 The oracle proxy has knowledge of every $\ppm \in \Psi$.
 To maintain such a global knowledge, the oracle must \amdel{} every command that creates, moves, or deletes variables.
-In order to avoid turining the oracle into a bottleneck, a caching mechamism could be applied on client to store those knoweldge as described later in Section~\ref{sec:optm}\fxnote[draft]{Add forward reference for caching}
+(In Section~\ref{sec:optm}, we introduce a caching mechanism to prevent the oracle from becoming a performance bottleneck.)
+
 \input{algorithm_client_proxy}
 
 \textbf{The client proxy.} To execute a command $C$, the proxy first consults the oracle.
@@ -236,7 +237,8 @@ This problem is trivially solved by falling back to \ssmr\ after a predefined nu
 
 As for linearizability, we argue that, if every command in execution \ex\ of \dssmr\ is delivered by atomic multicast and is \emph{execution atomic} (as defined in~\cite{bezerra2014ssmr}), then \ex\ is linearizable.
 We denote the order given by atomic multicast by relation $\prec$.
-Given any two messages $m_1$ and $m_2$, ``$m_1 \prec m_2$'' means that there exists a process that delivers both messages and $m_1$ is delivered before $m_2$, or there is some message $m'$ such that $m_1 \prec m'$ and $m' \prec m_2$, which can be written as \mbox{$m_1 \prec m' \prec m_2$}.\fxnote[draft]{use the phrase \"there exists a process that\" }
+Given any two messages $m_1$ and $m_2$, ``$m_1 \prec m_2$'' means that there exists a process that delivers both messages and $m_1$ is delivered before $m_2$, or there is some message $m'$ such that $m_1 \prec m'$ and $m' \prec m_2$, which can be written as \mbox{$m_1 \prec m' \prec m_2$}.
+%\fxnote[draft]{use the phrase \"there exists a process that\" }
 Also, for the purposes of this proof, we consider the oracle to be a partition, as it also \amdel{}s and executes application commands.
 
 Suppose, by means of contradiction, that there exist two commands $x$ and $y$, where $x$ finishes before $y$ starts, but $y \prec x$ in the execution.

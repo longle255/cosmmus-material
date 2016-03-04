@@ -7,12 +7,6 @@
 
 \graphicspath{{authorname/}}
 
-%
-% Paper size: 6 to 15 pages, single column
-% additional info: http://tab.computer.org/tcde/bull_author.html
-% deadline: end of January 2016
-%
-
 \newcommand{\ex}{$\mathcal{E}$}
 \newcommand{\pp}{$\mathcal{P}$}
 \newcommand{\ppm}{\mathcal{P}}
@@ -83,7 +77,6 @@ State machine replication, one of the most fundamental approaches to replication
 State machine replication yields configurable availability but limited scalability.
 Since every replica added to the system must execute all requests, 
 increasing the number of replicas results in bounded improvements in performance.
-%throughput does not steadily increase with the number of replicas.
 Scalable performance can be achieved with state partitioning (also known as \emph{sharding}).
 The idea is to divide the state of a service in multiple partitions so that most commands access one partition only and are equally distributed among partitions. 
 Unfortunately, most services cannot be ``perfectly partitioned", that is, the service state cannot be divided in a way that commands access one partition only.
@@ -107,25 +100,11 @@ We show in the paper that execution atomicity is not as expensive to implement i
 
 S-SMR has proved to provide scalable performance, in some cases involving single-partition commands, with improvements in throughput that grow linearly with the number of partitions~\cite{bezerra2014ssmr}.
 Forcing replicas in different partitions to coordinate to ensure strong consistency may slow down the execution of multi-partition commands, since each replica cannot execute at its own pace (i.e., a fast replica in a partition may need to wait for a slower replica in a different partition).
-%
 This paper reviews the Scalable State Machine Replication approach and takes a close look at replica coordination in the execution of multi-partition commands.
-%We seek to understand to which extent coordination among replicas slows down the execution of replicas in S-SMR.
 For multi-partition commands that require replicas in different partitions to exchange data as part of the execution of the command, execution atomicity does not affect performance.
 For multi-partition commands that do not require data exchange, execution atomicity has an impact on performance that depends on the number of partitions involved in the command and on data locality.
 For example, in workloads that do not experience locality, the overhead in throughput introduced by execution atomicity in commands that span two partitions is around 32\% in executions with 16 partitions;
 in workloads with data locality, this overhead is around 27\%.
-%Since locality results in high throughput, the effects of execution atomicity on performance are more important in such settings.
-%The more partitions are involved in a multi-partition command, the less the overhead introduced by execution atomicity is, varying from 53\% of performance overhead with two partitions to 12\% of overhead with 16 partitions in workloads with locality.
-%Moreover, the overhead is slightly higher in workloads that experience locality when compared to settings that do not present data locality.
-
-%2P
-%wi/s		wo/s
-%8024		17242
-%overhead = (17242 - 8024) / 17242 = 
-%16P
-%wi/s		wo/s
-%19708	22443
-%overhead = (22443 - 19708) / 22443 = 
 
 The remainder of the paper is structured as follows.
 Section~\ref{sec:sysmodel} presents the system model and definitions.
@@ -133,7 +112,6 @@ Sections~\ref{sec:smr} and \ref{sec:scalablesmr} recall classical state machine 
 Section~\ref{sec:perfeval} describes our experimental evaluation.
 Section~\ref{sec:rwork} reviews related work and Section~\ref{sec:final} concludes the paper.
 
-%\clearpage
 \section{System model and definitions}
 \label{sec:sysmodel}
 
@@ -149,10 +127,8 @@ Processes communicate by message passing, using either one-to-one or one-to-many
 The system is asynchronous: there is no bound on message delay or on relative process speed.
 One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process $m$ is addressed to.
 If sender and receiver are correct, then every message sent is eventually received.
-%
 One-to-many communication relies on reliable multicast and atomic multicast,\footnote{Solving atomic multicast requires additional assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence of an atomic multicast oracle.}
 defined in Sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
-%Atomic broadcast is a special case of atomic multicast in which there is a single group with all servers.
 
 
 \subsection{Reliable multicast}
@@ -194,28 +170,16 @@ Atomic multicast ensures the following properties:
 Atomic broadcast is a special case of atomic multicast in which there is a single group of processes.
 
 
-%\subsection{Consistency criterion}
-%
-%Our consistency criterion is linearizability.
-%A system is \emph{linearizable} if there is a way to reorder the client commands in a sequence that (i)~respects the semantics of the commands, as defined in their sequential specifications, and (ii)~respects the real-time precedence of commands~\cite{Attiya04}.
-
-
-
 \section{State machine replication}
 \label{sec:smr}
 
 State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78, Sch90}.
 The service is defined by a state machine, which consists of a set of \emph{state variables} $\vvm = \{v_1, ..., v_m\}$
-%that encode the service's state
 and a set of \emph{commands} that may read and modify state variables, and produce a response for the command.
 Each command is implemented by a deterministic program.
-% whose execution is atomic with respect to other commands.
-%The set of variables read by $C$ and the set of variables updated by $C$ are denoted, respectively, by $readset(C)$ and $writeset(C)$.
-%The set of all variables read and updated by $C$ is denoted by $var(C)$.
 State machine replication can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands.
 
 We consider implementations of state machine replication that ensure linearizability.
-%
 Linearizability is defined with respect to a sequential specification.
 The \emph{sequential specification} of a service consists of a set of commands and a set of \emph{legal sequences of commands}, which define the behavior of the service when it is accessed sequentially.
 In a legal sequence of commands, every response to the invocation of a command immediately follows its invocation, with no other invocation or response in between them.
@@ -227,9 +191,6 @@ In classical state machine replication, throughput does not scale with the numbe
 Some simple optimizations to the traditional scheme can provide improved performance but not scalability.
 For example, although update commands must be ordered and executed by every replica, only one replica can respond to the client, saving resources at the other replicas.
 Commands that only read the state must be ordered with respect to other commands, but can be executed by a single replica, the replica that will respond to the client.
-
-%This is a fundamental limitation: while some optimizations may increase throughput by adding servers, the improvements are limited since fundamentally, the technique does not scale.
-%In the next section, we describe an extension to SMR that under certain workloads allows performance to grow proportionally to the number of replicas.
 
 
 \section{Scalable State Machine Replication}
@@ -245,8 +206,6 @@ S-SMR divides the application state $\vvm$ (i.e., state variables) into $k$ part
 Moreover, we require each variable $v$ in $\vvm$ to be assigned to at least one partition and define $part(v)$ as the partitions that hold $v$.
 Each partition $\ppm_i$ is replicated by servers in group $\ssm_i$.
 For brevity, we say that server $s$ belongs to $\ppm_i$ with the meaning that $s \in \ssm_i$, and say that client $c$ multicasts command $C$ to partition $\ppm_i$ meaning that $c$ multicasts $C$ to group $\ssm_i$.
-% We also say that $\ppm_i$ does something meaning that servers in $\ssm_i$.
-%We also often mention $\ppm_i$ meaning servers in $\ssm_i$.
 
 To execute command $C$, the client multicasts $C$ to all partitions that hold a variable read or updated by $C$.
 Consequently, the client must be able to determine the partitions that may be accessed by $C$.
@@ -258,7 +217,6 @@ We assume the existence of an oracle that tells the client which partitions shou
 Upon delivering command $C$, if server $s$ does not contain all variables read by $C$, $s$ must communicate with servers in other partitions to execute $C$.
 Essentially, $s$ must retrieve every variable $v$ read in $C$ from a server that stores $v$ (i.e., a server in a partition in $part(v)$).
 Moreover, $s$ must retrieve a value of $v$ that is consistent with the order in which $C$ is executed, as we explain next.
-%Operations that do not involve reading a variable from a remote partition are executed locally.
 
 In more detail, let $op$ be an operation in the execution of command $C$.
 We distinguish between three operation types: $read(v)$, an operation that reads the value of a state variable $v$, $write(v, val)$, an operation that updates $v$ with value $val$,
@@ -304,8 +262,6 @@ More precisely, let $start(C,p)$ and $end(C,p)$ be, respectively, the time when 
 Execution atomicity ensures that, for every server $s$ in partition \pp\ that executes $C$, there is a server $r$ in every $\ppm' \in part(C)$ such that \mbox{$start(C,r) < end(C,s)$}.
 Intuitively, this condition guarantees that the execution of $C$ at $s$ and $r$ overlap in time.
 
-%Back in Fig.~\ref{fig:mcastnonlinssmr}, each black box represents the execution of a subcommand by servers in the partition: it starts when the first server in the partition begins executing the subcommand and ends when there is no more server executing the subcommand in that partition. We can see that $C_{xy}$ is not execution atomic: there is no time $t$ when some servers $s_x$ in $P_x$ and $s_y$ in $P_y$ are executing it. If it were the case, this example would be impossible to build, since $finish(C_y,s_y) < start(C_{xy}, s_y) < t < finish(C_{xy}, s_x) < start(C_x, s_x)$, which would contradict the fact that $C_x$ precedes $C_y$ in real-time.
-
 Replicas can ensure execution atomicity by coordinating the execution of commands.
 After starting the execution of command $C$, servers in each partition send a $signal(C)$ message to servers in the other partitions in $part(C)$.
 Before finishing the execution of $C$ and sending a reply to the client that issued $C$, each server must receive a $signal(C)$ message from at least one server in every other partition that executes $C$.
@@ -316,8 +272,6 @@ In the example, servers in $\ppm_x$ wait for a signal from $\ppm_y$,
 therefore ensuring that the servers of both partitions are synchronized during the execution of $C_{xy}$.
 Note that the outcome of each command execution is the same as in case (a), but the execution of $C_x$, $C_y$ and $C_{xy}$, as seen by clients, now overlap in time with one another.
 Hence, there is no real-time precedence among them and linearizability is not violated.
-
-
 
 
 \subsection{Performance optimizations}
@@ -332,7 +286,6 @@ In this section, we briefly mention some of these optimizations and then detail 
 \item Even though all replicas in all partitions in $part(C)$ execute $C$, a reply from a replica in a single partition suffices for the client to finish the command.
 \end{itemize}
 
-%Caching is a more elaborate optimization.
 Server $s$ in partition \pp\ can cache variables that belong to other partitions.
 There are different ways for $s$ to maintain cached variables; here we define two techniques: conservative caching and speculative caching.
 In both cases, the basic operation is the following:
@@ -341,7 +294,6 @@ If a command writes $x$, $s$ updates (or creates) $x$'s local value.
 Server $s$ will have a valid cache of $x$ until (i)~$s$ discards the entry due to memory constraints, or (ii)~some command not multicast to \pp\ changes the value of $x$.
 Since servers in $\ppm_x$ deliver all commands that access $x$, these servers know when any possible cached value of $x$ is stale.
 How servers use cached entries distinguishes conservative from speculative caching.
-%; what it does not know, however, is whether \pp\ has discarded $x$'s cache.
 
 
 Servers in $\ppm_x$ can determine which of its variables have a stale value cached in other partitions. This can be done by checking if there was any command that updated a variable $x$ in $\ppm_x$, where such command was not multicast to some other partition $\ppm$ that had a cache of $x$. Say servers in $\ppm_x$ deliver command $C$, which reads $x$, and say the last command that updated the value of $x$ was $C_w$. Since $x \in \ppm_x$, servers in $\ppm_x$ delivered $C_w$. One way for servers in $\ppm_x$ to determine which partitions need to update their cache of $x$ is by checking which destinations of $C$ did not receive $C_w$. This can be further optimized: even if servers in $\ppm$ did not deliver $C_w$, but delivered some other command $C_r$ that reads $x$ and $C_r$ was ordered by multicast after $C_w$, then $\ppm$ already received an up-to-date value of $x$ (sent by servers in $\ppm_x$ during the execution of $C_r$). If servers in $\ppm$ discarded the cache of $x$ (e.g., due to limited memory), they will have to send a request for its value.
@@ -443,26 +395,6 @@ For both Post and Follow/unfollow workloads, datasets with locality (Figure~\ref
 \label{fig:perf1}
 \end{figure*}
 
-%Table~\ref{tbl:default} shows the percentage of overhead in throughput due to signals in workloads that experience locality and in balanced workloads (i.e., without locality).
-%
-%\begin{table}[htp]
-%\centering
-%\small
-%\begin{tabular}{|l|c|c|c|c|} \hline
-%Dataset...				& Partitions	& Timeline		& Post		& Follow/Unfollow \\ \hline
-%~~~~...with locality			& 2			&	0\%	        & 0\%		&	65\%              \\ \cline{2-5}
-%              				& 4			&	0\%	        & 0\%		&	50\%              \\ \cline{2-5}
-%              				& 8			&	7\%	        & -5\%	    	&	32\%              \\ \cline{2-5}
-%              				& 16			&	1\%	        & 1\%		&	27\%              \\ \hline
-%~~~~...without locality		& 2			&	1\%	        & 2\%		&	61\%              \\ \cline{2-5}
-%              				& 4			&	0\%	        & 1\%		&	55\%              \\ \cline{2-5}
-%              				& 8			&	7\%	        & 1\%		&	35\%              \\ \cline{2-5}
-%              				& 16			&	2\%	        & -117\%		&	32\%               \\ \hline
-%\end{tabular}
-%\caption{Overhead in throughput due to signals in datasets with and without locality.}
-%\label{tbl:default}
-%\end{table}%
-
 
 \section{Related work}
 \label{sec:rwork}
@@ -478,7 +410,6 @@ State machine replication seems at first to prevent multi-threaded execution sin
 However, some works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way.
 In \cite{santos2013htsmr}, for instance, the authors propose organizing each replica in multiple modules that perform different tasks concurrently, such as receiving messages, batching, and dispatching commands to be executed.
 The execution of commands is still sequential, but the replica performs all other tasks in parallel. 
-%We also implemented this kind of parallelism in Eyrie.
 
 Some works have proposed to parallelize the execution of commands in SMR.
 In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands can be executed in any order relative to one another).
@@ -488,7 +419,6 @@ After a batch of commands is executed, replicas verify whether they reached a co
 Both \cite{kotla2004htbft} and \cite{kapritsos2012eve} assume a Byzantine failure model and in both cases, a single thread is responsible for receiving and scheduling commands to be executed.
 In the Byzantine failure model, command execution typically includes signature handling, which can result in expensive commands.
 Under benign failures, command execution is less expensive and the thread responsible for command reception and scheduling may become a performance bottleneck.
-%For commands that take long to execute, this may not be a problem, but for workloads where the command execution time is shorter than the parallelization time, those approaches may not scale.
 
 Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure strong consistency as we define it here (i.e., as linearizability). Many works (e.g., \cite{chundi96dur, kobus2013hybrid, sciascia2012sdur, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. For some applications, this kind of consistency is good enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
@@ -502,6 +432,7 @@ To ensure strong consistency across partitions, it assumes that clocks are synch
 The authors say that Spanner works well with GPS and atomic clocks.
 
 Scalable State Machine Replication employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even in the presence of multi-partition commands and unsynchronized clocks.
+
 
 \section{Final remarks}
 \label{sec:final}

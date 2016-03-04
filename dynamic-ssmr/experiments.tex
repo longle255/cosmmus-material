@@ -81,8 +81,8 @@ In the Post workload, every command accesses up to all partitions in the system,
 We can see that the throughput of \ssmr\ decreases significantly as the number of partitions increases.
 For \dssmr{}, we can see that the system throughput scales with the number of partitions.
 This happens because User objects that are accessed together, but which are in different partitions, are moved to the same partition based on the interests of the users.
-In the case of post command on 2 partitions, the number of move commands started ~3kcps, over 23kps of throughput, then reduced to less than 0.1kcps over time.\fxnote[draft]{Add ratio of move command}
 As the execution proceeds, this leads to a lower rate of multi-partition commands, which allows throughput to scale.
+(In the case of posts on 2 partitions, the number of move commands started at 3 kcps, with throughput of 23 kps, and eventually reduced to less than 0.1 kcps.)
 As a result the throughput improvement of \dssmr{} with respect to \ssmr\ increases over time.
 With eight partitions, \dssmr{} sports a performance that is 45 times that of \ssmr!
 
