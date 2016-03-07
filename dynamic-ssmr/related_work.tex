@@ -1,7 +1,7 @@
 \section{Related work}
 \label{sec:rw}
 
-State machine replication is a well-known approach to replication (e.g., \cite{kapritsos2012eve, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
+State machine replication is a well-known approach to replication (e.g., \cite{Kapritsos:2012um, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
 It requires replicas to execute commands deterministically, which implies sequential execution.
 Even though improving the performance of SMR is non-trivial, different techniques have been proposed to achieve scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
 In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
