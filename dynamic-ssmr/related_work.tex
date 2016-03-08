@@ -1,7 +1,7 @@
 \section{Related work}
 \label{sec:rw}
 
-State machine replication is a well-known approach to replication (e.g., \cite{Kapritsos:2012um, kotla2004htbft, Lam78, santos2013htsmr, Sch90}).
+State machine replication is a well-known approach to replication (e.g., \cite{Lam78, Sch90, Kapritsos:2012um, kotla2004htbft, santos2013htsmr}).
 It requires replicas to execute commands deterministically, which implies sequential execution.
 Even though improving the performance of SMR is non-trivial, different techniques have been proposed to achieve scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
 In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
@@ -11,10 +11,10 @@ In~\cite{biely2012spaxos}, Paxos~\cite{Lamport:1998ea} is used to order commands
 Other works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way. 
 In \cite{santos2013htsmr}, the authors propose to receive, batch, and dispatch commands in parallel, while commands themselves are still executed sequentially.
 In \cite{kotla2004htbft}, a parallelizer module uses application semantics to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands, which can be executed in any order relative to one another).
-In \cite{kapritsos2012eve}, commands are speculatively executed in parallel.
+In \cite{Kapritsos:2012um}, commands are speculatively executed in parallel.
 After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially. 
 
-Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure linearizability. Many works (e.g., \cite{chundi96dur, kobus2013hybrid, sciascia2012sdur, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. 
+Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure linearizability. Many works (e.g., \cite{sciascia2012sdur, chundi96dur, kobus2013hybrid, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. 
 For some applications, this consistency level is enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
 Besides \ssmr{}~\cite{bezerra2014ssmr}, other works have tried to make linearizable systems scalable~\cite{corbett2013spanner, Glendenning2011, Marandi11}.
