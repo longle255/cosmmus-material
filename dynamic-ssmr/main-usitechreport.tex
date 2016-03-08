@@ -1,0 +1,94 @@
+\documentclass{usiinftr}
+
+\usepackage{graphicx}
+%\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage[noend]{distribalgo}
+\usepackage{xspace}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\vvt}{$\mathcal{V}$}
+\newcommand{\rr}{$\mathcal{R}$}
+\newcommand{\rrm}{\mathcal{R}}
+\newcommand{\sst}{$\mathcal{S}$}
+\newcommand{\ssm}{\mathcal{S}}
+%
+% S-SMR
+\newcommand{\ssmr}{\mbox{S-SMR}\xspace}
+\newcommand{\ssmrshort}{Scalable SMR}
+\newcommand{\ssmrlong}{Scalable State Machine Replication}
+%
+% DS-SRM
+\newcommand{\dssmr}{\mbox{DS-SMR}}
+\newcommand{\dssmrshort}{Dynamic S-SMR}
+\newcommand{\dssmrlong}{Dynamic Scalable State Machine Replication}
+%
+% Eyrie and Chirper temporary name (double blind)
+\newcommand{\libname}{Eyrie}   % rename to Eyrie   after paper is accepted
+\newcommand{\appname}{Chirper} % rename to Chirper after paper is accepted
+%
+\newcommand{\rmcast}{reliable-multicast}
+\newcommand{\rmdel}{reliable-deliver}
+\newcommand{\amcast}{atomic-multicast}
+\newcommand{\amdel}{atomic-deliver}
+\begin{document}
+
+\title{\dssmrlong}
+
+%\author{[Regular Paper]\\\vspace{20pt}}
+
+%\author{
+%\IEEEauthorblockN{Resarch Paper}
+%\IEEEauthorblockA{Name of Authors\\Omitted}
+%}
+
+%\author{\IEEEauthorblockN{Long Hoang Le}
+%\IEEEauthorblockA{University of Lugano\\Switzerland}
+%\and
+%\IEEEauthorblockN{Carlos Eduardo Bezerra}
+%\IEEEauthorblockA{University of Lugano\\Switzerland}
+%\and
+%\IEEEauthorblockN{Fernando Pedone}
+%\IEEEauthorblockA{University of Lugano\\Switzerland}}
+
+\author{Long Hoang Le}{1}
+\author{Carlos Eduardo Bezerra}{1}
+\author{Fernando Pedone}{1}
+
+\affiliation{1}{\USIINF}
+
+\TRnumber{2016-1}
+
+\maketitle
+\thispagestyle{plain}
+\pagestyle{plain}
+%
+\input{abstract}
+\input{introduction}
+\input{model-and-definitions}
+\input{background-and-motivation}
+\input{dynamic-ssmr}
+\input{implementation}
+\input{experiments}
+\input{related_work}
+\input{conclusion}
+
+%removed acks because of double-blind!!! re-enable after getting accepted
+\input{acks}
+
+%\pagebreak
+
+% why did you have this vvv ?
+%\bibliographystyle{splncs03}
+\bibliographystyle{ieeetr}
+\bibliography{references}
+\newpage
+
+
+\end{document}
