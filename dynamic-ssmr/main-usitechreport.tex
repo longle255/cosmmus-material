@@ -1,8 +1,9 @@
 \documentclass{usiinftr}
 
 \usepackage{graphicx}
-%\usepackage{amssymb}
 \usepackage{algorithm}
+% \usepackage{amssymb}
+\usepackage{mathtools}
 \usepackage[noend]{distribalgo}
 \usepackage{xspace}
 \usepackage{adjustbox}
@@ -12,6 +13,7 @@
 \newcommand{\ppm}{\mathcal{P}}
 \newcommand{\cc}{$\mathcal{C}$}
 \newcommand{\ccm}{\mathcal{C}}
+\newcommand{\kk}{$\mathcal{K}$}
 \newcommand{\vv}{$\mathcal{V}$}
 \newcommand{\vvm}{\mathcal{V}}
 \newcommand{\vvt}{$\mathcal{V}$}
@@ -19,6 +21,7 @@
 \newcommand{\rrm}{\mathcal{R}}
 \newcommand{\sst}{$\mathcal{S}$}
 \newcommand{\ssm}{\mathcal{S}}
+
 %
 % S-SMR
 \newcommand{\ssmr}{\mbox{S-SMR}\xspace}
@@ -38,6 +41,11 @@
 \newcommand{\rmdel}{reliable-deliver}
 \newcommand{\amcast}{atomic-multicast}
 \newcommand{\amdel}{atomic-deliver}
+
+\DeclareSymbolFont{letters}{OML}{utopia}{m}{it}
+\DeclareSymbolFont{symbols}{OMS}{cmsy}{m}{n}
+\DeclareSymbolFontAlphabet{\mathcal}{symbols}
+
 \begin{document}
 
 \title{\dssmrlong}
