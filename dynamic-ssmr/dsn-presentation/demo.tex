@@ -1,0 +1,175 @@
+\documentclass[10pt]{beamer}
+
+\usetheme[progressbar=frametitle]{metropolis}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\title{Dynamic Scalable State Machine Replication}
+%\subtitle{A modern beamer theme}
+\date{\today}
+\author{
+  Long Hoang Le\\
+<<<<<<< Updated upstream
+  \texttt{long.hoang.le@usi.ch}\\
+  \and
+  Eduardo Bezerra\\
+  \texttt{eduardo.bezerra@usi.ch}\\
+  \and
+  Fernando Pedone\\
+  \texttt{fernando.pedone@usi.ch}}
+=======
+  long.hoang.le@usi.ch
+  \and
+  Eduardo Bezerra\\
+  eduardo.bezerra@usi.ch
+  \and
+  Fernando Pedone\\  
+  fernando.pedone@usi.ch
+}
+>>>>>>> Stashed changes
+  
+\institute{Università della Svizzera italiana (USI)}
+%\titlegraphic{\includegraphics[height=1.5cm]{figures/logo}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Outlines}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Motivation}
+
+\begin{frame}[fragile]{State Machine Replication}
+
+  \begin{figure}
+    \includegraphics<1>[width=.8\textwidth]{figures/smr-1}
+    \includegraphics<2>[width=.8\textwidth]{figures/smr-2}
+    \includegraphics<3>[width=.8\textwidth]{figures/smr-3}
+  \end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{State Machine Replication}
+
+
+  \begin{itemize}
+  \item Implementing fault-tolerant services
+
+  \item Providing strong consistency
+
+  \item Applications: 
+    \begin{itemize}
+      \item Google Spanner
+      \item CouchDB
+    \end{itemize}
+  \item \alert {Lack of scalability}
+  \end{itemize}
+
+\end{frame}
+
+<<<<<<< Updated upstream
+\begin{frame}[fragile]{Scalable State Machine Replication}
+  A
+\end{frame}
+
+\section{Dynamic Scalable State Machine Replication}
+
+\begin{frame}{General idea}
+	A
+=======
+\section{Titleformats}
+
+\begin{frame}{Metropolis titleformats}
+  \themename supports 4 different titleformats:
+  \begin{itemize}
+    \item Regular
+    \item \textsc{Smallcaps}
+    \item \textsc{allsmallcaps}
+    \item ALLCAPS
+  \end{itemize}
+  They can either be set at once for every title type or individually.
+>>>>>>> Stashed changes
+\end{frame}
+
+{
+\metroset{titleformat frame=smallcaps}
+\begin{frame}{Small caps}
+  This frame uses the \texttt{smallcaps} titleformat.
+
+  \begin{alertblock}{Potential Problems}
+    Be aware, that not every font supports small caps. If for example you typeset your presentation with pdfTeX and the Computer Modern Sans Serif font, every text in smallcaps will be typeset with the Computer Modern Serif font instead.
+  \end{alertblock}
+\end{frame}
+}
+
+<<<<<<< Updated upstream
+
+\section{Performance Evaluation}
+=======
+{
+\metroset{titleformat frame=allsmallcaps}
+\begin{frame}{All small caps}
+  This frame uses the \texttt{allsmallcaps} titleformat.
+
+  \begin{alertblock}{Potential problems}
+    As this titleformat also uses smallcaps you face the same problems as with the \texttt{smallcaps} titleformat. Additionally this format can cause some other problems. Please refer to the documentation if you consider using it.
+
+    As a rule of thumb: Just use it for plaintext-only titles.
+  \end{alertblock}
+\end{frame}
+}
+
+{
+\metroset{titleformat frame=allcaps}
+\begin{frame}{All caps}
+  This frame uses the \texttt{allcaps} titleformat.
+
+  \begin{alertblock}{Potential Problems}
+    This titleformat is not as problematic as the \texttt{allsmallcaps} format, but basically suffers from the same deficiencies. So please have a look at the documentation if you want to use it.
+  \end{alertblock}
+\end{frame}
+}
+
+\section{Elements}
+>>>>>>> Stashed changes
+
+\begin{frame}[fragile]{Typography}
+      \begin{verbatim}The theme provides sensible defaults to
+\emph{emphasize} text, \alert{accent} parts
+or show \textbf{bold} results.\end{verbatim}
+
+  \begin{center}becomes\end{center}
+
+  The theme provides sensible defaults to \emph{emphasize} text,
+  \alert{accent} parts or show \textbf{bold} results.
+\end{frame}
+
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+
+  Get the source of this theme and the demo presentation from
+
+  \begin{center}\url{github.com/matze/mtheme}\end{center}
+
+  The theme \emph{itself} is licensed under a
+  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+  Attribution-ShareAlike 4.0 International License}.
+
+  \begin{center}\ccbysa\end{center}
+
+\end{frame}
+
+\plain{Questions?}
+
+\end{document}
