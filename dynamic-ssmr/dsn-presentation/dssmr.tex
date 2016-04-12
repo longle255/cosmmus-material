@@ -124,6 +124,10 @@
     \item No Byzantine behavior
   \end{itemize}
   System is partially synchronous
+  \begin{itemize}
+    \item No delay bound
+  \end{itemize}
+  Relies on atomic multicast
 \end{frame}
 
 \begin{frame}{General idea}
@@ -192,6 +196,12 @@
         \item DS-SMR Proxy Server
       \end{itemize}
     \end{block}
+  }
+  \only<4>  {
+    \begin{itemize}
+      \item Clients atomic multicast commands to oracle and partitions
+      \item Oracle, partitions exchange message by reliable multicast
+    \end{itemize}  
   }
 
   
