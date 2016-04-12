@@ -127,3 +127,7 @@ main.pdf
 *.fls
 *.fdb_latexmk
 archives/
+*.nav
+*.snm
+*.toc
+*.vrb
