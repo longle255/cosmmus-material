@@ -104,8 +104,8 @@
   \end{itemize}
   Expensive cost of multi-partition commands
   \begin{itemize}
-    \item Relies on static mapping
-    \item Mapping does not need to be minimal
+    \item Partitions need to exchange signal
+    \item Performance decreases when number of involved partitions increases
   \end{itemize}
   
 \end{frame}
@@ -253,7 +253,7 @@
 \begin{frame}{Environment setup and configuration parameters}
   Running \emph{Chirper} under different loads and partitionings.
 
-  Partitionings: 2 replicas and 3 acceptors for each partition
+  Partitioning: 2 replicas and 3 acceptors for each partition
 
   Experiment on 2, 4, 8 partitions
 
