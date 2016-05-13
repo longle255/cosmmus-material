@@ -1,0 +1,228 @@
+===========================================================================
+                           DSN 2016 Review #198A
+---------------------------------------------------------------------------
+          Paper #198: Dynamic Scalable State Machine Replication
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 1. No familiarity
+
+                         ===== Paper summary =====
+
+The paper describes an approach to getting performance scaling in replicated state machines.  The approach is to partition the state so that different replicates deal with different parts of the state.  The paper presents a detailed explanation of the technique and a clear and useful performance assessment.
+
+                           ===== Strengths =====
+
++ Well presented problem explanation and solution approach.
++ Reported performance results are quite strong.
+
+                          ===== Weaknesses =====
+
+- Relies on argument rather than proof for correctness.
+
+                      ===== Comments for author =====
+
+In general, this paper is clearly written, defines the problem well, and presents a detailed solution approach.
+On page 2 the paper states that that the approach exploits locality.  This is true, of course, in the partitioning and caching, but I wonder whether there is not a lot more locality to exploit.  Would an approach based more on working sets allow some efficiency gain?  And what about speculative execution with undo if the guess was wrong?
+Section III-D (Correctness) is a good try but correctness for something like this cannot rest on argument.  A proof really is essential for wide deployment.
+Minor: a proof reading would be a useful thing to do.  I found text that was not a sentence but should be and "bad" is an adjective not an adverb
+
+===========================================================================
+                           DSN 2016 Review #198B
+---------------------------------------------------------------------------
+          Paper #198: Dynamic Scalable State Machine Replication
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+This paper presents an extension of the state machine replication technique to cope with different access patterns throughout the execution. Context of the proposed study is clearly presented, as well as description of close solutions. This work is based on an existing solution that provides a solution to multi-partition commands. The extension mainly consists in using an oracle that maintains global knowledge on the location of state variables, and that is in charge of the creation, deletion and moving of variables.
+
+                           ===== Strengths =====
+
+- address the load balancing  issue in presence of different access patterns.
+
+                          ===== Weaknesses =====
+
+- flaws in the atomic multicast specification
+- The impact of omissions and crashes on the correctness of the command execution is not healed with, in particular during creation and deletion of variables.
+- load balancing arguments seem to apply to only very specific access patterns
+- reliable and atomic multicast primitives are interleaved with not necessarily non-overlapping   destination sets. Impact on the correctness of the command execution should be clarified.
+
+                      ===== Comments for author =====
+
+This paper is well written and tackles an interesting problem, however there are some points that should be clarified:
+
+- 1). in the Introduction you say that "[...] the scalability requirement rules out the use of a centralized oracle that clients can consult to find out the partitions a command must be multicast to. [..]", while in the paragraph described the proposed solution, it is said "[...] to track object locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the locations of state variables, each client caches previous consults to the oracle. As a result the centralized oracle is only contacted the first time a client access a variable or after a variable changes its partition". This exactly comes down to contact the centralized oracle each time a client wants to access a variable.  More importantly, in presence of commands with overlapping sets of variables, the proposed solution may lead to situations in which each set of variable is moved from one partition to another one at each command invocation. The presence of the cache facility at each client proxy does not solve this issue. It is also argued that to improve load balancing, clients randomly choose the partition that will receive all the variables involved in their commands. The issue is that there is no reason for variables to be equally distributed into the commands, thus even if commands are uniformly distributed over the partitions, the possible unbalance will remain.
+
+- 2) Reliable multicast definition : 
+2.1)Given the fact that an asynchronous model is considered, all the properties can only "eventually" hold (so please correct them in that sense). 
+2.2)The agreement property is already implied by the validity one. Indeed, usually the validity property is stated as follow: "If a correct process multicast(\gamma,m) then it eventually delivers m" and thus an agreement property (such as "If a correct process in \gamma delivers m then all correct processes in \gamma eventually deliver m"). In contrast, your validity property states that "if a correct process multicast(\gamma,m) then all correct processes in \gamma delivers m". Thus the agreement property is useless. 
+3) Atomic multicast:
+3.1) The uniform agreement definition is flawed. It is said that "if a process atomic-delivers m then every correct process atomic-delivers m". As processes may fail by omitting to send messages and by crashing then a violation of uniform atomic agreement is possible:  suppose that some process p_1 atomic-multicast m then atomic-delivers m and then fail by crashing. Suppose that due to omission failures none of the processes in gamma receive m. Then no correct process will ever deliver m. 
+3.2) The atomic order property is also flawed as it allows contamination of correct processes based on an inconsistent state of a faulty process: suppose that there are at least two processes in \gamma, such that all of the correct processes deliver m1, m2 and m3 while the faulty one delivers m1 and m3 (which conforms to the proposed specification). So the state of the faulty process is inconsistent when it multicast m4 to the other processes before crashing. The correct processes deliver m4, and thus can get contaminated by the inconsistent state of the faulty process. 
+This property should be corrected either by defining it in terms of prefix of sequences or by imposing that "if some process delivers m' after message m then a process delivers m' only after it has delivered m.
+
+Impact of such a contamination can be disastrous in your context as correct nodes may executed commands that are in contraction with their local state. 
+
+4) It is said in section III.A that in consensus-based protocols (e.g Paxos, or rotating coordinator algorithms), a single process is in charge of "[...] determining the order of commands". This is not true. By construction of the rotating coordinator algorithms (à la Chandra and Toueg), the sequence of decisions are shared among all the processes of the group according to the current round number of the algorithm so there is not a unique process in charge of this role.
+
+5) algorithm 3: responses from the server proxy to the client are not reliably sent (line 10 : send the reply to the client). What happens if the reply is loss ? More generally, while command are atomically sent to the oracle, move commands are "only" reliably multicast to the partitions. What about their interleaving ? Note that in the "server proxy paragraph" it is said that commands are atomically multicast to the server partitions. Which one is correct ? Moreover, when the server proxy delivers atomic messages these messages are  temporarily put in a set data structure up to their treatment. Does it have an impact on the order in which these message are handled ?
+
+6) The oracle proxy atomically delivers command while it replies to the client with simple sent messages (line 22: send prophecy to the client). As before it should be proven that this cannot lead to inconsistent decisions at the client side. 
+
+7) the experimental evaluation should be accompanied by simulations run with synthetic distribution load which would allow to validate the behavior of the proposed architecture in presence of biased access patterns.
+
+===========================================================================
+                           DSN 2016 Review #198C
+---------------------------------------------------------------------------
+          Paper #198: Dynamic Scalable State Machine Replication
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+This paper introduces DS-SMR, a state machine replication protocol,
+that scales up when adding replicas, by dynamically partitioning the
+replicated state machines' states.  DS-SMR improves on an earlier
+protocol called S-SMR, where partitioning is only done statically.  In
+both approaches replicas only hold some of the state variables, and
+they are partitioned according to the state variables they hold.
+Using S-SMR, a command does not have to be executed in every replica,
+it only has to be executed in the replicas that hold the variables
+involved in the command.  However, S-SMR saturates when the commands
+involve many partitions because part of the state has to be sent
+around to get hold of the necessary data.  DS-SMR solves this issue by
+allowing variables to migrate from one replica to another so that
+variables that are often accessed together in commands are grouped
+together in the same partition.
+
+                           ===== Strengths =====
+
+This paper is very well-structured and written.  
+
+Its contributions are clear and substantial.
+
+                          ===== Weaknesses =====
+
+.
+
+                      ===== Comments for author =====
+
+If DS-SMR ends up moving too many variables to the same partition, or
+if for some reason it turns out that some variables in a single
+partition are never accessed by the same commands, is there a way to
+split that partition into smaller partitions?
+
+Is it always a good idea to move variables around?  There probably are
+some pathological cases that show that it is not always the case.  Can
+you already deal with that?
+
+Detailed comments:
+------------------
+
+Here are a few more detailed comments:
+
+- In your abstract: ssmr -> S-SMR.
+
+- pp.4: A few more words on signals would be great.
+
+- pp.4: "S-SMR" likely performs better as the number of
+  multi-partition commands decreases".  Why "likely"?  Has that not
+  been checked?
+
+- pp.4: When reading "If the command accesses variables from multiple
+  partitions, the client first multicasts one or more move commands to
+  the oracle and to the involved partitions", I was thinking about
+  whether clients could then get into contention.  You mention how to
+  fix this issue on pp.5.  A forward reference, or mentioning here
+  that DS-SMR defaults back to S-SMR in that case would be useful I
+  think.
+
+- pp.5: "partitions and oracle exchange signals to ensure
+  linearizability, as described in Section III-B".  Shouldn't
+  "described" be "mentioned"?
+
+- pp.5: When reading "To maintain such a global knowledge, the oracle
+  must atomic-deliver every command that creates, moves, or delete
+  variables", I was thinking about whether oracles could end up being
+  bottlenecks.  You address this issue later in subsection C.  A
+  forward reference would be useful.
+
+- pp.6: "For this reason, and to save time, the client proxy
+  multicasts all move commands at once".  Is the point that you do
+  that event if commands somehow "conflict"?
+
+- pp.7: "One way of balancing load is by having roughly the same
+  number of state variable in every partition.  This can be
+  implemented by having client proxies choosing randomly the
+  partition"...  Does that entirely solve the issue?
+
+- pp.7: "means that both messages are delivered by the same
+  processes".  Shouldn't that say that "there exists a process that
+  delivers both messages" instead?  Otherwise the "or" here doesn't
+  make much sense.  Also, you later say on pp.8: "where some process
+  p_0 ... delivers y, then z_1", which would correspond to a
+  definition of that ordering relation that uses "there exists a
+  process" and not "by the same processes".
+
+- pp.8: "Proof: Command z_{i+1} is multicast to both P_i and P_{i+1}".
+  Why?  In that proof, why not set x = z_{n+1}.  The proof would be a
+  bit shorter.
+
+- pp.8: "The developed informs to Nest".  Informs Nest?
+
+- pp.8: "All calls to methods of such objects are intercepted by
+  Flitter".  Shouldn't that be Nest instead of Flitter?
+
+- pp.9: "and fallback to DS-SMR".  Shouldn't that be S-SMR instead of
+  DS-SMR?
+
+- pp.10: Regarding your experiment, How often are users moved from one
+  partition to another?  It would be good to get a sense of how
+  partitions evolve over time.  How often does DS-SMR defaults back to
+  using S-SMR?
+
+- pp.10: "DS-SMR advantage".  DS-SMR's advantage?
+
+- pp.12: [22] and [28] are the same reference.  [22] has that weird
+  0009, and in [28] eve should be Eve.
+
+===========================================================================
+                           DSN 2016 Review #198D
+---------------------------------------------------------------------------
+          Paper #198: Dynamic Scalable State Machine Replication
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+This paper presents a variant of state machie replication (SMR) that exploit access locality to achieve better performance and scalability. Data that are frequently accessed together are gathered in the same partition to avoid costly synchronisation between partitions. The partitioning scheme is determined dynamically by DR-SMR based on the workload. Evaluation has been conducted on a cluster with a twitter-like application workload.
+
+                           ===== Strengths =====
+
+- Approach is original and sound, addresses a concrete problem
+- Results are very good
+
+                          ===== Weaknesses =====
+
+- Extension of S-SMR rather than a general-purpose technique for SMR
+
+                      ===== Comments for author =====
+
+The idea of dynamically exploiting locality observed in workloads is conceptually very simple but not obvious to implement properly. In this paper, the authors propose a smart way of doing so. The extend the design of scalable SMR (S-SMR [8]) by replacing the static mapping of variables to partitions by a dynamic mapping that is orchestrated by a partitioning oracle. The oracle oversees accesses to variables by clients and the placement of variables. Move operations are driven by clients as they access multiple variables: in that case they first move the variables before accessing them all in the same partition. Hence moves happen lazily (on demand) in such a way that the mapping eventually adapts to access patterns (and hopefully stabilises), at which point accesses become very efficient. The algorithm also supports caching and load balancing for improved performance.
+
+I really liked this paper overall. It is well written and represents an original contribution in the widely studied field of SMR. The problem is well formalised and analysed (including proofs of correctness). The ideas is particularly ingenious and the approach is sound. The results of the experimental evaluation with realistic application workloads are also quite convincing. Most remarkably, the performance benefits of this simple scheme is impressive, reaching 45 times in some experiments.
+
+My only mild concern is that this work can be seen as an extension of  S-SMR rather than a general-purpose technique for SMR. As a matter of fact, the evaluation only compares DS-SMR against S-SMR. It would be good to also include another baseline from the SMR literature.
+
+I could not find any information about the number of nodes used for experiments. Is there one node per partition?
+
+In abstract: "ssmr" should be capitalised.
+
