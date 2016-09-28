@@ -1,0 +1,80 @@
+\documentclass[conference]{IEEEtran}
+%\usepackage{llncsdoc}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage[noend]{distribalgo}
+\usepackage{fixme}
+\usepackage{xspace}
+\usepackage{adjustbox}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\kk}{$\mathcal{K}$}
+\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\vvt}{$\mathcal{V}$}
+\newcommand{\rr}{$\mathcal{R}$}
+\newcommand{\rrm}{\mathcal{R}}
+\newcommand{\sst}{$\mathcal{S}$}
+\newcommand{\ssm}{\mathcal{S}}
+%
+% S-SMR
+\newcommand{\ssmr}{\mbox{S-SMR}\xspace}
+\newcommand{\ssmrshort}{Scalable SMR}
+\newcommand{\ssmrlong}{Scalable State Machine Replication}
+%
+% DS-SRM
+\newcommand{\dssmr}{\mbox{DS-SMR}}
+\newcommand{\dssmrshort}{Dynamic S-SMR}
+\newcommand{\dssmrlong}{Dynamic Scalable State Machine Replication}
+%
+% Eyrie and Chirper temporary name (double blind)
+\newcommand{\libname}{Eyrie}   % rename to Eyrie   after paper is accepted
+\newcommand{\appname}{Chirper} % rename to Chirper after paper is accepted
+%
+\newcommand{\rmcast}{reliable-multicast}
+\newcommand{\rmdel}{reliable-deliver}
+\newcommand{\amcast}{atomic-multicast}
+\newcommand{\amdel}{atomic-deliver}
+\begin{document}
+
+\title{\dssmrlong}
+
+%\author{[Regular Paper]\\\vspace{20pt}}
+
+\author{
+\IEEEauthorblockN{Resarch Paper}
+\IEEEauthorblockA{Name of Authors\\Omitted}
+}
+
+\author{\IEEEauthorblockN{}
+\IEEEauthorblockA{}
+\and
+\IEEEauthorblockN{}
+\IEEEauthorblockA{}
+\and
+\IEEEauthorblockN{}
+\IEEEauthorblockA{}}
+
+\maketitle
+\thispagestyle{plain}
+\pagestyle{plain}
+%
+
+\input{correctness}
+
+
+%\pagebreak
+
+% why did you have this vvv ?
+%\bibliographystyle{splncs03}
+\bibliographystyle{ieeetr}
+\bibliography{references}
+\newpage
+
+
+\end{document}
