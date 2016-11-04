@@ -7,6 +7,7 @@
 \usepackage{fixme}
 \usepackage{xspace}
 \usepackage{adjustbox}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 
 \newcommand{\ex}{$\mathcal{E}$}
 \newcommand{\pp}{$\mathcal{P}$}
@@ -40,32 +41,42 @@
 \newcommand{\rmdel}{reliable-deliver}
 \newcommand{\amcast}{atomic-multicast}
 \newcommand{\amdel}{atomic-deliver}
+
+\newcommand{\mynote}[3]{
+   \fbox{\bfseries\sffamily\scriptsize#1}
+   {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
+\newcommand{\fp}[1]{\mynote{Fernando}{#1}{Red}}
+
+
 \begin{document}
 
-\title{\dssmrlong}
+\title{On the power of locality: Designing partitioned systems that fulfill their promises}
 
-%\author{[Regular Paper]\\\vspace{20pt}}
-
-\author{
-\IEEEauthorblockN{Resarch Paper}
-\IEEEauthorblockA{Name of Authors\\Omitted}
-}
-
-\author{\IEEEauthorblockN{}
-\IEEEauthorblockA{}
-\and
-\IEEEauthorblockN{}
-\IEEEauthorblockA{}
-\and
-\IEEEauthorblockN{}
-\IEEEauthorblockA{}}
+%\author{\IEEEauthorblockN{}
+%\IEEEauthorblockA{}
+%\and
+%\IEEEauthorblockN{}
+%\IEEEauthorblockA{}
+%\and
+%\IEEEauthorblockN{}
+%\IEEEauthorblockA{}}
 
 \maketitle
 \thispagestyle{plain}
 \pagestyle{plain}
-%
 
-\input{correctness}
+\input{abstract}
+\input{intro}
+\clearpage
+\input{model}
+\input{background}
+\input{centralized}
+\input{implementation}
+\input{experiments}
+\input{related_work}
+\input{conclusion}
+
+%\input{correctness}
 
 
 %\pagebreak
