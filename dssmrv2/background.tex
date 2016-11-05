@@ -1,0 +1,11 @@
+\subsection{Graph partitioning}
+%What is graph partitioning?
+Graph partitioning is an important subproblem of any system that aims parallelization and thus scalability, a bad partitioning can undermine all effort done in other parts of the system, so having a good partitioning is fundamental.
+
+%Need to relate the objects to the graph so it makes sense to use already functioning graph partitioning algorithms.
+
+%Definition of Graph partitioning
+Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ with $1 \leq i \leq k$ is a subset of $V$ such that $\bigcup p_i = V$ and $\bigcap p_i = \emptyset$.
+
+%What is a good partitioning? Our definition:
+We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$\section{Background}
