@@ -1,0 +1,12 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+This work introduces \dssmrlong{} (\dssmr), a scalable variant of the well-known state machine replication technique. 
+\dssmr{} implements dynamic state partitioning to adapt to different access patterns throughout the execution, while scaling throughput with the number of partitions and ensuring linearizability.
+To evaluate \dssmr{}, we developed the \libname\ library and implemented \appname{}, a scalable social network application, with \libname{}.
+In our experiments, we deployed \appname\ with both \dssmr\ and \ssmr{}.
+%, executing the application under workloads with weak and strong locality.
+The results demonstrate that \dssmr\ significantly improves the performance of \appname\ over \ssmr\ in the presence of multi-partition commands.
+%, specially for workloads with strong locality.
+
+%\clearpage
