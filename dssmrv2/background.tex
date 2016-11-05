@@ -65,3 +65,16 @@ However, the partitioning oracle of \ssmr\ relies on a static mapping of variabl
 One advantage of this implementation is that all clients and servers can have their own local oracle, which always returns a correct set of partitions for every query.
 Such a static mapping has the major limitation of not allowing the service to dynamically adapt to different access patterns.
 
+\subsection{Graph partitioning}
+%What is graph partitioning?
+Graph partitioning is an important subproblem of any system that aims parallelization and thus scalability, a bad partitioning can undermine all effort done in other parts of the system, so having the data well and evenly distributed is fundamental.
+
+%Need to relate the objects to the graph so it makes sense to use already functioning graph partitioning algorithms.
+
+%Definition of Graph partitioning
+Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ with $1 \leq i \leq k$ is a subset of $V$ such that $\bigcup p_i = V$ and $\bigcap p_i = \emptyset$.
+
+%What is a good partitioning? Our definition:
+We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$
+
+
