@@ -1,0 +1,32 @@
+\begin{abstract}
+%Borrow from SSMR paper
+
+%State machine replication (SMR) is a well-known technique to provide high availability and strong consistency (i.e., linearizability) to online services.
+%In SMR, client commands are executed in the same order on all server replicas: after executing each client command, every replica will reach the same state. 
+%%
+%One problem is that the original SMR model lacks scalability, as every replica executes all commands.
+%Because of that, adding replicas does not increase the maximum system throughput.
+%%
+%Scalable SMR (\ssmr) addresses this problem by partitioning the service state, allowing client commands to be executed only by some replicas, while still ensuring linearizability.
+%By doing this, \ssmr\ scales linearly with the number of partitions for workloads where each command accesses a single partition.
+%%
+%However, \ssmr\ may quickly become saturated when executing multi-partition commands,
+%as they require communication between partitions.
+%Dynamic S-SMR (\dssmr) solves this problem by repartitioning the state dynamically, based on the workload.
+%When a command needs variables from different partitions, those variables are first moved to the same partition.
+%Then, the command is executed as a single-partition command.
+%As a result, variables that are usually accessed together will tend to stay in the same partition, significantly improving scalability.
+%We evaluate the performance of \dssmr\ with a scalable social network application.
+
+State machine replication (SMR) is a well-known technique that guarantees strong consistency (i.e., linearizability) to online services.
+In SMR, client commands are executed in the same order on all server replicas, and after executing each command, every replica reaches the same state.
+However, SMR lacks scalability: every replica executes all commands, so adding servers does not increase the maximum throughput.
+Scalable SMR (\ssmr) addresses this problem by partitioning the service state, allowing commands to execute only in some replicas, providing scalability while still ensuring linearizability.
+One problem is that \ssmr quickly saturates when executing multi-partition commands,
+as partitions must communicate.
+%\fxnote[draft]{Change ssmr $\rightarrow$ S-SMR}
+\dssmrshort\ (\dssmr) solves this issue by repartitioning the state dynamically, based on the workload.
+Variables that are usually accessed together are moved to the same partition, which significantly improves scalability.
+We evaluate the performance of \dssmr\ with a scalable social network application.
+
+\end{abstract}
