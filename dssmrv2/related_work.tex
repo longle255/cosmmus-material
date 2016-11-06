@@ -1,1 +1,44 @@
 \section{Related work}
+\label{sec:rw}
+
+State machine replication is a well-known approach to replication (e.g., \cite{Lam78, Sch90, Kapritsos:2012um, kotla2004htbft, santos2013htsmr}).
+It requires replicas to execute commands deterministically, which implies sequential execution.
+Even though improving the performance of SMR is non-trivial, different techniques have been proposed to achieve scalable systems, such as optimizing the propagation and ordering of commands (i.e., the underlying atomic broadcast algorithm).
+In \cite{kapritsos2010scalable}, the authors propose to have clients send their requests to multiple computer clusters, where each such cluster executes the ordering protocol only for the requests it received, and then forwards this partial order to every server replica.
+The server replicas, then, must deterministically merge all different partial orders received from the ordering clusters.
+In~\cite{biely2012spaxos}, Paxos~\cite{Lamport:1998ea} is used to order commands, but it is implemented in a way such that the task of ordering messages is evenly distributed among replicas, as opposed to having a leader process that performs more work than the others and may eventually become a bottleneck. 
+
+Other works have proposed multi-threaded implementations of state machine replication, circumventing the non-determinism caused by concurrency in some way. 
+In \cite{santos2013htsmr}, the authors propose to receive, batch, and dispatch commands in parallel, while commands themselves are still executed sequentially.
+In \cite{kotla2004htbft}, a parallelizer module uses application semantics to determine which commands can be executed concurrently without reducing determinism (e.g., read-only commands, which can be executed in any order relative to one another).
+In \cite{Kapritsos:2012um}, commands are speculatively executed in parallel.
+After a batch of commands is executed, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially. 
+
+Many database replication schemes also aim at improving the system throughput, although commonly they do not ensure linearizability. Many works (e.g., \cite{sciascia2012sdur, chundi96dur, kobus2013hybrid, SousaOMP01}) are based on the deferred-update replication scheme, in which replicas commit read-only transactions immediately, not necessarily synchronizing with each other. This provides a significant improvement in performance, but allows non-linearizable executions to take place. The consistency criteria usually ensured by database systems are serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}. Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. 
+For some applications, this consistency level is enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
+
+Besides \ssmr{}~\cite{bezerra2014ssmr}, other works have tried to make linearizable systems scalable~\cite{corbett2013spanner, Glendenning2011, Marandi11}.
+In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
+In \cite{Marandi11}, a partitioned variant of SMR is proposed.
+However, it requires total order (i.e., all commands have to be ordered against each other) and it does not allow update commands to access variables from different partitions.
+Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition.
+To ensure strong consistency across partitions, it assumes that clocks are synchronized within a certain bound that may change over time.
+The authors say that Spanner works well with GPS and atomic clocks.
+\dssmrlong\ employs state partitioning and ensures linearizability for any possible execution, while allowing throughput to scale as partitions are added, even when commands update multiple partitions and without synchronized clocks.
+
+%\pagebreak
+
+\dssmr\ is not to be confused with other dynamic replication schemes though. Systems such as~\cite{birman2010dsr,guessoum2003dar,dustdar2007soc} are ``dynamic'' in the sense that they allow the membership to be reconfigured during execution. For instance, a multicast layer based on Paxos can be reconfigured by adding or removing acceptors. They also allow server replicas to be added and removed during execution.
+However, this is orthogonal to what \dssmr\ proposes.
+\dssmrlong\ consists of allowing the \emph{state partitioning}, that is, which state variables belong to which partition, to change dynamically.
+The greatest challenge that is addressed by \dssmr\ is how to provide such a solution, with a dynamic partitioning oracle, while ensuring the strongest level of consistency (linearizability), as variables are created, deleted, and moved across partitions, based on the access patterns of the workload.
+
+
+Schism~\cite{curino2010sch} proposes an automatic graph-based partitioning of transactional databases that uses the workload to decide where to place data items.
+The authors detail how the workload is used to create a graph that captures dependencies between data items, but they do not provide much detail about how the repartitioning can be done dynamically without violating consistency.
+E-Store~\cite{taft2014est} is a reconfiguration system for transactional databases that repartitions the data according to the access patterns detected in the workload.
+It strives to minimize the number of multi-partition accesses and is able to redistribute data items among partitions during execution.
+However, E-Store assumes that all non-replicated tables form a tree-schema based on foreign key relationships.
+This has the drawback of ruling out graph-structured schemas and \mbox{$m$-$n$} relationships.
+\dssmr\ is a more general approach that works with any kind of relationship between data items, while also ensuring the strongest level of consistency.
+
