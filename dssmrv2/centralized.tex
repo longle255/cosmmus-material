@@ -2,3 +2,12 @@
 \section{The centralized partitioning scheme}
 
 \fp{Here we should describe the new scheme, which computes partitions on the fly based on feedback from the oracle}
+
+%Partitioning 
+
+\subsection{Dynamic repartitioning}
+%How do we do a repartitioning?
+Whenever an external agent to the system decides that there should be a new partitioning, it sends a \emph{Partition} command to the oracle, which executes the respective step in algorithm~\ref{alg:oracle_partition}. The system continues to operate normally while the partitioning is taking place.
+
+
+\input{algorithm_oracle_partition}

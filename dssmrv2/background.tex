@@ -1,5 +1,5 @@
 %!TEX root =  main.tex
-\section{Background: Scaling State Machine Replication}
+\section{Background}
 
 \fp{In this section, we should define SMR, S-SMR and DS-SMR!}
 
@@ -52,7 +52,6 @@ In \ssmr{}, partitions exchange signals while executing multi-partition commands
 This guarantees linearizability, at the cost of synchronizing partitions.
 
 
-
 S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
 Under workloads with multi-partition commands, however, it has limited performance, in terms of latency and throughput scalability. 
 Such decreased performance when executing multi-partition commands is due to
@@ -75,4 +74,4 @@ Graph partitioning is an important subproblem of any system that aims paralleliz
 Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ with $1 \leq i \leq k$ is a subset of $V$ such that $\bigcup p_i = V$ and $\bigcap p_i = \emptyset$.
 
 %What is a good partitioning? Our definition:
-We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$\section{Background}
+We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$
