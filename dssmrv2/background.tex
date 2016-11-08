@@ -6,14 +6,17 @@
 State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
 State machine replication ensures strong consistency (i.e., linearizability~\cite{Attiya04}) by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
 
-\subsection{Scaling state machine replication}
 By starting in the same initial state and executing the same sequence of deterministic commands, servers make the same state changes and produce the same reply for each command. To guarantee that servers deliver the same sequence of commands, SMR can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
 
-Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple reasons. First, the underlying communication protocol needed to ensure ordered message delivery may not scale itself (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
+Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple reasons. First, the underlying communication protocol needed to ensure ordered message delivery may itself not scale (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
 
+%\eb{We don't need to go into so much detail when we have already a lot of background to cover...}.
+% Remove candidate: BEGIN
 Several approaches have been proposed to address SMR's scalability limitations. To cope with communication overhead, some proposals have suggested to spread the load of ordering commands among multiple processes (e.g., \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single process to determine the order of commands (e.g., \cite{Lamport:1998ea}).%\fxnote[draft]{remove inapplicable reference}
 
-Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the following section, we review Scalable State Machine Replication (\ssmr), a proposal in the second category.
+Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}.
+% Remove candidate: END
+Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the next few sections, we review Scalable State Machine Replication (\ssmr), a proposal in the second category, as well as its dynamic-partitioning variant \dssmr.
 
 \subsection{Scalable State Machine Replication}
 \label{sec:ssmr}
@@ -51,7 +54,6 @@ To ensure linearizability, all partitions involved in the execution of a multi-p
 In \ssmr{}, partitions exchange signals while executing multi-partition commands~\cite{bezerra2014ssmr}.
 This guarantees linearizability, at the cost of synchronizing partitions.
 
-
 S-SMR improves on classical SMR by allowing replicated systems to scale, while ensuring linearizability. 
 Under workloads with multi-partition commands, however, it has limited performance, in terms of latency and throughput scalability. 
 Such decreased performance when executing multi-partition commands is due to
@@ -63,6 +65,85 @@ One way to reduce the number of multi-partition commands is by dynamically chang
 However, the partitioning oracle of \ssmr\ relies on a static mapping of variables to partitions.
 One advantage of this implementation is that all clients and servers can have their own local oracle, which always returns a correct set of partitions for every query.
 Such a static mapping has the major limitation of not allowing the service to dynamically adapt to different access patterns.
+
+\subsection{Dynamic Scalable State Machine Replication}
+
+Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
+Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$.
+Such a mapping is managed by the partitioning oracle, which, differently from \ssmr, is now implemented as a replicated service run by a group of server processes.
+The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
+In more detail, \dssmr\ distinguishes five types of commands:
+$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:ssmr}),
+$create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
+$delete(v)$ removes $v$ from the service state,
+% resulting in $part(v) = \emptyset$,
+$move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
+and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
+The reply from the oracle to a $consult$ command is called a $prophecy$.
+A prophecy usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$ is mapped to partition $\ppm$.
+% The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively (more details in Section~\ref{sec:algorithm}).
+%If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
+
+% explain which partitions deliver each partitioning command:
+% how are access, consult, create, move and delete implemented?
+
+%Once the oracle is in place, 
+Clients can consult the oracle to know which partitions each command should be multicast to, based on which variables are accessed by the command.
+If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
+If the command accesses variables from multiple partitions, the client first multicasts one or more $move$ commands to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
+Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
+If a subsequent command accesses the same variables, it will also access a single partition.
+With this scheme, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
+
+Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dssmr{}.
+It may happen that, between those operations, the partitioning changes.
+%We illustrate this in Figure~\ref{fig:move_case_1}.
+%Commands $C_1$ and $C_2$ read variable $x$.
+%Since partitioning is dynamic, the client issuing the commands first consults the oracle before multicasting each command.
+%$C_1$ executes without the interference of other commands, so consulting the oracle and multicasting the command only once is enough for $C_1$ to be executed.
+%However, before $C_2$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
+%When $C_2$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
+%A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting at least three commands separately: $consult$, $move$ and $access$.
+%The partitioning can change between the execution of any two of those commands.
+%\begin{figure}[b!]
+%  \includegraphics[width=\linewidth]{figures/move_case_1}
+%  \caption{Consulting the oracle and issuing an application command consist of multiple calls to \amcast{}.}
+%  \label{fig:move_case_1}
+%\end{figure}
+% \pagebreak
+To solve this problem, the client multicasts the set of variables accessed along with each access command.
+Upon delivery, each server checks the set of variables sent by the client.
+If all variables in the set belong to the local partition, the command is executed; otherwise, a $retry$ message is sent back to the client.
+When the client receives a $retry$ message, it consults the oracle again, possibly moving variables across partitions, and then reissues the access command.
+To guarantee termination, if the command fails a certain number of times, the client multicasts the command to all partitions and the servers execute it as in the original \ssmr{}.
+
+% detail create, move and delete, and explain that they are multi-partition commands, with need for signaling
+
+% in the detailed algorithm, say that, from the pov of the client, there are no partitions
+
+The \dssmr\ client consists of the application logic and a client proxy.
+%From the point of view of the application client, there are no partitions, but only state variables to be created, accessed or deleted.
+The application does not see the state variables divided into partitions.
+When the application issues a command, it sends the command to the proxy and eventually receives a reply.
+All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands as described in the previous paragraph) are executed by the client proxy, transparently to the application.
+When the client proxy multicasts a partitioning-related command to multiple partitions and the oracle, partitions and oracle exchange signals to ensure linearizability, as mentioned in Section~\ref{sec:ssmr}.
+Every server and oracle process has its own \dssmr\ proxy as well.
+At each server, the proxy checks whether commands can be executed and manages the exchange of data and signals between processes.
+At the oracle, the service designer defines the application-dependent rules that must be followed (e.g., where each variable is created at first) and a proxy is responsible for managing the communication of the oracle with both clients and servers when executing commands.
+\dssmr\ relies on a fault-tolerant multicast layer for disseminating commands across replicas and implementing reliable communication between partitions.
+Replies to commands are sent directly through the network.
+%Figure~\ref{fig:arch} illustrates the architecture of \dssmr{}.
+
+%\begin{figure*}
+%\begin{minipage}[b]{1.0\linewidth} % A minipage that covers the whole width of the page
+%\centering
+%      \includegraphics[width=0.8\linewidth]{figures/arch}
+%\end{minipage}
+%\caption{The architecture of \dssmrlong{}.}
+%\label{fig:arch}
+%\end{figure*}
+
+\eb{Hint at the possible benefits of using graph partitioning to distribute objects across partitions (i.e., make the link to the next subsection).}
 
 \subsection{Graph partitioning}
 %What is graph partitioning?
