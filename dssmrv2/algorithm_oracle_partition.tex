@@ -25,7 +25,7 @@
             \INDENT{\textbf{when} \rmdel$(Apply(round))$ from partition $o'$}
                 \STATE $rcvd\_applies_{round} \leftarrow rcvd\_applies_{round} \cup o'$
                 \IF{$rcvd\_applies_{round} \cap \oom = \emptyset$}
-                    \STATE \amcast$(\oom, Apply(round))$
+                    \STATE \amcast$(\oom \cup \ppm, Apply(round))$
                 \ENDIF
             \ENDINDENT
 
@@ -49,11 +49,15 @@
 
     \oo: The set of oracle partitions
 
-    \vspace{1mm}
+    \vspace{1.25mm}
+    
+    \pp: The set of server partitions
+
+    \vspace{1.25mm}
 
     $o.graph$: The graph stored in the oracle
 
-    \vspace{1mm}
+    \vspace{1.25mm}
 
     $o.partitioning$: The current graph partitioning
 
