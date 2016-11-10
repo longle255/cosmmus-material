@@ -2,17 +2,7 @@ LATEX     = pdflatex -synctex=1 -interaction=nonstopmode -halt-on-error
 BIBTEX    = bibtex
 EMBED     = ./embed_fonts.sh
 PDFOUT    = main
-INPUTS    = abstract.tex \
-            background.tex \
-            centralized.tex \
-            conclusion.tex \
-            correctness.tex \
-            experiments.tex \
-            implementation.tex \
-            intro.tex \
-            main.tex \
-            model.tex \
-            related_work.tex
+INPUTS    = main.tex
 
 default: $(PDFOUT)
 
