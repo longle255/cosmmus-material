@@ -9,7 +9,7 @@ State machine replication ensures linearizability~\cite{Attiya04} by coordinatin
 
 By starting in the same initial state and executing the same sequence of deterministic commands, servers make the same state changes and produce the same reply for each command. To guarantee that servers deliver the same sequence of commands, SMR can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
 
-Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple reasons. First, the underlying communication protocol needed to ensure ordered message delivery may itself not scale (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
+Despite its simple execution model, classical SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. This happens for a couple of reasons. First, the underlying communication protocol needed to ensure ordered message delivery may itself not scale (i.e., a communication bottleneck). Second, every command must be executed sequentially by each replica (i.e., an execution bottleneck).
 
 %\eb{We don't need to go into so much detail when we have already a lot of background to cover...}.
 % Remove candidate: BEGIN
@@ -31,7 +31,7 @@ Commands that access a single partition are executed as in classical SMR: replic
 In the case of a multi-partition command, replicas of the involved partitions deliver the command and then may need to exchange state in order to execute the command since some partitions may not have all the values read in the command.
 This mechanism allows commands to execute seamlessly despite the partitioned state.
 
-%\input{algorithm_ssmr}
+\input{algorithm_ssmr}
 
 %\begin{figure*}
 %\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
@@ -69,19 +69,18 @@ Such a static mapping has the major limitation of not allowing the service to dy
 
 \subsection{Dynamic Scalable State Machine Replication}
 
-Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
-Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$.
+\dssmr{}~\cite{le2016dssmr} defines a dynamic mapping of variables to partitions.
+Each variable $v$ is mapped to partition $\ppm$, that is, $v \in \ppm$.
 Such a mapping is managed by the partitioning oracle, which, differently from \ssmr, is now implemented as a replicated service run by a group of server processes.
 The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
 In more detail, \dssmr\ distinguishes five types of commands:
-$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$ (as described in Section~\ref{sec:ssmr}),
+$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
 $delete(v)$ removes $v$ from the service state,
 % resulting in $part(v) = \emptyset$,
 $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
 and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
-The reply from the oracle to a $consult$ command is called a $prophecy$.
-A prophecy usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$ is mapped to partition $\ppm$.
+The reply from the oracle is called a $prophecy$, and usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning $v \in \ppm$.
 % The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively (more details in Section~\ref{sec:algorithm}).
 %If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
 
@@ -118,21 +117,37 @@ If all variables in the set belong to the local partition, the command is execut
 When the client receives a $retry$ message, it consults the oracle again, possibly moving variables across partitions, and then reissues the access command.
 To guarantee termination, if the command fails a certain number of times, the client multicasts the command to all partitions and the servers execute it as in the original \ssmr{}.
 
+% Should we talk about proxies? It feels like it's not essential to DS-SMR...
+%
+%As described in more detail in \cite{le2016dssmr}, \dssmr\ encapsulates most of its complexity in a \emph{client proxy}, a \emph{server proxy}, and an \emph{oracle proxy}. By having these proxies, the application does not see the state variables divided into partitions.
+%When the application issues a command, it sends the command to the proxy and eventually receives a reply.
+%All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands) are executed by the client proxy, transparently to the application.
+
+\dssmr\ works very well when dealing with a \emph{perfectly partitionable state}, that is, when it is possible to distribute variables evenly among partitions, in a way that no command will access multiple partitions.
+As the execution goes, variables that are accessed together (i.e., by the same command) will be grouped together in the same partition, so the number of multi-partition commands will tend to zero as time goes by.
+However, if the state is not perfectly partitionable, \dssmr\ will keep moving variables back and forth across different partitions, degrading performance.
+Say $\vvm = \{v_1, v_2, v_3\}$, and say the workload consists of two types of commands, $C_1$ and $C_2$, where $C_1$ always accesses $v_1$ and $v_2$, while $C_2$ always accesses $v_2$ and $v_3$.
+It is impossible to distribute those variable among different partitions in a way that every command will access a single partition---we could have all variables in the same partition, but that would be a degeneration to traditional~SMR.
+
+It is clear that we can improve \dssmr\ by addressing non-perfectly partitionable states.
+Instead of always forcing variables that are accessed together to migrate to the same partition, we could attempt to have a central view of the variables (as opposed to a per-command repartitioning) and distribute them in a way that minimizes the overall number of multi-partition commands.
+One way of doing that is by modeling the execution as a graph, with variables and commands as vertices and edges respectively.
+
 % detail create, move and delete, and explain that they are multi-partition commands, with need for signaling
 
 % in the detailed algorithm, say that, from the pov of the client, there are no partitions
 
-The \dssmr\ client consists of the application logic and a client proxy.
-%From the point of view of the application client, there are no partitions, but only state variables to be created, accessed or deleted.
-The application does not see the state variables divided into partitions.
-When the application issues a command, it sends the command to the proxy and eventually receives a reply.
-All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands as described in the previous paragraph) are executed by the client proxy, transparently to the application.
-When the client proxy multicasts a partitioning-related command to multiple partitions and the oracle, partitions and oracle exchange signals to ensure linearizability, as mentioned in Section~\ref{sec:ssmr}.
-Every server and oracle process has its own \dssmr\ proxy as well.
-At each server, the proxy checks whether commands can be executed and manages the exchange of data and signals between processes.
-At the oracle, the service designer defines the application-dependent rules that must be followed (e.g., where each variable is created at first) and a proxy is responsible for managing the communication of the oracle with both clients and servers when executing commands.
-\dssmr\ relies on a fault-tolerant multicast layer for disseminating commands across replicas and implementing reliable communication between partitions.
-Replies to commands are sent directly through the network.
+%The \dssmr\ client consists of the application logic and a client proxy.
+%%From the point of view of the application client, there are no partitions, but only state variables to be created, accessed or deleted.
+%The application does not see the state variables divided into partitions.
+%When the application issues a command, it sends the command to the proxy and eventually receives a reply.
+%All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands as described in the previous paragraph) are executed by the client proxy, transparently to the application.
+%When the client proxy multicasts a partitioning-related command to multiple partitions and the oracle, partitions and oracle exchange signals to ensure linearizability, as in \ssmr{}.
+%Every server and oracle process has its own \dssmr\ proxy as well.
+%At each server, the proxy checks whether commands can be executed and manages the exchange of data and signals between processes.
+%At the oracle, the service designer defines the application-dependent rules that must be followed (e.g., where each variable is created at first) and a proxy is responsible for managing the communication of the oracle with both clients and servers when executing commands.
+%\dssmr\ relies on a fault-tolerant multicast layer for disseminating commands across replicas and implementing reliable communication between partitions.
+%Replies to commands are sent directly through the network.
 %Figure~\ref{fig:arch} illustrates the architecture of \dssmr{}.
 
 %\begin{figure*}
