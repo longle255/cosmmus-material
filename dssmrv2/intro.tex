@@ -36,8 +36,8 @@ The scheme is \emph{decentralized}, in that clients are responsible for repartit
 In workloads that exhibit \emph{strong locality}, the system eventually converges to a partitioning that delivers scalable performance.
 
 To define locality, assume that the workload is represented by a graph in which vertices are objects (i.e., the service state) and edges interconnect objects accessed by a command (i.e., an edge between objects $o_i$ and $o_j$ means that there is a command that accesses $o_i$ and $o_j$).
-Strong locality means that the workload graph contains connected components.
-Intuitively, the decentralized scheme works because connected components can be entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
+Strong locality means that the workload graph contains connected components with the same size.
+Intuitively, the decentralized scheme works because those connected components can be entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
 
 \vspace{30mm}
 

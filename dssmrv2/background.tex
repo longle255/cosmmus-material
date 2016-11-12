@@ -4,8 +4,8 @@
 \subsection{State Machine Replication}
 \label{sec:smr}
 
-State machine replication is a fundamental approach to implementing a fault-tolerant service by replicating servers and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
-State machine replication ensures linearizability~\cite{Attiya04} by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
+State machine replication is a fundamental approach to implement a fault-tolerant service by replicating servers, and coordinating the execution of client commands against server replicas~\cite{Lam78,Sch90}. 
+SMR ensures linearizability~\cite{Attiya04} by coordinating the execution of commands in the different replicas: Every replica has a full copy of the service state $\vvm = \{v_1, ..., v_m\}$ and executes commands submitted by the clients in the same order. A command is a program consisting of a sequence of operations, which can be of three types: $read(v)$, $write(v, val)$, or a deterministic computation.
 
 By starting in the same initial state and executing the same sequence of deterministic commands, servers make the same state changes and produce the same reply for each command. To guarantee that servers deliver the same sequence of commands, SMR can be implemented with atomic broadcast: commands are atomically broadcast to all servers, and all correct servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
 
@@ -17,7 +17,7 @@ Several approaches have been proposed to address SMR's scalability limitations. 
 
 Two directions of research have been suggested to overcome execution bottlenecks. One approach (scaling up) is to take advantage of multiple cores to execute commands concurrently without sacrificing consistency \cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}.
 % Remove candidate: END
-Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the next few sections, we review Scalable State Machine Replication (\ssmr), a proposal in the second category, as well as its dynamic-partitioning variant \dssmr.
+Another approach (scaling out) is to partition the service's state and replicate each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In the next few sections, we review Scalable State Machine Replication (\ssmr) and its dynamic-partitioning variant \dssmr, both proposals related to scaling out the state.
 
 \subsection{Scalable State Machine Replication}
 \label{sec:ssmr}
@@ -28,7 +28,7 @@ S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by e
 
 To execute a command, the client multicasts the command to the appropriate partitions, as determined by the oracle.
 Commands that access a single partition are executed as in classical SMR: replicas of the concerned partition agree on the execution order and each replica executes the command independently.
-In the case of a multi-partition command, replicas of the involved partitions deliver the command and then may need to exchange state in order to execute the command since some partitions may not have all the values read in the command.
+In the case of a multi-partition command, replicas of the involved partitions deliver the command and then may need to exchange state, since some partitions may not have all the values read in the command.
 This mechanism allows commands to execute seamlessly despite the partitioned state.
 
 \input{algorithm_ssmr}
