@@ -16,13 +16,10 @@ Graph partitioning is an important subproblem of any system that aims paralleliz
 %EF:  Need to relate the objects to the graph so it makes sense to use already functioning graph partitioning algorithms.
 
 %EF:  Definition of Graph partitioning
-Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ with $1 \leq i \leq k$ is a subset of $V$ such that $\bigcup p_i = V$ and $\bigcap p_i = \emptyset$. That's it, the graph is partitioned in $k$ servers, each one with its respective replicas, all the objects are maintained partitioned among the replica.
+Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ with $1 \leq i \leq k$ is a subset of $V$ such that $\bigcup p_i = V$ and $\bigcap p_i = \emptyset$. That's it, the graph is partitioned in $k$ servers, each one with its respective replicas, all the objects (i.e., vertices) are maintained partitioned among the replica without being replicated among the servers.
 
 %EF:  What is a good partitioning? Our definition:
 We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$
-
-
-
 
 
 %EF: Partitioning 
