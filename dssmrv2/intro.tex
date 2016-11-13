@@ -68,6 +68,21 @@ In this case, throughput is substantially lower than what the optimum static sch
 In this paper, we introduce \dynastar, a partitioned state machine replication protocol based on a dynamic partitioning scheme that \emph{performs comparably to the optimized static scheme but does not require any a priori knowledge about the workload}.
 More precisely, \dynastar converges to the performance of the optimized static scheme.
 The core idea behind \dynastar is to collect workload information during the execution and periodically compute a partitioning of the service state using a graph partitioning algorithm (in our case METIS).
+%=======
+%To define locality, assume that the workload is represented by a graph in which vertices are objects (i.e., the service state) and edges interconnect objects accessed by a command (i.e., an edge between objects $o_i$ and $o_j$ means that there is a command that accesses $o_i$ and $o_j$).
+%Strong locality means that the workload graph contains connected components with the same size.
+%Intuitively, the decentralized scheme works because those connected components can be entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
+%
+%\vspace{30mm}
+%
+%We experimentally substantiate our claim with two extensions of existing S-SMR designs.
+%First, an optimal (but 
+%Second, a highly efficient design that approximates to the optimum
+%
+%
+%%We discuss our results in the case of a social network application, with operations to post a message and get the latest $n$ messages posted by a user friends (getTimeline).
+%%In such a service, one can optimize for Posts or GetTimelines.
+%>>>>>>> 61e9259356dd17daaa017679c42fdcd6c8b8fe10
 
 
 \vspace{30mm}
