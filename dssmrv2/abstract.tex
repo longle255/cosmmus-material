@@ -11,8 +11,8 @@ Because of that, adding replicas does not increase the maximum system throughput
 Scalable SMR (\ssmr) addresses this problem by partitioning the service state, allowing client commands to be executed only by some replicas, while still ensuring linearizability.
 By doing this, \ssmr\ scales linearly with the number of partitions for workloads where each command accesses a single partition.
 %
-However, \ssmr\ may quickly become saturated when executing multi-partition commands,
-as they require communication between partitions.
+%However, \ssmr\ may quickly become saturated when executing multi-partition commands,
+%as they require communication between partitions.
 Dynamic S-SMR (\dssmr) solves this problem by repartitioning the state dynamically, based on the workload.
 When a command needs variables from different partitions, those variables are first moved to the same partition.
 Then, the command is executed as a single-partition command.

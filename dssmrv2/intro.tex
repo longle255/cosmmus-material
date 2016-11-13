@@ -26,35 +26,72 @@ Multi-partition commands are multicast to all involved partitions; to prevent co
 
 Because single-partition commands are much more efficient than multi-partition commands (i.e., in some cases by a factor of more than 10x), the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
 But partitioning the service state with the goal of maximizing single-partition commands and without creating load imbalances among partitions is challenging.
-First, a favorable partitioning requires detailed information about the service workload (i.e., which commands access which objects and how frequently).
-Second, even if enough workload information is available, access patterns tend to change with time (e.g., in social networks users join and leave the system, new connections are created and removed), which require the partitioning to be constantly revisited.
+First, a favorable partitioning requires detailed a priori information about the service workload (i.e., which commands access which objects).
+Second, even if enough information is available, workloads change over time (e.g., in social networks users constantly join and leave the system, connections are created and removed), which requires the partitioning to be revisited.
 
-In light of these challenges, state partitioning needs to be dynamic, that is, adapt to workload changes on-the-fly.
-In \cite{hoang2016}, Long et al. propose a dynamic partitioning scheme that turns every multi-partition command into a single-partition command by grouping the objects involved in the command in a single partition before executing the command.
+In light of these challenges, state partitioning needs to be \emph{dynamic} and adapt to workload changes on-the-fly, as opposed to \emph{static}, in which the partitioning is defined before the system starts and re-partitioning the objects requires system shutdowns.
+In \cite{hoang2016}, Long et al. propose a dynamic partitioning scheme that turns every multi-partition command into a single-partition command by grouping the objects needed by a command in a single partition before executing the command.
 %The scheme relies on clients to decide where to group objects and largely outperforms static schemes (e.g., \cite{bezerra2014ssmr}) in workloads that provide a high degree of locality.
-The scheme is \emph{decentralized}, in that clients are responsible for repartitioning objects.
-In workloads that exhibit \emph{strong locality}, the system eventually converges to a partitioning that delivers scalable performance.
+The scheme is decentralized, in that clients decide to which partition the objects needed by a command should be moved.
+In workloads that exhibit \emph{strong locality} (defined next), the system eventually converges to a partitioning in which no further moves are needed.
+When this happens, performance scales with the number of partitions deployed.
 
-To define locality, assume that the workload is represented by a graph in which vertices are objects (i.e., the service state) and edges interconnect objects accessed by a command (i.e., an edge between objects $o_i$ and $o_j$ means that there is a command that accesses $o_i$ and $o_j$).
+To define locality, assume that the workload is represented by a graph in which vertices are objects, the service state, and edges interconnect objects accessed by a command. 
+An edge between objects $o_i$ and $o_j$ means that there is a command that accesses $o_i$ and $o_j$.
 Strong locality means that the workload graph contains connected components.
-Intuitively, the decentralized scheme works because connected components can be entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
+Intuitively, the decentralized scheme works because eventually the connected components are entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
+In the presence of \emph{weak locality}, however, objects permanently need to change partition, which hurts performance.
+
+\begin{figure*}[ht]
+	\center
+	\includegraphics[width=0.6\linewidth]{figures/motivation}
+	\caption{Performance under strong and weak locality.}
+	\label{fig:motivation}
+\end{figure*}
+
+To illustrate our point, we experimentally evaluate the dynamic partitioning protocol proposed in \cite{hoang2016} with workloads that exhibit strong and weak locality.
+We also compare the dynamic partitioning scheme to an optimized static partitioning scheme.
+The static scheme uses METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the workload graph and then distribute objects among partitions before startup.
+METIS creates balanced partitions with a near-minimum number edges across partitions (i.e., multi-partition commands).
+In the dynamic scheme, objects are randomly distributed among partitions at startup and then moved across partitions as the execution evolves.
+With strong locality, METIS decomposes the workload graph into connected components, one per partition.
+With weak locality, METIS partitions the workload so that XX\% of edges are between objects in different partitions.
+Notice that the optimized scheme is intended as a reference for performance, as it requires complete a priori knowledge about the workload.
+
+Figure~\ref{fig:motivation} shows the results.
+With strong locality, the dynamic scheme experiences a large number of move operations until each connected component is entirely contained in a partition (left top graph).
+Once this happens, throughput of the scheme is similar to the throughput of the optimum static scheme  (left bottom graph).
+With weak locality, though, move operations happen throughout the whole execution (right top graph).
+In this case, throughput is substantially lower than what the optimum static scheme can achieve (right bottom graph).
+%This essentially happens because move commands followed by a single-partition command are more expensive than a multi-partition command
+
+In this paper, we introduce \dynastar, a partitioned state machine replication protocol based on a dynamic partitioning scheme that \emph{performs comparably to the optimized static scheme but does not require any a priori knowledge about the workload}.
+More precisely, \dynastar converges to the performance of the optimized static scheme.
+The core idea behind \dynastar is to collect workload information during the execution and periodically compute a partitioning of the service state using a graph partitioning algorithm (in our case METIS).
+
 
 \vspace{30mm}
 
-We experimentally substantiate our claim with two extensions of existing S-SMR designs.
-First, an optimal (but 
-Second, a highly efficient design that approximates to the optimum
+The paper makes the following contributions:
+\begin{itemize}
+\item It introduces \dynastar and discusses its implementation. 
+\item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
+\item It describes \appname{} to demonstrate how \libname{} can be used to implement a scalable social network service.
+\item It presents a detailed experimental evaluation of \dynastar including real social network graphs with half a million users and 14 million edges.
+\end{itemize}
+
+The rest of the paper is structured as follows.
+Section~\ref{sec:sysmodel} describes our system model.
+Section~\ref{sec:background} reviews existing scalable state machine replication approaches.
+Section~\ref{sec:dssmr} introduces \dssmr{}; we explain the technique in detail and argue about its correctness.
+Section~\ref{sec:implementation} details the implementation of \libname\ and \appname{}.
+Section~\ref{sec:experiments} reports on the results of our experiments with \dssmr{}.
+Section~\ref{sec:rw} surveys related work and
+Section~\ref{sec:conclusion} concludes the paper.
 
 
-%We discuss our results in the case of a social network application, with operations to post a message and get the latest $n$ messages posted by a user friends (getTimeline).
-%In such a service, one can optimize for Posts or GetTimelines.
 
-
-
-
-
-
-
+%The main contribution of this paper is a dynamic partitioning scheme that \emph{performs comparably to the optimum static scheme but with no a priori knowledge about the workload}.
 
 
 %%State machine replication (SMR) is a well-established technique to develop highly available services (e.g., \cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}).
