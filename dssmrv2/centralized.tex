@@ -1,5 +1,6 @@
 %!TEX root =  main.tex
-\section{The centralized partitioning scheme}
+\section{\dynastar: dynamic partitioning for scalable state machine replication}
+%\section{The centralized partitioning scheme}
 
 \fp{Here we should describe the new scheme, which computes partitions on the fly based on feedback from the oracle}
 
@@ -22,24 +23,24 @@ Given a graph $G = (V, E)$, and a number of partitions $k$, a partition $p_i$ wi
 We define a good partitioning as one that minimize the cross-edges among partitions while maintaining each partition balanced, more formally, let $C(P)$ be a set of edges connecting a vertex in $P$ with a vertex in $V - P$, ideally $\frac{\sum_{i=1}^{k}|C(p_i)|}{|E|} = 0$ and $\frac{max_{1 \leq i \leq k}(|p_i|)}{avg_{1 \leq i \leq k}(|p_i|)} = 1$
 
 
-%EF: Partitioning 
-In \appname, the partitioning 
-
-\subsection{Dynamic repartitioning}
-%EF:  Why do we want that?
-The ability to execute a repartition on-the-fly is crucial to systems that 
-
-\begin{figure}
-	\includegraphics[width=1.0\linewidth]{graphs/0.01_edgecuts/repartition/4-2-1-2-4/edge_cut_balance_max_4_part}
-	\caption{Multiple repartitioning in the same execution.}
-	\label{fig:repartition_4_times}
-\end{figure}
-
-%EF:  How do we do a repartitioning?
-Whenever an external agent or the oracle itself decide that there should be a new partitioning, a \emph{Partition} command is sent to the oracle, which executes the respective step in algorithm~\ref{alg:oracle_partition}. The system continues to operate normally while the partitioning is taking place.
-
-%EF: What if a client is caught in the middle of repartitioning
-When a client issues a command and a repartitioning was applied before, like seen in figure~\ref{fig:oracle_repartition}, that command will fail and the client is going to be requested to update the version of its cache to the one replied by the oracle.
+%%EF: Partitioning 
+%In \appname, the partitioning 
+%
+%\subsection{Dynamic repartitioning}
+%%EF:  Why do we want that?
+%The ability to execute a repartition on-the-fly is crucial to systems that 
+%
+%\begin{figure}
+%	\includegraphics[width=1.0\linewidth]{graphs/0.01_edgecuts/repartition/4-2-1-2-4/edge_cut_balance_max_4_part}
+%	\caption{Multiple repartitioning in the same execution.}
+%	\label{fig:repartition_4_times}
+%\end{figure}
+%
+%%EF:  How do we do a repartitioning?
+%Whenever an external agent or the oracle itself decide that there should be a new partitioning, a \emph{Partition} command is sent to the oracle, which executes the respective step in algorithm~\ref{alg:oracle_partition}. The system continues to operate normally while the partitioning is taking place.
+%
+%%EF: What if a client is caught in the middle of repartitioning
+%When a client issues a command and a repartitioning was applied before, like seen in figure~\ref{fig:oracle_repartition}, that command will fail and the client is going to be requested to update the version of its cache to the one replied by the oracle.
 
 
 \input{algorithm_oracle_partition}
