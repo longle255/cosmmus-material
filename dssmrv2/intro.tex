@@ -12,61 +12,79 @@ system can be configured to tolerate any number of server failures.
 
 Although many distributed systems rely on state partitioning and
 replication (e.g., \cite{x,y,z,w}), there is relatively little prior
-work describing how to partition the state of a service. In principle,
-increasing the number of partitions should result in increased system
-performance. However, if executing an operation requires that the
-system access multiple partitions, then performance can actually
-decrease. Existing approaches to state partitioning either assume a
-priori knowledge of the workload~\cite{curino2010sch}, or assume
-that the state can be perfectly partitioned~\cite{long16} (i.e., that operations
-need only access a single partition). In practice, neither of these
-assumption often hold.
+work describing how to partition the state of a service.  In
+principle, increasing the number of partitions should result in
+increased system performance. However, if executing an operation
+requires that the system access multiple partitions, then performance
+can actually decrease, due to overhead from ordering commands across
+multiple partitions to ensure strong consistency. Because of this, 
+the performance of a distributed storage system is particularly
+sensitive to the way the service state is partitioned.
 
-This paper considers the problem of how to partition state without
-prior knowledge or strong assumptions about the workload.  To make the
-problem more concrete, we consider the problem of state partition in
-the context of Scalable State Machine Replication (S-SMR)~\cite{ssmr},
-a technique that partitions the service state and replicates each
-partition.  However, even though the discussion is centered on S-SMR,
-the approach to partitioning is relevant to other techniques that
-partition the state and guarantee strong consistency (e.g.,
-\cite{xxx}).
 
-%
-%Replication and partitioning introduce tradeoffs, the most emblematic of which being the consistency of the service.
-%\emph{Weakly consistent} services expose to the clients the existence of replicas and partitions.
-%For example, clients may not see state changes performed by previously completed operations since these may have been applied to some replicas, but not ``enough replicas". 
-%\emph{Strongly consistent} services strive to hide replication and partitioning from clients.
-%In this case, the service behaves to the clients as if it was implemented by a single server.
-%While weakly consistent services can be more efficiently implemented than strongly consistent services and are less exposed to impossibility results~\cite{FLP85,Gilbert:2002},
-%they may offer non-intuitive behavior to clients.
-%
-%Due to the importance of providing services that clients can intuitively understand, several approaches have been proposed that do not sacrifice consistency (e.g., [11, 21, 30, 31]).
-%This paper focuses on Scalable State Machine Replication (S-SMR) [8], a technique that partitions the service state and replicates each partition.
-%Our argument, however, holds for other solutions that partition the state and guarantee strong consistency.
-S-SMR relies on an atomic multicast primitive to consistently order commands within and across partitions. 
-Commands that access objects located in a single partition (i.e., single-partition commands) are multicast to the concerned partition and executed like in classical SMR. 
-Commands that access objects located in multiple partitions (i.e., multi-partition commands) are multicast to all involved partitions.
-To prevent command interleaves that violate strong consistency, partitions coordinate during the execution of multi-partition commands.
+%% Because single-partition commands are much more efficient than
+%% multi-partition commands (i.e., in some cases by a factor of more than
+%% 10x), the performance of a distributed storage system is particularly sensitive to the way
+%% the service state is partitioned.
 
-Because single-partition commands are much more efficient than multi-partition commands (i.e., in some cases by a factor of more than 10x), the performance of S-SMR is particularly sensitive to the way the service state is partitioned.
-But partitioning the service state with the goals of maximizing single-partition commands and minimizing load imbalances among partitions is challenging for at least two reasons.
-First, a favorable partitioning requires detailed a priori information about the service workload (i.e., which commands access which objects).
-Second, even if enough information is available, workloads change over time (e.g., in social networks users join and leave the system, connections are created and removed), which requires the partitioning to be revisited as the system evolves.
 
-In light of these challenges, state partitioning needs to be \emph{dynamic} and adapt to workload changes on-the-fly, as opposed to \emph{static}, in which the partitioning is defined before the system starts and re-partitioning the state requires system shutdowns.
-Long et al.~\cite{hoang2016} propose a dynamic partitioning scheme that turns every multi-partition command into a single-partition command by moving the objects needed by a command to a single partition before the command is executed.
-%The scheme relies on clients to decide where to group objects and largely outperforms static schemes (e.g., \cite{bezerra2014ssmr}) in workloads that provide a high degree of locality.
-In this scheme, which hereafter we refer to as \emph{decentralized partitioning}, clients decide to which partition the objects needed by a command should be moved.
-In workloads that exhibit \emph{strong locality} (defined next), the decentralized scheme makes the system eventually converge to a partitioning in which no further moves are needed.
-When this happens, performance scales with the number of partitions deployed.
+Partitioning the service state with the goals of maximizing
+single-partition commands and minimizing load imbalances among
+partitions is challenging for at least two reasons.  First, a
+favorable partitioning requires detailed a priori information about
+the service workload (i.e., which commands access which objects).
+Second, even if enough information is available, workloads change over
+time (e.g., in social networks users join and leave the system,
+connections are created and removed), which requires the partitioning
+to be revisited as the system evolves.  Prior work either assumes a
+priori knowledge of the workload~\cite{curino2010sch}, or makes strong
+assumptions about the workload~\cite{long16} (i.e., that operations
+need only access a single partition). In some cases, neither of these
+assumption may hold.
 
-We define locality using a \emph{workload graph} in which vertices are objects (the service state) and edges are commands. 
+
+In light of these challenges, state partitioning needs to be
+\emph{dynamic} and adapt to workload changes on-the-fly, as opposed to
+\emph{static}, in which the partitioning is defined before the system
+starts and re-partitioning the state requires system shutdowns.  Long
+et al.~\cite{hoang2016} propose a dynamic partitioning scheme that
+turns every multi-partition command into a single-partition command by
+moving the objects needed by a command to a single partition before
+the command is executed.  In this scheme, which hereafter we refer to
+as \emph{decentralized partitioning}, clients decide to which
+partition the objects needed by a command should be moved.  In
+workloads that exhibit \emph{strong locality} (defined next), the
+decentralized scheme makes the system eventually converge to a
+partitioning in which no further moves are needed.  When this happens,
+performance scales with the number of partitions deployed.
+
+
+
+
+
+%% S-SMR relies on an atomic multicast primitive to consistently order
+%% commands within and across partitions.  Commands that access objects
+%% located in a single partition (i.e., single-partition commands) are
+%% multicast to the concerned partition and executed like in classical
+%% SMR.  Commands that access objects located in multiple partitions
+%% (i.e., multi-partition commands) are multicast to all involved
+%% partitions.  To prevent command interleaves that violate strong
+%% consistency, partitions coordinate during the execution of
+%% multi-partition commands.
+
+
+
+We define locality using a \emph{workload graph} in which vertices are
+objects (the service state) and edges are commands.
 %To define locality, assume that the workload is represented by a graph in which vertices are objects, the service state, and edges interconnect objects accessed by a command. 
-An edge between two objects models commands that access the two objects.
-Strong locality means that the workload graph contains connected components.
-Intuitively, the decentralized scheme works because eventually every connected component is entirely hosted by a partition, and once this happens no further object moves are needed to execute commands, that is, the system converges.
-In the presence of \emph{weak locality}, however, the system never converges: objects permanently need to change partition, which hurts performance.
+An edge between two objects models commands that access the two
+objects.  Strong locality means that the workload graph contains
+connected components.  Intuitively, the decentralized scheme works
+because eventually every connected component is entirely hosted by a
+partition, and once this happens no further object moves are needed to
+execute commands, that is, the system converges.  In the presence of
+\emph{weak locality}, however, the system never converges: objects
+permanently need to change partition, which hurts performance.
 
 \begin{figure*}[ht]
 	\center
@@ -75,40 +93,83 @@ In the presence of \emph{weak locality}, however, the system never converges: ob
 	\label{fig:motivation}
 \end{figure*}
 
-To illustrate our point, we experimentally evaluate the decentralized scheme proposed by Long et al.~\cite{hoang2016} with workloads that exhibit strong and weak locality.
-We also compare the technique to an optimized static partitioning scheme, hereafter, referred to as \emph{optimized partitioning}.
-The optimized partitioning scheme uses METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the workload graph and then distribute objects among partitions before the system starts.
-METIS creates balanced partitions with a near-minimum number of edges across partitions.
-In the decentralized partitioning scheme, objects are randomly distributed among partitions at startup and then moved across partitions as the execution evolves.
-With strong locality, METIS decomposes the workload graph into connected components, one per partition.
-With weak locality, METIS partitions the workload so that approximately 1\% of edges connect objects in different partitions.
-Notice that the optimized scheme is intended as a reference for performance, as it requires complete a priori knowledge about the workload.
 
-Figure~\ref{fig:motivation} shows the results.
-With strong locality, the decentralized scheme experiences a large number of move operations until each connected component is entirely contained in a partition (left top graph).
-Once this happens, throughput of the scheme is similar to the throughput of the optimized scheme (left bottom graph).
-With weak locality, though, move operations happen throughout the whole execution (right top graph).
-In this case, throughput is substantially lower than what the optimized scheme can achieve (right bottom graph).
+
+
+To illustrate our point, we experimentally evaluate the decentralized
+scheme proposed by Long et al.~\cite{hoang2016} with workloads that
+exhibit strong and weak locality.  We also compare the technique to an
+optimized static partitioning scheme, hereafter, referred to as
+\emph{optimized partitioning}.  The optimized partitioning scheme uses
+METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
+workload graph and then distribute objects among partitions before the
+system starts.  METIS creates balanced partitions with a near-minimum
+number of edges across partitions.  In the decentralized partitioning
+scheme, objects are randomly distributed among partitions at startup
+and then moved across partitions as the execution evolves.  With
+strong locality, METIS decomposes the workload graph into connected
+components, one per partition.  With weak locality, METIS partitions
+the workload so that approximately 1\% of edges connect objects in
+different partitions.  Notice that the optimized scheme is intended as
+a reference for performance, as it requires complete a priori
+knowledge about the workload.
+
+Figure~\ref{fig:motivation} shows the results.  With strong locality,
+the decentralized scheme experiences a large number of move operations
+until each connected component is entirely contained in a partition
+(left top graph).  Once this happens, throughput of the scheme is
+similar to the throughput of the optimized scheme (left bottom graph).
+With weak locality, though, move operations happen throughout the
+whole execution (right top graph).  In this case, throughput is
+substantially lower than what the optimized scheme can achieve (right
+bottom graph).
+
 %This essentially happens because move commands followed by a single-partition command are more expensive than a multi-partition command
 
-In this paper, we introduce \dynastar, a dynamic partitioning scheme for state machine replication that is inspired by the optimized static scheme but does not require any a priori knowledge about the workload.
+In this paper, we introduce \dynastar, a dynamic partitioning scheme
+for state machine replication that is inspired by the optimized static
+scheme but does not require any a priori knowledge about the workload.
+The \dynastar prototype implementation extends prior work on Scalable
+State Machine Replication (S-SMR)~\cite{ssmr}, a technique that
+partitions the service state and replicates each partition.  However,
+the techniques used by \dynastar are relevant to other systems that
+partition the state and guarantee strong consistency (e.g.,
+\cite{xxx}).
+
+
+
 %\dynastar converges to the performance of the optimized static scheme by collecting workload information during the execution and periodically computing a partitioning of the service state using a graph partitioning algorithm (in our case METIS).
 %
-In its simplest form, \dynastar works as follows.
-As in S-SMR, a location oracle keeps track of the partition where each object is stored.
-In \dynastar, in addition to storing the mapping of objets to partitions, the oracle also builds a workload graph with objects as vertices and edges as commands that access the objects. 
-To submit a command, clients consult the location oracle to find out the partition the command must be multicast to.
-If the command accesses objects in multiple partitions, the oracle updates the workload graph with the command and moves objects to a single destination partition, after which the client can multicast the command.
-In order to choose the ``right" destination partition for the objects of a command, the oracle periodically computes a partitioning of the workload graph with METIS and uses the resulting partitioning as a reference to decide where to move the objects to.
-The oracle uses two heuristics to decide the destination partition of the objects of a command.
-First, it tries to move the minimum number of objects.
-Second, it attempts to respect as much as possible the partitioning of the workload graph.
+In its simplest form, \dynastar works as follows.  As in S-SMR, a
+location oracle keeps track of the partition where each object is
+stored.  In \dynastar, in addition to storing the mapping of objets to
+partitions, the oracle also builds a workload graph with objects as
+vertices and edges as commands that access the objects.  To submit a
+command, clients consult the location oracle to find out the partition
+the command must be multicast to.  If the command accesses objects in
+multiple partitions, the oracle updates the workload graph with the
+command and moves objects to a single destination partition, after
+which the client can multicast the command.  In order to choose the
+``right" destination partition for the objects of a command, the
+oracle periodically computes a partitioning of the workload graph with
+METIS and uses the resulting partitioning as a reference to decide
+where to move the objects to.  The oracle uses two heuristics to
+decide the destination partition of the objects of a command.  First,
+it tries to move the minimum number of objects.  Second, it attempts
+to respect as much as possible the partitioning of the workload graph.
 
-We have fully implemented \dynastar and compared its performance to the dynamic partitioning protocol proposed by Long et al.~\cite{hoang2016} and to the optimized static partitioning scheme.
-Our prototype can handle workload graphs with half a million objects and tens of millions of connections.
-In workloads that present strong locality, all three protocols eventually delivered comparable performance, although \dynastar converged more quickly than the decentralized scheme.
-In workloads with weak locality, however, \dynastar \emph{outperformed both} schemes.
-The reason for the surprisingly high performance of \dynastar compared to the optimized static partitioning scheme is that \textbf{we need to explain this!!! :-)}
+We have fully implemented \dynastar and compared its performance to
+the dynamic partitioning protocol proposed by Long et
+al.~\cite{hoang2016} and to the optimized static partitioning scheme.
+Our prototype can handle workload graphs with half a million objects
+and tens of millions of connections.  In workloads that present strong
+locality, all three protocols eventually delivered comparable
+performance, although \dynastar converged more quickly than the
+decentralized scheme.  In workloads with weak locality, however,
+\dynastar \emph{outperformed both} schemes.  The reason for the
+surprisingly high performance of \dynastar compared to the optimized
+static partitioning scheme is that \textbf{we need to explain this!!!
+  :-)}
 
 The paper makes the following contributions:
 \begin{itemize}
