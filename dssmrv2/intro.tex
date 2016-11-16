@@ -1,18 +1,37 @@
 %!TEX root =  main.tex
 \section{Introduction}
 
-Designing scalable and highly available services is the holy grail of many distributed systems designers.
-%Many online services have demanding performance and availability requirements.
-%To implement scalable and highly available services system designers typically recur to state partitioning and replication.
-Two of the most important techniques used to achieve scalability and high availability are state partitioning and replication.
-By partitioning the service state (i.e., sharding), each partition can contribute to overall performance.
-In principle, performance should increase with the number of partitions.
-By replicating state in multiple servers, the system can be configured to tolerate any number of server failures.
+Designing scalable and highly available services is the holy grail of
+many distributed systems designers.  Two of the most important
+techniques used to achieve scalability and high availability are state
+partitioning and replication.  By partitioning the service state
+(i.e., sharding), each partition can contribute to overall
+performance. By replicating state in multiple servers, the
+system can be configured to tolerate any number of server failures.
 
-Although there are numerous accounts of distributed systems that rely on state partitioning and replication (e.g., \cite{x,y,z,w}), descriptions of how to partition the state of a service are less common (e.g., \cite{curino2010sch}).
-%most papers assume that partitioning is provided by the application designer or system operator.
-This paper considers the problem of state partition in the context of Scalable State Machine Replication (S-SMR) [8], a technique that partitions the service state and replicates each partition.
-Even though the discussion is centered on S-SMR, it is relevant to other techniques that partition the state and guarantee strong consistency (e.g., \cite{xxx}).
+
+Although many distributed systems rely on state partitioning and
+replication (e.g., \cite{x,y,z,w}), there is relatively little prior
+work describing how to partition the state of a service. In principle,
+increasing the number of partitions should result in increased system
+performance. However, if executing an operation requires that the
+system access multiple partitions, then performance can actually
+decrease. Existing approaches to state partitioning either assume a
+priori knowledge of the workload~\cite{curino2010sch}, or assume
+that the state can be perfectly partitioned~\cite{long16} (i.e., that operations
+need only access a single partition). In practice, neither of these
+assumption often hold.
+
+This paper considers the problem of how to partition state without
+prior knowledge or strong assumptions about the workload.  To make the
+problem more concrete, we consider the problem of state partition in
+the context of Scalable State Machine Replication (S-SMR)~\cite{ssmr},
+a technique that partitions the service state and replicates each
+partition.  However, even though the discussion is centered on S-SMR,
+the approach to partitioning is relevant to other techniques that
+partition the state and guarantee strong consistency (e.g.,
+\cite{xxx}).
+
 %
 %Replication and partitioning introduce tradeoffs, the most emblematic of which being the consistency of the service.
 %\emph{Weakly consistent} services expose to the clients the existence of replicas and partitions.
