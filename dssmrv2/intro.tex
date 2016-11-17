@@ -1,104 +1,123 @@
 %!TEX root =  main.tex
 \section{Introduction}
 
-Designing scalable and highly available services is the holy grail of
-many distributed systems designers.  Two of the most important
-techniques used to achieve scalability and high availability are state
-partitioning and replication.  By partitioning the service state
-(i.e., sharding), each partition can contribute to overall
-performance. By replicating state in multiple servers, the
-system can be configured to tolerate any number of server failures.
+State machine replication (SMR) is a fundamental technique for
+building fault tolerant systems and services. With SMR, state is
+replicated on a set of servers, and each replica deterministically
+executes the same sequence of client commands in order to maintain
+consistency. Unfortunately, increasing the number of replicas can
+negatively impact performance, since each replica must execute every
+command.  In order to improve the scalability of SMR, several systems
+have investigated the use of state partitioning~\cite{facebookTAO,
+  sciascia2012sdur, Aguilera:2007}.
 
+%% Designing scalable and highly available services is the holy grail of
+%% many distributed systems designers.  Two of the most important
+%% techniques used to achieve scalability and high availability are state
+%% partitioning and replication (e.g., \cite{x,y,z,w}).  By partitioning the service state
+%% (i.e., sharding), each partition can contribute to overall
+%% performance. By replicating state in multiple servers, the
+%% system can be configured to tolerate any number of server failures.
 
-Although many distributed systems rely on state partitioning and
-replication (e.g., \cite{x,y,z,w}), there is relatively little prior
-work describing how to partition the state of a service.  In
-principle, increasing the number of partitions should result in
+In principle, increasing the number of partitions should result in
 increased system performance. However, if executing an operation
 requires that the system access multiple partitions, then performance
-can actually decrease, due to overhead from ordering commands across
-multiple partitions to ensure strong consistency. Because of this, 
-the performance of a distributed storage system is particularly
-sensitive to the way the service state is partitioned.
+can actually decrease, due to overhead from ordering commands to
+ensure strong consistency. On the other hand, placing data in a single
+partition can result in load imbalances, nullifying the benefits of
+partitioning.  Thus, an ideal partitioning scheme is one that would
+both (i) minimize multiple partition commands, and (ii) provide load
+balancing among the partitions. We refer to workloads that can be
+partitioned in a way that satisfies these two properties as exhibiting
+\emph{strong locality}.
+
+%% Partitioning the service state with the goals of maximizing
+%% single-partition commands and minimizing load imbalances among
+%% partitions is challenging for at least two reasons.  First, a
+%% favorable partitioning requires detailed a priori information about
+%% the service workload (i.e., which commands access which objects).
+%% Second, even if enough information is available, workloads change over
+%% time (e.g., in social networks users join and leave the system,
+%% connections are created and removed), which requires the partitioning
+%% to be revisited as the system evolves. 
 
 
-%% Because single-partition commands are much more efficient than
-%% multi-partition commands (i.e., in some cases by a factor of more than
-%% 10x), the performance of a distributed storage system is particularly sensitive to the way
-%% the service state is partitioned.
+%% Although state partitioning and replication are commonly used used to
+%% achieve scalability and high availability (e.g., \cite{x,y,z,w}),
+%% there is relatively little prior work on state partitioning in the
+%% context of state machine replication.
+
+Broadly speaking, there are two classes of techniques. \emph{Static} schemes
+choose an optimal partitioning based on the workload, and never change
+the assignment of objects to partitions. Such approaches require a
+priori knowledge of the workload~\cite{curino2010sch} and cannot adapt
+as workloads change over time (e.g., in social networks users join and
+leave the system, connections are created and removed).
+\emph{Dynamic} techniques move data to partitions in order to avoid
+multi-partition commands~\cite{long16}. Unfortunately, existing
+dynamic schemes assume workloads with strong locality, or suffer
+from instability due to constantly
+moving data from one partition to another.
 
 
-Partitioning the service state with the goals of maximizing
-single-partition commands and minimizing load imbalances among
-partitions is challenging for at least two reasons.  First, a
-favorable partitioning requires detailed a priori information about
-the service workload (i.e., which commands access which objects).
-Second, even if enough information is available, workloads change over
-time (e.g., in social networks users join and leave the system,
-connections are created and removed), which requires the partitioning
-to be revisited as the system evolves.  Prior work either assumes a
-priori knowledge of the workload~\cite{curino2010sch}, or makes strong
-assumptions about the workload~\cite{long16} (i.e., that operations
-need only access a single partition). In some cases, neither of these
-assumption may hold.
+In this paper, we introduce \dynastar, a new approach to the state
+partitioning problem designed to address these challenges.  \dynastar
+is \emph{dynamic}. It does not require any a priori knowledge about
+the workload, and it adapts to workload changes on-the-fly. However,
+in contrast to existing dynamic schemes, \dynastar minimizes the
+number of state relocations by monitoring the workload, and
+periodically re-computing an optimal partitioning using the static
+METIS partitioning algorithm~\cite{Abou-Rjeili:2006}.
 
 
-In light of these challenges, state partitioning needs to be
-\emph{dynamic} and adapt to workload changes on-the-fly, as opposed to
-\emph{static}, in which the partitioning is defined before the system
-starts and re-partitioning the state requires system shutdowns.  Long
-et al.~\cite{hoang2016} propose a dynamic partitioning scheme that
-turns every multi-partition command into a single-partition command by
-moving the objects needed by a command to a single partition before
-the command is executed.  In this scheme, which hereafter we refer to
-as \emph{decentralized partitioning}, clients decide to which
-partition the objects needed by a command should be moved.  In
-workloads that exhibit \emph{strong locality} (defined next), the
-decentralized scheme makes the system eventually converge to a
-partitioning in which no further moves are needed.  When this happens,
-performance scales with the number of partitions deployed.
+With \dynastar, a location oracle maintains two data structures: (i) a
+mapping of objects to partitions, and (ii) a \emph{workload graph}
+with objects as vertices and edges as commands that access the
+objects.  When a client submits a command, it must first contact the
+location oracle to discover the partitions on which the objects are
+stored.  If the command accesses objects in multiple partitions, the
+oracle issues a move command to the partitions, re-locating objects to
+a single partition. Of course, when re-locating an object, the oracle
+is faced with a choice of which partition to use as a destination.
+\dynastar chooses the optimal partition for relocation (i.e., one that
+would minimize the number of state relocations) by periodically
+partitioning of the workload graph using the METIS.
 
 
-
-
-
-%% S-SMR relies on an atomic multicast primitive to consistently order
-%% commands within and across partitions.  Commands that access objects
-%% located in a single partition (i.e., single-partition commands) are
-%% multicast to the concerned partition and executed like in classical
-%% SMR.  Commands that access objects located in multiple partitions
-%% (i.e., multi-partition commands) are multicast to all involved
-%% partitions.  To prevent command interleaves that violate strong
-%% consistency, partitions coordinate during the execution of
-%% multi-partition commands.
-
-
-
-We define locality using a \emph{workload graph} in which vertices are
-objects (the service state) and edges are commands.
-%To define locality, assume that the workload is represented by a graph in which vertices are objects, the service state, and edges interconnect objects accessed by a command. 
-An edge between two objects models commands that access the two
-objects.  Strong locality means that the workload graph contains
-connected components.  Intuitively, the decentralized scheme works
-because eventually every connected component is entirely hosted by a
-partition, and once this happens no further object moves are needed to
-execute commands, that is, the system converges.  In the presence of
-\emph{weak locality}, however, the system never converges: objects
-permanently need to change partition, which hurts performance.
-
-\begin{figure*}[ht]
-	\center
-	\includegraphics[width=0.6\linewidth]{figures/motivation}
-	\caption{Performance under strong and weak locality.}
-	\label{fig:motivation}
-\end{figure*}
-
+%% To submit a
+%% command, clients consult the location oracle to learn the partitions
+%% it must contact.  If the command accesses objects in multiple
+%% partitions, the oracle updates the workload graph with the command and
+%% moves objects to a single destination partition, after which the
+%% client can multicast the command.  In order to choose the ``right"
+%% destination partition for the objects of a command, the oracle
+%% periodically computes a partitioning of the workload graph with METIS
+%% and uses the resulting partitioning as a reference to decide where to
+%% move the objects to.  The oracle uses two heuristics to decide the
+%% destination partition of the objects of a command.  First, it tries to
+%% move the minimum number of objects.  Second, it attempts to respect as
+%% much as possible the partitioning of the workload graph.
 
 
 
-To illustrate our point, we experimentally evaluate the decentralized
-scheme proposed by Long et al.~\cite{hoang2016} with workloads that
-exhibit strong and weak locality.  We also compare the technique to an
+%% The client queries the oracle with command.
+%% Partitions are replicated, so all commands are multicast.
+%% It the oracle sees that the command involves multiple partitions.
+%% It does the following:
+%% It contacts the partitions and have them move data. Then responds
+%% to the client with the single partition.
+%% The partition may fail because something may fail. It may consult the
+%% cache.
+
+%% Executing as a multi-partition command is more expensive than
+%% moving the data.
+
+\noindent
+\textbf{Motivating example.}
+As both a motivating example, and a preview of the benefits of
+\dynastar, we experimentally evaluate the decentralized scheme
+proposed by Long et al.~\cite{hoang2016} with workloads that exhibit
+strong and weak locality.  We also compare the technique to an
 optimized static partitioning scheme, hereafter, referred to as
 \emph{optimized partitioning}.  The optimized partitioning scheme uses
 METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
@@ -124,39 +143,77 @@ whole execution (right top graph).  In this case, throughput is
 substantially lower than what the optimized scheme can achieve (right
 bottom graph).
 
+
+
+
+
+
+%% Long
+%% et al.~\cite{hoang2016} propose a dynamic partitioning scheme that
+%% turns every multi-partition command into a single-partition command by
+%% moving the objects needed by a command to a single partition before
+%% the command is executed.  In this scheme, which hereafter we refer to
+%% as \emph{decentralized partitioning}, clients decide to which
+%% partition the objects needed by a command should be moved.  In
+%% workloads that exhibit \emph{strong locality} (defined next), the
+%% decentralized scheme makes the system eventually converge to a
+%% partitioning in which no further moves are needed.  When this happens,
+%% performance scales with the number of partitions deployed.
+
+
+%% We define locality using a \emph{workload graph} in which vertices are
+%% objects (the service state) and edges are commands.
+%% An edge between two objects models commands that access the two
+%% objects.  Strong locality means that the workload graph contains
+%% connected components.  Intuitively, the decentralized scheme works
+%% because eventually every connected component is entirely hosted by a
+%% partition, and once this happens no further object moves are needed to
+%% execute commands, that is, the system converges.  In the presence of
+%% \emph{weak locality}, however, the system never converges: objects
+%% permanently need to change partition, which hurts performance.
+
+\begin{figure*}[ht]
+	\center
+	\includegraphics[width=0.6\linewidth]{figures/motivation}
+	\caption{Performance under strong and weak locality.}
+	\label{fig:motivation}
+\end{figure*}
+
+
+
+
+%% as opposed to
+%% \emph{static}, in which the partitioning is defined before the system
+%% starts and re-partitioning the state requires system shutdowns.
+%% Second,  \dynastar does not require any a priori knowledge about the workload.
+
+%% \dynastar is inspired by the optimized static
+%% scheme but does not require any a priori knowledge about the workload.
+%% The \dynastar prototype implementation extends prior work on Scalable
+%% State Machine Replication (S-SMR)~\cite{ssmr}, a technique that
+%% partitions the service state and replicates each partition.  However,
+%% the techniques used by \dynastar are relevant to other systems that
+%% partition the state and guarantee strong consistency (e.g.,
+%% \cite{xxx}).
+
+
+
+%% In light of these challenges, state partitioning needs to be
+%% \emph{dynamic} and adapt to workload changes on-the-fly, as opposed to
+%% \emph{static}, in which the partitioning is defined before the system
+%% starts and re-partitioning the state requires system shutdowns.
+
+
+
 %This essentially happens because move commands followed by a single-partition command are more expensive than a multi-partition command
 
-In this paper, we introduce \dynastar, a dynamic partitioning scheme
-for state machine replication that is inspired by the optimized static
-scheme but does not require any a priori knowledge about the workload.
-The \dynastar prototype implementation extends prior work on Scalable
-State Machine Replication (S-SMR)~\cite{ssmr}, a technique that
-partitions the service state and replicates each partition.  However,
-the techniques used by \dynastar are relevant to other systems that
-partition the state and guarantee strong consistency (e.g.,
-\cite{xxx}).
 
 
 
 %\dynastar converges to the performance of the optimized static scheme by collecting workload information during the execution and periodically computing a partitioning of the service state using a graph partitioning algorithm (in our case METIS).
 %
-In its simplest form, \dynastar works as follows.  As in S-SMR, a
-location oracle keeps track of the partition where each object is
-stored.  In \dynastar, in addition to storing the mapping of objets to
-partitions, the oracle also builds a workload graph with objects as
-vertices and edges as commands that access the objects.  To submit a
-command, clients consult the location oracle to find out the partition
-the command must be multicast to.  If the command accesses objects in
-multiple partitions, the oracle updates the workload graph with the
-command and moves objects to a single destination partition, after
-which the client can multicast the command.  In order to choose the
-``right" destination partition for the objects of a command, the
-oracle periodically computes a partitioning of the workload graph with
-METIS and uses the resulting partitioning as a reference to decide
-where to move the objects to.  The oracle uses two heuristics to
-decide the destination partition of the objects of a command.  First,
-it tries to move the minimum number of objects.  Second, it attempts
-to respect as much as possible the partitioning of the workload graph.
+
+\smallskip
 
 We have fully implemented \dynastar and compared its performance to
 the dynamic partitioning protocol proposed by Long et
@@ -274,3 +331,43 @@ Section~\ref{sec:conclusion} concludes the paper.
 %%Section~\ref{sec:conclusion} concludes the paper.
 %%
 %%
+
+
+%!TEX root =  main.tex
+\section{Background and Motivation}
+
+
+%% Because single-partition commands are much more efficient than
+%% multi-partition commands (i.e., in some cases by a factor of more than
+%% 10x), the performance of a distributed storage system is particularly sensitive to the way
+%% the service state is partitioned.
+
+
+\subsection{State Machine Replication}
+
+State machine replication (SMR) is a well-established technique to
+develop highly available services (e.g.,
+\cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}).  In
+essence, the idea is that replicas deterministically execute the same
+sequence of client commands in the same order and in doing so traverse
+the same sequence of states and produce the same results.  State
+machine replication provides configurable fault tolerance in the sense
+that the system can be set to tolerate any number of faulty replicas.
+Increasing the number of replicas, however, will not scale performance
+since each replica must execute every command.  Unfortunately,
+increasing the number of replicas will not scale performance since
+each replica must execute every command.
+
+S-SMR relies on an atomic multicast primitive to consistently order
+commands within and across partitions.  Commands that access objects
+located in a single partition (i.e., single-partition commands) are
+multicast to the concerned partition and executed like in classical
+SMR.  Commands that access objects located in multiple partitions
+(i.e., multi-partition commands) are multicast to all involved
+partitions.  To prevent command interleaves that violate strong
+consistency, partitions coordinate during the execution of
+multi-partition commands.
+
+
+
+\subsection{Motivating Example}
