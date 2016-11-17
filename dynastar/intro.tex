@@ -7,7 +7,7 @@ replicated on a set of servers, and each replica deterministically
 executes the same sequence of client commands in order to maintain
 consistency. Unfortunately, increasing the number of replicas can
 negatively impact performance, since each replica must execute every
-command.  In order to improve the scalability of SMR, several systems
+command. \fp{not clear why it should get worse} In order to improve the scalability of SMR, several systems
 have investigated the use of state partitioning~\cite{facebookTAO,
   sciascia2012sdur, Aguilera:2007}.
 
@@ -17,14 +17,14 @@ requires that the system access multiple partitions, then performance
 can actually decrease, due to overhead from ordering commands to
 ensure strong consistency. On the other hand, placing data in a single
 partition can result in load imbalances, nullifying the benefits of
-partitioning.  Thus, an ideal partitioning scheme is one that would
+partitioning \fp{this needs improvements}.  Thus, an ideal partitioning scheme is one that would
 both (i) minimize multiple partition commands, and (ii) provide load
 balancing among the partitions. We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
 Broadly speaking, there are two classes of techniques for
-partitioning. \emph{Static} schemes choose an optimal partitioning
+partitioning. \emph{Static} schemes choose an optimal \fp{not necessarily optimal} partitioning
 based on the workload, and never change the assignment of objects to
 partitions. Such approaches require a priori knowledge of the
 workload~\cite{curino2010sch} and cannot adapt as workloads change
@@ -65,7 +65,7 @@ experimentally evaluate \dynastar against two alternative approaches
 with workloads that exhibit strong and weak locality. The first
 approach is an optimized, static scheme using METIS, and the second is
 a decentralized, dynamic scheme proposed by Long et
-al.~\cite{hoang2016}. \red{what is the workload?}
+al.~\cite{hoang2016}. \red{what is the workload?} \fp{a social network}
 
 Figure~\ref{fig:motivation} shows the throughput and number of state
 changes for all three approaches. METIS creates balanced partitions with a near-minimum
