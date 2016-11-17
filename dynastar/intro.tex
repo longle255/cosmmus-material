@@ -5,11 +5,11 @@ State machine replication (SMR) is a fundamental technique for
 building fault tolerant systems and services. With SMR, state is
 replicated on a set of servers, and each replica deterministically
 executes the same sequence of client commands in order to maintain
-consistency. Unfortunately, increasing the number of replicas can
-negatively impact performance, since each replica must execute every
-command. \fp{not clear why it should get worse} In order to improve the scalability of SMR, several systems
-have investigated the use of state partitioning~\cite{facebookTAO,
-  sciascia2012sdur, Aguilera:2007}.
+consistency. Unfortunately, classic state machine replication does not
+scale, since each replica must execute every command. In order to
+improve the scalability of SMR, several systems have investigated the
+use of state partitioning~\cite{facebookTAO, sciascia2012sdur,
+  Aguilera:2007}.
 
 In principle, increasing the number of partitions should result in
 increased system performance. However, if executing an operation
@@ -24,16 +24,33 @@ partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
 Broadly speaking, there are two classes of techniques for
-partitioning. \emph{Static} schemes choose an optimal \fp{not necessarily optimal} partitioning
-based on the workload, and never change the assignment of objects to
-partitions. Such approaches require a priori knowledge of the
-workload~\cite{curino2010sch} and cannot adapt as workloads change
-over time (e.g., in social networks users join and leave the system,
-connections are created and removed).  \emph{Dynamic} techniques move
-data to partitions in order to avoid multi-partition
-commands~\cite{long16}. Unfortunately, existing dynamic schemes assume
-workloads with strong locality, or suffer from instability due to
-constantly moving data from one partition to another.
+partitioning: \emph{static} and \emph{dynamic}.
+Figure~\ref{fig:motivation} shows the result of a motivating experiment
+that highlights the shortcomings of both of these approaches. In
+the experiment, we show the throughput and number of state moves
+over time with two different workloads; one with strong locality
+and one with weak locality.
+
+Static schemes choose am assignment of objects to partitions in
+advance, and never change the assignment.  A prominent example of a
+static scheme is S-SMR~\cite{ssmr}. One problem with static schemes is
+that they cannot adapt as workloads change over time (e.g., in social
+networks users join and leave the system, connections are created and
+removed). One could imagine a static scheme that re-partitioned the
+data based on every change in workload, but such a scheme would be
+impossible to implement, since it would require a priori knowledge of
+the workload. Figure~\ref{fig:motivation} shows the theoretical
+optimal throughput one could achieve with a ``perfect'' static scheme.
+
+
+Dynamic schemes are designed to address the problem with static
+schemes.  Dynamic schemes assume no prior knowledge of the workload,
+and move data to partitions on-demand in order to avoid
+multi-partition commands. A prominent example of a dynamic scheme is
+DS-SMR~\cite{long16}. Unfortunately, existing dynamic schemes assume
+workloads with strong locality. As Figure~\ref{fig:motivation} shows,
+for workloads with weal-locality, DS-SMR suffers from instability due
+to constantly moving data from one partition to another.
 
 
 In this paper, we introduce \dynastar, a new approach to the state
