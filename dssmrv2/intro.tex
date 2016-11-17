@@ -11,14 +11,6 @@ command.  In order to improve the scalability of SMR, several systems
 have investigated the use of state partitioning~\cite{facebookTAO,
   sciascia2012sdur, Aguilera:2007}.
 
-%% Designing scalable and highly available services is the holy grail of
-%% many distributed systems designers.  Two of the most important
-%% techniques used to achieve scalability and high availability are state
-%% partitioning and replication (e.g., \cite{x,y,z,w}).  By partitioning the service state
-%% (i.e., sharding), each partition can contribute to overall
-%% performance. By replicating state in multiple servers, the
-%% system can be configured to tolerate any number of server failures.
-
 In principle, increasing the number of partitions should result in
 increased system performance. However, if executing an operation
 requires that the system access multiple partitions, then performance
@@ -31,33 +23,17 @@ balancing among the partitions. We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
-%% Partitioning the service state with the goals of maximizing
-%% single-partition commands and minimizing load imbalances among
-%% partitions is challenging for at least two reasons.  First, a
-%% favorable partitioning requires detailed a priori information about
-%% the service workload (i.e., which commands access which objects).
-%% Second, even if enough information is available, workloads change over
-%% time (e.g., in social networks users join and leave the system,
-%% connections are created and removed), which requires the partitioning
-%% to be revisited as the system evolves. 
-
-
-%% Although state partitioning and replication are commonly used used to
-%% achieve scalability and high availability (e.g., \cite{x,y,z,w}),
-%% there is relatively little prior work on state partitioning in the
-%% context of state machine replication.
-
-Broadly speaking, there are two classes of techniques. \emph{Static} schemes
-choose an optimal partitioning based on the workload, and never change
-the assignment of objects to partitions. Such approaches require a
-priori knowledge of the workload~\cite{curino2010sch} and cannot adapt
-as workloads change over time (e.g., in social networks users join and
-leave the system, connections are created and removed).
-\emph{Dynamic} techniques move data to partitions in order to avoid
-multi-partition commands~\cite{long16}. Unfortunately, existing
-dynamic schemes assume workloads with strong locality, or suffer
-from instability due to constantly
-moving data from one partition to another.
+Broadly speaking, there are two classes of techniques for
+partitioning. \emph{Static} schemes choose an optimal partitioning
+based on the workload, and never change the assignment of objects to
+partitions. Such approaches require a priori knowledge of the
+workload~\cite{curino2010sch} and cannot adapt as workloads change
+over time (e.g., in social networks users join and leave the system,
+connections are created and removed).  \emph{Dynamic} techniques move
+data to partitions in order to avoid multi-partition
+commands~\cite{long16}. Unfortunately, existing dynamic schemes assume
+workloads with strong locality, or suffer from instability due to
+constantly moving data from one partition to another.
 
 
 In this paper, we introduce \dynastar, a new approach to the state
@@ -84,33 +60,6 @@ would minimize the number of state relocations) by periodically
 partitioning of the workload graph using the METIS.
 
 
-%% To submit a
-%% command, clients consult the location oracle to learn the partitions
-%% it must contact.  If the command accesses objects in multiple
-%% partitions, the oracle updates the workload graph with the command and
-%% moves objects to a single destination partition, after which the
-%% client can multicast the command.  In order to choose the ``right"
-%% destination partition for the objects of a command, the oracle
-%% periodically computes a partitioning of the workload graph with METIS
-%% and uses the resulting partitioning as a reference to decide where to
-%% move the objects to.  The oracle uses two heuristics to decide the
-%% destination partition of the objects of a command.  First, it tries to
-%% move the minimum number of objects.  Second, it attempts to respect as
-%% much as possible the partitioning of the workload graph.
-
-
-
-%% The client queries the oracle with command.
-%% Partitions are replicated, so all commands are multicast.
-%% It the oracle sees that the command involves multiple partitions.
-%% It does the following:
-%% It contacts the partitions and have them move data. Then responds
-%% to the client with the single partition.
-%% The partition may fail because something may fail. It may consult the
-%% cache.
-
-%% Executing as a multi-partition command is more expensive than
-%% moving the data.
 
 \noindent
 \textbf{Motivating example.}
@@ -121,14 +70,14 @@ strong and weak locality.  We also compare the technique to an
 optimized static partitioning scheme, hereafter, referred to as
 \emph{optimized partitioning}.  The optimized partitioning scheme uses
 METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
-workload graph and then distribute objects among partitions before the
+workload graph and then distribute variables among partitions before the
 system starts.  METIS creates balanced partitions with a near-minimum
 number of edges across partitions.  In the decentralized partitioning
-scheme, objects are randomly distributed among partitions at startup
+scheme, variables are randomly distributed among partitions at startup
 and then moved across partitions as the execution evolves.  With
 strong locality, METIS decomposes the workload graph into connected
 components, one per partition.  With weak locality, METIS partitions
-the workload so that approximately 1\% of edges connect objects in
+the workload so that approximately 1\% of edges connect variables in
 different partitions.  Notice that the optimized scheme is intended as
 a reference for performance, as it requires complete a priori
 knowledge about the workload.
@@ -145,33 +94,6 @@ bottom graph).
 
 
 
-
-
-
-%% Long
-%% et al.~\cite{hoang2016} propose a dynamic partitioning scheme that
-%% turns every multi-partition command into a single-partition command by
-%% moving the objects needed by a command to a single partition before
-%% the command is executed.  In this scheme, which hereafter we refer to
-%% as \emph{decentralized partitioning}, clients decide to which
-%% partition the objects needed by a command should be moved.  In
-%% workloads that exhibit \emph{strong locality} (defined next), the
-%% decentralized scheme makes the system eventually converge to a
-%% partitioning in which no further moves are needed.  When this happens,
-%% performance scales with the number of partitions deployed.
-
-
-%% We define locality using a \emph{workload graph} in which vertices are
-%% objects (the service state) and edges are commands.
-%% An edge between two objects models commands that access the two
-%% objects.  Strong locality means that the workload graph contains
-%% connected components.  Intuitively, the decentralized scheme works
-%% because eventually every connected component is entirely hosted by a
-%% partition, and once this happens no further object moves are needed to
-%% execute commands, that is, the system converges.  In the presence of
-%% \emph{weak locality}, however, the system never converges: objects
-%% permanently need to change partition, which hurts performance.
-
 \begin{figure*}[ht]
 	\center
 	\includegraphics[width=0.6\linewidth]{figures/motivation}
@@ -181,44 +103,13 @@ bottom graph).
 
 
 
-
-%% as opposed to
-%% \emph{static}, in which the partitioning is defined before the system
-%% starts and re-partitioning the state requires system shutdowns.
-%% Second,  \dynastar does not require any a priori knowledge about the workload.
-
-%% \dynastar is inspired by the optimized static
-%% scheme but does not require any a priori knowledge about the workload.
-%% The \dynastar prototype implementation extends prior work on Scalable
-%% State Machine Replication (S-SMR)~\cite{ssmr}, a technique that
-%% partitions the service state and replicates each partition.  However,
-%% the techniques used by \dynastar are relevant to other systems that
-%% partition the state and guarantee strong consistency (e.g.,
-%% \cite{xxx}).
-
-
-
-%% In light of these challenges, state partitioning needs to be
-%% \emph{dynamic} and adapt to workload changes on-the-fly, as opposed to
-%% \emph{static}, in which the partitioning is defined before the system
-%% starts and re-partitioning the state requires system shutdowns.
-
-
-
-%This essentially happens because move commands followed by a single-partition command are more expensive than a multi-partition command
-
-
-
-
-%\dynastar converges to the performance of the optimized static scheme by collecting workload information during the execution and periodically computing a partitioning of the service state using a graph partitioning algorithm (in our case METIS).
-%
-
 \smallskip
+
 
 We have fully implemented \dynastar and compared its performance to
 the dynamic partitioning protocol proposed by Long et
 al.~\cite{hoang2016} and to the optimized static partitioning scheme.
-Our prototype can handle workload graphs with half a million objects
+Our prototype can handle workload graphs with half a million variables
 and tens of millions of connections.  In workloads that present strong
 locality, all three protocols eventually delivered comparable
 performance, although \dynastar converged more quickly than the
@@ -302,7 +193,7 @@ Section~\ref{sec:conclusion} concludes the paper.
 %%To reduce the chances of skewed load among partitions, the destination partition is chosen randomly.
 %%Although \dssmr\ could use more sophisticated forms of partitioning, formulated as an optimization problem (e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that it does not need any prior information about the workload and is not computationally expensive.
 %%
-%%To track object locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the location of state variables, each client caches previous consults to the oracle.
+%%To track variable locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the location of state variables, each client caches previous consults to the oracle.
 %%As a result, the oracle is only contacted the first time a client accesses a variable or after a variable changes its partition.
 %%Under the assumption of locality, we expect that most queries to the oracle will be accurately resolved by the client's cache.
 %%To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, \dssmr\ retries the command using \ssmr{}'s execution atomicity and involving all partitions. 
