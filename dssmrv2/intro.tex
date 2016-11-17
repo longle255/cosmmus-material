@@ -60,13 +60,26 @@ would minimize the number of state relocations) by periodically
 partitioning of the workload graph using the METIS.
 
 
+As both a motivating example, and a preview of our results, we
+experimentally evaluate \dynastar against two alternative approaches
+with workloads that exhibit strong and weak locality. The first
+approach is an optimized, static scheme using METIS, and the second is
+a decentralized, dynamic scheme proposed by Long et
+al.~\cite{hoang2016}. \red{what is the workload?}
 
-\noindent
-\textbf{Motivating example.}
-As both a motivating example, and a preview of the benefits of
-\dynastar, we experimentally evaluate the decentralized scheme
-proposed by Long et al.~\cite{hoang2016} with workloads that exhibit
-strong and weak locality.  We also compare the technique to an
+Figure~\ref{fig:motivation} shows the results.  With strong locality,
+the decentralized scheme experiences a large number of move operations
+until each connected component is entirely contained in a partition
+(left top graph).  Once this happens, throughput of the scheme is
+similar to the throughput of the optimized scheme (left bottom graph).
+With weak locality, though, move operations happen throughout the
+whole execution (right top graph).  In this case, throughput is
+substantially lower than what the optimized scheme can achieve (right
+bottom graph).
+
+
+
+We also compare the technique to an
 optimized static partitioning scheme, hereafter, referred to as
 \emph{optimized partitioning}.  The optimized partitioning scheme uses
 METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
@@ -82,15 +95,6 @@ different partitions.  Notice that the optimized scheme is intended as
 a reference for performance, as it requires complete a priori
 knowledge about the workload.
 
-Figure~\ref{fig:motivation} shows the results.  With strong locality,
-the decentralized scheme experiences a large number of move operations
-until each connected component is entirely contained in a partition
-(left top graph).  Once this happens, throughput of the scheme is
-similar to the throughput of the optimized scheme (left bottom graph).
-With weak locality, though, move operations happen throughout the
-whole execution (right top graph).  In this case, throughput is
-substantially lower than what the optimized scheme can achieve (right
-bottom graph).
 
 
 
