@@ -1,0 +1,103 @@
+\begin{algorithm}[t!]
+\small
+
+\begin{distribalgo}[1]
+
+\vspace{1.5mm}
+
+\INDENT{To execute a command $C$, the oracle does:}
+
+    \vspace{1.5mm}
+
+    \INDENT{\textbf{when} \amdel$(C)$}
+
+    \vspace{1.5mm}
+
+        \IF{\underline{$C$ is a $consult(C_c)$ command}}
+
+            \IF{$C_c$ is an $access(\omega)$ command}
+                \STATE $update(G_W, \omega)$
+                \STATE $dests \leftarrow \emptyset$
+%                \IF{$\exists v \in \omega : (\nexists \ppm \in \Psi : v \in \ppm)$}
+%                    \STATE $prophecy \leftarrow nok$
+%                \ELSE
+                    \FOR{each $v \in \omega$}
+                        \STATE $dests \leftarrow dests \cup \{ \ppm \}:v \in \ppm$
+                    \ENDFOR
+                    \IF{$|dests| > 1$}
+                        \STATE $\ppm_d \leftarrow getPart(G_W, \omega)$
+                        \FOR{each $v \in \omega$}
+                            \STATE let $\ppm_s$ be $v$'s partition
+                            \IF{$\ppm_s \neq \ppm_d$}
+                                \STATE $aux \leftarrow \{$oracle$,\ppm_s,\ppm_d\}$    
+                                \STATE \amcast$(aux$, $move(v,\ppm_s,\ppm_d))$
+                            \ENDIF 
+                        \ENDFOR
+                    \ELSE
+                        \STATE $\ppm_d \leftarrow dests$
+                    \ENDIF 
+%                \ENDIF
+                \STATE $prophecy \leftarrow (\ppm_d,dests)$
+
+            \ELSIF{$C_c$ is a $create(v)$ command}
+%                \IF{$\exists \ppm \in \Psi : v \in \ppm$}
+%                    \STATE $prophecy \leftarrow nok$
+%                \ELSE
+                    \STATE $\ppm \leftarrow getPart(G_W, v)$
+                    \STATE $prophecy \leftarrow (\{ \ppm, oracle \}, -)$
+%                \ENDIF
+
+            \ELSIF{$C_c$ is a $delete(v)$ command}
+%                \IF{$\nexists \ppm \in \Psi : v \in \ppm$}
+%                    \STATE $prophecy \leftarrow ok$
+%                \ELSE
+                    \STATE $prophecy \leftarrow (\{ \ppm : v \in \ppm, oracle \}, -)$
+%                \ENDIF
+                
+            \ENDIF
+            
+            \STATE send $prophecy$ to the client
+
+        \vspace{1.5mm}
+
+        \ELSIF{\underline{$C$ is a $move(v,\ppm_s,\ppm_d)$ command}}
+ %           \IF{$v \in \ppm_s$}
+                \STATE $\ppm_s \leftarrow \ppm_s \setminus \{v\}$
+                \STATE $\ppm_d \leftarrow \ppm_d \cup      \{v\}$
+                \STATE send $ok$ to the client
+ %           \ENDIF
+
+        \vspace{1.0mm}
+    
+        \ELSIF{\underline{$C$ is a $create(v)$ command}}
+            \STATE let $\ppm_c$ be $\ppm \in C.dests \setminus \{$oracle$\}$
+            \STATE $\ppm_c \leftarrow \ppm_c \cup      \{v\}$
+%            \IF{$\nexists \ppm \in \Psi : v \in \ppm$}
+%                \STATE $outcome \leftarrow ok$
+%            \ELSE
+%                \STATE $outcome \leftarrow nok$
+%            \ENDIF
+            \STATE \rmcast$(\ppm_c, \langle create(v), C \rangle )$
+%            \STATE send $outcome$ to the client
+        
+        \vspace{1.0mm}
+        
+        \ELSIF{\underline{$C$ is a $delete(v)$ command}}
+            \STATE let $\ppm_d$ be $\ppm : \{\ppm\} = C.dests \setminus \{$oracle$\}$
+            \STATE $\ppm_c \leftarrow \ppm_c \setminus      \{v\}$
+%            \IF{$\nexists \ppm \in \Psi: v \in \ppm$ or $v \in \ppm_d$}
+%                \STATE send $ok$    to the client
+%            \ELSE
+%                \STATE send $retry$ to the client
+%            \ENDIF
+             \STATE \rmcast$(\ppm_c, \langle delete(v), C \rangle )$
+           
+            
+        \ENDIF
+    \ENDINDENT
+\ENDINDENT
+
+\caption{Oracle}
+\label{alg:oracle_proxy}
+\end{distribalgo}
+\end{algorithm}
