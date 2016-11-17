@@ -232,41 +232,41 @@ Section~\ref{sec:conclusion} concludes the paper.
 %%
 
 
-%!TEX root =  main.tex
-\section{Background and Motivation}
+%% %!TEX root =  main.tex
+%% \section{Background and Motivation}
 
 
-%% Because single-partition commands are much more efficient than
-%% multi-partition commands (i.e., in some cases by a factor of more than
-%% 10x), the performance of a distributed storage system is particularly sensitive to the way
-%% the service state is partitioned.
+%% %% Because single-partition commands are much more efficient than
+%% %% multi-partition commands (i.e., in some cases by a factor of more than
+%% %% 10x), the performance of a distributed storage system is particularly sensitive to the way
+%% %% the service state is partitioned.
 
 
-\subsection{State Machine Replication}
+%% \subsection{State Machine Replication}
 
-State machine replication (SMR) is a well-established technique to
-develop highly available services (e.g.,
-\cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}).  In
-essence, the idea is that replicas deterministically execute the same
-sequence of client commands in the same order and in doing so traverse
-the same sequence of states and produce the same results.  State
-machine replication provides configurable fault tolerance in the sense
-that the system can be set to tolerate any number of faulty replicas.
-Increasing the number of replicas, however, will not scale performance
-since each replica must execute every command.  Unfortunately,
-increasing the number of replicas will not scale performance since
-each replica must execute every command.
+%% State machine replication (SMR) is a well-established technique to
+%% develop highly available services (e.g.,
+%% \cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}).  In
+%% essence, the idea is that replicas deterministically execute the same
+%% sequence of client commands in the same order and in doing so traverse
+%% the same sequence of states and produce the same results.  State
+%% machine replication provides configurable fault tolerance in the sense
+%% that the system can be set to tolerate any number of faulty replicas.
+%% Increasing the number of replicas, however, will not scale performance
+%% since each replica must execute every command.  Unfortunately,
+%% increasing the number of replicas will not scale performance since
+%% each replica must execute every command.
 
-S-SMR relies on an atomic multicast primitive to consistently order
-commands within and across partitions.  Commands that access objects
-located in a single partition (i.e., single-partition commands) are
-multicast to the concerned partition and executed like in classical
-SMR.  Commands that access objects located in multiple partitions
-(i.e., multi-partition commands) are multicast to all involved
-partitions.  To prevent command interleaves that violate strong
-consistency, partitions coordinate during the execution of
-multi-partition commands.
+%% S-SMR relies on an atomic multicast primitive to consistently order
+%% commands within and across partitions.  Commands that access objects
+%% located in a single partition (i.e., single-partition commands) are
+%% multicast to the concerned partition and executed like in classical
+%% SMR.  Commands that access objects located in multiple partitions
+%% (i.e., multi-partition commands) are multicast to all involved
+%% partitions.  To prevent command interleaves that violate strong
+%% consistency, partitions coordinate during the execution of
+%% multi-partition commands.
 
 
 
-\subsection{Motivating Example}
+%% \subsection{Motivating Example}
