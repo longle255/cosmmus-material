@@ -67,7 +67,19 @@ approach is an optimized, static scheme using METIS, and the second is
 a decentralized, dynamic scheme proposed by Long et
 al.~\cite{hoang2016}. \red{what is the workload?}
 
-Figure~\ref{fig:motivation} shows the results.  With strong locality,
+Figure~\ref{fig:motivation} shows the throughput and number of state
+changes for all three approaches. METIS creates balanced partitions with a near-minimum
+number of edges across partitions.  In the decentralized partitioning
+scheme, variables are randomly distributed among partitions at startup
+and then moved across partitions as the execution evolves.  With
+strong locality, METIS decomposes the workload graph into connected
+components, one per partition.  With weak locality, METIS partitions
+the workload so that approximately 1\% of edges connect variables in
+different partitions.  Notice that the optimized scheme is intended as
+a reference for performance, as it requires complete a priori
+knowledge about the workload.
+
+ With strong locality,
 the decentralized scheme experiences a large number of move operations
 until each connected component is entirely contained in a partition
 (left top graph).  Once this happens, throughput of the scheme is
@@ -79,21 +91,13 @@ bottom graph).
 
 
 
-We also compare the technique to an
-optimized static partitioning scheme, hereafter, referred to as
-\emph{optimized partitioning}.  The optimized partitioning scheme uses
-METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
-workload graph and then distribute variables among partitions before the
-system starts.  METIS creates balanced partitions with a near-minimum
-number of edges across partitions.  In the decentralized partitioning
-scheme, variables are randomly distributed among partitions at startup
-and then moved across partitions as the execution evolves.  With
-strong locality, METIS decomposes the workload graph into connected
-components, one per partition.  With weak locality, METIS partitions
-the workload so that approximately 1\% of edges connect variables in
-different partitions.  Notice that the optimized scheme is intended as
-a reference for performance, as it requires complete a priori
-knowledge about the workload.
+%% We also compare the technique to an
+%% optimized static partitioning scheme, hereafter, referred to as
+%% \emph{optimized partitioning}.  The optimized partitioning scheme uses
+%% METIS~\cite{Abou-Rjeili:2006} to compute a partitioning of the
+%% workload graph and then distribute variables among partitions before the
+%% system starts.
+
 
 
 
