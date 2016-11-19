@@ -3,14 +3,13 @@
 
 \begin{distribalgo}[1]
 
-\vspace{1.0mm}
+%\vspace{1.0mm}
 
-\INDENT{To execute command $C$, the server in partition $\ppm$ does:}
-	\vspace{1.0mm}
-	\INDENT{\textbf{when} \amdel$(C)$}
-	\vspace{1.0mm}
-
-	\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
+%\INDENT{To execute command $C$, the server in partition $\ppm$ does:}
+	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(access(\omega))$}}
+%	\vspace{1.0mm}
+%
+%	\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
 		\IF{$\exists v \in \omega : v \not\in \ppm$}
 			\STATE send $retry$ to the client
 		\ELSE
@@ -19,7 +18,8 @@
 		\ENDIF
 	\ENDINDENT
         \vspace{1.0mm}
-	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
+	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
+%	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
 		\IF{$\ppm = \ppm_s$}
 			\IF{$v \in \ppm$}
 				\STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
@@ -33,21 +33,25 @@
 				\STATE $v \leftarrow val$
 				\STATE $\ppm \leftarrow \ppm \cup \{v\}$
 			\ENDIF
-			\STATE send $ok$ to the client
 		\ENDIF
-        	\ENDINDENT
-	\vspace{1.0mm}
-	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
-		\STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
-		\STATE $\ppm \leftarrow \ppm \cup \{v\}$
 		\STATE send $ok$ to the client
         	\ENDINDENT
 	\vspace{1.0mm}
-	\INDENT{\textbf{case} $C$ is a $delete(v)$ command:}
-                \STATE $\ppm \leftarrow \ppm \setminus \{v\}$
-                \STATE send $ok$ to the client
+	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
+%	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+		\STATE \rmcast$(oracle, \langle signal, C \rangle )$
+		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+		\STATE $\ppm \leftarrow \ppm \cup \{v\}$
+		\STATE send $ok$ to the client
         	\ENDINDENT
-\ENDINDENT
+%	\vspace{1.0mm}
+%	\INDENT{\textbf{case} $C$ is a $delete(v)$ command:}
+%		\STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
+%                \STATE $\ppm \leftarrow \ppm \setminus \{v\}$
+%                \STATE send $ok$ to the client
+%		\STATE \rmcast$(oracle, \langle ok, C \rangle )$
+%        	\ENDINDENT
+%\ENDINDENT
 
     \vspace{1.0mm}
 
@@ -55,9 +59,9 @@
         \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
     \ENDINDENT
 
-\ENDINDENT
+%\ENDINDENT
 
-\caption{Server}
+\caption{Server in partition $\ppm$}
 \label{alg:server_proxy}
 \end{distribalgo}
 \end{algorithm}

@@ -3,44 +3,35 @@
 
 \begin{distribalgo}[1]
 
+%\vspace{1.0mm}
+
+\INDENT{\colorbox{\coloralgo}{To issue a command $C$, the client does:}}
+
 \vspace{1.0mm}
-
-\INDENT{To issue a command $C$, the client does:}
-
-\vspace{1.0mm}
-
-    \INDENT{\textbf{do}}
-        \STATE \amcast$($oracle, $consult(C))$
-        \STATE wait for $(\ppm_d,dests)$
-%        \IF{$prophecy \in \{ok, nok\}$}
-%            \STATE $reply \leftarrow prophecy$
-%        \ENDIF
-%        \INDENT{\textbf{else} // in this case, $prophecy$ is $(target,dests)$}
-%            \STATE $C.dests \leftarrow \{\ppm : \exists \langle v, \ppm \rangle \in prophecy \}$
-            \IF{$C$ is $access(\omega)$ and $|dests| > 1$}
-%                \STATE let $\ppm_d$ be one of the partitions in $C.dests$
-%                \label{algline:client:partition}
-                \FOR{each $\ppm \in dests$}
-%                    \STATE // \textit{move $v$ to partition $\ppm_d$}
-%                    \STATE let $\ppm_s$ be $\ppm : \langle v, \ppm \rangle \in prophecy$
-%                    \IF{$\ppm_s \neq \ppm_d$}
-%                        \STATE $C_{move} \leftarrow move(v,\ppm_s,\ppm_d)$
-%                        \STATE $C_{move}.dests \leftarrow \{$oracle$,\ppm_s,\ppm_d\}$    
-%                        \STATE \amcast$(C_{move}.dests$, $C_{move})$
-                        \STATE wait for $reply$ from a server in $\ppm$
-%                    \ENDIF
-                \ENDFOR
-%                \STATE $C.dests \leftarrow \{ \ppm_d \}$
-            \ENDIF
-%            \IF{$C$ is $create$ or $delete$}
-%                \STATE $C.dests \leftarrow dests \cup \{oracle\}$
-%            \ENDIF
-            \STATE \amcast$(\ppm_d, C)$
-            \STATE wait for $reply$ from a server in $\ppm_d$
-%        \ENDINDENT
-    \ENDINDENT
-    \STATE{\textbf{while} $reply = retry$ // \textit{after many retries, fall back to \ssmr}}
-    \STATE return $reply$ to the application
+\INDENT{\textbf{do}}
+	\STATE \amcast$($oracle, $consult(C))$
+	\COMMENT{atomic multicast to...}
+	\STATE wait for $prophecy$
+	\COMMENT{...retrieve involved partitions}
+	\IF[in this case...]{$prophecy \in \{ok, nok\}$}
+		\STATE $reply \leftarrow prophecy$
+		\COMMENT{...there's nothing to execute}
+	\ELSE[in this case, $prophecy$ is $(dests,sync)$]
+		\IF[if did move:]{$C$ is $access(\omega)$ and $|sync| > 1$}
+			\FOR[wait for partitions...]{each $\ppm \in sync$}
+				\STATE wait for $reply$ from a server in $\ppm$
+				\COMMENT{...in move}
+			\ENDFOR
+		\ENDIF
+		\STATE \amcast$(dests, C)$
+		\COMMENT{atomic multicast command}
+		\FOR{each $\ppm \in dests$}
+			\STATE wait for $reply$ from a server in $\ppm$
+		\ENDFOR
+	\ENDIF
+\ENDINDENT
+\STATE{\textbf{while} $reply = retry$} %// \textit{after many retries, fall back to \ssmr}}
+\STATE return $reply$ to the application
 \ENDINDENT
 
 \caption{Client}
