@@ -15,9 +15,9 @@ In principle, increasing the number of partitions should result in
 increased system performance. However, if executing an operation
 requires that the system access multiple partitions, then performance
 can actually decrease, due to overhead from ordering commands to
-ensure strong consistency. On the other hand, placing data in a single
-partition can result in load imbalances, nullifying the benefits of
-partitioning \fp{this needs improvements}.  Thus, an ideal partitioning scheme is one that would
+ensure strong consistency. Moreover, if data is not distributed
+carefully, then load imbalances can nullify the benefits of
+partitioning.  Thus, an ideal partitioning scheme is one that would
 both (i) minimize multiple partition commands, and (ii) provide load
 balancing among the partitions. We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
