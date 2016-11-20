@@ -20,18 +20,23 @@
         \vspace{1.0mm}
 	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
 %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-		\IF{$\ppm = \ppm_s$}
-			\IF{$v \in \ppm$}
+		\IF[if $\ppm$ is $v$'s current partition:]{$\ppm = \ppm_s$}
+			\IF[if $v$ is still in $\ppm$:]{$v \in \ppm$}
 				\STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
+				\COMMENT{send $v$ to $\ppm_d$}
 				\STATE $\ppm \leftarrow \ppm \setminus \{v\}$
-			\ELSE
+				\COMMENT{and update $\ppm$}
+			\ELSE[if $v$ is no longer in $\ppm$:]
 				\STATE \rmcast$(\ppm_d$,$\langle null, C \rangle)$
+				\COMMENT{send null so that $\ppm_d$ doesn't block}
 			\ENDIF
-		\ELSE
+		\ELSE[if $\ppm$ is $v$'s new partition:]
 			\STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_msgs$
-			\IF{$val \neq null$}
-				\STATE $v \leftarrow val$
-				\STATE $\ppm \leftarrow \ppm \cup \{v\}$
+			\COMMENT{get $v$ or null}
+			\IF[if $val$ isn't null...]{$val \neq null$}
+%				\STATE $v \leftarrow val$
+				\STATE $\ppm \leftarrow \ppm \cup \{val\}$
+				\COMMENT{...it must be $v$}
 			\ENDIF
 		\ENDIF
 		\STATE send $ok$ to the client
@@ -40,7 +45,9 @@
 	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 		\STATE \rmcast$(oracle, \langle signal, C \rangle )$
+		\COMMENT{exchange signal to...}
 		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+		\COMMENT{...coordinate partitions}
 		\STATE $\ppm \leftarrow \ppm \cup \{v\}$
 		\STATE send $ok$ to the client
         	\ENDINDENT
@@ -55,7 +62,7 @@
 
     \vspace{1.0mm}
 
-    \INDENT{\textbf{when} \rmdel$( \langle val, C \rangle )$}
+    \INDENT{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
         \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
     \ENDINDENT
 

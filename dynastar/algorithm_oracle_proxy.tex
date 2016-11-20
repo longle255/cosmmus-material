@@ -9,26 +9,33 @@
 %		\INDENT{\textbf{case} $C$ is a $consult(C_c)$ command:}
 %			\STATE $update(G_W, \omega)$
 			\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
-				\IF{$\exists v \in \omega : \parts(\{v\}) = \bot$}
+				\IF[if $v$ doesn't exist:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
 					\STATE $prophecy \leftarrow nok$
-				\ELSE
+					\COMMENT{tell the client}
+				\ELSE[if all vars in $\omega$ exist]
 %					\STATE $dests \leftarrow \emptyset$
 %					\FOR{each $v \in \omega$}
 %						\STATE $dests \leftarrow dests \cup partition(v)$
 %					\ENDFOR
 					\STATE $dests \leftarrow \parts(\omega)$
-					\IF{$|dests| = 1$}
+					\COMMENT{get all partition involved}
+					\IF[if only one partition:]{$|dests| = 1$}
 						\STATE $prophecy \leftarrow (dests,\emptyset)$
-					\ELSE
+						\COMMENT{tell client which partition}
+					\ELSE[if multiple partitions involved]
 						\STATE $\ppm_d \leftarrow target(G_W, \omega)$
-						\FOR{each $v \in \omega$}
+						\COMMENT{$\ppm_d$ will store all vars in $\omega$}
+						\FOR[for each involved var $v$]{each $v \in \omega$}
 							\STATE $\ppm_s \leftarrow \parts(\{v\})$
-							\IF{$\ppm_s \neq \ppm_d$}
-								\STATE $aux \leftarrow \{$oracle$,\ppm_s,\ppm_d\}$    
+							\COMMENT{$\ppm_s$ is $v$'s current partition}
+							\IF[if $v$ not in $\ppm_d$:]{$\ppm_s \neq \ppm_d$}
+								\STATE $aux \leftarrow \{oracle,\ppm_s,\ppm_d\}$
+								\COMMENT{move $v$ from $\ppm_s$...}
 								\STATE \amcast$(aux$, $move(v,\ppm_s,\ppm_d))$
+								\COMMENT{...to $\ppm_d$}
 							\ENDIF 
 						\ENDFOR
-						\STATE $prophecy \leftarrow (\{\ppm_d\},dests)$
+						\STATE $prophecy \leftarrow (\{\ppm_d\},dests\ \cup \{oracle\})$
 					\ENDIF 
 				\ENDIF
 			\ENDINDENT
@@ -58,7 +65,9 @@
 	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
 %        \INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
                 \STATE $\ppm_s \leftarrow \ppm_s \setminus \{v\}$
+                \COMMENT{update $v$'s current and...}
                 \STATE $\ppm_d \leftarrow \ppm_d \cup      \{v\}$
+                \COMMENT{...new partition}
                 \STATE send $ok$ to the client
 	\ENDINDENT
 
@@ -66,13 +75,49 @@
     
 	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
-		\STATE let $\ppm_c$ be $\ppm \in C.dests \setminus \{$oracle$\}$
+		\STATE let $\ppm_c \in C.dests \setminus \{oracle\}$
+		\COMMENT{var created in $\ppm_c$}
 		\STATE \rmcast$(\ppm_c, \langle signal, C \rangle )$
+		\COMMENT{exchange signal to...}
 		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+		\COMMENT{...coordinate partitions}
 		\STATE $\ppm_c \leftarrow \ppm_c \cup      \{v\}$
                 \STATE send $ok$ to the client
 	\ENDINDENT
-       
+
+	\vspace{1.0mm}
+	\INDENT{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+	\ENDINDENT
+	
+	\vspace{1.0mm}
+	\INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
+		\STATE $aux \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
+		\STATE return $aux$
+	\ENDINDENT
+	
+%	\vspace{1.0mm}
+	\rule{83mm}{0.4pt}
+%	\vspace{0.1mm}
+
+	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+		\STATE update $G_W$ with $(V_h,E_h)$
+		\STATE send $ok$ to the client
+	\ENDINDENT
+	
+	\vspace{1.0mm}
+    
+	\INDENT{\colorbox{\coloralgo}{\textbf{periodically do}}}
+		\STATE compute ideal partition $\ip_1, ..., \ip_m$ from $G_W$
+	\ENDINDENT
+	
+	\vspace{1.0mm}
+    
+	\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
+		\STATE $\ppm \leftarrow$ compute target from $vars$ and $\ppm_1, ..., \ppm_m$
+		\STATE return $\ppm$
+	\ENDINDENT	
+	
 %	\vspace{1.0mm}
 %        
 %	\INDENT{\textbf{case} $C$ is a $delete(v)$ command:}
@@ -81,10 +126,6 @@
 %		\STATE \rmcast$(\ppm_c, \langle ok, C \rangle )$
 %			\STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_msgs$
 %	\ENDINDENT
-    \vspace{1.0mm}
-    \INDENT{\textbf{when} \rmdel$( \langle val, C \rangle )$}
-        \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
-    \ENDINDENT
 
 %\ENDINDENT
 
