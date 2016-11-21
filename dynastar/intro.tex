@@ -34,7 +34,7 @@ of the experimental setup until Section~\ref{sec:experiments}.
 
 Static schemes choose am assignment of objects to partitions in
 advance, and never change the assignment.  A prominent example of a
-static scheme is S-SMR~\cite{ssmr}. One problem with static schemes is
+static scheme is S-SMR~\cite{bezerra2014ssmr}. One problem with static schemes is
 that they cannot adapt as workloads change over time (e.g., in social
 networks users join and leave the system, connections are created and
 removed). One could imagine a static scheme that re-partitioned the
@@ -48,7 +48,7 @@ Dynamic schemes are designed to address the problem with static
 schemes.  Dynamic schemes assume no prior knowledge of the workload,
 and move data to partitions on-demand in order to avoid
 multi-partition commands. A prominent example of a dynamic scheme is
-DS-SMR~\cite{long16}. Unfortunately, existing dynamic schemes assume
+DS-SMR~\cite{hoang2016}. Unfortunately, existing dynamic schemes assume
 workloads with strong locality. As Figure~\ref{fig:motivation} shows,
 for workloads with weak-locality, DS-SMR suffers from instability due
 to constantly moving data from one partition to another.
