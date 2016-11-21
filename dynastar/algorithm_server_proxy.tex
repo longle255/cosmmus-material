@@ -3,24 +3,18 @@
 
 \begin{distribalgo}[1]
 
-%\vspace{1.0mm}
-
-%\INDENT{To execute command $C$, the server in partition $\ppm$ does:}
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(access(\omega))$}}
-%	\vspace{1.0mm}
-%
-%	\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
-		\IF{$\exists v \in \omega : v \not\in \ppm$}
-			\STATE send $retry$ to the client
-		\ELSE
-			\STATE execute command
-			\STATE send response to the client
-		\ENDIF
-	\ENDINDENT
-        \vspace{1.0mm}
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
+\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(access(\omega))$}}
+	\IF{$\forall v \in \omega : v \in \ppm$}
+		\STATE execute command
+		\STATE send response to the client
+	\ELSE
+		\STATE send $retry$ to the client
+	\ENDIF
+\ENDINDENT
+\vspace{1.0mm}
+	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
 %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-		\IF[if $\ppm$ is $v$'s current partition:]{$\ppm = \ppm_s$}
+		\IF[if $\ppm$ is $v$'s source partition:]{$\ppm = \ppm_s$}
 			\IF[if $v$ is still in $\ppm$:]{$v \in \ppm$}
 				\STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
 				\COMMENT{send $v$ to $\ppm_d$}
@@ -42,7 +36,7 @@
 		\STATE send $ok$ to the client
         	\ENDINDENT
 	\vspace{1.0mm}
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
+	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 		\STATE \rmcast$(oracle, \langle signal, C \rangle )$
 		\COMMENT{exchange signal to...}
@@ -62,7 +56,7 @@
 
     \vspace{1.0mm}
 
-    \INDENT{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+    \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
         \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
     \ENDINDENT
 

@@ -5,7 +5,7 @@
 
 %\vspace{1.0mm}
 
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(consult(C))$}}
+	\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(consult(C))$}}
 %		\INDENT{\textbf{case} $C$ is a $consult(C_c)$ command:}
 %			\STATE $update(G_W, \omega)$
 			\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
@@ -62,7 +62,7 @@
 	\ENDINDENT
 	\vspace{1.0mm}
 
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
+	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
 %        \INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
                 \STATE $\ppm_s \leftarrow \ppm_s \setminus \{v\}$
                 \COMMENT{update $v$'s current and...}
@@ -73,7 +73,7 @@
 
         \vspace{1.0mm}
     
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
+	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 		\STATE let $\ppm_c \in C.dests \setminus \{oracle\}$
 		\COMMENT{var created in $\ppm_c$}
@@ -86,7 +86,7 @@
 	\ENDINDENT
 
 	\vspace{1.0mm}
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
 		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
 	\ENDINDENT
 	
@@ -100,14 +100,14 @@
 	\rule{83mm}{0.4pt}
 %	\vspace{0.1mm}
 
-	\INDENT{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+	\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 		\STATE update $G_W$ with $(V_h,E_h)$
 		\STATE send $ok$ to the client
 	\ENDINDENT
 	
 	\vspace{1.0mm}
     
-	\INDENT{\colorbox{\coloralgo}{\textbf{periodically do}}}
+	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically do}}}
 		\STATE compute ideal partition $\ip_1, ..., \ip_m$ from $G_W$
 	\ENDINDENT
 	
