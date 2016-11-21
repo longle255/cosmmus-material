@@ -22,6 +22,7 @@ both (i) minimize multiple partition commands, and (ii) provide load
 balancing among the partitions. We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
+\ef{i) and ii) don't imply our definition of strong locality}
 
 Broadly speaking, there are two classes of techniques for
 partitioning: \emph{static} and \emph{dynamic}.
@@ -32,8 +33,8 @@ over time with two different workloads; one with strong locality
 and one with weak locality. For brevity, we postpone the details
 of the experimental setup until Section~\ref{sec:experiments}.
 
-Static schemes choose am assignment of objects to partitions in
-advance, and never change the assignment.  A prominent example of a
+Static schemes choose an immutable assignment of objects to partitions in
+advance.  A prominent example of a
 static scheme is S-SMR~\cite{bezerra2014ssmr}. One problem with static schemes is
 that they cannot adapt as workloads change over time (e.g., in social
 networks users join and leave the system, connections are created and
@@ -61,8 +62,10 @@ the workload, and it adapts to workload changes on-the-fly. However,
 it is able to achieve throughputs comparable to the unrealizable
 perfect static scheme. The key idea behind \dynastar is that it
 minimizes the number of state relocations by monitoring the workload,
-and periodically re-computing an optimal partitioning using the static
-METIS partitioning algorithm~\cite{Abou-Rjeili:2006}.
+and re-computing an optimal partitioning on demand using a static
+partitioner, we chose to use METIS partitioning algorithm~\cite{Abou-Rjeili:2006}
+as an example of a static partitioner.
+%ef.: Changed so we allow plug-and-play partitioners
 
 
 With \dynastar, a location oracle maintains two data structures: (i) a
@@ -75,8 +78,8 @@ oracle issues a move command to the partitions, re-locating objects to
 a single partition. Of course, when re-locating an object, the oracle
 is faced with a choice of which partition to use as a destination.
 \dynastar chooses the optimal partition for relocation (i.e., one that
-would minimize the number of state relocations) by periodically
-partitioning of the workload graph using the METIS.
+would minimize the number of state relocations) by partitioning the workload graph
+using the METIS partitioner.
 
 
 %% As both a motivating example, and a preview of our results, we
@@ -144,7 +147,8 @@ decentralized scheme.  In workloads with weak locality, however,
 \dynastar \emph{outperformed both} schemes.  The reason for the
 surprisingly high performance of \dynastar compared to the optimized
 static partitioning scheme is that \textbf{we need to explain this!!!
-  :-)}
+  :-)} \ef{If the cost of migrating the object outperforms the cost of signaling partitions,
+  why performance get similar when we have more partitions?}
 
 The paper makes the following contributions:
 \begin{itemize}
