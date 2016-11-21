@@ -85,9 +85,9 @@ Such a static mapping has the major limitation of not allowing the service to dy
 \subsection{S-SMR with dynamic partitioning}
 
 \dssmr{}~\cite{le2016dssmr} defines a dynamic mapping of variables to partitions.
-Each variable $v$ is mapped to partition $\ppm$, that is, $v \in \ppm$.
+Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.
 Such a mapping is managed by the partitioning oracle, which, differently from \ssmr, is now implemented as a replicated service run by a group of server processes.
-The oracle service allows the mapping of variables to partitions to be retrieved or changed during execution.
+The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
 In more detail, \dssmr\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
@@ -139,14 +139,16 @@ To guarantee termination, if the command fails a certain number of times, the cl
 %All commands that deal with partitioning (i.e., consulting the oracle, moving objects across partitions and retrying commands) are executed by the client proxy, transparently to the application.
 
 \dssmr\ works well when dealing with a \emph{perfectly partitionable state}, that is, when it is possible to distribute variables evenly among partitions, in a way that no command will access multiple partitions.
-As the execution goes, variables that are accessed together (i.e., by the same command) will be grouped together in the same partition, so the number of multi-partition commands will tend to zero as time goes by.
-However, if the state is not perfectly partitionable, \dssmr\ will keep moving variables back and forth across different partitions, degrading performance.
-Say $\vvm = \{v_1, v_2, v_3\}$, and say the workload consists of two types of commands, $C_1$ and $C_2$, where $C_1$ always accesses $v_1$ and $v_2$, while $C_2$ always accesses $v_2$ and $v_3$.
-It is impossible to distribute those variable among different partitions in a way that every command will access a single partition---we could have all variables in the same partition, but that would be a degeneration to traditional~SMR.
-
-It is clear that we can improve \dssmr\ by addressing non-perfectly partitionable states.
-Instead of always forcing variables that are accessed together to migrate to the same partition, we could attempt to have a central view of the variables (as opposed to a per-command repartitioning) and distribute them in a way that minimizes the overall number of multi-partition commands.
-One way of doing that is by modeling the execution as a graph, with variables and commands as vertices and edges respectively.
+As the execution evolves, variables that are accessed together (i.e., by the same command) will be grouped together in the same partition, so the number of multi-partition commands will tend to zero as time goes by.
+However, if the state is not perfectly partitionable, \dssmr\ will keep moving variables back and forth across different partitions, and the partitioning never converges, which degrades performance.
+%Say $\vvm = \{v_1, v_2, v_3\}$, and say the workload consists of two types of commands, $C_1$ and $C_2$, where $C_1$ always accesses $v_1$ and $v_2$, while $C_2$ always accesses $v_2$ and $v_3$.
+%It is impossible to distribute those variable among different partitions in a way that every command will access a single partition---we could have all variables in the same partition, but that would be a degeneration to traditional~SMR.
+%
+%It is clear that we can improve \dssmr\ by addressing non-perfectly partitionable states.
+%Instead of always forcing variables that are accessed together to migrate to the same partition, we could attempt to have a central view of the variables (as opposed to a per-command repartitioning) and distribute them in a way that minimizes the overall number of multi-partition commands.
+%One way of doing that is by modeling the execution as a graph, with variables and commands as vertices and edges respectively.
+In many workloads, it is impossible to evenly distribute variables among different partitions in a way that every command will eventually access a single partition.
+\dynastar proposes a technique to address this issue.
 
 % detail create, move and delete, and explain that they are multi-partition commands, with need for signaling
 

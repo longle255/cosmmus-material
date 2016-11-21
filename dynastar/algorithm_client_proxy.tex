@@ -17,11 +17,11 @@
 		\STATE $reply \leftarrow prophecy$
 		\COMMENT{...there's nothing to execute}
 	\ELSE[in this case, $prophecy$ is $(dests,sync)$]
-		\IF[if did a move:]{$C$ is $access(\omega)$ and $|sync| > 1$}
-			\FOR[wait for partitions...]{each $\ppm \in sync$}
-				\STATE wait for $reply$ from a server in $\ppm$
-				\COMMENT{...in move}
-			\ENDFOR
+		\IF[did a move?]{$C$ is $access(\omega)$ and $sync = true$}
+%			\FOR[wait for partitions...]{each $\ppm \in sync$}
+				\STATE wait for $reply$ from a server in $dests\setminus \{ oracle \}$
+%				\COMMENT{...in move}
+%			\ENDFOR
 		\ENDIF
 		\STATE $C.dests \leftarrow dests$
 		\COMMENT{dests needed by oracle in create}

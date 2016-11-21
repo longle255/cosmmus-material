@@ -8,6 +8,17 @@
 	\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(consult(C))$}}
 %		\INDENT{\textbf{case} $C$ is a $consult(C_c)$ command:}
 %			\STATE $update(G_W, \omega)$
+			\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+				\IF[if $v$ already exists...]{$\parts(\{v\}) \neq \bot$}
+					\STATE $prophecy \leftarrow nok$
+					\COMMENT{...notify client}
+				\ELSE[if $v$ doesn't exist...]
+					\STATE $\ppm \leftarrow target(G_W, \{v\})$
+					\COMMENT{...determine $v$'s partition}
+					\STATE $prophecy \leftarrow (\{ \ppm, oracle \}, false)$
+%					\COMMENT{prepare client's response}
+				\ENDIF
+			\ENDINDENT
 			\INDENT{\textbf{case} $C$ is an $access(\omega)$ command:}
 				\IF[if $v$ doesn't exist:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
 					\STATE $prophecy \leftarrow nok$
@@ -20,34 +31,27 @@
 					\STATE $dests \leftarrow \parts(\omega)$
 					\COMMENT{get all partition involved}
 					\IF[if only one partition:]{$|dests| = 1$}
-						\STATE $prophecy \leftarrow (dests,\emptyset)$
-						\COMMENT{tell client which partition}
+						\STATE $prophecy \leftarrow (dests,false)$
+%						\COMMENT{tell client which partition}
 					\ELSE[if multiple partitions involved]
 						\STATE $\ppm_d \leftarrow target(G_W, \omega)$
 						\COMMENT{$\ppm_d$ will store all vars in $\omega$}
-						\FOR[for each involved var $v$]{each $v \in \omega$}
-							\STATE $\ppm_s \leftarrow \parts(\{v\})$
-							\COMMENT{$\ppm_s$ is $v$'s current partition}
-							\IF[if $v$ not in $\ppm_d$:]{$\ppm_s \neq \ppm_d$}
-								\STATE $aux \leftarrow \{oracle,\ppm_s,\ppm_d\}$
-								\COMMENT{move $v$ from $\ppm_s$...}
-								\STATE \amcast$(aux$, $move(v,\ppm_s,\ppm_d))$
-								\COMMENT{...to $\ppm_d$}
-							\ENDIF 
-						\ENDFOR
-						\STATE $prophecy \leftarrow (\{\ppm_d\},dests\ \cup \{oracle\})$
+						\STATE $alldest \leftarrow \{oracle\} \cup dests$
+						\COMMENT{move $v$ from $\ppm_s$...}
+						\STATE \amcast$(alldest, move(\omega,dests,\ppm_d))$
+						\COMMENT{...to $\ppm_d$}						
+%						\FOR[for each involved var $v$]{each $v \in \omega$}
+%							\STATE $\ppm_s \leftarrow \parts(\{v\})$
+%							\COMMENT{$\ppm_s$ is $v$'s current partition}
+%							\IF[if $v$ not in $\ppm_d$:]{$\ppm_s \neq \ppm_d$}
+%								\STATE $aux \leftarrow \{oracle,\ppm_s,\ppm_d\}$
+%								\COMMENT{move $v$ from $\ppm_s$...}
+%								\STATE \amcast$(aux$, $move(v,\ppm_s,\ppm_d))$
+%								\COMMENT{...to $\ppm_d$}
+%							\ENDIF 
+%						\ENDFOR
+						\STATE $prophecy \leftarrow (\{\ppm_d\},true)$
 					\ENDIF 
-				\ENDIF
-			\ENDINDENT
-			\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
-				\IF[if $v$ already exists...]{$\parts(\{v\}) \neq \bot$}
-					\STATE $prophecy \leftarrow nok$
-					\COMMENT{...notify client}
-				\ELSE[if $v$ doesn't exist...]
-					\STATE $\ppm \leftarrow target(G_W, \{v\})$
-					\COMMENT{...determine $v$'s partition and}
-					\STATE $prophecy \leftarrow (\{ \ppm, oracle \}, \emptyset)$
-					\COMMENT{prepare client's response}
 				\ENDIF
 			\ENDINDENT
 			\STATE send $prophecy$ to the client
@@ -62,18 +66,7 @@
 	\ENDINDENT
 	\vspace{1.0mm}
 
-	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
-%        \INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-                \STATE $\ppm_s \leftarrow \ppm_s \setminus \{v\}$
-                \COMMENT{update $v$'s current and...}
-                \STATE $\ppm_d \leftarrow \ppm_d \cup      \{v\}$
-                \COMMENT{...new partition}
-                \STATE send $ok$ to the client
-	\ENDINDENT
-
-        \vspace{1.0mm}
-    
-	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
+	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 		\STATE let $\ppm_c \in C.dests \setminus \{oracle\}$
 		\COMMENT{var created in $\ppm_c$}
@@ -86,6 +79,17 @@
 	\ENDINDENT
 
 	\vspace{1.0mm}
+	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,dests,\ppm_d))$}}
+%        \INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
+                \STATE \textbf{for} each $\ppm_s \in dests$ \textbf{do} $\ppm_s \leftarrow \ppm_s \setminus \omega$
+                \COMMENT{update partitions...}
+                \STATE $\ppm_d \leftarrow \ppm_d \cup \omega$
+                \COMMENT{...and add new variables}
+                \STATE send $ok$ to the client
+	\ENDINDENT
+
+        \vspace{1.0mm}
+    
 	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
 		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
 	\ENDINDENT
@@ -102,19 +106,19 @@
 
 	\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 		\STATE update $G_W$ with $(V_h,E_h)$
-		\STATE send $ok$ to the client
+%		\STATE send $ok$ to the client
 	\ENDINDENT
 	
 	\vspace{1.0mm}
     
-	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically do}}}
+	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
 		\STATE compute ideal partition $\ip_1, ..., \ip_m$ from $G_W$
 	\ENDINDENT
 	
 	\vspace{1.0mm}
     
 	\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
-		\STATE $\ppm \leftarrow$ compute target from $vars$ and $\ppm_1, ..., \ppm_m$
+		\STATE $\ppm \leftarrow$ compute destination partition for $vars$ from\\ \hspace{8mm}current $\ppm_1, ..., \ppm_m$ and ideal $\ip_1, ..., \ip_m$ partitionings
 		\STATE return $\ppm$
 	\ENDINDENT	
 	

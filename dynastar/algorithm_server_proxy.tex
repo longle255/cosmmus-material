@@ -12,26 +12,33 @@
 	\ENDIF
 \ENDINDENT
 \vspace{1.0mm}
-	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(v,\ppm_s,\ppm_d))$}}
+	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,dests,\ppm_d))$}}
 %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-		\IF[if $\ppm$ is $v$'s source partition:]{$\ppm = \ppm_s$}
-			\IF[if $v$ is still in $\ppm$:]{$v \in \ppm$}
-				\STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
-				\COMMENT{send $v$ to $\ppm_d$}
-				\STATE $\ppm \leftarrow \ppm \setminus \{v\}$
-				\COMMENT{and update $\ppm$}
-			\ELSE[if $v$ is no longer in $\ppm$:]
-				\STATE \rmcast$(\ppm_d$,$\langle null, C \rangle)$
-				\COMMENT{send null so that $\ppm_d$ doesn't block}
-			\ENDIF
-		\ELSE[if $\ppm$ is $v$'s new partition:]
-			\STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_msgs$
-			\COMMENT{get $v$ or null}
-			\IF[if $val$ isn't null...]{$val \neq null$}
+		\IF[if $\ppm$ is a source partition:]{$\ppm \in dests \setminus \ppm_d$}
+			\STATE $vars \leftarrow \omega \cap \ppm$
+			\COMMENT{all needed variables in $\ppm$}
+			\STATE \rmcast$(\ppm_d$,$\langle vars, C \rangle)$
+			\COMMENT{send variables to destination}
+			\STATE $\ppm \leftarrow \ppm \setminus \omega$
+			\COMMENT{update source partition}
+%
+%			
+%			\IF[if $v$ is still in $\ppm$:]{$v \in \ppm$}
+%				\STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
+%				\COMMENT{send $v$ to $\ppm_d$}
+%				\STATE $\ppm \leftarrow \ppm \setminus \{v\}$
+%				\COMMENT{and update $\ppm$}
+%			\ELSE[if $v$ is no longer in $\ppm$:]
+%				\STATE \rmcast$(\ppm_d$,$\langle null, C \rangle)$
+%				\COMMENT{send null so that $\ppm_d$ doesn't block}
+%			\ENDIF
+		\ELSE[$\ppm$ is destination partition:]
+			\STATE wait until $\exists vars : \langle vars, C \rangle \in rcvd\_msgs$
+%			\IF[if $val$ isn't null...]{$val \neq null$}
 %				\STATE $v \leftarrow val$
-				\STATE $\ppm \leftarrow \ppm \cup \{val\}$
-				\COMMENT{...it must be $v$}
-			\ENDIF
+				\STATE $\ppm \leftarrow \ppm \cup vars$
+				\COMMENT{update partition, vars is possibly empty}
+%			\ENDIF
 		\ENDIF
 		\STATE send $ok$ to the client
         	\ENDINDENT
