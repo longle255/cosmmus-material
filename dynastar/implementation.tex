@@ -1,19 +1,27 @@
 \section{Implementation}
 \label{sec:implementation}
 
-In this section, we describe \libname{}, a library that implements \dynastar, \ssmr\ and \dssmr, with the library we
-implemented and tested \appname{}, a scalable social network application. \libname\ and \appname\ were both
-implemented in Java.
+In this section, we describe \libname{}, a library that implements both \ssmr{}, \dssmr{} and \dynastar{}, and \appname{}, a scalable social network application built with \libname{}. \libname\ and \appname\ were both implemented in Java.
 
 \subsection{\libname}
 
-To implement a replicated service with \libname{}, the developer (i.e., service designer) must extend three classes: PRObject, StateMachine, OracleStateMachine.
+\libname{} implements functionalities of static and dynamic mapping, supports both centralized and decentralized partitioning schemes. There 
+are three classes that the developer (i.e., application designer) must extend to implement a replicated service with \libname{}: PRObject, 
+PartitionStateMachine, OracleStateMachine.
 
-\textbf{The PRObject class.} \libname{} supports partial replication (i.e., some objects may be replicated in some partitions, not all). Therefore, when executing a command, a replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but the application code is agnostic to that. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer.
+\textbf{The PRObject class} represents any kind of data item that is part of the service state. The state is partial replicated (i.e., some 
+objects may be local to some partitions, while other objects must be fetched from a remote location). Therefore, when executing a command, a 
+replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which 
+object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but 
+the application code is agnostic to that. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer. 
 
-% are you still using the aspect? do methods actually get intercepted by D-Eyrie?
+\textbf{The PartitionStateMachine class} represents logic of the server proxy. The application server class must extend the 
+PartitionStateMachine class. To execute commands, the developer must provide an implementation for the method executeCommand(Command). The code 
+for such a method is agnostic to the existence of partitions. In other words, it can be exactly the same as the code used to execute commands 
+with classical state-machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions 
+and oracle transparently. Objects that are involved in application's command will be available to the partition at the time it is accessed by the partitions. To start the server, method runStateMachine() is called. Method createObject() also needs to be implemented, where the 
+developer defines how new state objects are loaded or created.
 
-\textbf{The StateMachine class.} This class implements the logic of the server proxy. The application server class must extend the StateMachine class. To execute commands, the developer must provide an implementation for the method executeCommand(Command). The code for such a method is agnostic to the existence of partitions. In other words, it can be exactly the same as the code used to execute commands with classical state-machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions and oracle transparently. To start the server, method runStateMachine() is called. Method createObject() also needs to be implemented, where the developer defines how new state objects are loaded or created.
 
 \ef{Modify up here}
 
@@ -46,7 +54,7 @@ for the partitioning, so all the replicas can execute it at the same moment.
 
 \subsection{\appname}
 
-We implemented \appname{}, a social network application similar to Twitter, using \libname{}. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API consists basically of: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
+We implemented \appname{} on top of \libname{}, provide similar API as Twitter. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API consists basically of: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
 
 State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
 
