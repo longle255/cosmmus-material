@@ -8,14 +8,19 @@
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
-\dynastar extends the dynamic partitioning scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit weak locality, that is, workloads that cannot be perfectly partitioned.
-The key insights of \dynastar are to model the workload dynamically and use graph partitioning techniques to optimally relocate application state on-the-fly.
+\dynastar extends the decentralized dynamic scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
+In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
+Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms the decentralized dynamic scheme.
+The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to optimally relocate application state on-demand.
 \begin{itemize}
-\item \emph{Dynamic workload modeling.}
-\dynastar represents a service workload as a graph $G = (V, E)$, where vertices are state variables and an edges are commands.
-There is an edge connecting two variables in the graph if a client can issue a command that accesses the objects. 
-
-\item Data relocation on-the-fly.
+\item \emph{On-the-fly workload modeling.}
+\dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges commands.
+An edge connecting two variables in the graph represents a command that accesses the variables. 
+The oracle builds the workload graph based on feedback from the clients and partitions, as commands are executed.
+\item \emph{On-demand application state relocation.}
+Periodically, the oracle computes an ``ideal" partitioning of the workload graph.
+Based on this partitioning and the current location of variables, the oracle computes the destination partition for commands that access variables spread on multiple partitions.
+Variables are only moved on needed, the and the destination partition strives to minimize the number of moves. 
 \end{itemize}
 
 
