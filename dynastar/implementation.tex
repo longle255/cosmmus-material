@@ -1,7 +1,9 @@
 \section{Implementation}
 \label{sec:implementation}
 
-In this section, we describe \libname{}, a library that implements both \ssmr\ and \dssmr{}, and \appname{}, a scalable social network application built with \libname{}. \libname\ and \appname\ were both implemented in Java.
+In this section, we describe \libname{}, a library that implements \dynastar, \ssmr\ and \dssmr, with the library we
+implemented and tested \appname{}, a scalable social network application. \libname\ and \appname\ were both
+implemented in Java.
 
 \subsection{\libname}
 
@@ -13,13 +15,32 @@ To implement a replicated service with \libname{}, the developer (i.e., service 
 
 \textbf{The StateMachine class.} This class implements the logic of the server proxy. The application server class must extend the StateMachine class. To execute commands, the developer must provide an implementation for the method executeCommand(Command). The code for such a method is agnostic to the existence of partitions. In other words, it can be exactly the same as the code used to execute commands with classical state-machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions and oracle transparently. To start the server, method runStateMachine() is called. Method createObject() also needs to be implemented, where the developer defines how new state objects are loaded or created.
 
-\textbf{The OracleStateMachine class.} This class implements the logic of the oracle proxy. It extends StateMachine, so the oracle can be deployed similarly to a fault-tolerant partition in the original \ssmr{}. Class OracleStateMachine has a default implementation, but the developer is encouraged to override its methods. Method extractObject(Command) returns the set of objects accessed by the command. It should be overridden by the application so that the client proxy can relocate all necessary objects to a destination partition before executing the application command.
-% didn't understand this: "in the case there are hidden objects in the command."
-Method getTargetPartition(Set$\langle$Object$\rangle$) returns a particular partition to which objects should be moved, when they are not in the same partition yet, in order to execute an application command that accesses those objects. The default implementation of the method returns a random partition. The developer can override it in order to further improve the distribution of objects among partitions.
-For instance, the destination partition could be chosen based on an attribute of the objects passed to the method.
+\ef{Modify up here}
 
-The client proxy is implemented in class Client, which handles all communication of the application client with the partitioned service. The client proxy provides methods sendCreate(Command, CallbackHandler), sendAccess(Command, CallbackHandler), and sendDelete(Command, CallbackHandler). The client proxy's default behavior is to keep retrying commands (and fallback to \ssmr\ in case of too many retries) and only call back the application client when the command has been successfully executed.
-However, the developer can change this behavior by overriding the error() method of CallbackHandler. The error() method is called when a $retry$ reply is received.
+\textbf{The OracleStateMachine class.} This class defines the oracle proxy, the oracle is replicated in a fault-tolerant
+group, identified in group commands. Because the oracle is in charge of moving the PRObjects to the appropriate 
+partitions, it requires a partitioner that will provide for each object a location. A default partitioner is implemented using
+METIS, a state-of-the-art graph partitioner, but any algorithm that takes as input a graph and outputs a list is a valid
+partitioner, the graph is built by aggregating hints about the objects' access patterns, and the list indicates where is the
+ideal place for each object. Since the partitioner is executed in every oracle replica at the same moment, 
+its output should be deterministic
+so all the replicas transition to the same state after the partitioning. By default the OracleStateMachine calls for the
+coordination of a partitioning at the beginning of the execution, this can be changed by the developer to fit the application
+logic. For instance, the partitioning can be triggered to happen when a partition is overloaded.
+
+Notice that the oracle does not stop the system's progress while doing the partitioning, the partitioner algorithm can even
+ run in a different thread or computer, offloading the oracle. The oracle must know however an \emph{id}
+for the partitioning, so all the replicas can execute it at the same moment.
+
+
+
+%\textbf{The OracleStateMachine class.} This class implements the logic of the oracle proxy. It extends StateMachine, so the oracle can be deployed similarly to a fault-tolerant partition in the original \ssmr{}. Class OracleStateMachine has a default implementation, but the developer is encouraged to override its methods. Method extractObject(Command) returns the set of objects accessed by the command. It should be overridden by the application so that the client proxy can relocate all necessary objects to a destination partition before executing the application command.
+% didn't understand this: "in the case there are hidden objects in the command."
+%Method getTargetPartition(Set$\langle$Object$\rangle$) returns a particular partition to which objects should be moved, when they are not in the same partition yet, in order to execute an application command that accesses those objects. The default implementation of the method returns a random partition. The developer can override it in order to further improve the distribution of objects among partitions.
+%For instance, the destination partition could be chosen based on an attribute of the objects passed to the method.
+
+%The client proxy is implemented in class Client, which handles all communication of the application client with the partitioned service. The client proxy provides methods sendCreate(Command, CallbackHandler), sendAccess(Command, CallbackHandler), and sendDelete(Command, CallbackHandler). The client proxy's default behavior is to keep retrying commands (and fallback to \ssmr\ in case of too many retries) and only call back the application client when the command has been successfully executed.
+%However, the developer can change this behavior by overriding the error() method of CallbackHandler. The error() method is called when a $retry$ reply is received.
 
 % i don't understand what the application can actually change with the error() method
 
