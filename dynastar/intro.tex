@@ -12,9 +12,9 @@ use of state partitioning~\cite{facebookTAO, sciascia2012sdur,
   Aguilera:2007}.
 
 In principle, increasing the number of partitions should result in
-increased system performance. However, if executing an operation
+increased system performance. However, if executing a command
 requires that the system access multiple partitions, then performance
-can actually decrease, due to overhead from ordering commands to
+can actually decrease, due to overhead from ordering commands across partitions to
 ensure strong consistency. Moreover, if data is not distributed
 carefully, then load imbalances can nullify the benefits of
 partitioning.  Thus, an ideal partitioning scheme is one that would

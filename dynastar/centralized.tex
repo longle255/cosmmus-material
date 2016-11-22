@@ -8,8 +8,15 @@
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
-We represent a service workload as a graph $G = (V, E)$, where vertices are state objects and an edges are operations.
-There is an edge connecting two objects in the graph if a client can issue a command that accesses the objects. 
+\dynastar extends the dynamic partitioning scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit weak locality, that is, workloads that cannot be perfectly partitioned.
+The key insights of \dynastar are to model the workload dynamically and use graph partitioning techniques to optimally relocate application state on-the-fly.
+\begin{itemize}
+\item \emph{Dynamic workload modeling.}
+\dynastar represents a service workload as a graph $G = (V, E)$, where vertices are state variables and an edges are commands.
+There is an edge connecting two variables in the graph if a client can issue a command that accesses the objects. 
+
+\item Data relocation on-the-fly.
+\end{itemize}
 
 
 
@@ -97,31 +104,15 @@ To determine the destination partition of a set of variables, as part of a move,
 \subsection{Performance optimizations}
 \label{sec:optm}
 
-\fp{I'm here...}
 In the algorithm presented in the previous section, clients always need to consult the oracle to determine the partition a command must be atomically multicast to for execution.
-Obviously, if every command requires the oracle, the system is unlikely to scale, as the oracle will likely become a bottleneck.
-To address this issue, we equip clients with a location cache.
-Before submitting a consult request to the oracle, the client queries its location cache.
-If the cache contains the location of the variables needed by a command, the client can avoid contacting the oracle. 
+Obviously, if every command involves the oracle, the system is unlikely to scale, as the oracle will likely become a bottleneck.
+To address this issue, clients are equipped with a location cache.
+Before submitting a consult request to the oracle, the client checks its location cache.
+If the cache contains the partition of the variables needed by the command and all variables are in a single destination partition, the client can atomically multicast the command to the partition and avoid contacting the oracle. 
 
-Although this solution is similar to the one used by Long et al.~\cite{}, it has several implications in the design of \dynastar.
-
-To provide a scalable solution, each client proxy has a local cache of the partitioning information.
-Before multicasting an application command $C$ to be executed, the client proxy checks whether the cache has information about every variable concerned by $C$.
-If the cache does have such a knowledge, the oracle is not consulted and the information contained in the cache is used instead.
-If the reply to $C$ is $retry$, the oracle is consulted and the returned prophecy is used to update the client proxy's cache.
-Algorithm~\ref{alg:client_proxy} is followed from the second attempt to execute $C$ on.
-The cache is a local service that follows an algorithm similar to that of the oracle, except it responds only to $consult(C)$ commands and, in situations where the oracle would return $ok$ or $nok$, the cache tells the client proxy to consult the actual oracle.
-
-Naturally, the cached partitioning information held by the client proxy may be out of date.
-On the one hand, this may lead a command to be multicast to the wrong set of partitions, which will probably incur in the client proxy having to retry executing the command.
-For instance, in Figure~\ref{fig:cache_retry} the client has an out-of-date cache, incurring in a new consultation to the oracle when executing $C_3$.
-On the other hand, the client proxy may already have to retry commands, even if the oracle is always consulted first, as shown in Figure~\ref{fig:move_case_1}.
-If most commands are executed without consulting the oracle, as in the case of $C_4$ in Figure~\ref{fig:cache_retry}, we avoid turning the oracle into a bottleneck.
-Moreover, such a cache can be updated ahead of time, not having to wait for an actual application command to be issued to only then consult the oracle.
-This way, the client proxy can keep a cache of partitioning information of variables that the proxy deems likely to be accessed in the future.
-
-
+The client needs to contact the oracle if not all variables needed by the command are in the same partition, or if the cache contains outdated information, or the command is a create, in which case it must involve the oracle, as explained before.
+If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
+In this case, the client contacts the oracle and then updates its cache with the oracle's response.
 
 \input{correctness}
 
