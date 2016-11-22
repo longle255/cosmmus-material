@@ -12,9 +12,9 @@ use of state partitioning~\cite{facebookTAO, sciascia2012sdur,
   Aguilera:2007}.
 
 In principle, increasing the number of partitions should result in
-increased system performance. However, if executing an operation
+increased system performance. However, if executing a command
 requires that the system access multiple partitions, then performance
-can actually decrease, due to overhead from ordering commands to
+can actually decrease, due to overhead from ordering commands across partitions to
 ensure strong consistency. Moreover, if data is not distributed
 carefully, then load imbalances can nullify the benefits of
 partitioning.  Thus, an ideal partitioning scheme is one that would
@@ -32,7 +32,7 @@ over time with two different workloads; one with strong locality
 and one with weak locality. For brevity, we postpone the details
 of the experimental setup until Section~\ref{sec:experiments}.
 
-Static schemes choose am assignment of objects to partitions in
+Static schemes choose an assignment of objects to partitions in
 advance, and never change the assignment.  A prominent example of a
 static scheme is S-SMR~\cite{bezerra2014ssmr}. One problem with static schemes is
 that they cannot adapt as workloads change over time (e.g., in social
