@@ -10,7 +10,8 @@ multicast primitive to consistently order commands within and across
 partitions.  We therefore briefly discuss the abstractions of reliable
 and atomic multicast. \red{How do we use reliable multicast, as opposed to atomic?}
 \red{Do we need this primitive? Or is it just inherited from the artifact?}
-
+\lle{Partitions (and oracle) in dynastar use reliable multicast to exchange
+ objects and signals }
 %% S-SMR relies on an atomic multicast primitive to consistently order
 %% commands within and across partitions.  Commands that access objects
 %% located in a single partition (i.e., single-partition commands) are
