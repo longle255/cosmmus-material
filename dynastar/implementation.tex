@@ -9,7 +9,7 @@ In this section, we describe \libname{}, a library that implements both \ssmr{},
 are three classes that the developer (i.e., application designer) must extend to implement a replicated service with \libname{}: PRObject, 
 PartitionStateMachine, OracleStateMachine.
 
-\textbf{The PRObject class} represents any kind of data item that is part of the service state. The state is partial replicated (i.e., some 
+\textbf{The PRObject class} represents any kind of data item that is part of the service state. The state is partially replicated (i.e., some 
 objects may be local to some partitions, while other objects must be fetched from a remote location). Therefore, when executing a command, a 
 replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which 
 object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but 
@@ -26,20 +26,22 @@ developer defines how new state objects are loaded or created.
 \textbf{The OracleStateMachine class.} This class defines the oracle proxy, the oracle is replicated in a fault-tolerant
 group and can be deployed as a partition. Because the oracle is in charge of moving the PRObjects to the appropriate 
 partitions, it requires a partitioner that will provide for each object a desired location. A default partitioner is implemented using METIS, a state-of-the-art graph partitioner, but any algorithm that takes as input a graph and outputs a list is a valid
-partitioner, the graph is built by aggregating hints about the objects' access patterns, and the list indicates where is the
-ideal place for each object. Since the partitioner is executed in every oracle replica at the same moment, 
-its output should be deterministic
-so all the replicas transition to the same state after the partitioning. By default the OracleStateMachine calls for the
-coordination of a partitioning at the beginning of the execution, this can be changed by the developer to fit the application
-logic. For instance, the partitioning can be triggered to happen when a partition is overloaded.
+partitioner, the graph is built by aggregating hints about the objects' access patterns, and the list it returns indicates where
+is the ideal place for each object. Since the partitioner is executed in every oracle replica at the same moment,
+its output should be deterministic so all the replicas transition to the same state after the partitioning. 
+The developer can override the default algorithm to partition the graph and the oracle is agnostic about its internal behaviour.
+By default the OracleStateMachine calls for the coordination of a partitioning at the beginning of the execution, this can be
+changed by the developer to fit the application logic. For instance, the partitioning can be triggered to 
+happen when a partition is overloaded.
 
-Notice that the oracle does not stop the system's progress while doing the partitioning, the partitioner algorithm can even
- run in a different thread or computer, offloading the oracle. The oracle must know however an \emph{id}
-for the partitioning, so all the replicas can execute it at the same moment.
+Notice that the oracle does not stop the system's progress while doing the partitioning, the partitioner algorithm can
+ run in a different thread or computer, offloading the oracle. The oracle gets an incremental \emph{id} for the partitioning, 
+ so all the replicas can execute it at the same moment, when all receive the signal to execute the partitioning, 
+ even in the presence of simultaneous repartitionings.
 
 \subsection{\appname}
 
-We implemented \appname{} on top of \libname{}, provide similar API as Twitter. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API consists basically of: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
+We implemented \appname{} on top of \libname{}, which provides a similar API as Twitter. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API consists basically of: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
 
 State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
 
