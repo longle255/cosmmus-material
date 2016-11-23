@@ -2,9 +2,14 @@
 \section{System model and definitions}
 \label{sec:sysmodel}
 
-In this section, we present the system model, recall the abstractions
-of reliable and atomic multicast, and define linearizability, our
-correctness criterion.
+In this section, we present the system model, and define our
+correctness criterion (i.e., linearizability).  Dynastar builds on
+prior work on scalabale state machine replication (e.g.,
+~\cite{bezerra2014ssmr, hoang2016}. These systems rely on an atomic
+multicast primitive to consistently order commands within and across
+partitions.  We therefore briefly discuss the abstractions of reliable
+and atomic multicast. \red{How do we use reliable multicast, as opposed to atomic?}
+\red{Do we need this primitive? Or is it just inherited from the artifact?}
 
 %% S-SMR relies on an atomic multicast primitive to consistently order
 %% commands within and across partitions.  Commands that access objects
@@ -42,6 +47,15 @@ multicast,\footnote{Solving atomic multicast requires additional
   assumptions~\cite{CT96,FLP85}. In the following, we simply assume
   the existence of an atomic multicast oracle.}  defined in
 sections~\ref{sec:rmcast} and \ref{sec:amcast}, respectively.
+
+
+\subsection{Correctness criterion}
+
+Our consistency criterion is linearizability.  A system is
+\emph{linearizable} if there is a way to reorder the client commands
+in a sequence that (i)~respects the semantics of the commands, as
+defined in their sequential specifications, and (ii)~respects the
+real-time precedence of commands~\cite{Attiya04}.
 
 
 \subsection{Reliable multicast}
@@ -103,11 +117,4 @@ Atomic broadcast is a special case of atomic multicast in which there
 is a single group of processes.
 
 
-\subsection{Correctness criterion}
-
-Our consistency criterion is linearizability.  A system is
-\emph{linearizable} if there is a way to reorder the client commands
-in a sequence that (i)~respects the semantics of the commands, as
-defined in their sequential specifications, and (ii)~respects the
-real-time precedence of commands~\cite{Attiya04}.
 
