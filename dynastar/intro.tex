@@ -148,7 +148,9 @@ decentralized scheme.  In workloads with weak locality, however,
 surprisingly high performance of \dynastar compared to the optimized
 static partitioning scheme is that \textbf{we need to explain this!!!
   :-)} \ef{If the cost of migrating the object outperforms the cost of signaling partitions,
-  why performance get similar when we have more partitions?}
+  why performance get similar when we have more partitions?} \lle{this is true in the case of 
+	weak locality, but not true if workload could be perfectly partitioned, since there is 
+	exchange of signal nor data. I updated the graph with proper numbers}
 
 The paper makes the following contributions:
 \begin{itemize}
