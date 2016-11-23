@@ -2,11 +2,13 @@
 \section{Performance evaluation}
 \label{sec:experiments}
 
-In this section, we present the results found for \appname\ with different loads and partitionings and compare them with the original \ssmr{}~\cite{bezerra2014ssmr}.
+In this section, we present the results found for \appname\ with different loads and partitionings and compare them with
+\ssmr{}~\cite{bezerra2014ssmr} and \dssmr.
 %We are interested in assessing \dssmr{}'s performance with workloads that present different levels of locality.
 %By locality, we mean the likelihood that certain groups of data items are accessed together (by the same command).
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
 In Section~\ref{sec:evaluation:strongloc}, we show the results.
+
 % with strong-locality workloads.
 %In Section~\ref{sec:evaluation:weakloc}, we show the results for weak-locality workloads.
 
@@ -54,11 +56,14 @@ Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
 Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \subsection{Methodology and goals}
+All static graphs were generated using the Holme-Kim model \cite{holme-kim}, it generates power-law graphs
+with a clustering coefficient, such graphs are also referred as scale-free or small-world, and they are a good representation
+of the geometric properties of a social network.
+
+In the experiments we tested graphs with 10.000 users with a varying percentage of edge-cut, to get the desired edge-cut
+percentage, we run METIS partitioner for each partitioning size. 
 
 \subsection{Results}
-
-\subsubsection{Repartitioning on-the-fly}
-
 
 
 

@@ -33,7 +33,6 @@ Notice that the oracle does not stop the system's progress while doing the parti
 for the partitioning, so all the replicas can execute it at the same moment.
 
 
-
 %\textbf{The OracleStateMachine class.} This class implements the logic of the oracle proxy. It extends StateMachine, so the oracle can be deployed similarly to a fault-tolerant partition in the original \ssmr{}. Class OracleStateMachine has a default implementation, but the developer is encouraged to override its methods. Method extractObject(Command) returns the set of objects accessed by the command. It should be overridden by the application so that the client proxy can relocate all necessary objects to a destination partition before executing the application command.
 % didn't understand this: "in the case there are hidden objects in the command."
 %Method getTargetPartition(Set$\langle$Object$\rangle$) returns a particular partition to which objects should be moved, when they are not in the same partition yet, in order to execute an application command that accesses those objects. The default implementation of the method returns a random partition. The developer can override it in order to further improve the distribution of objects among partitions.
