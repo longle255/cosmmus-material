@@ -1,6 +1,34 @@
 %!TEX root =  main.tex
 \section{Introduction}
 
+
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-strong-locality}    
+    \caption{Throughput with strong locality.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-weak-locality}
+    \caption{Throughput with weak locality}
+  \end{subfigure} \\
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-strong-locality}
+    \caption{Number of move commands with strong locality.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-weak-locality}
+    \caption{Number of move commands with weak locality}
+  \end{subfigure} 
+\end{figure*}
+
+
+
+
 State machine replication (SMR) is a fundamental technique for
 building fault tolerant systems and services. With SMR, state is
 replicated on a set of servers, and each replica deterministically
@@ -78,37 +106,10 @@ oracle issues a move command to the partitions, re-locating objects to
 a single partition. Of course, when re-locating an object, the oracle
 is faced with a choice of which partition to use as a destination.
 \dynastar chooses the optimal partition for relocation (i.e., one that
-would minimize the number of state relocations) by partitioning the workload graph
-using the METIS partitioner.
-
-\begin{figure*}[t]
-  \centering
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-strong-locality}    
-    \caption{Throughput with strong locality.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-weak-locality}
-    \caption{Throughput with weak locality}
-  \end{subfigure} \\
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-strong-locality}
-    \caption{Number of move commands with strong locality.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-weak-locality}
-    \caption{Number of move commands with weak locality}
-  \end{subfigure} 
-\end{figure*}
+would minimize the number of state relocations) by partitioning the
+workload graph using the METIS partitioner.
 
 
-
-
-\smallskip
 
 
 We have fully implemented \dynastar and compared its performance to
