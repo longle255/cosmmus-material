@@ -1,18 +1,31 @@
-
+%!TEX root =  main.tex
+\clearpage
 \subsection{Correctness}
 \label{sec:correctness}
 
-In this section, we argue that \dssmr\ ensures termination and linearizability.
-By ensuring termination, we mean that for every command $C$ issued by a correct client, a reply to $C$ different than $retry$ is eventually received by the client.
-This assumes that at least one oracle process is correct and that every partition has at least one correct server.
-Given these constraints, the only thing that could prevent a command from terminating would be an execution that forced the client proxy to keep retrying a command.
-This problem is trivially solved by falling back to \ssmr\ after a predefined number of retries: at a certain point, the client proxy multicast the command to all server and oracle processes, which execute the command as in \ssmr{}, i.e., with coordination among all partitions and the oracle.
+In this section, we argue that \dynastar is safe (i.e., it ensures linearizability) and live (i.e., it ensures termination).
+
+To prove that \dynastar ensures linearizability, we must show that there is a way to reorder the client commands in a sequence that 
+(i)~respects the semantics of the commands, as defined in their sequential specifications, and 
+(ii)~respects the real-time precedence of commands~(Section~\ref{sec:correctcrit}).
+
+We prove that \dynastar ensures linearizability in two steps.
+We first show that every command in \dynastar is execution atomic (defined below).
+It follows that if every command in an execution \ex\ is execution atomic, then \ex\ is linearizable~\cite{bezerra2014ssmr}.
+
+Let $part(C)$ denote all the partitions 
+Command $C$ is \emph{execution atomic} if, for each server $s$ that executes $C$, there exists at least one server $r$ in every other partition in $part(C)$ such that the execution of $C$ at $s$ finishes after $r$ delivers $C$.
+More precisely, let $delivery(C,s)$ and $end(C,s)$ be, respectively, the time when $s$ delivers command $C$ and the time when $s$ completes $C$'s execution.
+Execution atomicity ensures that, for every server $s$ in partition \pp\ that executes $C$, there is a server $r$ in every $\ppm' \in part(C)$ such that $delivery(C,r) < end(C,s)$.
+Intuitively, this condition guarantees that the execution of $C$ at $\ppm$ and $\ppm'$ overlap in time.
+
+
 
 As for linearizability, we argue that, if every command in execution \ex\ of \dssmr\ is delivered by atomic multicast and is \emph{execution atomic} (as defined in~\cite{bezerra2014ssmr}), then \ex\ is linearizable.
+
 We denote the order given by atomic multicast by relation $\prec$.
-Given any two messages $m_1$ and $m_2$, ``$m_1 \prec m_2$'' means that there exists a process that delivers both messages and $m_1$ is delivered before $m_2$, or there is some message $m'$ such that $m_1 \prec m'$ and $m' \prec m_2$, which can be written as \mbox{$m_1 \prec m' \prec m_2$}.
+Given any two messages $m_1$ and $m_2$, ``$m_1 \prec m_2$'' means that there exists a process that delivers both messages and $m_1$ is delivered before $m_2$, or there is some message $m'$ such that $m_1 \prec m'$ and $m' \prec m_2$.
 %\fxnote[draft]{use the phrase \"there exists a process that\" }
-Also, for the purposes of this proof, we consider the oracle to be a partition, as it also \amdel{}s and executes application commands.
 
 Suppose, by means of contradiction, that there exist two commands $x$ and $y$, where $x$ finishes before $y$ starts, but $y \prec x$ in the execution.
 There are two possibilities to be considered: (i) $x$ and $y$ are delivered by the same process $p$, or (ii) no process delivers both $x$ and $y$.
@@ -29,3 +42,12 @@ Let $z_0 = y$ and let $atomic(i)$ be the following predicate:
 ``For every process $p_i \in \ppm_i$, $p_i$ finishes executing $z_i$ only after some $p_0 \in \ppm_0$ started executing $z_0$.''
 We now claim that $atomic(i)$ is true for every $i$, where $0 \leq i \leq n$.
 We prove our claim by induction.
+
+
+
+
+By ensuring termination, we mean that for every command $C$ issued by a correct client, a reply to $C$ different than $retry$ is eventually received by the client.
+This assumes that at least one oracle process is correct and that every partition has at least one correct server.
+Given these constraints, the only thing that could prevent a command from terminating would be an execution that forced the client proxy to keep retrying a command.
+This problem is trivially solved by falling back to \ssmr\ after a predefined number of retries: at a certain point, the client proxy multicast the command to all server and oracle processes, which execute the command as in \ssmr{}, i.e., with coordination among all partitions and the oracle.
+

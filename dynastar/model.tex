@@ -64,6 +64,7 @@ Atomic broadcast is a special case of atomic multicast in which there is a singl
 
 
 \subsection{Correctness criterion}
+\label{sec:correctcrit}
 
 Our consistency criterion is linearizability.
 A system is \emph{linearizable} if there is a way to reorder the client commands in a sequence that (i)~respects the semantics of the commands, as defined in their sequential specifications, and (ii)~respects the real-time precedence of commands~\cite{Attiya04}.
