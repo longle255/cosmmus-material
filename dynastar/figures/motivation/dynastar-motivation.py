@@ -4,16 +4,126 @@ __author__ = 'longle'
 
 import Gnuplot
 import Gnuplot.funcutils
+from os.path import isfile as file_exists
 
 import common
 
 
-def plot(graph_name, graphs, output, graph_config):
+def plot_tp_strong_locality(graph_name, graphs, output, graph_config):
     g = Gnuplot.Gnuplot(debug=0, )
     g('set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16')
     g('set output "' + output + '"')
     g('set size 1, 0.9')
     g('set size ratio 0.5')
+    # g.title('Strong locality')
+
+    g('set grid ytics')
+    g('set style data lines')  # give gnuplot an arbitrary command
+
+    g('set xrange ' + graph_config['xrange'])
+
+    g('set ylabel "Thousand commands/sec" offset 1.5')
+    g('set xlabel "Time(s)"')
+    g('set yrange [0:20]')
+    g('set ytics 0,5,20')
+    g('set key bottom right')
+    data = graphs[2]
+    g('set style func linespoints')
+    g.plot(Gnuplot.PlotItems.Data(data[0], using="2", with_="line lt 1 lw 2", title="Dynamic decentralized"),
+           Gnuplot.PlotItems.Data(data[1], using="2", with_="line ls 3 lw 2", title="Optimum static"))
+
+    g.reset()
+
+
+def plot_tp_weak_locality(graph_name, graphs, output, graph_config):
+    g = Gnuplot.Gnuplot(debug=0, )
+    g('set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16')
+    g('set output "' + output + '"')
+    g('set size 1, 0.9')
+    g('set size ratio 0.5')
+    # g.title('Strong locality')
+
+    g('set grid ytics')
+    g('set style data lines')  # give gnuplot an arbitrary command
+
+    g('set xrange ' + graph_config['xrange'])
+
+    g('set ylabel "Thousand commands/sec" offset 1.5')
+    g('set xlabel "Time(s)"')
+    g('set key top right')
+    g('set yrange [0:20]')
+    g('set ytics 0,5,20')
+    data = graphs[3]
+    g('set style func linespoints')
+    g.plot(Gnuplot.PlotItems.Data(data[0], using="2", with_="line lt 1 lw 2", title="Dynamic decentralized"),
+           Gnuplot.PlotItems.Data(data[1], using="2", with_="line ls 3 lw 2", title="Optimum static"))
+
+    g.reset()
+
+
+def plot_moves_strong_locality(graph_name, graphs, output, graph_config):
+    g = Gnuplot.Gnuplot(debug=0, )
+    g('set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16')
+    g('set output "' + output + '"')
+    g('set size 1, 0.9')
+    g('set size ratio 0.5')
+    # g.title('Weak locality')
+
+    g('set grid ytics')
+    g('set style data lines')  # give gnuplot an arbitrary command
+
+    g('set xrange ' + graph_config['xrange'])
+
+    g('set key bottom right')
+
+    g('set style func linespoints')
+    g('set ylabel "Moves/sec" offset 1.95')
+    g('set xlabel "Time(s)"')
+
+    g('set yrange [0:1000]')
+    g('set ytics 0,200,1000')
+    data = graphs[0]
+    g.plot(Gnuplot.PlotItems.Data(data[0], using="2", with_="line lt 1 lw 2", title="Dynamic decentralized"))
+
+    g.reset()
+
+
+def plot_moves_weak_locality(graph_name, graphs, output, graph_config):
+    g = Gnuplot.Gnuplot(debug=0, )
+    g('set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16')
+    g('set output "' + output + '"')
+    g('set size 1, 0.9')
+    g('set size ratio 0.5')
+    # g.title('Weak locality')
+
+    g('set grid ytics')
+    g('set style data lines')  # give gnuplot an arbitrary command
+
+    g('set xrange ' + graph_config['xrange'])
+
+    g('set ylabel "Thousand commands/sec" offset 1.5')
+    g('unset xlabel')
+    g('set key bottom right')
+
+    g('set style func linespoints')
+    g('set ylabel "Moves/sec" offset 1.95')
+    g('set xlabel "Time(s)"')
+
+    g('set yrange [0:1000]')
+    g('set ytics 0,200,1000')
+    data = graphs[1]
+    g.plot(Gnuplot.PlotItems.Data(data[0], using="2", with_="line lt 1 lw 2", title="Dynamic decentralized"))
+
+    g.reset()
+
+
+def plot_all(graph_name, graphs, output, graph_config):
+    g = Gnuplot.Gnuplot(debug=0, )
+    g('set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16')
+    g('set output "' + output + '"')
+    g('set size 1, 0.9')
+    g('set size ratio 0.5')
+
     g('set multiplot layout 2,2 margins 0.1,0.98,0.1,0.98 spacing 0.08,-0.9 ')
     g('set label "Strong locality" at screen 0.3,0.85 center')
     g('set label "Weak locality" at screen 0.8,0.85 center')
@@ -110,8 +220,6 @@ TP_GRAPHS_TYPE = [
 ]
 
 
-
-
 def collect_intersec_tp(graph, folder):
     tps = []
     max_start = -1
@@ -161,6 +269,7 @@ def collect_tp(graph, folder):
     min_end = sys.maxint
     for client in graph['nodes']:
         tp_file = folder + 'throughput_client_conservative_overall_' + str(client) + '.log'
+        if not file_exists(tp_file): continue
         f = open(tp_file)
         reduce_factor = 1
         records = []
@@ -220,10 +329,12 @@ def aggregate_move(file, gap):
     f.close()
     if len(ret) > 173: ret = ret[0:173]
     return ret
+
+
 graphs = []
 for graph_type in MOVE_GRAPHS_TYPE:
     data = []
-    ROOT = './rawdata/' + graph_type['type'] + '/'
+    ROOT = './data/dsn/motivation/' + graph_type['type'] + '/'
     for partition in PARTITIONS:
         for mode in RUN_MODES:
             folder = ['purepost', 'uniform', mode, 'p', partition, 'c', graph_type['client'], 'pm', 1,
@@ -237,12 +348,9 @@ for graph_type in MOVE_GRAPHS_TYPE:
                     data.append(aggregate_move(move_log, graph_type['gap']))
     graphs.append(data)
 
-
-
-
 for graph_type in TP_GRAPHS_TYPE:
     data = []
-    ROOT = './rawdata/' + graph_type['type'] + '/'
+    ROOT = './data/dsn/motivation/' + graph_type['type'] + '/'
     for partition in PARTITIONS:
         data = []
         for mode in RUN_MODES:
@@ -257,6 +365,12 @@ for graph_type in TP_GRAPHS_TYPE:
                 print data
     graphs.append(data)
 
-graph_file = "./motivation.ps"
-plot("DSSMR ", graphs, graph_file, graph_type['graph_config'])
+graph_file = "./data/dsn/motivation"
+plot_tp_strong_locality("DSSMR ", graphs, graph_file + "-tp-strong-locality.ps", graph_type['graph_config'])
+plot_tp_weak_locality("DSSMR ", graphs, graph_file + "-tp-weak-locality.ps", graph_type['graph_config'])
+plot_moves_strong_locality("DSSMR ", graphs, graph_file + "-moves-strong-locality.ps", graph_type['graph_config'])
+plot_moves_weak_locality("DSSMR ", graphs, graph_file + "-moves-weak-locality.ps", graph_type['graph_config'])
+
+plot_all("DSSMR ", graphs, graph_file + "-all.ps", graph_type['graph_config'])
+
 print(graph_file + " saved")
