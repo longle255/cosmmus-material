@@ -46,15 +46,19 @@ We implemented \appname{} on top of \libname{}, which provides a similar API as 
 Given that users in social networks spend most of the time reading (i.e.: performing getTimeline) than any other operation 
 \cite{facebookTAO}, we optimised \appname\ for getTimeline being always a single partition command, so when a
 user request a timeline, all messages are going to be available on the partition that the request was sent to.
-Because of that designing choice, moves in objects can only happen when an user issues a post command,
+Because of this designing choices, moves in objects can only happen when an user issues a post, follow or unfollow
+command, follow and unfollow commands can touch at most two partitions, while the post can move the objects from
+one or more partitions.
 
+To execute a post command, the \appname\ client needs to access all other users that are 
+\ef{cont}
 
 %State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
 
-One detail about the post request is that it needs access to all users that follow the user issuing the post.
+%One detail about the post request is that it needs access to all users that follow the user issuing the post.
 %Thus the list of follower need to be attached in the post command. However, the (Chirper) client cannot know for sure who follows the user: it keeps a cache of followers, but such cache can become stale if a different user starts following the poster.
-To ensure linearizability when executing a post request, the \appname\ server overrides the extractObject(command) method to check if all followers that will be accessed by the command are available in the local partition (i.e., the partition of the server executing the post command).
-If this is the case, the request is executed.
-Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of followers of the user who was posting.
-Then, the \appname\ server proceeds to the next command.
-Upon receiving the $retry(\gamma)$ message, the client proxy tries to move all users in $\gamma$ to the same partition before retrying to execute the post command.
+%To ensure linearizability when executing a post request, the \appname\ server overrides the extractObject(command) method to check if all followers that will be accessed by the command are available in the local partition (i.e., the partition of the server executing the post command).
+%If this is the case, the request is executed.
+%Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of followers of the user who was posting.
+%Then, the \appname\ server proceeds to the next command.
+%Upon receiving the $retry(\gamma)$ message, the client proxy tries to move all users in $\gamma$ to the same partition before retrying to execute the post command.
