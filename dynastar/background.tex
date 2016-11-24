@@ -24,7 +24,9 @@ Several approaches have been proposed to address SMR's scalability limitations.
 In the following, we review Scalable State Machine Replication (\ssmr), an approach that partitions the service's state and replicates each partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj,hoang2016}).
 
 
-\subsection{S-SMR with static partitioning}
+\subsection{Static state partitioning}
+%\subsection{Scalable replication with static state partitioning}
+%\subsection{S-SMR with static partitioning}
 \label{sec:ssmr}
 
 %
@@ -82,7 +84,9 @@ However, the partitioning oracle of \ssmr\ relies on a static mapping of variabl
 One advantage of this approach is that all clients and servers can have their own local oracle, which always returns a correct set of partitions for every query.
 Such a static mapping has the major limitation of not allowing the service to dynamically adapt to different access patterns.
 
-\subsection{S-SMR with dynamic partitioning}
+%\subsection{S-SMR with dynamic partitioning}
+%\subsection{Scalable replication with decentralized dynamic state partitioning}
+\subsection{Decentralized dynamic state partitioning}
 
 \dssmr{}~\cite{le2016dssmr} defines a dynamic mapping of variables to partitions.
 Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.

@@ -1,5 +1,5 @@
 %!TEX root =  main.tex
-\section{\dynastar: dynamic and quasi-optimum state partitioning}
+\section{\dynastar: quasi-optimum dynamic state partitioning}
 %\section{\dynastar: dynamic partitioning for scalable state machine replication}
 %\section{The centralized partitioning scheme}
 
@@ -16,11 +16,12 @@ The key insights of \dynastar are to create the workload graph on-the-fly and us
 \item \emph{On-the-fly workload modeling.}
 \dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges commands.
 An edge connecting two variables in the graph represents a command that accesses the variables. 
-The oracle builds the workload graph based on feedback from the clients and partitions, as commands are executed.
-\item \emph{On-demand application state relocation.}
+The oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
+\item \emph{On-demand relocation of service state.}
 Periodically, the oracle computes an ``ideal" partitioning of the workload graph.
 Based on this partitioning and the current location of variables, the oracle computes the destination partition for commands that access variables spread on multiple partitions.
-Variables are only moved on needed, the and the destination partition strives to minimize the number of moves. 
+When computing the the destination partition, the oracle strives to minimize the number of moves. 
+Variables are only moved on demand, when a command that needs the variable is issued.
 \end{itemize}
 
 
