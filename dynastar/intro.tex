@@ -30,27 +30,26 @@
 
 
 State machine replication (SMR) is a fundamental technique for
-building fault tolerant systems and services. With SMR, state is
-replicated on a set of servers, and each replica deterministically
+building fault-tolerant systems and services. With SMR, state is
+replicated on a set of servers and each replica deterministically
 executes the same sequence of client commands in order to maintain
-consistency. Unfortunately, classic state machine replication does not
+consistency~\cite{Lam78,Sch90}. Unfortunately, classic state machine replication does not
 scale, since each replica must execute every command. In order to
 improve the scalability of SMR, several systems have investigated the
-use of state partitioning~\cite{facebookTAO, sciascia2012sdur,
-  Aguilera:2007}.
+use of state partitioning~(e.g., \cite{corbett2013spanner, bezerra2014ssmr,Glendenning:2011kj,
+  Aguilera:2007,bli16edcc}).
 
 In principle, increasing the number of partitions should result in
 increased system performance. However, if executing a command
 requires that the system access multiple partitions, then performance
-can actually decrease, due to overhead from ordering commands across partitions to
+can actually decrease, due to overhead from ordering and coordinating commands across partitions to
 ensure strong consistency. Moreover, if data is not distributed
 carefully, then load imbalances can nullify the benefits of
 partitioning.  Thus, an ideal partitioning scheme is one that would
 both (i) minimize multiple partition commands, and (ii) provide load
-balancing among the partitions. We refer to workloads that can be
+balancing among the partitions. \fp{the following is incorrect}We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
-\ef{i) and ii) don't imply our definition of strong locality}
 
 Broadly speaking, there are two classes of techniques for
 partitioning: \emph{static} and \emph{dynamic}.
@@ -67,7 +66,7 @@ static scheme is S-SMR~\cite{bezerra2014ssmr}. One problem with static schemes i
 that they cannot adapt as workloads change over time (e.g., in social
 networks users join and leave the system, connections are created and
 removed). One could imagine a static scheme that re-partitioned the
-data based on every change in workload, but such a scheme would be
+data based on every change in workload, \fp{this seems to contradict the notion of static}but such a scheme would be
 impossible to implement, since it would require a priori knowledge of
 the workload. Figure~\ref{fig:motivation} shows the theoretical
 optimal throughput one could achieve with a ``perfect'' static scheme.
@@ -78,7 +77,7 @@ schemes.  Dynamic schemes assume no prior knowledge of the workload,
 and move data to partitions on-demand in order to avoid
 multi-partition commands. A prominent example of a dynamic scheme is
 DS-SMR~\cite{hoang2016}. Unfortunately, existing dynamic schemes assume
-workloads with strong locality. As Figure~\ref{fig:motivation} shows,
+workloads with strong locality. \fp{apparently not true in general, that's how ds-smr works}As Figure~\ref{fig:motivation} shows,
 for workloads with weak-locality, DS-SMR suffers from instability due
 to constantly moving data from one partition to another.
 
@@ -94,7 +93,7 @@ and re-computing an optimal partitioning on demand using a static
 partitioner, we chose to use METIS partitioning algorithm~\cite{Abou-Rjeili:2006}
 as an example of a static partitioner.
 %ef.: Changed so we allow plug-and-play partitioners
-
+\fp{we should probably say that it preserves consistency}
 
 With \dynastar, a location oracle maintains two data structures: (i) a
 mapping of objects to partitions, and (ii) a \emph{workload graph}
