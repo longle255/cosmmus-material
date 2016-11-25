@@ -7,6 +7,7 @@
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-strong-locality}    
+  \label{fig:motivation}
     \caption{Throughput with strong locality.}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
@@ -46,8 +47,8 @@ can actually decrease, due to overhead from ordering and coordinating commands a
 ensure strong consistency. Moreover, if data is not distributed
 carefully, then load imbalances can nullify the benefits of
 partitioning.  Thus, an ideal partitioning scheme is one that would
-both (i) minimize multiple partition commands, and (ii) provide load
-balancing among the partitions. \fp{the following is incorrect}We refer to workloads that can be
+both (i) allow commands to be executed at a single partition only, and (ii) evenly distribute data so that load is balanced among partitions.
+We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
