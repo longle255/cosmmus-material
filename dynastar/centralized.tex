@@ -116,7 +116,10 @@ To address this issue, clients are equipped with a location cache.
 Before submitting a consult request to the oracle, the client checks its location cache.
 If the cache contains the partition of the variables needed by the command and all variables are in a single destination partition, the client can atomically multicast the command to the partition and avoid contacting the oracle. 
 
-The client needs to contact the oracle if not all variables needed by the command are in the same partition, or if the cache contains outdated information, or the command is a create, in which case it must involve the oracle, as explained before.
+The client still needs to contact the oracle in one of these situations:
+(a)~according to client's cache, not all variables needed by the command are in the same partition;
+(b)~the cache contains outdated information, and the command is multicast to a partition that does not contain all needed variables; or
+(c)~the command is a create, in which case it must involve the oracle, as explained before.
 If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
 In this case, the client contacts the oracle and then updates its cache with the oracle's response.
 

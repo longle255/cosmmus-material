@@ -5,49 +5,57 @@
 
 In this section, we argue that \dynastar is safe (i.e., it ensures linearizability) and live (i.e., it ensures termination).
 
-To prove that \dynastar ensures linearizability, we must show that there is a way to reorder the client commands in a sequence that 
+To prove that \dynastar ensures linearizability, we must show that for any execution $\sigma$ of the system, there is a total order $\pi$ on client commands that 
 (i)~respects the semantics of the commands, as defined in their sequential specifications, and 
 (ii)~respects the real-time precedence of commands~(Section~\ref{sec:correctcrit}).
+%
+Let $\pi$ be a total order of operations in $\sigma$ that respects $<$, the order atomic multicast induces on commands.
 
-We prove that \dynastar ensures linearizability in two steps.
-We first show that every command in \dynastar is execution atomic (defined below).
-It follows that if every command in an execution \ex\ is execution atomic, then \ex\ is linearizable~\cite{bezerra2014ssmr}.
+To argue that $\pi$ respects the semantics of  commands, let $C_i$ be the $i$-th command in $\pi$ and $p$ a process in partition $\ppm_p$ that executes $C_i$.
+%Let $C_i$ be the $i$-th command in $\pi$ and $p$ a process in partition $\ppm_p$ that executes $C_i$.
+We claim that when $p$ executes $C_i$, it has updated values of variables in $vars(C_i)$, the variables accessed by $C_i$.
+We proof the claim by induction on $i$.
+The base step trivially holds from the fact that variables are initialized correctly.
+Let $v \in vars(C_i)$, $C_v$ be the last client command before $C_i$ in $\pi$ that accesses $v$, and $q$ a process in $\ppm_q$ that executes $C_v$.
+From the inductive hypothesis, $q$ has an updated value of $v$ when it executes $C_v$.
+There are two cases to consider:
+(a)~$p = q$. In this case, $p$ obviously has an updated value of $v$ when it executes $C_i$ since no other command accesses $v$ between $C_v$ and $C_i$.
+(b)~$p \neq q$. 
+Since processes in the same partition execute the same commands, it must be that $\ppm_p \neq \ppm_q$.
+From the algorithm, when $q$ executes $C_v$, $v \in \ppm_q$ and when $p$ executes $C_i$, $v \in \ppm_p$.
+Thus, $q$ executed a command to move $v$ to another partition after executing $C_v$ and $p$ executed a command to move $v$ to $\ppm_p$ before executing $C_i$.
+Since there is no command that accesses $v$ between $C_v$ and $C_i$ in $\pi$, $q$ has an updated $v$ when it executes $C_v$ (from inductive hypothesis), and $p$ receives the value of $v$ at $q$, it follows that $p$ has an updated $v$ when it executes $C_i$.
 
-Let $part(C)$ denote all the partitions 
-Command $C$ is \emph{execution atomic} if, for each server $s$ that executes $C$, there exists at least one server $r$ in every other partition in $part(C)$ such that the execution of $C$ at $s$ finishes after $r$ delivers $C$.
-More precisely, let $delivery(C,s)$ and $end(C,s)$ be, respectively, the time when $s$ delivers command $C$ and the time when $s$ completes $C$'s execution.
-Execution atomicity ensures that, for every server $s$ in partition \pp\ that executes $C$, there is a server $r$ in every $\ppm' \in part(C)$ such that $delivery(C,r) < end(C,s)$.
-Intuitively, this condition guarantees that the execution of $C$ at $\ppm$ and $\ppm'$ overlap in time.
+% DISCLAIMER: in the proof below, I assumed a single process per partition. While I'm pretty sure it works for multiple processes per partition, in some future refinement this should be added to the proof. Also see related picture showing cases (a) and (b) below. Perhaps we should include such a picture too in a future version.
+%
+We now argue that there is a total order $\pi$ that respects the real-time precedence of commands in $\sigma$.
+Assume $C_i$ ends before $C_j$ starts, or more precisely, the time $C_i$ ends at a client is smaller than the time $C_j$ starts at a client, $tec(C_i) < tsc(C_j)$.
+Since the time $C_i$ ends at the server from which the client receives the response for $C_i$ is smaller than the time $C_i$ ends at the client, $tes(C_i) < tec(C_i)$, and the time $C_j$ starts at the client is smaller than the time $C_j$ starts at the first server, $tsc(C_j) < tss(C_j)$, we conclude that $tes(C_i) < tss(C_j)$.
 
+We must show that either $C_i < C_j$; or neither $C_i < C_j$ nor $C_j < C_i$.
+For a contradiction, assume that $C_j < ... < Z_k < ... < C_i$, where $Z_k$ is a client or a move command.
+Let $Z_k$ be delivered by partition $\ppm_k$.
+There are two cases: 
+\begin{enumerate}
+\item[(a)] $Z_{k+1}$ is a client command delivered by partition $\ppm_k$.
+In this case, since $Z_{k+1}$ only starts after $Z_k$ at a server, it follows that $tes(Z_k) < tss(Z_{k+1})$.
+\item[(b)] $Z_{k+1}$ is a move command that involves $\ppm_k$ as source and $\ppm_{k+1}$ as destination.
+At $\ppm_k$, $tes(Z_k) < tss(Z_{k+1})$ since the move is only executed after $Z_k$.
+Since servers in $\ppm_k$ must send one or more variables to servers in $\ppm_{k+1}$, it must be that $tss(Z_{k+1}) < tes(Z_{k+1})$.
+Thus, it follows that $tes(Z_{k+1}) < tss(Z_{k+2})$.
+\end{enumerate}
+From the two cases above, we conclude that $tes(C_j) < tss(C_i)$, a contradiction.
+Therefore, either $C_i < C_j$ and from the definition of $\pi$, $C_i$ precedes $C_j$ or neither $C_i < C_j$ nor $C_j < C_i$, and there is a total order in which $C_i$ precedes $C_j$.
+%\begin{figure}
+%\centering
+%\includegraphics[width=1.2\linewidth,angle=-90]{figures/IMG_7203.JPG}
+%\caption{Two cases in proof.}
+%\end{figure}
 
+For termination, we argue that every correct client eventually receives a reply different than $retry$ for every command $C$ that it issues.
+This assumes that every partition (including the oracle partition) is always operational, despite the failure of some servers in the partition.
+For a contradiction, assume that some client submits a command $C$ that always returns $retry$.
+Therefore, from the algorithm, whenever $C$ is delivered at a partition, the partition does not contain all the variables needed by $C$.
+As a consequence, the client eventually falls back to \ssmr\ and multicasts $C$ to all partitions and $C$ is executed as a multi-partition command, which is guaranteed to succeed, a contradiction that concludes our argument.
 
-As for linearizability, we argue that, if every command in execution \ex\ of \dssmr\ is delivered by atomic multicast and is \emph{execution atomic} (as defined in~\cite{bezerra2014ssmr}), then \ex\ is linearizable.
-
-We denote the order given by atomic multicast by relation $\prec$.
-Given any two messages $m_1$ and $m_2$, ``$m_1 \prec m_2$'' means that there exists a process that delivers both messages and $m_1$ is delivered before $m_2$, or there is some message $m'$ such that $m_1 \prec m'$ and $m' \prec m_2$.
-%\fxnote[draft]{use the phrase \"there exists a process that\" }
-
-Suppose, by means of contradiction, that there exist two commands $x$ and $y$, where $x$ finishes before $y$ starts, but $y \prec x$ in the execution.
-There are two possibilities to be considered: (i) $x$ and $y$ are delivered by the same process $p$, or (ii) no process delivers both $x$ and $y$.
-
-In case (i), at least one process $p$ delivers both $x$ and $y$.
-As $x$ finishes before $y$ starts, then $p$ delivers $x$, then $y$. From the properties of atomic multicast, and since each partition is mapped to a multicast group, no process delivers $y$, then $x$.
-Therefore, we reach a contradiction in this case.
-
-In case (ii), if there were no other commands in \ex, then the execution of $x$ and $y$ could be done in any order, which would contradict the supposition that $y \prec x$.
-Therefore, there are commands $z_1, ..., z_n$ with atomic order $y \prec z_1 \prec \cdots \prec z_n \prec x$, where some process $p_0$ (of partition $\ppm_0$) delivers $y$, then $z_1$; some process $p_1 \in \ppm_1$ delivers $z_1$, then $z_2$, and so on: process $p_i \in \ppm_i$ delivers $z_{i}$, then $z_{i+1}$, where $1 \leq i < n$.
-Finally, process $p_n \in \ppm_n$ delivers $z_n$, then $x$.
-
-Let $z_0 = y$ and let $atomic(i)$ be the following predicate:
-``For every process $p_i \in \ppm_i$, $p_i$ finishes executing $z_i$ only after some $p_0 \in \ppm_0$ started executing $z_0$.''
-We now claim that $atomic(i)$ is true for every $i$, where $0 \leq i \leq n$.
-We prove our claim by induction.
-
-
-
-
-By ensuring termination, we mean that for every command $C$ issued by a correct client, a reply to $C$ different than $retry$ is eventually received by the client.
-This assumes that at least one oracle process is correct and that every partition has at least one correct server.
-Given these constraints, the only thing that could prevent a command from terminating would be an execution that forced the client proxy to keep retrying a command.
-This problem is trivially solved by falling back to \ssmr\ after a predefined number of retries: at a certain point, the client proxy multicast the command to all server and oracle processes, which execute the command as in \ssmr{}, i.e., with coordination among all partitions and the oracle.
 
