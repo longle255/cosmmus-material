@@ -107,8 +107,7 @@ a single partition. Of course, when re-locating an object, the oracle
 is faced with a choice of which partition to use as a destination.
 \dynastar chooses the optimal partition for relocation (i.e., one that
 would minimize the number of state relocations) by partitioning the
-workload graph using the METIS partitioner. \eb{I still don't get this... Does this mean that an object is relocated potentially everytime a command is executed? If so, how is this different from DS-SMR? Also, do you need to rellocate all objects accessed by each command to the same partition? An optimal partitioning for a certain workload doesn't imply that every command is executed against a single parition...}
-
+workload graph using the METIS partitioner.
 
 We have fully implemented \dynastar and compared its performance to
 the dynamic partitioning protocol proposed by Long et

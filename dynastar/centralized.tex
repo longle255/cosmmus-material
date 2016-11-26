@@ -20,7 +20,7 @@ The oracle builds the workload graph based on feedback from the clients or parti
 \item \emph{On-demand relocation of service state.}
 Periodically, the oracle computes an ``ideal" partitioning of the workload graph.
 Based on this partitioning and the current location of variables, the oracle computes the destination partition for commands that access variables spread on multiple partitions.
-When computing the the destination partition, the oracle strives to minimize the number of moves. 
+When computing the the destination partition, the oracle strives to minimize the number of moves.
 Variables are only moved on demand, when a command that needs the variable is issued.
 \end{itemize}
 
