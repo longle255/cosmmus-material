@@ -41,7 +41,9 @@ Notice that the oracle does not stop the system's progress while doing the parti
 
 \subsection{\appname}
 
-We implemented \appname{} on top of \libname{}, which provides a similar API as Twitter. Twitter is an online social networking service in which users can post 140-character messages and read posted messages of other users. The API consists basically of: post (user publishes a message), follow (user starts following another user), unfollow (user stops following someone), and getTimeline (user requests messages of all people whom the user follows).
+We implemented \appname\ on top of \libname, which provides a similar API as Twitter. In Twitter, among other things
+users can follow, unfollow, post and read other's tweets according to whom the user is following, users in Twitter are
+constrained to post 140-character messages, those are the messages we implemented in \appname.
 
 Given that users in social networks spend most of the time reading (i.e.: performing getTimeline) than any other operation 
 \cite{facebookTAO}, we optimised \appname\ for getTimeline being always a single partition command, so when a
@@ -50,9 +52,12 @@ Because of this designing choices, moves in objects can only happen when an user
 command, follow and unfollow commands can touch at most two partitions, while the post can move the objects from
 one or more partitions.
 
-To execute a post command, the \appname\ client needs to access all other users that are 
-\ef{cont}
+To execute a post command, the \appname\ client needs to access all user's followers, so
+we can ensure linearizability in case of users following/unfollowing in-between of a command execution, if such
+case happens, the server sends the list of followers that should be included in the next command,
+then the \appname\ server proceeds to the next command.
 
+%
 %State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
 
 %One detail about the post request is that it needs access to all users that follow the user issuing the post.
