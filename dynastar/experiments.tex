@@ -7,7 +7,8 @@ In this section, we present the results found for \appname\ with different loads
 %We are interested in assessing \dssmr{}'s performance with workloads that present different levels of locality.
 %By locality, we mean the likelihood that certain groups of data items are accessed together (by the same command).
 In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
-In Section~\ref{sec:evaluation:strongloc}, we show the results.
+In Section~\ref{sec:evaluation:methodology}, we describe how we designed the experiments and our methodology.
+In Section~\ref{sec:evaluation:results}, we show the results.
 
 % with strong-locality workloads.
 %In Section~\ref{sec:evaluation:weakloc}, we show the results for weak-locality workloads.
@@ -44,23 +45,24 @@ In Section~\ref{sec:evaluation:strongloc}, we show the results.
 
 \subsection{Environment setup and configuration parameters}
 \label{sec:evaluation:setup}
-
+\ef{How we change that?}
 We conducted all experiments on a cluster that had two types of nodes: (a) HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes, equipped with two AMD Opteron 2212 processors running at 2.0 GHz and with 4 GB of main memory. The HP nodes were connected to an HP ProCurve 2920-48G gigabit network switch, and the Dell nodes were connected to another, identical switch. Those switches were interconnected by a 20 Gbps link.
 All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM (build 25.45-b02).
 %We kept the clocks synchronized using NTP in order to measure latency components involving events in different computers.
 
-For the experiments, we use the following workloads:
-Timeline (composed only of getTimeline requests),
-Post (only post requests),
-Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
-Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
+%For the experiments, we use the following workloads:
+%Timeline (composed only of getTimeline requests),
+%Post (only post requests),
+%Follow/unfollow (50\% of follow requests and 50\% of unfollow), and
+%Mix (7.5\% post, 3.75\% follow, 3.75\% unfollow, and 85\% getTimeline).
 
 \subsection{Methodology and goals}
-All static graphs were generated using the Holme-Kim model \cite{holme-kim}, it generates power-law graphs
-with a clustering coefficient, such graphs, also referred as scale-free, are a good representation
-of the geometric structure of social networks.
+\label{sec:evaluation:methodology}
+All static graphs were generated using the Holme-Kim model \cite{holme-kim}, with this model we generate power-law
+graphs with a clustering coefficient, such graphs, also referred as scale-free, are a good representation
+of geometric structures of social networks.
 
-In the experiments, we tested graphs with 10.000 users with a varying percentage of edge-cuts, to get the desired edge-cut
+In the experiments, we tested graphs with 10.000 users with a varying percentage of edge-cuts \footnote{An edge is said to be cut if it connects two vertices that are in different partitions}, to get the desired edge-cut
 percentage, we run METIS partitioner for each partitioning size. METIS performs well in graphs with less than 10 million nodes, and scales linearly as seen in Figure~\ref{fig:metis_size_time}, with both memory and cpu usage.
 
 \begin{figure}[t]
@@ -69,6 +71,15 @@ percentage, we run METIS partitioner for each partitioning size. METIS performs 
 	\label{fig:metis_size_time}
 \end{figure}
 
+As explained in the design implementation of \appname\ in Section~\ref{sec:imp:\appname}, we chose to focus our
+experiments on the non-trivial case, when a command can go in several partitions, the other commands are linearly
+scalable over time.
+
+Since we focus our tests in the post command, we are interested in see what happens when we increase the number of
+partitions, with a higher number of partitions we should be able to achieve a high scalability but the amount of edge-cuts
+play an important role, the higher the edge-cuts the greater the incentive to degenerate the implementation to a single
+partition SMR. To perform how well a system behave in the presence of edge-cuts, we also consider the variation of
+dge-cuts in 0\%, 1\%, 5\% and 10\%.
 
 \subsection{Results}
 
