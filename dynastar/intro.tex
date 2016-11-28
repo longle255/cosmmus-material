@@ -7,7 +7,6 @@
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-strong-locality}    
-  \label{fig:motivation}
     \caption{Throughput with strong locality.}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
@@ -24,7 +23,9 @@
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-weak-locality}
     \caption{Number of move commands with weak locality}
-  \end{subfigure} 
+  \end{subfigure}
+  \caption{Motivating experiment.}
+  \label{fig:motivation}
 \end{figure*}
 
 
@@ -41,14 +42,15 @@ use of state partitioning~(e.g., \cite{corbett2013spanner, bezerra2014ssmr,Glend
   Aguilera:2007,bli16edcc}).
 
 In principle, increasing the number of partitions should result in
-increased system performance. However, if executing a command
-requires that the system access multiple partitions, then performance
-can actually decrease, due to overhead from ordering and coordinating commands across partitions to
-ensure strong consistency. Moreover, if data is not distributed
-carefully, then load imbalances can nullify the benefits of
-partitioning.  Thus, an ideal partitioning scheme is one that would
-both (i) allow commands to be executed at a single partition only, and (ii) evenly distribute data so that load is balanced among partitions.
-We refer to workloads that can be
+increased system performance. However, if executing a command requires
+that the system access multiple partitions, then performance can
+actually decrease, due to overhead from ordering and coordinating
+commands across partitions to ensure strong consistency. Moreover, if
+data is not distributed carefully, then load imbalances can nullify
+the benefits of partitioning.  Thus, an ideal partitioning scheme is
+one that would both (i) allow commands to be executed at a single
+partition only, and (ii) evenly distribute data so that load is
+balanced among partitions.  We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
@@ -61,26 +63,41 @@ over time with two different workloads; one with strong locality
 and one with weak locality. For brevity, we postpone the details
 of the experimental setup until Section~\ref{sec:experiments}.
 
-Static schemes choose an immutable assignment of objects to partitions in
-advance.  A prominent example of a
-static scheme is S-SMR~\cite{bezerra2014ssmr}. One problem with static schemes is
-that they cannot adapt as workloads change over time (e.g., in social
-networks users join and leave the system, connections are created and
-removed). One could imagine a static scheme that re-partitioned the
-data based on every change in workload, \fp{this seems to contradict the notion of static}but such a scheme would be
-impossible to implement, since it would require a priori knowledge of
-the workload. Figure~\ref{fig:motivation} shows the theoretical
-optimal throughput one could achieve with a ``perfect'' static scheme.
+Static schemes choose an immutable assignment of objects to partitions
+in advance.  A prominent example of a static scheme is
+S-SMR~\cite{bezerra2014ssmr}. The major problem with static schemes,
+though, is that they do not adapt as workloads change. Therefore, over
+time, performance is likely to degrade (e.g., in social networks users
+join and leave the system, connections are created and removed).
+
+In contrast, dynamic schemes assume no prior knowledge of the
+workload, and adapt the partitioning scheme over time.  A prominent
+example of a dynamic scheme is DS-SMR~\cite{hoang2016}. DS-SMR moves
+data to partitions on-demand in order to avoid multi-partition
+commands. While the overhead due to moving data is comparable to the
+overhead of executing multi-partition commands, the strategy of moving
+data is beneficial if future commands access the same partitions.
+
+The problem for dynamic schemes is how to select the partition to
+which to move data. Figure~\ref{fig:motivation} shows the results of
+an experiment evaluating two different strategies. The first, which we
+refer to as \emph{decentralized dynamic}, is the strategy implemented
+by DS-SMR.  DS-SMR selects partitions randomly. This allows for a
+completely decentralized implementation, in which partitions make only
+local choices about data movement. As Figure~\ref{fig:motivation-a}
+shows, this approach works well for data with strong locality, but
+performs poorly for data with weak locality.
+
+In contrast, an ''optimal'' dynamic scheme would re-compute a
+partitioning on every change in workload using a centralized, global
+view of the network.  Figure~\ref{fig:motivation-b} shows the
+performance for such a scheme.  In practice, such a scheme would be
+impossible to implement, since it would require perfectly predicting
+the workload, and constantly moving the state.
 
 
-Dynamic schemes are designed to address the problem with static
-schemes.  Dynamic schemes assume no prior knowledge of the workload,
-and move data to partitions on-demand in order to avoid
-multi-partition commands. A prominent example of a dynamic scheme is
-DS-SMR~\cite{hoang2016}. Unfortunately, existing dynamic schemes assume
-workloads with strong locality. \fp{apparently not true in general, that's how ds-smr works}As Figure~\ref{fig:motivation} shows,
-for workloads with weak-locality, DS-SMR suffers from instability due
-to constantly moving data from one partition to another.
+%% for workloads with weak-locality, DS-SMR suffers from instability due
+%% to constantly moving data from one partition to another.
 
 
 In this paper, we introduce \dynastar, a new approach to the state
@@ -88,7 +105,7 @@ partitioning problem designed to address these challenges.  \dynastar
 is \emph{dynamic}. It does not require any a priori knowledge about
 the workload, and it adapts to workload changes on-the-fly. However,
 it is able to achieve throughputs comparable to the unrealizable
-perfect static scheme. The key idea behind \dynastar is that it
+perfect dynamic scheme. The key idea behind \dynastar is that it
 minimizes the number of state relocations by monitoring the workload,
 and re-computing an optimal partitioning on demand using a static
 partitioner, we chose to use METIS partitioning algorithm~\cite{Abou-Rjeili:2006}
