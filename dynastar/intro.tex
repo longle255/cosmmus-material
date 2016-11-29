@@ -47,7 +47,7 @@ that the system access multiple partitions, then performance can
 actually decrease, due to overhead from ordering and coordinating
 commands across partitions to ensure strong consistency. Moreover, if
 data is not distributed carefully, then load imbalances can nullify
-the benefits of partitioning.  Thus, an ideal partitioning scheme is
+the benefits of partitioning.mThus, an ideal partitioning scheme is
 one that would both (i) allow commands to be executed at a single
 partition only, and (ii) evenly distribute data so that load is
 balanced among partitions.  We refer to workloads that can be
@@ -55,54 +55,66 @@ partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
 
 Broadly speaking, there are two classes of techniques for
-partitioning: static and dynamic. Static schemes (e.g.,
-S-SMR~\cite{bezerra2014ssmr}) choose an immutable assignment of
-objects to partitions in advance. In contrast, dynamic schemes assume
-no prior knowledge of the workload, and adapt the partitioning scheme
-as workloads change over time (e.g., in social networks users join and
-leave the system, connections are created and removed). Typically,
-this is implemented by moving data ``on demand'' to a single partition
-which executes a user command.
-
-The major challenge, therefore, in designing a dynamic scheme is
-determining how the system selects the partition to which to move
-data.  Figure~\ref{fig:motivation} shows the result of a motivating
-experiment that highlights two approaches. In the experiment, we show
-the throughput and number of state moves over time with two different
-workloads; one with strong locality and one with weak locality. For
-brevity, we postpone the details of the experimental setup until
-Section~\ref{sec:experiments}.
-
-The first approach, which we refer to as \emph{decentralized dynamic},
-is the strategy implemented by DS-SMR.  DS-SMR selects partitions
-randomly. This allows for a completely a decentralized implementation,
-in which partitions make only local choices about data movement. As
-Figure~\ref{fig:motivation-a} shows, this approach works well for data
-with strong locality, but is unstable for workloads with weak
-locality, since data is constantly moved from one partition to another.
+partitioning: \emph{static} and \emph{dynamic}.
+Figure~\ref{fig:motivation} shows the result of a motivating
+experiment that compares two representative systems. In the
+experiment, we measured the throughput and number of state moves over
+time with two different workloads: one with strong locality and one
+with weak locality. The workloads are inspired by the social network
+Twitter, in which the network is modeled as a graph, and users can
+``post'' messages. The social graph was generated using a Zipfian
+distribution, where the Zipf parameter was adjusted to alter the
+locality.  For brevity, we postpone the details of the experimental
+setup until Section~\ref{sec:experiments}.
 
 
-The second approach, which we refer to as \emph{optimal dynamic},
-re-computes a partitioning on every change in workload using a
-centralized, global view of the network. In practice, such a scheme
-would be impossible to implement, since it would require perfectly
-predicting the workload. Nevertheless, the results in
-Figure~\ref{fig:motivation-a} are useful, as they show an upper-bound
-for the best throughput one could hope to achieve.
+Static schemes choose an immutable assignment of objects to partitions
+prior to executing commands. As an example of a static approach for
+use in the experiment, we modified the S-SMR
+system~\cite{bezerra2014ssmr} to use the static
+METIS~\cite{Abou-Rjeili:2006} partitioning algorithm.  The METIS
+algorithm is optimized to minimize edge-cuts when partitioning a
+static social graph. As expected, we see that the throughput is less
+for the weak locality workload, since the static scheme incurs
+overhead when accessing multiple partitions to execute commands.
+For workloads that do not change the graph structure, the
+results in Figure~\ref{fig:motivation} show a theoretical optimal
+throughput.  Of course, these results are not achievable in practice,
+since for real workloads, the graph would change over time (e.g., in
+social networks users join and leave the system, connections are
+created and removed).
 
 
-In this paper, we introduce \dynastar, a new approach to the state
-partitioning problem designed to address these challenges.  \dynastar
-is \emph{dynamic}. It does not require any a priori knowledge about
-the workload, and it adapts to workload changes on-the-fly. However,
-it is able to achieve throughputs comparable to the unrealizable
-optimal dynamic scheme. The key idea behind \dynastar is that it
-minimizes the number of state relocations by monitoring the workload,
-and re-computing an optimal partitioning on demand using a static
-partitioner, we chose to use METIS partitioning algorithm~\cite{Abou-Rjeili:2006}
-as an example of a static partitioner.
+Dynamic schemes address the limitations of static schemes by adapting
+the partitioning scheme as workloads change.  Typically, this is
+implemented by moving data ``on demand'' to a single partition which
+executes a user command.  The major challenge in designing a dynamic
+scheme is determining how the system selects the partition to which to
+move data.
 
-\fp{we should probably say that it preserves consistency}
+The second system in Figure~\ref{fig:motivation-a} evaluates the dynamic
+partitioning strategy implemented by the DS-SMR system~\cite{todo}.
+DS-SMR selects partitions randomly. This allows for a completely a
+decentralized implementation, in which partitions make only local
+choices about data movement.  We refer to this approach as
+\emph{decentralized dynamic}.  As Figure~\ref{fig:motivation-a} shows,
+the {decentralized dynamic approach works well for data with strong
+  locality, but is unstable for workloads with weak locality, since
+  data is constantly moved from one partition to another.
+
+
+In this paper, we introduce \dynastar, a new dynamic approach to the
+state partitioning problem.  Like other dynamic approaches, \dynastar
+does not require any a priori knowledge about the workload. However,
+\dynastar differs from prior approaches because it maintains a
+centralized, global view of the network.  \dynastar minimizes the
+number of state relocations by monitoring the workload, and
+re-computing an optimal partitioning on demand using a static
+partitioning algorithm. Because of this, \dynastar it is able to
+achieve throughputs comparable to the optimal static scheme, while
+adapting to workload changes on-the-fly, and preserving strong
+consistency.
+
 
 With \dynastar, a location oracle maintains two data structures: (i) a
 mapping of objects to partitions, and (ii) a \emph{workload graph}
