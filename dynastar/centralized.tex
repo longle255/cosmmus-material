@@ -88,7 +88,7 @@ When the oracle delivers a consult request (Task 1 in Algorithm~\ref{alg:oracle_
 \item If the command is to create a variable $v$, the oracle checks that the $v$ does not already exist, in which case the oracle determines the destination partition of $v$ and returns a response to the client.
 In the case of a create, the oracle chooses a random partition for the new variable.
 \item If the command is not a create, the oracle first checks that all variables involved in the command exist.
-If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition the command must be atomically multicast to for execution.
+If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition to which the command must be atomically multicast for execution.
 If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition and atomically multicasts a move command to all such partitions and to the destination partition.
 \end{itemize}
 
@@ -98,10 +98,10 @@ To execute a move command (Task 3), the oracle simply updates its local informat
 In the case of a move command, the oracle does not coordinate with the involved partitions.
 This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients.
 
-The oracle also keeps track of the workload graph, periodically computes the ``ideal" partitioning of the graph, and determines the destination partition for move operations.
+The oracle also keeps track of the workload graph, periodically computes the ``ideal" partitioning of the graph, and determines the destination partition for move operations. \rjs{We never say what is the periodicity.}
 To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
 These hints can be submitted by the clients (e.g., after the execution of a command), or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-In our social network application, clients inform the oracle upon submitting ``structural operations" on the social graph, that is, operations that change the  graph (i.e., follow and unfollow requests).
+In our social network application, clients inform the oracle when submitting ``structural operations" on change the social graph (i.e., follow and unfollow requests).
 
 To ensure that the ideal partitioning periodically computed by the oracle replicas is deterministic (Task 6), each replica triggers the partitioning upon delivering a constant number of hints.
 Moreover, the algorithm used to compute the partitioning of the graph must be also deterministic.
