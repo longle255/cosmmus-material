@@ -1,35 +1,36 @@
+%!TEX root =  main.tex
 \section{Implementation}
 \label{sec:implementation}
 
-In this section, we describe \libname{}, a library that implements both \ssmr{}, \dssmr{} and \dynastar{}, and \appname{}, a scalable social network application built with \libname{}. \libname\ and \appname\ were both implemented in Java.
+In this section, we describe \libname{}, a library that implements both \ssmr{}, \dssmr{} and \dynastar{}.
+We also present \appname{}, a scalable social network application built with \libname{}. \libname\ and \appname\ were both implemented in Java.
 
 \subsection{\libname}
 
-\libname{} implements functionalities of static and dynamic mapping, supports both centralized and decentralized partitioning schemes. There 
-are three classes that the developer (i.e., application designer) must extend to implement a replicated service with \libname{}: PRObject, 
+\libname{} implements functionalities of static and dynamic mapping, and supports centralized and decentralized partitioning schemes. 
+There are three classes that the developer (i.e., application designer) must extend to implement a replicated service with \libname{}: PRObject, 
 PartitionStateMachine, OracleStateMachine.
 
-\textbf{The PRObject class} represents any kind of data item that is part of the service state. The state is partially replicated (i.e., some 
-objects may be local to some partitions, while other objects must be fetched from a remote location). Therefore, when executing a command, a 
+The \emph{PRObject class} represents any kind of data item that is part of the service state. The state is partially replicated (i.e., 
+objects are distributed among partitions). Therefore, when executing a command, a 
 replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which 
-object classes are partially replicated by extending the PRObject class. Each object of such class is stored either locally or remotely, but 
-the application code is agnostic to that. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer. 
+object classes are partially replicated by extending the PRObject class. Each object of such a class is stored locally or remotely, but 
+the application code is agnostic to the location of an object. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer. 
 
-\textbf{The PartitionStateMachine class} represents logic of the server proxy. The application server class must extend the 
+The \emph{PartitionStateMachine class} represents logic of the server proxy. The application server class must extend the 
 PartitionStateMachine class. To execute commands, the developer must provide an implementation for the method executeCommand(Command). The code 
-for such a method is agnostic to the existence of partitions. In other words, it can be exactly the same as the code used to execute commands 
-with classical state-machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions 
+for such a method is agnostic to the existence of partitions. In other words, developer programs for classical state machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions 
 and oracle transparently. Objects that are involved in application's command will be available to the partition at the time it is accessed by the partitions. To start the server, method runStateMachine() is called. Method createObject() also needs to be implemented, where the 
 developer defines how new state objects are loaded or created.
 
 
-\textbf{The OracleStateMachine class.} This class defines the oracle proxy, the oracle is replicated in a fault-tolerant
-group and can be deployed as a partition. Because the oracle is in charge of moving the PRObjects to the appropriate 
-partitions, it requires a partitioner that will provide for each object a desired location. A default partitioner is implemented using METIS, a state-of-the-art graph partitioner, but any algorithm that takes as input a graph and outputs a list is a valid
-partitioner, the graph is built by aggregating hints about the objects' access patterns, and the list it returns indicates where
-is the ideal place for each object. Since the partitioner is executed in every oracle replica at the same moment,
+The \emph{OracleStateMachine class} defines the oracle, which is deployed as a partition. 
+Because the oracle is in charge of moving the PRObjects to the appropriate 
+partitions, it requires a partitioner that will provide for each object a desired location. A default partitioner is implemented using METIS, a state-of-the-art graph partitioner, but any algorithm that takes as input a graph and outputs a mapping of objects to partitions is a valid
+partitioner.
+The workload graph is built by aggregating hints about the objects' access patterns, and the mapping it returns indicates the ideal partition for each object. Since the partitioner is executed in every oracle replica,
 its output should be deterministic so all the replicas transition to the same state after the partitioning. 
-The developer can override the default algorithm to partition the graph and the oracle is agnostic about its internal behaviour.
+The developer can override the default algorithm to partition the graph and the oracle is agnostic to its internal behavior.
 By default the OracleStateMachine calls for the coordination of a partitioning at the beginning of the execution, this can be
 changed by the developer to fit the application logic. For instance, the partitioning can be triggered to 
 happen when a partition is overloaded.

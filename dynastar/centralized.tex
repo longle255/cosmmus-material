@@ -8,9 +8,10 @@
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
-\dynastar extends the decentralized dynamic scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
+\dynastar extends DS-SMR, the scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
 In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
-Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms the decentralized dynamic scheme.
+Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms DS-SMR.
+
 The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to optimally relocate application state on-demand.
 \begin{itemize}
 \item \emph{On-the-fly workload modeling.}
