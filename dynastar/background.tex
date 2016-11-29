@@ -2,8 +2,13 @@
 \section{Background}
 \label{sec:background}
 
-\dynastar builds on state machine replication and scalable state machine replication.
-In this section, we recall these techniques and the dynamic partitioning scheme proposed by Long et al.~\cite{hoang2016}.
+
+\dynastar builds on
+prior work on scalable state machine replication
+~\cite{bezerra2014ssmr}, which in turn, build on classic
+state machine replication. In this section, we briefly review these
+techniques. Moreover, we present a summary of the decentralized
+dynamic partitioning scheme proposed by Long et al.~\cite{hoang2016}.
 
 \subsection{State Machine Replication (SMR)}
 \label{sec:smr}
@@ -89,9 +94,9 @@ Such a static mapping has the major limitation of not allowing the service to dy
 
 %\subsection{S-SMR with dynamic partitioning}
 %\subsection{Scalable replication with decentralized dynamic state partitioning}
-\subsection{Decentralized dynamic state partitioning}
+\subsection{Dynamic decentralized state partitioning}
 
-\dssmr{}~\cite{le2016dssmr} defines a dynamic mapping of variables to partitions.
+\dssmr{}~\cite{hoang2016} defines a dynamic mapping of variables to partitions.
 Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.
 Such a mapping is managed by the partitioning oracle, which, differently from \ssmr, is now implemented as a replicated service run by a group of server processes.
 The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
