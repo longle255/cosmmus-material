@@ -3,14 +3,13 @@
 \label{sec:sysmodel}
 
 In this section, we present the system model, and define our
-correctness criterion (i.e., linearizability).  \dynastar builds on
-prior work on scalable state machine replication (e.g.,
-~\cite{bezerra2014ssmr, hoang2016}. These systems rely on an atomic
-multicast primitive to consistently order commands within and across
-partitions.  We therefore briefly discuss the abstractions of reliable
-and atomic multicast. 
+correctness criterion (i.e., linearizability). Additionally, because
+\dynastar relies on two variations of a multicast primitive for
+communication, we discuss them below. When the protocol requires that
+commands are consistently ordered across partitions, \dynastar uses
+atomic multicast. Otherwise, it uses a reliable multicast, which has
+less overhead.
 
-\rjs{We need to introduce the two types of multicast here.}
 
 %\red{How do we use reliable multicast, as opposed to atomic?}
 %\red{Do we need this primitive? Or is it just inherited from the artifact?}

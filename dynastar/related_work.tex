@@ -20,14 +20,14 @@ Although this indeed improves performance significantly, it allows non-lineariza
 Those criteria can be considered weaker than linearizability, in the sense that they do not take into account real-time precedence of different commands among different clients. 
 For some applications, these consistency levels may be enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
-Efforts to make linearizable systems scalable have been made in the past~\cite{corbett2013spanner, bezerra2014ssmr, le2016dssmr, Glendenning2011, Marandi11}.
+Efforts to make linearizable systems scalable have been made in the past~\cite{corbett2013spanner, bezerra2014ssmr, hoang2016, Glendenning2011, Marandi11}.
 In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
 In \cite{Marandi11}, a partitioned variant of SMR is proposed.
 However, it requires total order (i.e., all commands have to be ordered against each other) and it does not allow a single command to update variables in different partitions.
 Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and, to ensure strong consistency across partitions, clocks are assumed to be synchronized.
 Although the authors say that Spanner works well with GPS and atomic clocks, if clocks go out of synch beyond the tolerated difference, correcteness is not guaranteed.
 \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any assumption about clock synchronization, but relying on a static partitioning of the state.
-\dssmr{}~\cite{le2016dssmr} extends S-SMR by allowing state variables to migrate across partition in order to reduce multi-partition commands.
+\dssmr{}~\cite{hoang2016} extends S-SMR by allowing state variables to migrate across partition in order to reduce multi-partition commands.
 However, \dssmr{} implements repartitioning in a very simple way that does not perform very well in scenarios with weak locality.
 \dynastar\ improves on DS-SMR by employing well known graph partitioning techniques to decide where each variable should be.
 Moreover, \dynastar\ dillutes the cost of repartitioning by moving variables on-demand, that is, only when they are accessed by some command.

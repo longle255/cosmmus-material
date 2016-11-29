@@ -8,7 +8,10 @@
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
-\dynastar extends DS-SMR, the scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
+%<<<<<<< HEAD
+%\dynastar extends DS-SMR, the scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
+%=======
+\dynastar improves DS-SMR to cope with workloads that exhibit both strong and weak locality.
 In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
 Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms DS-SMR.
 
@@ -17,7 +20,7 @@ The key insights of \dynastar are to create the workload graph on-the-fly and us
 \item \emph{On-the-fly workload modeling.}
 \dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges commands.
 An edge connecting two variables in the graph represents a command that accesses the variables. 
-The oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
+A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
 \item \emph{On-demand relocation of service state.}
 Periodically, the oracle computes an ``ideal" partitioning of the workload graph.
 Based on this partitioning and the current location of variables, the oracle computes the destination partition for commands that access variables spread on multiple partitions.
@@ -30,7 +33,7 @@ Variables are only moved on demand, when a command that needs the variable is is
 
 \subsection{The \dynastar protocol}
 
-Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe in detail how client, server and oracle processes execute, respectively.
+Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe in detail how the client, server and oracle processes execute, respectively. 
 For brevity, we omit the delete command since the coordination involved in the execution of a create and of a delete commands are analogous. 
 Moreover, in the discussion in this section, every command involves the oracle.
 In the next section, we explain how clients can use a caching technique to avoid using the oracle in the execution of most commands.
@@ -68,7 +71,7 @@ This happens if the oracle requests variables to be moved to a single destinatio
 After the client atomically multicasts the command to the destination partition, it waits for a response from the servers in the partition.
 The client must retry the command if the partition cannot execute the command.
 This happens if some of the variables needed by the command were moved to another partition due to other commands. 
-To ensure that a command is eventually executed, after retrying a few times, the client falls back \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
+To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
 
 \subsubsection{The server process} 
 
@@ -89,7 +92,7 @@ When the oracle delivers a consult request (Task 1 in Algorithm~\ref{alg:oracle_
 \item If the command is to create a variable $v$, the oracle checks that the $v$ does not already exist, in which case the oracle determines the destination partition of $v$ and returns a response to the client.
 In the case of a create, the oracle chooses a random partition for the new variable.
 \item If the command is not a create, the oracle first checks that all variables involved in the command exist.
-If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition the command must be atomically multicast to for execution.
+If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition to which the command must be atomically multicast for execution.
 If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition and atomically multicasts a move command to all such partitions and to the destination partition.
 \end{itemize}
 
@@ -99,10 +102,10 @@ To execute a move command (Task 3), the oracle simply updates its local informat
 In the case of a move command, the oracle does not coordinate with the involved partitions.
 This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients.
 
-The oracle also keeps track of the workload graph, periodically computes the ``ideal" partitioning of the graph, and determines the destination partition for move operations.
+The oracle also keeps track of the workload graph, periodically computes the ``ideal" partitioning of the graph, and determines the destination partition for move operations. \rjs{We never say what is the periodicity.}
 To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
 These hints can be submitted by the clients (e.g., after the execution of a command), or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-In our social network application, clients inform the oracle upon submitting ``structural operations" on the social graph, that is, operations that change the  graph (i.e., follow and unfollow requests).
+In our social network application, clients inform the oracle when submitting ``structural operations" on change the social graph (i.e., follow and unfollow requests).
 
 To ensure that the ideal partitioning periodically computed by the oracle replicas is deterministic (Task 6), each replica triggers the partitioning upon delivering a constant number of hints.
 Moreover, the algorithm used to compute the partitioning of the graph must be also deterministic.
