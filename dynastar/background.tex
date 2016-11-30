@@ -67,12 +67,12 @@ This mechanism allows commands to execute seamlessly despite the partitioned sta
 %\end{figure*}
 
 %Algorithm~\ref{alg:ssmr} shows precisely how S-SMR operates. 
-In more detail, when a server $s$ of partition $\ppm$, while executing a command $C$, reaches a $read(v)$ operation, there are two possibilities:
+In more detail, when a server $s$ of partition $\ppm$, while executing a command $C$, needs to read variable $v$, there are two possibilities:
 either $v$ belongs to the local partition $\ppm$,
 or it is part of a remote partition $\ppm'$. 
 If $v$ is local, $s$ will retrieve its value and send it to the servers of other partitions concerned by $C$;
 if $v$ is remote, $s$ will wait until its value is received from a server of $\ppm'$. 
-A $write(v, val)$ operation does not depend on the previous value of $v$, not requiring communication between partitions, even if $v$ is not assigned to the partition of the server executing $C$.
+A write operation on $v$ does not depend on the previous value of $v$, not requiring communication between partitions, even if $v$ is not assigned to the partition of the server executing $C$.
 To ensure linearizability, all partitions involved in the execution of a multi-partition command $C$ must coordinate before a reply can be sent to the client.
 %To understand why, consider the non-linearizable execution shown in Figure~\ref{fig:whysignals}~(a).
 %This execution is not linearizable because the only equivalent sequential execution requires $C_y$ to precede $C_{xy}$ and $C_{xy}$ to precede $C_x$, thus $C_y$ would precede $C_x$.
