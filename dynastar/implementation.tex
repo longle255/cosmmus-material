@@ -2,73 +2,117 @@
 \section{Implementation}
 \label{sec:implementation}
 
-In this section, we describe \libname{}, a library that implements both \ssmr{}, \dssmr{} and \dynastar{}.
-We also present \appname{}, a scalable social network application built with \libname{}. \libname\ and \appname\ were both implemented in Java.
 
-\subsection{\libname}
+Our  \dynastar prototype is written as a
+Java \red{8?} library.
+All code, including the experiment harness,
+is publicly available with an open-source
+license.\footnote{https://github.com/anonymous}
+Application designers who use \dynastar
+ to implement a replicated service must extend three key classes:
+ \begin{itemize}
+ \item[--] \emph{PRObject}: provides a common interface for (partially) replicated data items.
+ \item[--] \emph{PartitionStateMachine}: encapsulates the logic of the server
+   proxy. Note that the server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
+   handles all communication between partitions and the oracle transparently.
+ \item[--] \emph{OracleStateMachine}: computes the mapping of objects to partitions.
+Our default implementation uses the \red{METIS library} to provide an optimal partitioning based on the workload graph.
+ \end{itemize}
 
-\libname{} implements functionalities of static and dynamic mapping, and supports centralized and decentralized partitioning schemes. 
-There are three classes that the developer (i.e., application designer) must extend to implement a replicated service with \libname{}: PRObject, 
-PartitionStateMachine, OracleStateMachine.
-
-The \emph{PRObject class} represents any kind of data item that is part of the service state. The state is partially replicated (i.e., 
-objects are distributed among partitions). Therefore, when executing a command, a 
-replica might not have local access to some of the objects involved in the execution of the command. The developer informs \libname{} which 
-object classes are partially replicated by extending the PRObject class. Each object of such a class is stored locally or remotely, but 
-the application code is agnostic to the location of an object. All calls to methods of such objects are intercepted by \libname{}, transparently to the developer. 
-
-The \emph{PartitionStateMachine class} represents logic of the server proxy. The application server class must extend the 
-PartitionStateMachine class. To execute commands, the developer must provide an implementation for the method executeCommand(Command). The code 
-for such a method is agnostic to the existence of partitions. In other words, developer programs for classical state machine replication (i.e., full replication). \libname{} is responsible for handling all communication between partitions 
-and oracle transparently. Objects that are involved in application's command will be available to the partition at the time it is accessed by the partitions. To start the server, method runStateMachine() is called. Method createObject() also needs to be implemented, where the 
-developer defines how new state objects are loaded or created.
+ We note one important implementation detail.  The oracle is
+ multi-threaded, and can service requests while computing a new
+ partitioning concurrently. To ensure that all replicas start using
+ the new partitioning consistently, the oracle identifies each
+ partitioning with a unique id.  When an oracle replica finishes a
+ repartitioning, it atomically multicasts the id of the new
+ partitioning to all replicas of the oracle.  The first delivered id
+ message defines the order of the new partitioning with respect to
+ other oracle operations.
 
 
-The \emph{OracleStateMachine class} defines the oracle, which is deployed as a partition. 
-Because the oracle is in charge of moving the PRObjects to the appropriate 
-partitions, it requires a partitioner that will provide for each object a desired location. A default partitioner is implemented using METIS, a state-of-the-art graph partitioner, but any algorithm that takes as input a graph and outputs a mapping of objects to partitions is a valid
-partitioner.
-The workload graph is built by aggregating hints about the objects' access patterns, and the mapping it returns indicates the ideal partition for each object. Since the partitioner is executed in every oracle replica,
-its output should be deterministic so all the replicas transition to the same state after the partitioning. 
-The developer can override the default algorithm to partition the graph and the oracle is agnostic to its internal behavior.
-At any time, the application can request a repartitioning of the graph.
-%By default the OracleStateMachine calls for the coordination of a partitioning at the beginning of the execution, this can be
-%changed by the developer to fit the application logic. For instance, the partitioning can be triggered to 
-%happen when a partition is overloaded.
 
-Notice that the oracle does not halt the system while doing a partitioning since the partitioner can
-run in a different thread (or even computer, to offload the oracle). 
-To ensure that all replicas start using the new partitioning consistently, the oracle identifies each partitioning with a unique id.
-When an oracle replica concludes a repartitioning, it atomically multicasts the id of the new partitioning to all replicas of the oracle.
-The first delivered id message defines the order of the new partitioning with respect to other oracle operations.
+
+
+%% In this section, we describe \libname{}, a library that implements
+%% both \ssmr{}, \dssmr{} and \dynastar{}.  We also present \appname{}, a
+%% scalable social network application built with
+%% \libname{}. \libname\ and \appname\ were both implemented in Java.
+
+%% \subsection{\libname}
+
+%% \libname{} implements functionalities of static and dynamic mapping,
+%% and supports centralized and decentralized partitioning schemes.
+%% There are three classes that the developer (i.e., application
+%% designer) must extend to implement a replicated service with
+%% \libname{}: PRObject, PartitionStateMachine, OracleStateMachine.
+
+%% The \emph{PRObject class} represents any kind of data item that is
+%% part of the service state. The state is partially replicated (i.e.,
+%% objects are distributed among partitions). Therefore, when executing a
+%% command, a replica might not have local access to some of the objects
+%% involved in the execution of the command. The developer informs
+%% \libname{} which object classes are partially replicated by extending
+%% the PRObject class. Each object of such a class is stored locally or
+%% remotely, but the application code is agnostic to the location of an
+%% object. All calls to methods of such objects are intercepted by
+%% \libname{}, transparently to the developer.
+
+%% The \emph{PartitionStateMachine class} represents logic of the server
+%% proxy. The application server class must extend the
+%% PartitionStateMachine class. To execute commands, the developer must
+%% provide an implementation for the method executeCommand(Command). The
+%% code for such a method is agnostic to the existence of partitions. In
+%% other words, developer programs for classical state machine
+%% replication (i.e., full replication). \libname{} is responsible for
+%% handling all communication between partitions and oracle
+%% transparently. Objects that are involved in application's command will
+%% be available to the partition at the time it is accessed by the
+%% partitions. To start the server, method runStateMachine() is
+%% called. Method createObject() also needs to be implemented, where the
+%% developer defines how new state objects are loaded or created.
+
+
+%% The \emph{OracleStateMachine class} defines the oracle, which is
+%% deployed as a partition.  Because the oracle is in charge of moving
+%% the PRObjects to the appropriate partitions, it requires a partitioner
+%% that will provide for each object a desired location. A default
+%% partitioner is implemented using METIS, a state-of-the-art graph
+%% partitioner, but any algorithm that takes as input a graph and outputs
+%% a mapping of objects to partitions is a valid partitioner.  The
+%% workload graph is built by aggregating hints about the objects' access
+%% patterns, and the mapping it returns indicates the ideal partition for
+%% each object. Since the partitioner is executed in every oracle
+%% replica, its output should be deterministic so all the replicas
+%% transition to the same state after the partitioning.  The developer
+%% can override the default algorithm to partition the graph and the
+%% oracle is agnostic to its internal behavior.  At any time, the
+%% application can request a repartitioning of the graph.
 
 
 \subsection{\appname}
 \label{sec:imp:\appname}
-We implemented \appname\ on top of \libname.
-Chirper provides a similar API as Twitter. In Twitter, among other things
-users can follow, unfollow, post and read other's tweets according to whom the user is following, users in Twitter are
-constrained to post 140-character messages, those are the messages we implemented in \appname.
 
-Given that users in social networks spend most of the time reading (i.e., performing getTimeline)
-\cite{facebookTAO}, we designed \appname\ so that getTimeline are always a single-partition command.
-Thus, when a user request a timeline, all posts are available in the user's partition.
-As a consequence, post, follow or unfollow commands can lead to object moves.
-Follow and unfollow commands can involve at most two partitions, while posts can require object moves from
-one or more partitions.
+For the purposes of our evaluation, we have developed a Twitter-like
+service named \appname{} using the \dynastar{} library.  With
+\appname, users can follow, unfollow, post, or read other users'
+tweets according to whom the user is following. Like Twitter, users
+are constrained to posting 140-character messages.
 
-%To execute a post command, the \appname\ client needs to access all user's followers, so
-%we can ensure linearizability in case of users following/unfollowing in-between of a command execution, if such
-%case happens, the server sends the list of followers that should be included in the next command,
-%then the \appname\ server proceeds to the next command.
+Given that users in social networks spend most of the time reading
+(i.e., performing getTimeline) \cite{facebookTAO}, we designed
+\appname\ so that getTimeline are always a single-partition command.
+Thus, when a user request a timeline, all posts are available in the
+user's partition.  As a consequence, post, follow or unfollow commands
+can lead to object moves.  Follow and unfollow commands can involve at
+most two partitions, while posts can require object moves from one or
+more partitions.
 
-%
-%State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
 
-%One detail about the post request is that it needs access to all users that follow the user issuing the post.
-%Thus the list of follower need to be attached in the post command. However, the (Chirper) client cannot know for sure who follows the user: it keeps a cache of followers, but such cache can become stale if a different user starts following the poster.
-%To ensure linearizability when executing a post request, the \appname\ server overrides the extractObject(command) method to check if all followers that will be accessed by the command are available in the local partition (i.e., the partition of the server executing the post command).
-%If this is the case, the request is executed.
-%Otherwise, the server sends a $retry(\gamma)$ message, where $\gamma$ is the complete set of followers of the user who was posting.
-%Then, the \appname\ server proceeds to the next command.
-%Upon receiving the $retry(\gamma)$ message, the client proxy tries to move all users in $\gamma$ to the same partition before retrying to execute the post command.
+\subsection{Alternative Systems}
+
+Throughout our evaluation, we compare \dynastar{} to two alternative
+systems: S-SMR and DS-SMR. For performing our experiments, we used
+the implementations of the two systems that are available in public
+repositories. Since all three systems (S-SMR, DS-SMR, and Dynastar) provide
+a common application-level interface, there was no additional work required
+to port the \appname{} application. \rjs{We should add links to the repositories.}
