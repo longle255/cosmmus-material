@@ -146,14 +146,17 @@ Therefore, clients only query the oracle when they access a variable for the fir
 We have fully implemented \dynastar and compared its performance to
 the dynamic partitioning protocol proposed by Long et
 al.~\cite{hoang2016} and to the optimized static partitioning scheme.
-Our prototype can handle workload graphs with half a million variables
-and tens of millions of connections.  In workloads that present strong
+%Our prototype can handle workload graphs with half a million variables
+%and tens of millions of connections. \ef{Not yet :-|}
+In workloads that present strong
 locality, all three protocols eventually delivered comparable
 performance, although \dynastar converged more quickly than the
 decentralized scheme.  In workloads with weak locality, however,
-\dynastar \emph{outperformed both} schemes.  The reason for the
-surprisingly high performance of \dynastar compared to the optimized
-static partitioning scheme is that 
+\dynastar \emph{outperformed} the decentralized scheme and performed
+similar to the optimized static partitioning scheme.
+
+%The reason for the surprisingly high performance of \dynastar compared to the optimized
+%static partitioning scheme is that 
 %\textbf{we need to explain this!!!
 %:-)} \ef{If the cost of migrating the object outperforms the cost of 
 %signaling partitions, why performance get similar when we have more partitions?} 
@@ -168,7 +171,8 @@ The paper makes the following contributions:
 \item It introduces \dynastar and discusses its implementation. 
 \item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
 \item It describes \appname{} to demonstrate how \libname{} can be used to implement a scalable social network service.
-\item It presents a detailed experimental evaluation of \dynastar including real social network graphs with half a million users and 14 million edges.
+\item It presents a detailed experimental evaluation of \dynastar
+%including real social network graphs with half a million users and 14 million edges.
 \end{itemize}
 
 The rest of the paper is structured as follows.
