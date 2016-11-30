@@ -31,32 +31,36 @@ partitioner.
 The workload graph is built by aggregating hints about the objects' access patterns, and the mapping it returns indicates the ideal partition for each object. Since the partitioner is executed in every oracle replica,
 its output should be deterministic so all the replicas transition to the same state after the partitioning. 
 The developer can override the default algorithm to partition the graph and the oracle is agnostic to its internal behavior.
-By default the OracleStateMachine calls for the coordination of a partitioning at the beginning of the execution, this can be
-changed by the developer to fit the application logic. For instance, the partitioning can be triggered to 
-happen when a partition is overloaded.
+At any time, the application can request a repartitioning of the graph.
+%By default the OracleStateMachine calls for the coordination of a partitioning at the beginning of the execution, this can be
+%changed by the developer to fit the application logic. For instance, the partitioning can be triggered to 
+%happen when a partition is overloaded.
 
-Notice that the oracle does not stop the system's progress while doing the partitioning, the partitioner algorithm can
- run in a different thread or computer, offloading the oracle. The oracle gets an incremental \emph{id} for the partitioning, 
- so all the replicas can execute it at the same moment, when all receive the signal to execute the partitioning, 
- even in the presence of simultaneous repartitionings.
+Notice that the oracle does not halt the system while doing a partitioning since the partitioner can
+run in a different thread (or even computer, to offload the oracle). 
+To ensure that all replicas start using the new partitioning consistently, the oracle identifies each partitioning with a unique id.
+When an oracle replica concludes a repartitioning, it atomically multicasts the id of the new partitioning to all replicas of the oracle.
+The first delivered id message defines the order of the new partitioning with respect to other oracle operations.
+
 
 \subsection{\appname}
 \label{sec:imp:\appname}
-We implemented \appname\ on top of \libname, which provides a similar API as Twitter. In Twitter, among other things
+We implemented \appname\ on top of \libname.
+Chirper provides a similar API as Twitter. In Twitter, among other things
 users can follow, unfollow, post and read other's tweets according to whom the user is following, users in Twitter are
 constrained to post 140-character messages, those are the messages we implemented in \appname.
 
-Given that users in social networks spend most of the time reading (i.e.: performing getTimeline) than any other operation 
-\cite{facebookTAO}, we optimised \appname\ for getTimeline being always a single partition command, so when a
-user request a timeline, all messages are going to be available on the partition that the request was sent to.
-Because of this designing choices, moves in objects can only happen when an user issues a post, follow or unfollow
-command, follow and unfollow commands can touch at most two partitions, while the post can move the objects from
+Given that users in social networks spend most of the time reading (i.e., performing getTimeline)
+\cite{facebookTAO}, we designed \appname\ so that getTimeline are always a single-partition command.
+Thus, when a user request a timeline, all posts are available in the user's partition.
+As a consequence, post, follow or unfollow commands can lead to object moves.
+Follow and unfollow commands can involve at most two partitions, while posts can require object moves from
 one or more partitions.
 
-To execute a post command, the \appname\ client needs to access all user's followers, so
-we can ensure linearizability in case of users following/unfollowing in-between of a command execution, if such
-case happens, the server sends the list of followers that should be included in the next command,
-then the \appname\ server proceeds to the next command.
+%To execute a post command, the \appname\ client needs to access all user's followers, so
+%we can ensure linearizability in case of users following/unfollowing in-between of a command execution, if such
+%case happens, the server sends the list of followers that should be included in the next command,
+%then the \appname\ server proceeds to the next command.
 
 %
 %State partitioning in \appname\ is based on users' interest. A function $f(uid)$ returns the partition that user with id $uid$ should belong to, based on the user's interest. Function $f$ is implemented in method getObjectPlacement(User) of class \appname{}Oracle, which extends OracleStateMachine (class User extends PRObject). Taking into account that a typical user probably spends more time reading messages (i.e., issuing getTimeline) than writing them (i.e., issuing post), we decided to optimize getTimeline to be single-partition. This means that, when a user requests his or her timeline, all messages should be available in the partition that stores that user's data, in the form of a materialized timeline (similarly to a materialized view in a database). To make this possible, whenever a post request is executed, the message is inserted into the materialized timeline of all users that follow the one that is posting. Also, when a user starts following another user, the messages of the followed user are inserted into the follower's materialized timeline as part of the command execution; likewise, they are removed when a user stops following another user. Because of this design decision, every getTimeline request accesses only one partition, follow and unfollow requests access objects on at most two partitions, and post requests access up to all partitions. The \appname{} client does not need any knowledge about partitions, since it uses method sendAccessCommand(command) of the \dssmr{} client proxy to issue its commands.
