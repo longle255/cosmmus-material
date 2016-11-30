@@ -42,12 +42,12 @@ use of state partitioning~(e.g., \cite{corbett2013spanner, bezerra2014ssmr,Glend
   Aguilera:2007,bli16edcc}).
 
 In principle, increasing the number of partitions should result in
-increased system performance. However, if executing a command requires
-that the system access multiple partitions, then performance can
+increased system performance. However, if the execution of commands involves
+multiple partitions, then performance can
 actually decrease, due to overhead from ordering and coordinating
 commands across partitions to ensure strong consistency. Moreover, if
 data is not distributed carefully, then load imbalances can nullify
-the benefits of partitioning.mThus, an ideal partitioning scheme is
+the benefits of partitioning. Thus, an ideal partitioning scheme is
 one that would both (i) allow commands to be executed at a single
 partition only, and (ii) evenly distribute data so that load is
 balanced among partitions.  We refer to workloads that can be
@@ -57,7 +57,7 @@ partitioned in a way that satisfies these two properties as exhibiting
 Broadly speaking, there are two classes of techniques for
 partitioning: \emph{static} and \emph{dynamic}.
 Figure~\ref{fig:motivation} shows the result of a motivating
-experiment that compares two representative systems. In the
+experiment that compares two representative systems, one of each class. In the
 experiment, we measured the throughput and number of state moves over
 time with two different workloads: one with strong locality and one
 with weak locality. The workloads are inspired by the social network
@@ -68,15 +68,18 @@ locality.  For brevity, we postpone the details of the experimental
 setup until Section~\ref{sec:experiments}.
 
 
-Static schemes choose an immutable assignment of objects to partitions
+Static techniques choose an immutable assignment of application state variables to partitions
 prior to executing commands. As an example of a static approach for
 use in the experiment, we modified the S-SMR
 system~\cite{bezerra2014ssmr} to use the static
 METIS~\cite{Abou-Rjeili:2006} partitioning algorithm.  The METIS
 algorithm is optimized to minimize edge-cuts when partitioning a
-static social graph. As expected, we see that the throughput is less
-for the weak locality workload, since the static scheme incurs
-overhead when accessing multiple partitions to execute commands.
+static social graph. 
+In the workload with strong locality, METIS partitions the social graph such that all posts are single partition;
+in the workload with weak locality, although most commands are single partition, a small fraction of posts involves multiple partitions.
+As expected, we see that the throughput is less
+for the weak locality workload, due to the more expensive execution of multi-partition posts.
+%since the static scheme incurs overhead when accessing multiple partitions to execute commands.
 For workloads that do not change the graph structure, the
 results in Figure~\ref{fig:motivation} show a theoretical optimal
 throughput.  Of course, these results are not achievable in practice,
@@ -85,19 +88,22 @@ social networks users join and leave the system, connections are
 created and removed).
 
 
-Dynamic schemes address the limitations of static schemes by adapting
-the partitioning scheme as workloads change.  Typically, this is
-implemented by moving data ``on demand'' to a single partition which
-executes a user command.  The major challenge in designing a dynamic
+Dynamic techniques address the limitations of static techniques by adapting
+the partitioning scheme as workloads change.  
+For example, a dynamic technique can move data ``on demand'' to maximize the number of single partition user commands, while avoiding imbalances in the load of the partitions.  
+%Typically, this is
+%implemented by moving data ``on demand'' to a single partition which
+%executes a user command.  
+The major challenge in designing a dynamic
 scheme is determining how the system selects the partition to which to
 move data.
-
-The second system in Figure~\ref{fig:motivation-a} evaluates the dynamic
+%
+The second system in Figure~\ref{fig:motivation} evaluates the dynamic
 partitioning strategy implemented by the DS-SMR system~\cite{hoang2016}.
-DS-SMR selects partitions randomly. This allows for a completely a
+DS-SMR selects partitions randomly. This allows for a completely 
 decentralized implementation, in which partitions make only local
 choices about data movement.  We refer to this approach as
-\emph{decentralized dynamic}.  As Figure~\ref{fig:motivation-a} shows,
+\emph{decentralized dynamic}.  As Figure~\ref{fig:motivation} shows,
 the {decentralized dynamic approach works well for data with strong
   locality, but is unstable for workloads with weak locality, since
   data is constantly moved from one partition to another.
@@ -117,19 +123,25 @@ consistency.
 
 
 With \dynastar, a location oracle maintains two data structures: (i) a
-mapping of objects to partitions, and (ii) a \emph{workload graph}
-with objects as vertices and edges as commands that access the
-objects.  When a client submits a command, it must first contact the
-location oracle to discover the partitions on which the objects are
-stored.  If the command accesses objects in multiple partitions, the
-oracle issues a move command to the partitions, re-locating objects to
-a single partition. Of course, when re-locating an object, the oracle
+mapping of application state variables to partitions, and (ii) a \emph{workload graph}
+with state variables as vertices and edges as commands that access the
+variables.  When a client submits a command, it must first contact the
+location oracle to discover the partitions on which state variables are
+stored.  If the command accesses variables in multiple partitions, the
+oracle issues a move command to the partitions, re-locating variables to
+a single partition. Of course, when re-locating a variable, the oracle
 is faced with a choice of which partition to use as a destination.
-\dynastar chooses the optimal partition for relocation (i.e., one that
+\dynastar chooses the partition for relocation (i.e., one that
 would minimize the number of state relocations) by partitioning the
 workload graph using the METIS partitioner.
+Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
 
-\rjs{Should we say something about the location oracle not being a bottleneck?}
+\dynastar implements the oracle as a regular partition, replicated in a set of nodes, to tolerate failures.
+To ensure that the oracle does not become a performance bottleneck, clients can cache location information.
+Therefore, clients only query the oracle when they access a variable for the first time or when cached entries become invalid (i.e., because a variable changed location).
+\dynastar copes with commands addressed to wrong partitions by telling clients to retry a command.
+
+%\rjs{Should we say something about the location oracle not being a bottleneck?}
 
 We have fully implemented \dynastar and compared its performance to
 the dynamic partitioning protocol proposed by Long et
@@ -141,14 +153,15 @@ performance, although \dynastar converged more quickly than the
 decentralized scheme.  In workloads with weak locality, however,
 \dynastar \emph{outperformed both} schemes.  The reason for the
 surprisingly high performance of \dynastar compared to the optimized
-static partitioning scheme is that \textbf{we need to explain this!!!
-:-)} \ef{If the cost of migrating the object outperforms the cost of 
-signaling partitions, why performance get similar when we have more partitions?} 
-\lle{in static scheme, partitions exchange signal in every global commands,
-while, in dynamic scheme, there is chance that partitions already have
-data, thus no communication needed. More over, signaling is a two-way mechanism,
-while moving objects in dynamic scheme is only one-way, which leads to less data
-is being exchanged}
+static partitioning scheme is that 
+%\textbf{we need to explain this!!!
+%:-)} \ef{If the cost of migrating the object outperforms the cost of 
+%signaling partitions, why performance get similar when we have more partitions?} 
+%\lle{in static scheme, partitions exchange signal in every global commands,
+%while, in dynamic scheme, there is chance that partitions already have
+%data, thus no communication needed. More over, signaling is a two-way mechanism,
+%while moving objects in dynamic scheme is only one-way, which leads to less data
+%is being exchanged}
 
 The paper makes the following contributions:
 \begin{itemize}
