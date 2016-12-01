@@ -49,16 +49,16 @@ partitions. With a higher number of partitions we should be able to achieve high
 play an important role, the higher the edge-cuts the greater the incentive to degenerate the implementation to a single
 partition SMR. To perform how well a system behave in the presence of edge-cuts, we also consider the variation of
 edge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning we also vary the number of edge-cuts 
-in 1\%, 5\% and 10\%, then we put the objects at random initial partitions.
-We compare our results with \dssmr\ and \ssmr with a static partitioning produced by METIS.
+in 1\%, 5\% and 10\%, then we put the objects at random initial partitions. We compare \dynastar\ with \dssmr\ and \ssmr with a static partitioning produced by METIS.
 
 \subsection{Results}
 \label{sec:evaluation:results}
-As we see in the Figure~\ref{fig:varying_edge_cut}, all the techniques perform similar on tests with strong locality, that is
-expected because there are no cross-partition commands, so after a while there are no moves in \dynastar and \dssmr, and no synchronization among partitions for \ssmr.
+As we see in Figure~\ref{fig:varying_edge_cut}, all the techniques perform similarly on tests with strong locality, that is
+expected because there are no cross-partition commands after the graph is perfectly partitioned and no more moves 
+occur in \dynastar or \dssmr, also no synchronization among partitions is necessary for \ssmr.
 As the number of edge-cuts get higher however, \dssmr\ performance decreases significantly.
 This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions,
-and hardly converge at a stable configuration, the problem only gets worse when the number of edge-cuts increases, as
+and hardly converge in a stable configuration, the problem only gets worse when the number of edge-cuts increases, as
 the number of moves increases proportionally.
 For \dynastar and \ssmr with a static partitioning, we can see that the throughput scales 
 with the number of partitions, this is expected for both methods, up to a point that the number of moves and cross-partition
@@ -66,7 +66,7 @@ commands have a considerable overhead in the execution.
 %The optimal partitioning produced by METIS was used in the \ssmr\, which helps minimize the number of edge-cuts.
 %ef: I think this is already said in other parts.
 %In \dynastar, performance is similar to \ssmr with a static partitioning. This happens because \dynastar uses METIS as 
-reference for doing partitioning, 
+%reference for doing partitioning, 
 
 \begin{figure*}[h]
 	\includegraphics{figures/experiments/throughput-latency-avg-all}
@@ -140,7 +140,7 @@ Figure~\ref{fig:dynamic_load_tput} depicts dynamically repartitioning on-the-fly
 We started the system with an empty graph. Then clients continuously create users and links between them
 during the experiment (running the follow command).  The oracle monitors changes in the graph's structure and 
 trigger a repartitioning when the number of changes exceed a threshold.
-Each time the repartitioning took place, the partitioning became better, helps the throughput increase. 
+Each time the repartitioning took place, the partitioning became better, that helps the throughput increase. 
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
