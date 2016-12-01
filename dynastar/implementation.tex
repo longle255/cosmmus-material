@@ -4,7 +4,7 @@
 
 
 Our  \dynastar prototype is written as a
-Java \red{8?} library.
+Java 8 library.
 All code, including the experiment harness,
 is publicly available with an open-source
 license.\footnote{https://github.com/anonymous}
@@ -16,7 +16,7 @@ Application designers who use \dynastar
    proxy. Note that the server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
    handles all communication between partitions and the oracle transparently.
  \item[--] \emph{OracleStateMachine}: computes the mapping of objects to partitions.
-Our default implementation uses the \red{METIS library} to provide an optimal partitioning based on the workload graph.
+Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide an optimal partitioning based on the workload graph.
  \end{itemize}
 
  We note one important implementation detail.  The oracle is

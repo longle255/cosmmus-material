@@ -5,6 +5,8 @@
 
 %If the system can be modeled as a graph, as described in the previous session, we can take advantage of algorithms that perform graph partitioning to optimise the state partitioning of \ssmr\  while using concepts from \dssmr. The problem of graph partitioning is well stablished and despite being NP-Complete \ref{NPC_GraphPartition}, several approximation algorithms exist. First we define what graph partitioning is and how it can analyzed to our needs, next we explore possibilities that are easily obtainable when applying the same graph's reasoning.
 
+In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
+
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
@@ -15,13 +17,11 @@
 In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
 Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms DS-SMR.
 
-The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to optimally \eb{I don't agree with the "optimally" here, as graph partitioning is an NP-hard problem and those libraries usually employ some kind of heuristics...} relocate application state on-demand.
+The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to efficiently relocate application state on-demand.
 \begin{itemize}
 \item \emph{On-the-fly workload modeling.}
-\dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges commands.
-An edge connecting two variables in the graph represents a command that accesses the variables. 
-\eb{I'd rewrite as: ``where vertices represent state variables and edges dependencies between variables.
-An edge connects two variables in the graph if a command accesses both of them; the more commands, the higher the weight of the edge.''}
+\dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges dependencies between variables.
+An edge connects two variables in the graph if a command accesses both of them.
 A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
 \item \emph{On-demand relocation of service state.}
 Periodically, the oracle computes an ``ideal" partitioning of the workload graph.
@@ -36,7 +36,7 @@ Variables are only moved on demand, when a command that needs the variable is is
 \subsection{The \dynastar protocol}
 
 Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe in detail how the client, server and oracle processes execute, respectively. 
-For brevity, we omit the delete command since the coordination involved in the execution of a create and of a delete commands are analogous. \eb{nitpick: ``...of create and delete commands...''?}
+For brevity, we omit the delete command since the coordination involved in the execution of a create and delete commands are analogous. 
 Moreover, in the discussion in this section, every command involves the oracle.
 In the next section, we explain how clients can use a caching technique to avoid using the oracle in the execution of most commands.
 
@@ -67,8 +67,8 @@ In the next section, we explain how clients can use a caching technique to avoid
 
 To execute a command, the client atomically multicasts the command to the oracle in a consult message to find out the partitions involved.
 The oracle replies with a prophecy, which may already tell the client that the command cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
-If the command can be executed, the client receives a prophecy containing a tuple $(dests, sync)$, where $dests$ is a set of the partitions \eb{nit: ``the set of partitions''?} the command must be atomically multicast for execution, and $sync$ is a flag that tells the client whether it must coordinate with a partition before atomically multicasting the command.
-This happens if the oracle requests variables to be moved to a single destination partition, in which case the client must wait for the destination partition to receive the variables. \eb{This part here is hard to understand... I'd either give a bit more detail, or not talk about this sync flag (which could perhaps be encapsulated by something like fifo in the amcast layer, similarly to what ZAB does for zookeeper).}
+If the command can be executed, the client receives a prophecy containing a tuple $(dests, sync)$, where $dests$ is the set of partitions the command must be atomically multicast for execution, and $sync$ is a flag.
+The $sync$ flag tells the client whether it should wait for the destination partition to receive the variables accessed by the command, in case the oracle had to move these variables to a single destination partition.
 
 After the client atomically multicasts the command to the destination partition, it waits for a response from the servers in the partition.
 The client must retry the command if the partition cannot execute the command.
@@ -79,7 +79,7 @@ To ensure that a command is eventually executed, after retrying a few times, the
 
 When a server delivers a command for execution, it first checks that all variables accessed by the command are stored locally, in which case the command is executed and the response is sent back to the client (Task 1 in Algorithm~\ref{alg:server_proxy}).
 If one or more variables are not stored at the partition, the server returns a message to the client to retry the operation.
-This happens if some variables have been moved to another partition due to another command. \eb{who tells the servers to move variables?}
+This happens if the oracle moved some variables to another partition as part of another command. 
 
 Upon delivering a message to move variables (Task 2), a server in the source partition reliably multicasts all the needed variables stored locally to the destination partition (possibly none, if these variables have already been moved).
 Servers in the destination partition simply wait for a message from each source partition.
@@ -95,24 +95,27 @@ When the oracle delivers a consult request (Task 1 in Algorithm~\ref{alg:oracle_
 In the case of a create, the oracle chooses a random partition for the new variable.
 \item If the command is not a create, the oracle first checks that all variables involved in the command exist.
 If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition to which the command must be atomically multicast for execution.
-If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition and atomically multicasts a move command to all such partitions and to the destination partition. \eb{``... and sends a prophecy back to the client with the sync flag set to true''?}
+If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition, atomically multicasts a move command to all such partitions and to the destination partition, and returns a prophecy back to the client with the $sync$ flag set to true.
 \end{itemize}
 
 The oracle executes a create command (Task 2) by updating its partition information and coordinating with the destination partition of the variable.
 This is done to avoid interleaved executions with other commands, which could lead to consistency violations. 
-To execute a move command (Task 3), the oracle simply updates its local information about source and destination partitions.
-In the case of a move command, the oracle does not coordinate with the involved partitions.
-This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients. \eb{These claims sound a bit strong... Do we have a proof for them?}
+To execute a move command (Task 3), the oracle updates its local information about source and destination partitions.
+%In the case of a move command, the oracle does not coordinate with the involved partitions.
+%This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients. \eb{These claims sound a bit strong... Do we have a proof for them?}
 
-The oracle also keeps track of the workload graph, periodically computes the ``ideal" partitioning of the graph, and determines the destination partition for move operations. \rjs{We never say what is the periodicity.}
+The oracle also keeps track of the workload graph, computes the optimized partitioning of the graph, and determines the destination partition for move operations. %\rjs{We never say what is the periodicity.}
 To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
 These hints can be submitted by the clients (e.g., after the execution of a command), or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-\eb{I don't think the next sentence belongs to this section...}
-In our social network application, clients inform the oracle when submitting ``structural operations" on change the social graph (i.e., follow and unfollow requests).
+%\eb{I don't think the next sentence belongs to this section...}
+%In our social network application, clients inform the oracle when submitting ``structural operations" on change the social graph (i.e., follow and unfollow requests).
 
-To ensure that the ideal \eb{I'd refrain from using ``optimal'' or ``ideal'' when METIS uses heuristics.} partitioning periodically computed by the oracle replicas is deterministic (Task 6), each replica triggers the partitioning upon delivering a constant number of hints.
-Moreover, the algorithm used to compute the partitioning of the graph must be also deterministic.
-To determine the destination partition of a set of variables, as part of a move, the oracle chooses the partition that results in the minimum number of variables that need to be moved given the ideal partitioning and the current location of the variables. \eb{I'd begin this last sentence with ``When executing a command, and the variables are not in the same partition, the oracle chooses a partition to move them all to based on...'' or something like that.}
+To compute an optimized partitioning (Task 6), the oracle uses a graph partitioner.
+A new partitioning can be requested by the application, by a partition, or by the oracle itself (e.g., upon delivering a certain number of hints).
+%Moreover, the algorithm used to compute the partitioning of the graph must be also deterministic.
+To determine the destination partition of a set of variables, as part of a move, the oracle uses the current location of variables and the last partitioning produced by the graph partitioner.
+
+%partition that results in the minimum number of variables that need to be moved given the ideal partitioning and the current location of the variables. \eb{I'd begin this last sentence with ``When executing a command, and the variables are not in the same partition, the oracle chooses a partition to move them all to based on...'' or something like that.}
 
 \subsection{Performance optimizations}
 \label{sec:optm}
@@ -124,7 +127,7 @@ Before submitting a consult request to the oracle, the client checks its locatio
 If the cache contains the partition of the variables needed by the command and all variables are in a single destination partition, the client can atomically multicast the command to the partition and avoid contacting the oracle. 
 
 The client still needs to contact the oracle in one of these situations:
-(a)~according to client's cache, not all variables needed by the command are in the same partition \eb{(since it will likely involve a move)};
+(a)~according to client's cache, not all variables accessed by the command are in the same partition and it is necessary to move variables;
 (b)~the cache contains outdated information, and the command is multicast to a partition that does not contain all needed variables; or
 (c)~the command is a create, in which case it must involve the oracle, as explained before.
 If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.

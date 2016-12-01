@@ -19,8 +19,9 @@
 	\ELSE[in this case, $prophecy$ is $(dests,sync)$]
 		\IF[did a move?]{$C$ is $access(\omega)$ and $sync = true$}
 %			\FOR[wait for partitions...]{each $\ppm \in sync$}
-				\STATE wait for $reply$ from a server in $dests\setminus \{ oracle \}$ \eb{why only ``a server'', shouldn't it be a server from each partition?}
-				\STATE \eb{where's the part about the client telling the server to move variables accross partitions?}
+				\STATE wait for $reply$ from a server in $dests\setminus \{ oracle \}$ 
+				%\eb{why only ``a server'', shouldn't it be a server from each partition?}
+				%\STATE \eb{where's the part about the client telling the server to move variables accross partitions?}
 %				\COMMENT{...in move}
 %			\ENDFOR
 		\ENDIF
