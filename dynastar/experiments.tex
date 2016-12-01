@@ -58,15 +58,16 @@ All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Envi
 
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
-All static graphs were generated using the Holme-Kim model \cite{holme-kim}, with this model we generate power-law
-graphs with a clustering coefficient, such graphs, also referred as scale-free, are a good representation
+All weak-locality static graphs were generated using the Holme-Kim model \cite{holme-kim}, with this model we generate
+power-law graphs with a clustering coefficient, such graphs, also referred as scale-free, are a good representation
 of geometric structures of social networks.
 
 In the experiments, we tested graphs with 10.000 users with a varying percentage of edge-cuts \footnote{An edge is said to be cut if it connects two vertices that are in different partitions}, to get the desired edge-cut
 percentage, we run METIS partitioner for each partitioning size. METIS performs well in graphs with less than 10 million nodes, and scales linearly as seen in Figure~\ref{fig:metis_size_time}, with both memory and cpu usage.
 
-\begin{figure}[t]
-	\includegraphics[width=0.95\columnwidth]{figures/metis_size_time}
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\columnwidth]{figures/metis_size_time}
 	\caption{METIS processor and memory usage}
 	\label{fig:metis_size_time}
 \end{figure}
@@ -83,9 +84,25 @@ partition SMR. To perform how well a system behave in the presence of edge-cuts,
 dge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning we also vary the number of edge-cuts 
 in 1\%, 5\% and 10\%. We compare our results with \dssmr\ and \ssmr with a static partitioning.
 
-
-
 \subsection{Results}
+As we see in the Figure~\ref{fig:varying_edge_cut}, all the techniques perform similar on tests with strong locality. As
+the number of edge-cuts get higher, \dssmr performance decreases significantly both in terms of throughput and latency.
+\dynastar
+
+\begin{figure*}[t]
+	 \begin{subfigure}[t]{.8\textwidth}
+		\includegraphics{figures/experiments/throughput-peak-all}
+		%\caption{Throughput varying edge-cuts and number of partitions}
+		\label{fig:varying_edge_cut}
+	\end{subfigure}
+	\begin{subfigure}[t]{.8\textwidth}
+		\includegraphics{figures/experiments/latency-avg-all}
+		\caption{Varying edge-cuts and number of partitions}
+		\label{fig:latency-avg-all}
+	\end{subfigure}
+\end{figure*}
+
+\subsubsection{Dynamic partitioning}
 
 
 
