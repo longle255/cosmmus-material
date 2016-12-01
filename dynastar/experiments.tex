@@ -67,7 +67,7 @@ percentage, we run METIS partitioner for each partitioning size. METIS performs 
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\columnwidth]{figures/metis_size_time}
+    \includegraphics[width=\columnwidth]{figures/metis_size_time}
 	\caption{METIS processor and memory usage}
 	\label{fig:metis_size_time}
 \end{figure}
@@ -91,16 +91,9 @@ synchronisation among partitions for \ssmr, as the number of edge-cuts get highe
 decreases significantly, while \dynastar performance is similar to \ssmr with a static partitioning.
 
 \begin{figure*}[t]
-	 \begin{subfigure}[t]{.8\textwidth}
-		\includegraphics{figures/experiments/throughput-peak-all}
-		\caption{Throughput varying edge-cuts and number of partitions}
-		\label{fig:varying_edge_cut}
-	\end{subfigure}
-	\begin{subfigure}[t]{.8\textwidth}
-		\includegraphics{figures/experiments/latency-avg-all}
-		\caption{Varying edge-cuts and number of partitions}
-		\label{fig:latency-avg-all}
-	\end{subfigure}
+	\includegraphics{figures/experiments/throughput-latency-avg-all}
+	\caption{Throughput and latency, varying edge-cuts for different partitioning size}
+	\label{fig:latency-avg-all}
 \end{figure*}
 
 To test if the oracle can be a bottleneck, in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
@@ -124,10 +117,20 @@ The load is higher in the beginning, when the clients did not yet cache the requ
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
-\begin{figure}[t]
-	\includegraphics{figures/experiments/tp-move-4p}
-	\caption{\dynastar throughput and number of moves over time}
+\begin{figure}
+\centering
+\begin{subfigure}[ht]{0.5\textwidth}
+\captionsetup{justification=centering}
+	\includegraphics{figures/experiments/move-dynastar-vs-dssmr-4p}
+	\caption{\dynastar and \dssmr\ moves over time}
 	\label{fig:4p_moves}
+\end{subfigure}
+
+\begin{subfigure}[ht]{0.5\textwidth}
+	\includegraphics{figures/experiments/tp-dynastar-vs-dssmr-4p}
+	\caption{\dynastar and \dssmr\ throughput over time}
+	\label{fig:4p_tput}
+\end{subfigure}
 \end{figure}
 
 \subsubsection{Dynamic partitioning}
