@@ -108,6 +108,11 @@ reference for doing partitioning.
 
 The Figure~\ref{fig:move_throughput_ddsm_vs_dynastar} shows how a weak locality graph affects performance of \dssmr and \dynastar performance (i.e. centralized and decentralized methods). \dssmr couldn't reach a stable partitioning, and moved objects constantly, which prevents it from increasing performance. With \dynastar{}, it soon reach the optimal partitioning, help reducing the number of moves, and increasing the system's throughput
 
+To test if the oracle can be a bottleneck, in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
+The load is higher in the beginning, when the clients did not yet cache the requests, but diminish over time, being
+necessary only when clients have an invalid log or when a repartition happens.
+
+
 
 \begin{figure*}[ht!]
   \centering
@@ -163,6 +168,7 @@ The load is higher in the beginning, when the clients did not yet cache the requ
 	\label{fig:cpu_oracle}
 \end{figure}
 
+In Figure~\ref{fig:dynamic_load_tput}, we increase the number of clients and perform dynamic repartitionings,
 
 Figure~\ref{fig:dynamic_load_tput} depicts the test of dynamic repartitioning on-the-fly. 
 We started the system with an empty graph (i.e. there was no user in the system). 
@@ -170,19 +176,33 @@ Then clients continuously create users and links betweens users during the exper
 The oracle monitored changed in the graph's structure, trigger repartitioning when the number of changes exceed a threshold. 
 Each time the repartitioning took place, the partitioning became better, helps the throughput increase. 
 
-\begin{figure}[t]
+\begin{figure}[ht]
 	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
 	\caption{Adding nodes and repartitioning dynamically}
 	\label{fig:dynamic_load_tput}
 \end{figure}
 
-
-\begin{figure}[t]
+\begin{figure}[ht]
 	\includegraphics{figures/experiments/throughput-avg-vary-partition}
 	\caption{Same graph in different partitioning}
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
+\begin{figure}
+\centering
+\begin{subfigure}[ht]{0.5\textwidth}
+\captionsetup{justification=centering}
+	\includegraphics{figures/experiments/move-dynastar-vs-dssmr-4p}
+	\caption{\dynastar and \dssmr\ moves over time}
+	\label{fig:4p_moves}
+\end{subfigure}
+
+\begin{subfigure}[ht]{0.5\textwidth}
+	\includegraphics{figures/experiments/tp-dynastar-vs-dssmr-4p}
+	\caption{\dynastar and \dssmr\ throughput over time}
+	\label{fig:4p_tput}
+\end{subfigure}
+\end{figure}
 
 \subsubsection{Dynamic partitioning}
 
