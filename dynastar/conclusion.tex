@@ -1,11 +1,9 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-This work introduces \dssmrlong{} (\dssmr), a scalable variant of the well-known state machine replication technique. 
-\dssmr{} implements dynamic state partitioning to adapt to different access patterns throughout the execution, while scaling throughput with the number of partitions and ensuring linearizability.
-To evaluate \dssmr{}, we developed the \libname\ library and implemented \appname{}, a scalable social network application, with \libname{}.
-In our experiments, we deployed \appname\ with both \dssmr\ and \ssmr{}.
-%, executing the application under workloads with weak and strong locality.
-The results demonstrate that \dssmr\ significantly improves the performance of \appname\ over \ssmr\ in the presence of multi-partition commands.
-%, specially for workloads with strong locality.
-
+In this paper we present \dynastar, a partitioning strategy for scalable state machine replication.
+\dynastar is inspired by DS-SMR, a decentralized dynamic scheme proposed by Long et al.~\cite{hoang2016}.
+Differently from DS-SMR, however, \dynastar performs well in workloads that exhibit strong and weak locality.
+In the presence of strong locality, it converges more quickly than DS-SMR; in the presence of weak locality, it largely outperforms DS-SMR.
+The key insights of \dynastar are to build a workload graph on-the-fly and use an optimized partitioning of the workload graph, computed with an online graph partitioner, to decide how to efficiently move state variables.
+The paper describes how one can turn this conceptually simple idea into a system that sports performance close to an optimal (but impractical) scalable system.
