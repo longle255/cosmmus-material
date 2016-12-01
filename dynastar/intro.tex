@@ -152,7 +152,7 @@ In workloads that present strong
 locality, all three protocols eventually delivered comparable
 performance, although \dynastar converged more quickly than the
 decentralized scheme.  In workloads with weak locality, however,
-\dynastar \emph{outperformed} the decentralized scheme and performed
+\dynastar largely outperformed the decentralized scheme and performed
 similar to the optimized static partitioning scheme.
 
 %The reason for the surprisingly high performance of \dynastar compared to the optimized
@@ -176,11 +176,11 @@ The paper makes the following contributions:
 \end{itemize}
 
 The rest of the paper is structured as follows.
-Section~\ref{sec:sysmodel} describes our system model.
+Section~\ref{sec:sysmodel} presents the system model.
 Section~\ref{sec:background} reviews existing scalable state machine replication approaches.
-Section~\ref{sec:dssmr} introduces \dssmr{}; we explain the technique in detail and argue about its correctness.
-Section~\ref{sec:implementation} details the implementation of \libname\ and \appname{}.
-Section~\ref{sec:experiments} reports on the results of our experiments with \dssmr{}.
+Section~\ref{sec:dynastar} introduces \dynastar, describes the technique in detail and argues about its correctness.
+Section~\ref{sec:implementation} overviews our prototype.
+Section~\ref{sec:experiments} reports on the results of our experiments.
 Section~\ref{sec:rw} surveys related work and
 Section~\ref{sec:conclusion} concludes the paper.
 
