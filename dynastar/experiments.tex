@@ -81,14 +81,24 @@ Since we focus our tests in the post command, we are interested to see what happ
 partitions. With a higher number of partitions we should be able to achieve higher scalability but the amount of edge-cuts
 play an important role, the higher the edge-cuts the greater the incentive to degenerate the implementation to a single
 partition SMR. To perform how well a system behave in the presence of edge-cuts, we also consider the variation of
-dge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning we also vary the number of edge-cuts 
-in 1\%, 5\% and 10\%. We compare our results with \dssmr\ and \ssmr with a static partitioning.
+edge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning we also vary the number of edge-cuts 
+in 1\%, 5\% and 10\%, then we put the objects at random initial partitions.
+We compare our results with \dssmr\ and \ssmr with a static partitioning produced by METIS.
 
 \subsection{Results}
 As we see in the Figure~\ref{fig:varying_edge_cut}, all the techniques perform similar on tests with strong locality, that is
-expected because there are no cross-partition commands, so after a while there are no moves in \dynastar, and no
-synchronisation among partitions for \ssmr, as the number of edge-cuts get higher however, \dssmr performance 
-decreases significantly, while \dynastar performance is similar to \ssmr with a static partitioning.
+expected because there are no cross-partition commands, so after a while there are no moves in \dynastar and \dssmr, and no
+synchronization among partitions for \ssmr.
+As the number of edge-cuts get higher however, \dssmr performance decreases significantly.
+This happens because with weak locality test, objects in \dssmr are constantly being moved 
+back and forth between partitions, and hardly converge at a stable configuration.
+And the problem gets worse when the number of edge-cuts increases.
+For \dynastar and \ssmr with a static partitioning, we can see that system throughput is able to scale 
+with the number of partitions. This was expected for both methods.
+In \ssmr with a static partitioning. This was the optimal partitioning produced by METIS, which helps minimize the number of 
+edge-cuts. This is the ideal workload for \ssmr{}.
+In \dynastar, performance is similar to \ssmr with a static partitioning. This happens because \dynastar uses METIS as 
+reference for doing partitioning. 
 
 \begin{figure*}[t]
 	\includegraphics{figures/experiments/throughput-latency-avg-all}
@@ -96,26 +106,7 @@ decreases significantly, while \dynastar performance is similar to \ssmr with a 
 	\label{fig:latency-avg-all}
 \end{figure*}
 
-To test if the oracle can be a bottleneck, in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
-The load is higher in the beginning, when the clients did not yet cache the requests.
-
-\begin{figure}[t]
-	\includegraphics{figures/experiments/oracle-load}
-	\caption{CPU load in the oracle}
-	\label{fig:cpu_oracle}
-\end{figure}
-
-\begin{figure}[t]
-	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
-	\caption{Adding nodes and repartitioning dynamically}
-	\label{fig:dynamic_load_tput}
-\end{figure}
-
-\begin{figure}[t]
-	\includegraphics{figures/experiments/throughput-avg-vary-partition}
-	\caption{Same graph in different partitioning}
-	\label{fig:4p1p_varying_partition_size}
-\end{figure}
+The Figure~\ref{fig:move_throughput_ddsm_vs_dynastar} shows how a weak locality graph affects performance of \dssmr and \dynastar performance (i.e. centralized and decentralized methods). \dssmr couldn't reach a stable partitioning, and moved objects constantly, which prevents it from increasing performance. With \dynastar{}, it soon reach the optimal partitioning, help reducing the number of moves, and increasing the system's throughput
 
 \begin{figure}
 \centering
@@ -131,7 +122,41 @@ The load is higher in the beginning, when the clients did not yet cache the requ
 	\caption{\dynastar and \dssmr\ throughput over time}
 	\label{fig:4p_tput}
 \end{subfigure}
+\label{fig:move_throughput_ddsm_vs_dynastar}
 \end{figure}
+
+
+We also verified if the oracle could be a bottleneck. in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
+The load is higher in the beginning, when the clients did not yet cache the requests, and \dynastar were trying to move objects to partitions as partitioning reference. After the partitioning had been better, the load on oracle become stable.
+
+\begin{figure}[t]
+	\includegraphics{figures/experiments/oracle-load}
+	\caption{CPU load in the oracle}
+	\label{fig:cpu_oracle}
+\end{figure}
+
+
+Figure~\ref{fig:dynamic_load_tput} depicts the test of dynamic repartitioning on-the-fly. 
+We started the system with an empty graph (i.e. there was no user in the system). 
+Then clients continuously create users and links betweens users during the experiment (running follow command). 
+The oracle monitored changed in the graph's structure, trigger repartitioning when the number of changes exceed a threshold. 
+Each time the repartitioning took place, the partitioning became better, helps the throughput increase. 
+
+\begin{figure}[t]
+	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
+	\caption{Adding nodes and repartitioning dynamically}
+	\label{fig:dynamic_load_tput}
+\end{figure}
+
+
+
+
+\begin{figure}[t]
+	\includegraphics{figures/experiments/throughput-avg-vary-partition}
+	\caption{Same graph in different partitioning}
+	\label{fig:4p1p_varying_partition_size}
+\end{figure}
+
 
 \subsubsection{Dynamic partitioning}
 
