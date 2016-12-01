@@ -85,14 +85,15 @@ dge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning 
 in 1\%, 5\% and 10\%. We compare our results with \dssmr\ and \ssmr with a static partitioning.
 
 \subsection{Results}
-As we see in the Figure~\ref{fig:varying_edge_cut}, all the techniques perform similar on tests with strong locality. As
-the number of edge-cuts get higher, \dssmr performance decreases significantly both in terms of throughput and latency.
-\dynastar
+As we see in the Figure~\ref{fig:varying_edge_cut}, all the techniques perform similar on tests with strong locality, that is
+expected because there are no cross-partition commands, so after a while there are no moves in \dynastar, and no
+synchronisation among partitions for \ssmr, as the number of edge-cuts get higher however, \dssmr performance 
+decreases significantly, while \dynastar performance is similar to \ssmr with a static partitioning.
 
 \begin{figure*}[t]
 	 \begin{subfigure}[t]{.8\textwidth}
 		\includegraphics{figures/experiments/throughput-peak-all}
-		%\caption{Throughput varying edge-cuts and number of partitions}
+		\caption{Throughput varying edge-cuts and number of partitions}
 		\label{fig:varying_edge_cut}
 	\end{subfigure}
 	\begin{subfigure}[t]{.8\textwidth}
@@ -101,6 +102,15 @@ the number of edge-cuts get higher, \dssmr performance decreases significantly b
 		\label{fig:latency-avg-all}
 	\end{subfigure}
 \end{figure*}
+
+To test if the oracle can be a bottleneck, in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
+The load is higher in the beginning, when the clients did not yet cache the requests.
+
+\begin{figure}[t]
+	\includegraphics{figures/experiments/oracle-load}
+	\caption{CPU load in the oracle}
+	\label{fig:cpu_oracle}
+\end{figure}
 
 \subsubsection{Dynamic partitioning}
 
