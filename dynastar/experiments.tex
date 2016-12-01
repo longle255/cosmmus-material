@@ -108,6 +108,34 @@ reference for doing partitioning.
 
 The Figure~\ref{fig:move_throughput_ddsm_vs_dynastar} shows how a weak locality graph affects performance of \dssmr and \dynastar performance (i.e. centralized and decentralized methods). \dssmr couldn't reach a stable partitioning, and moved objects constantly, which prevents it from increasing performance. With \dynastar{}, it soon reach the optimal partitioning, help reducing the number of moves, and increasing the system's throughput
 
+
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-tp-strong-locality}    
+    \caption{Throughput with strong locality \lle{will be replaced}}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/tp-dynastar-vs-dssmr-4p}
+    \caption{Throughput with weak locality}
+  \end{subfigure} \\
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/motivation-moves-strong-locality}
+    \caption{Number of move commands with strong locality \lle{will be replaced}}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/move-dynastar-vs-dssmr-4p}
+    \caption{Number of move commands with weak locality}
+  \end{subfigure}
+  \caption{Throughput and number of move commands for different level of locality}
+  \label{fig:motivation}
+\end{figure*}
+
+
 \begin{figure}
 \centering
 \begin{subfigure}[ht]{0.5\textwidth}
@@ -147,8 +175,6 @@ Each time the repartitioning took place, the partitioning became better, helps t
 	\caption{Adding nodes and repartitioning dynamically}
 	\label{fig:dynamic_load_tput}
 \end{figure}
-
-
 
 
 \begin{figure}[t]
