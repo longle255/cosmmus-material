@@ -56,15 +56,33 @@ The experiments are designed to explore the following questions:
 \item \emph{When will the oracle become a bottleneck?}
 \end{itemize}
 
+\noindent
 We answer these questions for social graphs with different geometries
-and using deployments with different number of partitions, with 2, 4
-and 8 partitions.  We characterize a social graph using the percentage
-of edge-cuts computed by METIS on a static graph, and use graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts.
+and using deployments with different number of partitions (i.e., 2, 4
+and 8 partitions).  We characterize a social graph using the
+percentage of edge-cuts computed by METIS on a static graph, and use
+graphs with 0\%, 1\%, 5\% and 10\% of edge cuts.
 
 
 \subsection{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
+
+To compare \dynastar with alternative approaches, we measured
+the throughputh and latency
+
+
+\begin{alltt}\scriptsize
+  - Generated social network graphs with differnt edge cut percentages
+  - Each client sends a ''post'' command. The select a user randomly. Then
+  - issue a post command. Each vertex stores a timeline, which is a sequence
+  - of post messages. A post message appends to the timeline.
+  - Post commands are synchronous to the client, you measure end-to-end
+  - latency. Throughput is measured at the client - how many posts/sec that
+  - they can send.
+  - The number of clients increased porportionally with the number of partitions.
+  - 2 partitions = 200 clients, 4 = 400 clients. clients = 100 * numPartitions
+\end{alltt}
+
 
 As we see in Figure~\ref{fig:varying_edge_cut}, all the techniques
 perform similarly on tests with strong locality, that is expected
