@@ -2,12 +2,12 @@
 \section{Performance evaluation}
 \label{sec:experiments}
 
-
-In this section, we present the results found for \appname\ with
-different loads and partitionings and compare them with
-\ssmr{}~\cite{bezerra2014ssmr} and \dssmr.  In
-Section~\ref{sec:evaluation:setup}, we describe the environment where
-we conducted our experiments.  In
+In this section, we evaluate \dynastar{} under different workloads
+according to various metrics, and compare the results with both
+\ssmr{}~\cite{bezerra2014ssmr} and \dssmr. As a representative
+application, we use the \appname{} social networking service described in the
+previous section. In Section~\ref{sec:evaluation:setup}, we
+describe the environment where we conducted our experiments.  In
 Section~\ref{sec:evaluation:methodology}, we describe how we designed
 the experiments and our methodology.  In
 Section~\ref{sec:evaluation:results}, we show the results.
@@ -30,8 +30,10 @@ We used the Holme-Kim model \cite{holme-kim} to generate all social
 graphs.  We created power-law graphs (also known as scale-free graphs)
 with a clustering coefficient, which represent the geometric
 structures of social networks.  In the experiments, we tested graphs
-with 10000 users with a varying percentage of edge-cuts (i.e., edges
-connecting vertices in different partitions).
+with 10000 users. We characterize different workloads by varying percentage of edge-cuts.
+For example, a graph with a 5\% edge cut means that 5\% of the total edges
+in the graph have connected vertices located in different partitions.
+Graphs with larger edge-cut percentages have \emph{weak locality}.
 
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
@@ -92,7 +94,6 @@ considerable overhead in the execution.
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
-\rjs{TODO(rjs): write this.}
 
 \subsection{Performance under dynamic workloads}
 
