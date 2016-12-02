@@ -147,9 +147,23 @@ the partitioning became better, that helps the throughput increase.
 
 \subsection{The performance of the oracle}
 
-METIS performs well in graphs with less than 10 million nodes, and
-scales linearly as seen in Figure~\ref{fig:metis_size_time}, with both
-memory and cpu usage.
+\dynastar differs from \dssmr in that it uses a centralized oracle
+that maintains a global view of the workload graph. This oracle allows
+\dynastar to make better choices about data movement, resulting in overall
+better throughput and lower latency. However, introducing centralized
+components in a distributed system is always a cause for some skepticism,
+in case the component becomes a bottleneck. We therefore conducted two
+experiments to evaluate if the \dynastar oracle is a bottleneck to
+system performance. The results show that the load on the oracle is
+low, suggesting that \dynastar scales well.
+
+
+The first experiment assesses the scalability of the static METIS algorithm
+in isolation. We measured the time to compute the partitioning solution, and
+the memory usage of the algorithms for increasingly large graphs. 
+The results, shown in Figure~\ref{fig:metis_size_time}, shows that METIS scales
+linearly in both memory and computation time on graphs of up to 10 million vertices.
+
 
 \begin{figure}[ht!]
   \centering
@@ -158,12 +172,15 @@ memory and cpu usage.
 	\label{fig:metis_size_time}
 \end{figure}
 
-To test if the oracle can be a bottleneck, in
-Figure~\ref{fig:cpu_oracle} we show the average load over time in the
-oracle.  The load is higher in the beginning, when the clients did not
-yet cache the requests, but diminish over time. Access to the oracle
-is necessary only when clients have an invalid log or when a
-repartition happens.
+The second experiment evaluates the oracle in terms of CPU load over
+time, for varying numbers of partitions. The results are shown in
+Figure~\ref{fig:cpu_oracle}. The plot shows that load is higher in the
+beginning of the experiment, when the clients had not yet cached the
+requests. However, the load diminishes rapidly, and remains relatively
+low over time. This is because access to the oracle is necessary only
+when clients have an invalid log or when a repartition happens. This experiments
+suggest that the oracle would not become a bottleneck for reasonably large
+deployments.
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/oracle-load}
