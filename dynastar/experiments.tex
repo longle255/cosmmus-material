@@ -2,29 +2,45 @@
 \section{Performance evaluation}
 \label{sec:experiments}
 
-In this section, we present the results found for \appname\ with different loads and partitionings and compare them with
-\ssmr{}~\cite{bezerra2014ssmr} and \dssmr.
-%We are interested in assessing \dssmr{}'s performance with workloads that present different levels of locality.
-%By locality, we mean the likelihood that certain groups of data items are accessed together (by the same command).
-In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments.
-In Section~\ref{sec:evaluation:methodology}, we describe how we designed the experiments and our methodology.
-In Section~\ref{sec:evaluation:results}, we show the results.
+
+In this section, we present the results found for \appname\ with
+different loads and partitionings and compare them with
+\ssmr{}~\cite{bezerra2014ssmr} and \dssmr.  In
+Section~\ref{sec:evaluation:setup}, we describe the environment where
+we conducted our experiments.  In
+Section~\ref{sec:evaluation:methodology}, we describe how we designed
+the experiments and our methodology.  In
+Section~\ref{sec:evaluation:results}, we show the results.
 
 \subsection{Environment and configuration parameters}
 \label{sec:evaluation:setup}
 
-We conducted all experiments on a cluster with two types of nodes: (a) HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes, equipped with two AMD Opteron 2212 processors running at 2.0 GHz and with 4 GB of main memory. The HP nodes were connected to an HP ProCurve 2920-48G gigabit network switch, and the Dell nodes were connected to another, identical switch. Those switches were interconnected by a 20 Gbps link.
-All nodes ran CentOS Linux 7.1 with kernel 3.10 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM (build 25.45-b02).
+We conducted all experiments on a cluster with two types of nodes: (a)
+HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running
+at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes,
+equipped with two AMD Opteron 2212 processors running at 2.0 GHz and
+with 4 GB of main memory. The HP nodes were connected to an HP
+ProCurve 2920-48G gigabit network switch, and the Dell nodes were
+connected to another, identical switch. Those switches were
+interconnected by a 20 Gbps link.  All nodes ran CentOS Linux 7.1 with
+kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
+\mbox{64-Bit} Server VM (build 25.45-b02).
 
-We used the Holme-Kim model \cite{holme-kim} to generate all social graphs.
-We created power-law graphs (also known as scale-free graphs) with a clustering coefficient, which represent the geometric structures of social networks.
-In the experiments, we tested graphs with 10000 users with a varying percentage of edge-cuts (i.e., edges connecting vertices in different partitions).
+We used the Holme-Kim model \cite{holme-kim} to generate all social
+graphs.  We created power-law graphs (also known as scale-free graphs)
+with a clustering coefficient, which represent the geometric
+structures of social networks.  In the experiments, we tested graphs
+with 10000 users with a varying percentage of edge-cuts (i.e., edges
+connecting vertices in different partitions).
 
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
 
-In the experiments with our social network service, we focus on post commands only since getTimeline commands are all single-partition.
-Posts are more difficult to handle since the rate between single-partition and multi-partition commands depends on the geometry of the social graph and the technique used to partition the data.
+In the experiments with our social network service, we focus on post
+commands only since getTimeline commands are all single-partition.
+Posts are more difficult to handle since the rate between
+single-partition and multi-partition commands depends on the geometry
+of the social graph and the technique used to partition the data.
 
 When designing the experiments, we strived to answer the following questions.
 \begin{itemize}
@@ -34,49 +50,37 @@ When designing the experiments, we strived to answer the following questions.
 \item \emph{When will the oracle become a bottleneck?}
 \end{itemize}
 
-We answer these questions for social graphs with different geometries and using deployments with different number of partitions, with 2, 4 and 8 partitions.
-We characterize a social graph using the percentage of edge-cuts computed by METIS on a static graph, and use graphs with 0\%, 1\%, 5\% and 10\% of edge cuts.
+We answer these questions for social graphs with different geometries
+and using deployments with different number of partitions, with 2, 4
+and 8 partitions.  We characterize a social graph using the percentage
+of edge-cuts computed by METIS on a static graph, and use graphs with
+0\%, 1\%, 5\% and 10\% of edge cuts.
 
-%As explained in the design implementation of \appname\ in Section~\ref{sec:imp:\appname}, we chose to focus our
-%experiments on the non-trivial case, when a command can go in several partitions. The other commands are linearly
-%scalable over time, for instance, if a post command is going to be executed 5\% of the time in a graph that have a 10\%
-%possibility of executing a global command, the actual possibility of executing a global command is 0.05\%.
-
-%Since we focus our tests in the post command, we are interested to see what happens when we increase the number of
-%partitions. With a higher number of partitions we should be able to achieve higher scalability but the amount of edge-cuts
-%play an important role, the higher the edge-cuts the greater the incentive to degenerate the implementation to a single
-%partition SMR. To perform how well a system behave in the presence of edge-cuts, we also consider the variation of
-%edge-cuts. We partition the data in 2, 4 and 8 partitions, for each partitioning we also vary the number of edge-cuts 
-%in 1\%, 5\% and 10\%, then we put the objects at random initial partitions. We compare \dynastar\ with \dssmr\ and \ssmr with a static partitioning produced by METIS.
 
 \subsection{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
 
-As we see in Figure~\ref{fig:varying_edge_cut}, all the techniques perform similarly on tests with strong locality, that is
-expected because there are no cross-partition commands after the graph is perfectly partitioned and no more moves 
-occur in \dynastar or \dssmr, also no synchronization among partitions is necessary for \ssmr.
-As the number of edge-cuts get higher however, \dssmr\ performance decreases significantly.
-This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions,
-and hardly converge in a stable configuration, the problem only gets worse when the number of edge-cuts increases, as
-the number of moves increases proportionally.
-For \dynastar and \ssmr with a static partitioning, we can see that the throughput scales 
-with the number of partitions, this is expected for both methods, up to a point that the number of moves and cross-partition
-commands have a considerable overhead in the execution.
-%The optimal partitioning produced by METIS was used in the \ssmr\, which helps minimize the number of edge-cuts.
-%ef: I think this is already said in other parts.
-%In \dynastar, performance is similar to \ssmr with a static partitioning. This happens because \dynastar uses METIS as 
-%reference for doing partitioning, 
+As we see in Figure~\ref{fig:varying_edge_cut}, all the techniques
+perform similarly on tests with strong locality, that is expected
+because there are no cross-partition commands after the graph is
+perfectly partitioned and no more moves occur in \dynastar or \dssmr,
+also no synchronization among partitions is necessary for \ssmr.  As
+the number of edge-cuts get higher however, \dssmr\ performance
+decreases significantly.  This happens because with weak locality,
+objects in \dssmr\ are constantly being moved back and forth between
+partitions, and hardly converge in a stable configuration, the problem
+only gets worse when the number of edge-cuts increases, as the number
+of moves increases proportionally.  For \dynastar and \ssmr with a
+static partitioning, we can see that the throughput scales with the
+number of partitions, this is expected for both methods, up to a point
+that the number of moves and cross-partition commands have a
+considerable overhead in the execution.
 
 \begin{figure*}[ht!]
 	\includegraphics{figures/experiments/throughput-latency-avg-all}
 	\caption{Throughput and latency, varying edge-cuts for different partitioning size}
 	\label{fig:varying_edge_cut}
 \end{figure*}
-
-%Figure~\ref{fig:move_throughput_dssmr_vs_dynastar} shows how a weak locality graph affects the 
-%performance of \dssmr\ and \dynastar. \dssmr\ cannot reach a stable partitioning, and moves objects constantly, which
-%prevents it from increasing performance. \dynastar, soon reaches a partitioning similar to the one
-%generated by METIS, that helps it reduce the number of moves, and increase the system's throughput.
 
 
 \subsection{Performance with the number of partitions}
@@ -88,41 +92,17 @@ commands have a considerable overhead in the execution.
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
-%\begin{figure*}[ht]
-%  \centering
-%  \begin{subfigure}[b]{0.45\textwidth}
-%    \centering
-%    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar-vs-dssmr-4p-0-tp}
-%    \caption{Throughput with strong locality}
-%  \end{subfigure}
-%  \begin{subfigure}[b]{0.45\textwidth}
-%    \centering
-%    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar-vs-dssmr-4p-5-tp}
-%    \caption{Throughput with weak locality}
-%  \end{subfigure} \\
-%  \begin{subfigure}[b]{0.45\textwidth}
-%    \centering
-%    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar-vs-dssmr-4p-0-move}
-%	\caption{\dynastar and \dssmr\ comparison}
-%  \end{subfigure}
-%  \begin{subfigure}[b]{0.45\textwidth}
-%    \centering
-%    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar-vs-dssmr-4p-5-move}
-%    \caption{Number of move commands with weak locality}
-%  \end{subfigure}
-%  \caption{\dynastar and \dssmr\ comparison}
-%  \label{fig:motivation}
-%\end{figure*}
-
-
+\rjs{TODO(rjs): write this.}
 
 \subsection{Performance under dynamic workloads}
 
-Figure~\ref{fig:dynamic_load_tput} depicts dynamically repartitioning on-the-fly.
-We started the system with an empty graph. Then clients continuously create users and links between them
-during the experiment (running the follow command).  The oracle monitors changes in the graph's structure and 
-trigger a repartitioning when the number of changes exceed a threshold.
-Each time the repartitioning took place, the partitioning became better, that helps the throughput increase. 
+Figure~\ref{fig:dynamic_load_tput} depicts dynamically repartitioning
+on-the-fly.  We started the system with an empty graph. Then clients
+continuously create users and links between them during the experiment
+(running the follow command).  The oracle monitors changes in the
+graph's structure and trigger a repartitioning when the number of
+changes exceed a threshold.  Each time the repartitioning took place,
+the partitioning became better, that helps the throughput increase.
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
@@ -134,7 +114,9 @@ Each time the repartitioning took place, the partitioning became better, that he
 
 \subsection{The performance of the oracle}
 
-METIS performs well in graphs with less than 10 million nodes, and scales linearly as seen in Figure~\ref{fig:metis_size_time}, with both memory and cpu usage.
+METIS performs well in graphs with less than 10 million nodes, and
+scales linearly as seen in Figure~\ref{fig:metis_size_time}, with both
+memory and cpu usage.
 
 \begin{figure}[ht!]
   \centering
@@ -143,9 +125,12 @@ METIS performs well in graphs with less than 10 million nodes, and scales linear
 	\label{fig:metis_size_time}
 \end{figure}
 
-To test if the oracle can be a bottleneck, in Figure~\ref{fig:cpu_oracle} we show the average load over time in the oracle.
-The load is higher in the beginning, when the clients did not yet cache the requests, but diminish over time. Access to the
-oracle is necessary only when clients have an invalid log or when a repartition happens.
+To test if the oracle can be a bottleneck, in
+Figure~\ref{fig:cpu_oracle} we show the average load over time in the
+oracle.  The load is higher in the beginning, when the clients did not
+yet cache the requests, but diminish over time. Access to the oracle
+is necessary only when clients have an invalid log or when a
+repartition happens.
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/oracle-load}
