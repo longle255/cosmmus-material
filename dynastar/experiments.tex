@@ -2,15 +2,16 @@
 \section{Performance evaluation}
 \label{sec:experiments}
 
-In this section, we evaluate \dynastar{} under different workloads
-according to various metrics, and compare the results with both
-\ssmr{}~\cite{bezerra2014ssmr} and \dssmr. As a representative
-application, we use the \appname{} social networking service described in the
-previous section. In Section~\ref{sec:evaluation:setup}, we
-describe the environment where we conducted our experiments.  In
-Section~\ref{sec:evaluation:methodology}, we describe how we designed
-the experiments and our methodology.  In
-Section~\ref{sec:evaluation:results}, we show the results.
+In this section, we evaluate \dynastar{} according to various metrics,
+under a variety of different operational parameters.  As a
+representative application, we use the \appname{} social networking
+service described in the previous section.  As a point of comparison,
+we perform the same experiments with both
+\ssmr{}~\cite{bezerra2014ssmr} and \dssmr. Our experiments show that
+\dynastar{} is able to rapidly adapt to changing workloads, while
+achiving throughputs and latencies far better than the existing
+state-of-the-art approaches to partitioning.
+
 
 \subsection{Environment and configuration parameters}
 \label{sec:evaluation:setup}
@@ -26,28 +27,11 @@ interconnected by a 20 Gbps link.  All nodes ran CentOS Linux 7.1 with
 kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
 \mbox{64-Bit} Server VM (build 25.45-b02).
 
-We used the Holme-Kim model \cite{holme-kim} to generate all social
-graphs.  We created power-law graphs (also known as scale-free graphs)
-with a clustering coefficient varying from 0.6 to 1, which represent the geometric
-structures of social networks. The coefficient is the probability that whenever an edge 
-$(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$.
-In the experiments, we tested graphs with 10000 users. We characterize 
-different workloads by varying the percentage of edge-cuts.
-For example, a graph with a 5\% edge cut means that 5\% of the total edges
-in the graph have connected vertices located in different partitions.
-Graphs with larger edge-cut percentages have \emph{weak locality}.
 
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
 
-In the experiments with our social network service, we focus on post
-commands, since they may access multiple partitions. In contrast,
-getTimeline commands are all single-partition.  With Posts, the
-frequency of single-partition vs. multi-partition commands depends on
-both the geometry of the social graph and the technique used to
-partition the data.
-
-The experiments are designed to explore the following questions:
+The experiments explore the following questions:
 \begin{itemize}
 \item \emph{How does \dynastar compare to other approaches?} 
 \item \emph{How does the number of partitions affect the performance of posts for a fixed social graph?}
@@ -55,49 +39,72 @@ The experiments are designed to explore the following questions:
 \item \emph{When will the oracle become a bottleneck?}
 \end{itemize}
 
-\noindent
-We answer these questions for social graphs with different geometries
-and using deployments with different number of partitions (i.e., 2, 4
-and 8 partitions).  We characterize a social graph using the
-percentage of edge-cuts computed by METIS on a static graph, and use
-graphs with 0\%, 1\%, 5\% and 10\% of edge cuts.
+
+
+\paragraph*{Social network graph creation}
+%
+To generate the social graphs used in the experiments, we used the
+Holme-Kim model~\cite{holme-kim}.  We created power-law graphs (also
+known as scale-free graphs) with a clustering coefficient varying from
+0.6 to 1, which represent the geometric structures of social
+networks. The coefficient is the probability that whenever an edge
+$(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$.
+In the experiments, we tested graphs with 10000 users. We characterize
+different workloads by varying the percentage of edge-cuts.  For
+example, a graph with a 5\% edge cut means that 5\% of the total edges
+in the graph have connected vertices located in different partitions.
+Graphs with larger edge-cut percentages have \emph{weak locality}.
+
+\paragraph*{Command generation}
+%
+As a workload for the social graph, clients issued a sequence of post
+commands.  For each command, the client selected a node a random as
+the poster.  We focused on post commands, since they may access
+multiple partitions.  We used 100 clients per partition. In other
+words, the number of clients varied linearly with the number of
+partitions.  Each client repeatedly issued synchronous post commands,
+waiting for a response from the storage.
+
+\paragraph*{Performance metrics}
+%
+The latency was measured as the end-to-end time between issuing the
+command, and receiving the response.  Throughput was measured as the
+number of posts/second that the clients were able to send.
+
+\paragraph*{Operational parameters}
+%
+With post commands, the frequency of single-partition
+vs. multi-partition commands depends on the number of partitions, the
+geometry of the social graph, and the technique used to partition the
+data. We ran experiments with 2, 4, and 8 partitions.  To vary the
+geometry, we generated graphs with varying percentages of edge-cuts as
+computed by METIS on a static graph. Our experiments used graphs with
+0\%, 1\%, 5\% and 10\% of edge cuts. As already mentioned, we used
+three partitioning strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
 \subsection{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
 
-To compare \dynastar with alternative approaches, we measured
-the throughputh and latency
+To compare \dynastar with alternative approaches, we measured the
+throughputh and latency for a varying number of partitions and a
+varying percentage of edge-cuts. The results are shown in
+Figure~\ref{fig:varying_edge_cut}.
 
+As expected, all three techniques perform similarly on tests with
+strong locality, because there are no cross-partition commands after
+the graph is perfectly partitioned and no more moves occur in
+\dynastar or \dssmr.  Also, no synchronization among partitions is
+necessary for \ssmr.
 
-\begin{alltt}\scriptsize
-  - Generated social network graphs with differnt edge cut percentages
-  - Each client sends a ''post'' command. The select a user randomly. Then
-  - issue a post command. Each vertex stores a timeline, which is a sequence
-  - of post messages. A post message appends to the timeline.
-  - Post commands are synchronous to the client, you measure end-to-end
-  - latency. Throughput is measured at the client - how many posts/sec that
-  - they can send.
-  - The number of clients increased porportionally with the number of partitions.
-  - 2 partitions = 200 clients, 4 = 400 clients. clients = 100 * numPartitions
-\end{alltt}
-
-
-As we see in Figure~\ref{fig:varying_edge_cut}, all the techniques
-perform similarly on tests with strong locality, that is expected
-because there are no cross-partition commands after the graph is
-perfectly partitioned and no more moves occur in \dynastar or \dssmr,
-also no synchronization among partitions is necessary for \ssmr.  As
-the number of edge-cuts get higher however, \dssmr\ performance
+However, as the percentage of edge-cuts increases, \dssmr\ performance
 decreases significantly.  This happens because with weak locality,
 objects in \dssmr\ are constantly being moved back and forth between
-partitions, and hardly converge in a stable configuration, the problem
-only gets worse when the number of edge-cuts increases, as the number
-of moves increases proportionally.  For \dynastar and \ssmr with a
-static partitioning, we can see that the throughput scales with the
-number of partitions, this is expected for both methods, up to a point
+partitions without converging to a stable configuration. In contrast, for \dynastar and \ssmr with
+static partitioning, we see that the throughput scales with the
+number of partitions. This is expected for both methods, up to a point
 that the number of moves and cross-partition commands have a
-considerable overhead in the execution.
+considerable overhead in the execution. \rjs{I don't understand the previous sentence.}
 
 \begin{figure*}[ht!]
 	\includegraphics{figures/experiments/throughput-latency-avg-all}

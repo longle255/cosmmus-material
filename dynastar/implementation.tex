@@ -85,31 +85,41 @@ Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/
 %% application can request a repartitioning of the graph.
 
 
-\subsection{Social network service}
+\subsection{\appname social network service}
 \label{sec:imp:\appname}
 
 For the purposes of our evaluation, we have developed a Twitter-like
-social network service using the \dynastar{} library.  In our social network, 
-users can follow, unfollow, post, or read other users'
-tweets according to whom the user is following. Like Twitter, users
-are constrained to posting 140-character messages.
+social network service using the \dynastar{} library.  In our social
+network, users can follow, unfollow, post, or read other users' tweets
+according to whom the user is following. Like Twitter, users are
+constrained to posting 140-character messages.
 
-Given that users in social networks spend most of the time reading
-(i.e., performing getTimeline) \cite{facebookTAO}, we designed
-our service so that getTimeline are always a single-partition command.
-Thus, when a user request a timeline, all posts are available in the
-user's partition.  As a consequence, post, follow or unfollow commands
-can lead to object moves.  Follow and unfollow commands can involve at
-most two partitions, while posts can require object moves from one or
-more partitions.
+Each user in the social network corresponds to a node in a graph. If
+one user follows another, then a directed edge is created from the
+follower to the followee. Each user has an associated \emph{timeline},
+which is a sequence of post messages from the people that the user
+follows. Thus, when a user issues a post command, it results in
+writing the message to the timeline of all the user's followers.  In
+contrast, when a user wants to read their own timeline, they only need
+to access the state associated with their own node.
+
+Overall, in \appname, post, follow or unfollow commands can lead to
+object moves.  Follow and unfollow commands can involve at most two
+partitions, while posts may require object moves from many partitions.
+
+Of course, other implementations are possible. But, given that users
+in social networks spend most of the time reading (i.e., performing
+getTimeline)~\cite{facebookTAO}, it is useful to implement getTimeline
+as an efficient single-partition command.
 
 
 \subsection{Alternative Systems}
 
 Throughout our evaluation, we compare \dynastar{} to two alternative
-systems: S-SMR and DS-SMR. For performing our experiments, we used
-the implementations of the two systems that are available in public
-repositories.\footnote{https://bitbucket.org/usi-dslab/ds-smr} Since all three systems (S-SMR, DS-SMR, and \dynastar) provide
-a common application-level interface, there was no additional work required
-to port the social network application. 
-%\rjs{We should add links to the repositories.}
+systems: S-SMR and DS-SMR. For performing our experiments, we used the
+implementations of the two systems that are available in public
+repositories.\footnote{https://bitbucket.org/usi-dslab/ds-smr} Since
+all three systems (S-SMR, DS-SMR, and \dynastar) provide a common
+application-level interface, there was no additional work required to
+port the social network application.
+
