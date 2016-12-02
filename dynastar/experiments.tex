@@ -29,10 +29,10 @@ kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
 We used the Holme-Kim model \cite{holme-kim} to generate all social
 graphs.  We created power-law graphs (also known as scale-free graphs)
 with a clustering coefficient varying from 0.6 to 1, which represent the geometric
-structures of social networks, the coefficient is the probability of whenever an edge 
+structures of social networks. The coefficient is the probability that whenever an edge 
 $(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$.
 In the experiments, we tested graphs with 10000 users. We characterize 
-different workloads by varying percentage of edge-cuts.
+different workloads by varying the percentage of edge-cuts.
 For example, a graph with a 5\% edge cut means that 5\% of the total edges
 in the graph have connected vertices located in different partitions.
 Graphs with larger edge-cut percentages have \emph{weak locality}.
@@ -41,12 +41,13 @@ Graphs with larger edge-cut percentages have \emph{weak locality}.
 \label{sec:evaluation:methodology}
 
 In the experiments with our social network service, we focus on post
-commands only since getTimeline commands are all single-partition.
-Posts are more difficult to handle since the rate between
-single-partition and multi-partition commands depends on the geometry
-of the social graph and the technique used to partition the data.
+commands, since they may access multiple partitions. In contrast,
+getTimeline commands are all single-partition.  With Posts, the
+frequency of single-partition vs. multi-partition commands depends on
+both the geometry of the social graph and the technique used to
+partition the data.
 
-When designing the experiments, we strived to answer the following questions.
+The experiments are designed to explore the following questions:
 \begin{itemize}
 \item \emph{How does \dynastar compare to other approaches?} 
 \item \emph{How does the number of partitions affect the performance of posts for a fixed social graph?}
