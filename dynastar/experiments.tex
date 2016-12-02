@@ -26,12 +26,10 @@ interconnected by a 20 Gbps link.  All nodes ran CentOS Linux 7.1 with
 kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
 \mbox{64-Bit} Server VM (build 25.45-b02).
 
-We used the Holme-Kim model \cite{holme-kim} to generate all social
-graphs.  We created power-law graphs (also known as scale-free graphs)
-with a clustering coefficient, which represent the geometric
-structures of social networks.  In the experiments, we tested graphs
-with 10000 users with a varying percentage of edge-cuts (i.e., edges
-connecting vertices in different partitions).
+We used the Holme-Kim model \cite{holme-kim} to generate all social graphs.
+We created power-law graphs (also known as scale-free graphs) with a clustering coefficient varying from 0.6 to 1, 
+this is the probability of whenever an edge $(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$, 
+In the experiments, we tested graphs with 10000 users with a varying percentage of edge-cuts (i.e., edges connecting vertices in different partitions).
 
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
@@ -138,4 +136,5 @@ repartition happens.
 	\label{fig:cpu_oracle}
 \end{figure}
 
+\label{sec:evaluation:strongloc}
 
