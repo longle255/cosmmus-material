@@ -53,17 +53,25 @@ In the experiments, we tested graphs with 10000 users. We characterize
 different workloads by varying the percentage of edge-cuts.  For
 example, a graph with a 5\% edge cut means that 5\% of the total edges
 in the graph have connected vertices located in different partitions.
-Graphs with larger edge-cut percentages have \emph{weak locality}.
+Graphs with some percentage of edge-cuts have \emph{weak locality}.
 
 \paragraph*{Command generation}
 %
 As a workload for the social graph, clients issued a sequence of post
-commands.  For each command, the client selected a node a random as
+commands.  For each command, the client selects a random node as
 the poster.  We focused on post commands, since they may access
 multiple partitions.  We used 100 clients per partition. In other
 words, the number of clients varied linearly with the number of
 partitions.  Each client repeatedly issued synchronous post commands,
 waiting for a response from the storage.
+
+\begin{figure*}[ht!]
+	\includegraphics{figures/experiments/throughput-latency-avg-all}
+	\caption{Throughput and latency, varying edge-cuts for different partitioning size}
+	\label{fig:varying_edge_cut}
+\end{figure*}
+
+
 
 \paragraph*{Performance metrics}
 %
@@ -79,42 +87,42 @@ geometry of the social graph, and the technique used to partition the
 data. We ran experiments with 2, 4, and 8 partitions.  To vary the
 geometry, we generated graphs with varying percentages of edge-cuts as
 computed by METIS on a static graph. Our experiments used graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts. As already mentioned, we used
-three partitioning strategies: \ssmr{}, \dssmr, and \dynastar.
+0\%, 1\%, 5\% and 10\% of edge cuts. As already mentioned, we compared 
+three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
 \subsection{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
 
-To compare \dynastar with alternative approaches, we measured the
-throughputh and latency for a varying number of partitions and a
-varying percentage of edge-cuts. The results are shown in
-Figure~\ref{fig:varying_edge_cut}.
-
+Figure~\ref{fig:varying_edge_cut} shows the throughput and latency of the three strategies, as we vary the number of partitions for social networks with different percentages of edge cuts.
 As expected, all three techniques perform similarly on tests with
 strong locality, because there are no cross-partition commands after
 the graph is perfectly partitioned and no more moves occur in
 \dynastar or \dssmr.  Also, no synchronization among partitions is
 necessary for \ssmr.
+Consequently, all three schemes scale remarkably well.
+Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
+As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges to maximum throughput after 30 seconds from the beginning of the execution, while it takes DS-SMR (decentralized dynamic scheme) about 90 seconds to converge.
 
-However, as the percentage of edge-cuts increases, \dssmr\ performance
-decreases significantly.  This happens because with weak locality,
-objects in \dssmr\ are constantly being moved back and forth between
-partitions without converging to a stable configuration. In contrast, for \dynastar and \ssmr with
-static partitioning, we see that the throughput scales with the
-number of partitions. This is expected for both methods, up to a point
-that the number of moves and cross-partition commands have a
-considerable overhead in the execution. \rjs{I don't understand the previous sentence.}
 
-\begin{figure*}[ht!]
-	\includegraphics{figures/experiments/throughput-latency-avg-all}
-	\caption{Throughput and latency, varying edge-cuts for different partitioning size}
-	\label{fig:varying_edge_cut}
-\end{figure*}
+%To compare \dynastar with alternative approaches, we measured the
+%throughputh and latency for a varying number of partitions and a
+%varying percentage of edge-cuts. The results are shown in
+%Figure~\ref{fig:varying_edge_cut}.
 
+With social networks that exhibit weak locality (edge cut percentage greater than zero) \dssmr\ performance decreases significantly.  
+This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions without converging to a stable configuration (see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
+In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions up to 10\% of edge cuts. 
+With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweight the gains from additional partitions.
+
+We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
+The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
 
 \subsection{Performance with the number of partitions}
 \label{sec:evaluation:results}
+
+While in the previous section we considered executions where the percentage of edge cuts is fixed as the number of partitions increases, we now consider the performance of \dynastar when a fixed social graph is partitioned 
+
 In this tests we measure the throughput of the same graph partitioned in different
 partition sizes. As seen in Figure~\ref{fig:4p1p_varying_partition_size}, the throughput
 scales with the number of partitions up until a point, then decreases, that is because
