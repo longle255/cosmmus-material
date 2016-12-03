@@ -154,7 +154,7 @@ the partitioning became better, that helps the throughput increase.
 
 \subsection{The performance of the oracle}
 
-\dynastar differs from \dssmr in that it uses a centralized oracle
+\dynastar differs from \dssmr\ in that it uses a centralized oracle
 that maintains a global view of the workload graph. This oracle allows
 \dynastar to make better choices about data movement, resulting in overall
 better throughput and lower latency. However, introducing centralized
@@ -168,7 +168,7 @@ low, suggesting that \dynastar scales well.
 The first experiment assesses the scalability of the static METIS algorithm
 in isolation. We measured the time to compute the partitioning solution, and
 the memory usage of the algorithms for increasingly large graphs. 
-The results, shown in Figure~\ref{fig:metis_size_time}, shows that METIS scales
+The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
 linearly in both memory and computation time on graphs of up to 10 million vertices.
 
 
@@ -183,7 +183,7 @@ The second experiment evaluates the oracle in terms of CPU load over
 time, for varying numbers of partitions. The results are shown in
 Figure~\ref{fig:cpu_oracle}. The plot shows that load is higher in the
 beginning of the experiment, when the clients had not yet cached the
-requests. However, the load diminishes rapidly, and remains relatively
+requests and the oracle was busy moving state. However, the load diminishes rapidly, and remains relatively
 low over time. This is because access to the oracle is necessary only
 when clients have an invalid log or when a repartition happens. This experiments
 suggest that the oracle would not become a bottleneck for reasonably large
