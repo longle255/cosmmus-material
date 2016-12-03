@@ -95,6 +95,7 @@ three strategies: \ssmr{}, \dssmr, and \dynastar.
 \label{sec:evaluation:results}
 
 Figure~\ref{fig:varying_edge_cut} shows the throughput and latency of the three strategies, as we vary the number of partitions for social networks with different percentages of edge cuts.
+
 As expected, all three techniques perform similarly on tests with
 strong locality, because there are no cross-partition commands after
 the graph is perfectly partitioned and no more moves occur in
@@ -104,12 +105,6 @@ Consequently, all three schemes scale remarkably well.
 Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
 As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges to maximum throughput after 30 seconds from the beginning of the execution, while it takes DS-SMR (decentralized dynamic scheme) about 90 seconds to converge.
 
-
-%To compare \dynastar with alternative approaches, we measured the
-%throughputh and latency for a varying number of partitions and a
-%varying percentage of edge-cuts. The results are shown in
-%Figure~\ref{fig:varying_edge_cut}.
-
 With social networks that exhibit weak locality (edge cut percentage greater than zero) \dssmr\ performance decreases significantly.  
 This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions without converging to a stable configuration (see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
 In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions up to 10\% of edge cuts. 
@@ -117,6 +112,7 @@ With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cro
 
 We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
 The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
+
 
 \subsection{Performance with the number of partitions}
 \label{sec:evaluation:results}
@@ -128,7 +124,8 @@ partition sizes. As seen in Figure~\ref{fig:4p1p_varying_partition_size}, the th
 scales with the number of partitions up until a point, then decreases, that is because
 when increasing the partitioning size, the number of edge-cuts also increase, in this
 case, the number of edge-cuts for 2, 4, 6 and 8 partitions were respectively 
-0.13\%, 1.06\%, 2.28\% and 2.67\%. \ef{Is that reason enough?}
+0.13\%, 1.06\%, 2.28\% and 2.67\%. \ef{Is that reason enough? It is a reason but
+I think is not the only thing}
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/throughput-avg-vary-partition}
