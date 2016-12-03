@@ -96,10 +96,10 @@ three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 Figure~\ref{fig:varying_edge_cut} shows the throughput and latency of the three strategies, as we vary the number of partitions for social networks with different percentages of edge cuts.
 
-As expected, all three techniques perform similarly on tests with
+All three techniques perform similarly on experiments with
 strong locality, because there are no cross-partition commands after
 the graph is perfectly partitioned and no more moves occur in
-\dynastar or \dssmr.  Also, no synchronization among partitions is
+\dynastar or \dssmr, and no synchronization among partitions is
 necessary for \ssmr.
 Consequently, all three schemes scale remarkably well.
 Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
@@ -114,18 +114,20 @@ We can draw similar results about the latency of the three strategies (Figure~\r
 The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
 
 
-\subsection{Performance with the number of partitions}
+\subsection{The ideal number of partitions}
 \label{sec:evaluation:results}
 
-While in the previous section we considered executions where the percentage of edge cuts is fixed as the number of partitions increases, we now consider the performance of \dynastar when a fixed social graph is partitioned 
+While in the previous section we considered executions with a fixed percentage of edge cuts as we increased the number of partitions (by adjusting the social graph clustering coefficient), we now consider a fixed graph and vary the number of partitions.
+Increasing the number of partitions with a fixed graph introduces a tradeoff.
+On the one hand, additional partitions improve performance as there is more resources to execute posts.
+On the other hand, the number of edge cuts augments with the number of partitions, which hurts performance as there are additional moves.
+We evaluate the performance of \dynastar when subject to this tradeoff. 
 
-In this tests we measure the throughput of the same graph partitioned in different
-partition sizes. As seen in Figure~\ref{fig:4p1p_varying_partition_size}, the throughput
-scales with the number of partitions up until a point, then decreases, that is because
-when increasing the partitioning size, the number of edge-cuts also increase, in this
-case, the number of edge-cuts for 2, 4, 6 and 8 partitions were respectively 
-0.13\%, 1.06\%, 2.28\% and 2.67\%. \ef{Is that reason enough? It is a reason but
-I think is not the only thing}
+Figure~\ref{fig:4p1p_varying_partition_size} shows that throughput scales with the number of partitions up to 6 partitions.
+For each configuration, we computed the percentage of edge cuts and found that for 2, 4, 6 and 8 partitions the percentages were respectively 
+0.13\%, 1.06\%, 2.28\% and 2.67\%.
+Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
+As discussed before, getTimeline, the most common operations in social networks, are all single-partition operations in our application and as a consequence scale linearly with the number of partitions.
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/throughput-avg-vary-partition}
