@@ -115,12 +115,12 @@ considerable overhead in the execution. \rjs{I don't understand the previous sen
 
 \subsection{Performance with the number of partitions}
 \label{sec:evaluation:results}
-\ef{changing this part}
 In this tests we measure the throughput of the same graph partitioned in different
 partition sizes. As seen in Figure~\ref{fig:4p1p_varying_partition_size}, the throughput
-scales with the number of partitions up until a point, then decreases, this is due to
-the fact that partitioning the same graph in more partitions will probably increase the number of
-edge-cuts.
+scales with the number of partitions up until a point, then decreases, that is because
+when increasing the partitioning size, the number of edge-cuts also increase, in this
+case, the number of edge-cuts for 2, 4, 6 and 8 partitions were respectively 
+0.13\%, 1.06\%, 2.28\% and 2.67\%. \ef{Is that reason enough?}
 
 \begin{figure}[ht]
 	\includegraphics{figures/experiments/throughput-avg-vary-partition}
