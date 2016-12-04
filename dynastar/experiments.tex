@@ -87,7 +87,10 @@ geometry of the social graph, and the technique used to partition the
 data. We ran experiments with 2, 4, and 8 partitions.  To vary the
 geometry, we generated graphs with varying percentages of edge-cuts as
 computed by METIS on a static graph. Our experiments used graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts. As already mentioned, we compared 
+0\%, 1\%, 5\% and 10\% of edge cuts. We let METIS optimize the partitioning
+to keep the size of the most unbalanced partition up to 30\% more than the average
+partition size, that gives flexibility to decrease more the edge-cuts.
+As already mentioned, we compared 
 three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
@@ -170,7 +173,6 @@ in isolation. We measured the time to compute the partitioning solution, and
 the memory usage of the algorithms for increasingly large graphs. 
 The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
 linearly in both memory and computation time on graphs of up to 10 million vertices.
-
 
 \begin{figure}[ht!]
   \centering
