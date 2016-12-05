@@ -116,10 +116,11 @@ does not require any a priori knowledge about the workload. However,
 centralized, global view of the network.  \dynastar minimizes the
 number of state relocations by monitoring the workload, and
 re-computing an optimal partitioning on demand using a static
-partitioning algorithm. Because of this, \dynastar it is able to
-achieve throughputs comparable to the optimal static scheme, while
-adapting to workload changes on-the-fly, and preserving strong
-consistency.
+partitioning algorithm.  As a preview of our results,
+Figure~\ref{fig:motivation} also includes measurements for \dynastar.
+We see that \dynastar it is able to achieve throughputs comparable to
+the optimal static scheme, while adapting to workload changes
+on-the-fly, and preserving strong consistency.
 
 
 With \dynastar, a location oracle maintains two data structures: (i) a
