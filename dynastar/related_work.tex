@@ -28,9 +28,9 @@ However, it requires total order (i.e., all commands have to be ordered against 
 Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and, to ensure strong consistency across partitions, clocks are assumed to be synchronized.
 Although the authors say that Spanner works well with GPS and atomic clocks, if clocks go out of synch beyond the tolerated difference, correctness is not guaranteed.
 \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any assumption about clock synchronization, but relies on a static partitioning of the state.
-\dssmr{}~\cite{hoang2016} extends S-SMR by allowing state variables to migrate across partitions in order to reduce multi-partition commands.
+\dssmr{}~\cite{hoang2016} extends \dssmr\ by allowing state variables to migrate across partitions in order to reduce multi-partition commands.
 However, \dssmr{} implements repartitioning in a very simple way that does not perform very well in scenarios with weak locality.
-\dynastar\ improves on DS-SMR by employing well-known graph partitioning techniques to decide where each variable should be.
+\dynastar\ improves on \dssmr\ by employing well-known graph partitioning techniques to decide where each variable should be.
 Moreover, \dynastar\ dillutes the cost of repartitioning by moving variables on-demand, that is, only when they are accessed by some command.
 
 Graph-partitioning is an interesting problem with many proposed solutions~\cite{Abou-Rjeili:2006,kernighan1970efficient,hendrickson2000graph}.
