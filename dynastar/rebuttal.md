@@ -1,6 +1,6 @@
 THE MISUNDERSTOOD ORACLE (Rev.A,B,C,D,E)
 
-We realize now that our descriptions were unclear, and we will revise. The oracle is not a centralized, single point of failure. DynaStar implements the oracle as a regular RSM: replicated in a set of machines to tolerate failures, like any other partition. For performance, clients cache oracle entries. Both replication and caching are implemented and used in the experiments.
+We realize now that our descriptions were unclear, and we will revise. The oracle is not a single point of failure. DynaStar implements the oracle as a regular RSM: replicated in a set of machines to tolerate failures, like any other partition. For performance, clients cache oracle entries. Both replication and caching are implemented and used in the experiments.
 
 The oracle only needs requests that change the workload graph. These are sent as hints by the partitions. When the changes exceed a threshold, the Oracle repartitions the graph.
 
