@@ -1,0 +1,60 @@
+%!TEX root =  main.tex
+\subsection{Correctness}
+\label{sec:correctness}
+
+In this section, we argue that \dynastar is safe (i.e., it ensures linearizability) and live (i.e., it ensures termination).
+
+To prove that \dynastar ensures linearizability, we must show that for any execution $\sigma$ of the system, there is a total order $\pi$ on client commands that 
+(i)~respects the semantics of the commands, as defined in their sequential specifications, and 
+(ii)~respects the real-time precedence of commands~(Section~\ref{sec:correctcrit}).
+%
+Let $\pi$ be a total order of operations in $\sigma$ that respects $<$, the order atomic multicast induces on commands.
+
+To argue that $\pi$ respects the semantics of  commands, let $C_i$ be the $i$-th command in $\pi$ and $p$ a process in partition $\ppm_p$ that executes $C_i$.
+%Let $C_i$ be the $i$-th command in $\pi$ and $p$ a process in partition $\ppm_p$ that executes $C_i$.
+We claim that when $p$ executes $C_i$, it has updated values of variables in $vars(C_i)$, the variables accessed by $C_i$.
+We proof the claim by induction on $i$.
+The base step trivially holds from the fact that variables are initialized correctly.
+Let $v \in vars(C_i)$, $C_v$ be the last client command before $C_i$ in $\pi$ that accesses $v$, and $q$ a process in $\ppm_q$ that executes $C_v$.
+From the inductive hypothesis, $q$ has an updated value of $v$ when it executes $C_v$.
+There are two cases to consider:
+(a)~$p = q$. In this case, $p$ obviously has an updated value of $v$ when it executes $C_i$ since no other command accesses $v$ between $C_v$ and $C_i$.
+(b)~$p \neq q$. 
+Since processes in the same partition execute the same commands, it must be that $\ppm_p \neq \ppm_q$.
+From the algorithm, when $q$ executes $C_v$, $v \in \ppm_q$ and when $p$ executes $C_i$, $v \in \ppm_p$.
+Thus, $q$ executed a command to move $v$ to another partition after executing $C_v$ and $p$ executed a command to move $v$ to $\ppm_p$ before executing $C_i$.
+Since there is no command that accesses $v$ between $C_v$ and $C_i$ in $\pi$, $q$ has an updated $v$ when it executes $C_v$ (from inductive hypothesis), and $p$ receives the value of $v$ at $q$, it follows that $p$ has an updated $v$ when it executes $C_i$.
+
+% DISCLAIMER: in the proof below, I assumed a single process per partition. While I'm pretty sure it works for multiple processes per partition, in some future refinement this should be added to the proof. Also see related picture showing cases (a) and (b) below. Perhaps we should include such a picture too in a future version.
+%
+We now argue that there is a total order $\pi$ that respects the real-time precedence of commands in $\sigma$.
+Assume $C_i$ ends before $C_j$ starts, or more precisely, the time $C_i$ ends at a client is smaller than the time $C_j$ starts at a client, $tec(C_i) < tsc(C_j)$.
+Since the time $C_i$ ends at the server from which the client receives the response for $C_i$ is smaller than the time $C_i$ ends at the client, $tes(C_i) < tec(C_i)$, and the time $C_j$ starts at the client is smaller than the time $C_j$ starts at the first server, $tsc(C_j) < tss(C_j)$, we conclude that $tes(C_i) < tss(C_j)$.
+
+We must show that either $C_i < C_j$; or neither $C_i < C_j$ nor $C_j < C_i$.
+For a contradiction, assume that $C_j < ... < Z_k < ... < C_i$, where $Z_k$ is a client or a move command.
+Let $Z_k$ be delivered by partition $\ppm_k$.
+There are two cases: 
+\begin{enumerate}
+\item[(a)] $Z_{k+1}$ is a client command delivered by partition $\ppm_k$.
+In this case, since $Z_{k+1}$ only starts after $Z_k$ at a server, it follows that $tes(Z_k) < tss(Z_{k+1})$.
+\item[(b)] $Z_{k+1}$ is a move command that involves $\ppm_k$ as source and $\ppm_{k+1}$ as destination.
+At $\ppm_k$, $tes(Z_k) < tss(Z_{k+1})$ since the move is only executed after $Z_k$.
+Since servers in $\ppm_k$ must send one or more variables to servers in $\ppm_{k+1}$, it must be that $tss(Z_{k+1}) < tes(Z_{k+1})$.
+Thus, it follows that $tes(Z_{k+1}) < tss(Z_{k+2})$.
+\end{enumerate}
+From the two cases above, we conclude that $tes(C_j) < tss(C_i)$, a contradiction.
+Therefore, either $C_i < C_j$ and from the definition of $\pi$, $C_i$ precedes $C_j$ or neither $C_i < C_j$ nor $C_j < C_i$, and there is a total order in which $C_i$ precedes $C_j$.
+%\begin{figure}
+%\centering
+%\includegraphics[width=1.2\linewidth,angle=-90]{figures/IMG_7203.JPG}
+%\caption{Two cases in proof.}
+%\end{figure}
+
+For termination, we argue that every correct client eventually receives a reply different than $retry$ for every command $C$ that it issues.
+This assumes that every partition (including the oracle partition) is always operational, despite the failure of some servers in the partition.
+For a contradiction, assume that some client submits a command $C$ that always returns $retry$.
+Therefore, from the algorithm, whenever $C$ is delivered at a partition, the partition does not contain all the variables needed by $C$.
+As a consequence, the client eventually falls back to \ssmr\ and multicasts $C$ to all partitions and $C$ is executed as a multi-partition command, which is guaranteed to succeed, a contradiction that concludes our argument.
+
+

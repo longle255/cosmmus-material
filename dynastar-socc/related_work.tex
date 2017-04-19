@@ -1,0 +1,55 @@
+%!TEX root =  main.tex
+\section{Related work}
+\label{sec:rw}
+
+State machine replication~\cite{Lam78, Sch90, Kapritsos:2012um, kotla2004htbft, santos2013htsmr} provides strong consistency guarantees, which come from total order and deterministic execution of commands.
+Deterministic execution is usually ensured by having every replica execute commands sequentially.
+Since consistent ordering is fundamental for SMR, some authors proposed to optimize the ordering and propagation of commands (i.e., the atomic broadcast layer of the system).
+For instance, \cite{kapritsos2010scalable} proposes to divide the ordering of commands between different clusters: each cluster orders only some requests, and then forwards the partial order to every server replica, which then merges the partial orders deterministically into a single total order that is consistent across the system.
+In~\cite{biely2012spaxos}, Paxos~\cite{Lamport:1998ea} is used to order commands, but it is implemented in a way that avoids overloading the leader process, which would turn it into a bottleneck.
+
+Multi-threaded execution is a potential source of non-determinism, depending on how threads are scheduled to be executed in the operating system.
+Some works attempted to circumvent this problems and come up with a multi-threaded, yet deterministic implementation of SMR.
+In \cite{santos2013htsmr}, the authors propose to parallelize the receipt and dispatching of commands, while executing commands sequentially.
+In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently and still produce a deterministic outcome (e.g., read-only commands).
+In \cite{Kapritsos:2012um}, commands are tentatively executed in parallel.
+After the parallel execution, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially.
+
+Many database replication schemes aim at achieving higher throughput by relaxing consistency, that is, they do not ensure linearizability.
+In deferred-update replication \cite{sciascia2012sdur, chundi96dur, kobus2013hybrid, SousaOMP01}, replicas commit read-only transactions immediately, not always synchronizing with each other.
+Although this indeed improves performance, it allows non-linearizable executions to take place.
+Database systems usually ensure serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}, which do not take into account real-time precedence of different commands among different clients. 
+For some applications, these consistency levels may be enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
+
+Efforts to make linearizable systems scalable have been made in the past~\cite{corbett2013spanner, bezerra2014ssmr, hoang2016, Glendenning2011, Marandi11}.
+In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
+In \cite{Marandi11}, a partitioned variant of SMR is proposed.
+However, it requires total order (i.e., all commands have to be ordered against each other) and it does not allow a single command to update variables in different partitions.
+Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and, to ensure strong consistency across partitions, clocks are assumed to be synchronized.
+Although the authors say that Spanner works well with GPS and atomic clocks, if clocks go out of synch beyond the tolerated difference, correctness is not guaranteed.
+\ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any assumption about clock synchronization, but relies on a static partitioning of the state.
+\dssmr{}~\cite{hoang2016} extends \dssmr\ by allowing state variables to migrate across partitions in order to reduce multi-partition commands.
+However, \dssmr{} implements repartitioning in a very simple way that does not perform very well in scenarios with weak locality.
+\dynastar\ improves on \dssmr\ by employing well-known graph partitioning techniques to decide where each variable should be.
+Moreover, \dynastar\ dillutes the cost of repartitioning by moving variables on-demand, that is, only when they are accessed by some command.
+
+Graph-partitioning is an interesting problem with many proposed solutions~\cite{Abou-Rjeili:2006,kernighan1970efficient,hendrickson2000graph}.
+In this work, we do not introduce a new graph partitioning solution, but instead we use a well-known one (METIS~\cite{Abou-Rjeili:2006}) to partition the state of a service implemented with state machine replication.
+Similarly to \dynastar{}, Schism~\cite{curino2010sch} also uses graph-based partitioning to decide where to place data items in a transactional database.
+The authors propose to use the workload to create a graph that captures dependencies between data items, but not much detail is given about how the repartitioning can be done dynamically without violating consistency.
+Sword~\cite{quamar2013sword} is another graph-based dynamic repartitioning technique.
+It uses a hypergraph partitioning algorithm to distribute rows of tables in a relational database across database shards.
+Sword does not ensure linearizability and it is not clear how it implements repartitions without violating consistency.
+E-Store~\cite{taft2014est} is yet another repartitioning proposal for transactional databases.
+It repartitions data according to access patterns from the workload.
+It strives to minimize the number of multi-partition accesses and is able to redistribute data items among partitions during execution.
+E-Store assumes that all non-replicated tables form a tree-schema based on foreign key relationships.
+This has the drawback of ruling out graph-structured schemas and \mbox{$m$-$n$} relationships.
+\dynastar\ is a more general approach that works with any kind of relationship between data items, while also ensuring linearizability.
+
+\dynastar\ is not to be confused with replication schemes that are ``dynamic'' in that they allow the membership to be reconfigured during execution (e.g., \cite{birman2010dsr,guessoum2003dar,dustdar2007soc}).
+For instance, a multicast layer based on Paxos can be reconfigured by adding or removing acceptors. 
+These systems are dynamic in way that is orthogonal to what \dynastar\ proposes.
+%\dynastar\ consists of allowing the \emph{state partitioning}, that is, which state variables belong to which partition, to change dynamically.
+%The greatest challenge that is addressed by \dynastar\ is how to provide such a solution, with a dynamic partitioning oracle, while ensuring a very strong level of consistency (linearizability), as variables are created, deleted, and moved across partitions, based on the access patterns of the workload.
+
