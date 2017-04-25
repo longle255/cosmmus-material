@@ -1,19 +1,12 @@
 %!TEX root =  main.tex
-\section{\dynastar: quasi-optimum dynamic state partitioning}
+\section{\dynastar: optimized dynamic state partitioning}
 \label{sec:dynastar}
-%\section{\dynastar: dynamic partitioning for scalable state machine replication}
-%\section{The centralized partitioning scheme}
-
-%If the system can be modeled as a graph, as described in the previous session, we can take advantage of algorithms that perform graph partitioning to optimise the state partitioning of \ssmr\  while using concepts from \dssmr. The problem of graph partitioning is well stablished and despite being NP-Complete \ref{NPC_GraphPartition}, several approximation algorithms exist. First we define what graph partitioning is and how it can analyzed to our needs, next we explore possibilities that are easily obtainable when applying the same graph's reasoning.
 
 In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
 
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
 
-%<<<<<<< HEAD
-%\dynastar extends DS-SMR, the scheme proposed by Long et al.~\cite{hoang2016} to cope with workloads that exhibit both strong and weak locality.
-%=======
 \dynastar improves DS-SMR to cope with workloads that exhibit both strong and weak locality.
 In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
 Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms DS-SMR.
@@ -41,14 +34,14 @@ For brevity, we omit the delete command since the coordination involved in the e
 Moreover, in the discussion in this section, every command involves the oracle.
 In the next section, we explain how clients can use a caching technique to avoid using the oracle in the execution of most commands.
 
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-\centering
-      \includegraphics[width=0.9\linewidth]{figures/dynastar}
-\end{minipage}
-\caption{The execution of a create command and a read command in \dynastar.}
-\label{fig:oracle_repartition}
-\end{figure*}
+%\begin{figure*}
+%\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+%\centering
+%      \includegraphics[width=0.9\linewidth]{figures/dynastar}
+%\end{minipage}
+%\caption{The execution of a create command and a read command in \dynastar.}
+%\label{fig:oracle_repartition}
+%\end{figure*}
 
 %When issuing a command, the application simply forwards the command to the client proxy and waits for the reply.
 %Consulting the oracle and multicasting the command to different partitions is done internally by the proxy at the client.
