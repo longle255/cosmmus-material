@@ -17,7 +17,7 @@
 					\COMMENT{...determine $v$'s partition}
 					\STATE $prophecy \leftarrow (\ppm)$
 					\COMMENT{prepare client's response}
-					\STATE \amcast$(\ppm, $C$)$
+					\STATE \amcast$(\ppm, C)$
 					\COMMENT{forward command to partition}
 				\ENDIF
 			\ENDINDENT
@@ -30,7 +30,7 @@
 					\COMMENT{get all partition involved}
 					\IF[if only one partition:]{$|dests| = 1$}
 						\STATE $prophecy \leftarrow (dest)$
-						\STATE \amcast$(\ppm, ($C$))$
+						\STATE \amcast$(\ppm, C)$
 						\COMMENT{forward command to partition}
 %						\COMMENT{tell client which partition}
 					\ELSE[if multiple partitions involved]
@@ -38,7 +38,7 @@
 						\COMMENT{$\ppm_d$ will store all vars in $\omega$}
 						\STATE $alldest \leftarrow \{oracle\} \cup dests$
 						\COMMENT{move $v$ from $\ppm_s$...}
-						\STATE \amcast$(alldest, (move(\omega,dests,\ppm_d), $C$))$
+						\STATE \amcast$(alldest, (move(\omega,dests,\ppm_d), C))$
 						\COMMENT{...to $\ppm_d$}						
 						\STATE $prophecy \leftarrow (\ppm_d)$
 					\ENDIF 
