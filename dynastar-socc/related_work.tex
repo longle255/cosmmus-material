@@ -35,8 +35,8 @@ Moreover, \dynastar\ dillutes the cost of repartitioning by moving variables on-
 
 Graph-partitioning is an interesting problem with many proposed solutions~\cite{Abou-Rjeili:2006,kernighan1970efficient,hendrickson2000graph}.
 In this work, we do not introduce a new graph partitioning solution, but instead we use a well-known one (METIS~\cite{Abou-Rjeili:2006}) to partition the state of a service implemented with state machine replication.
-Similarly to \dynastar{}, Schism~\cite{curino2010sch} also uses graph-based partitioning to decide where to place data items in a transactional database.
-The authors propose to use the workload to create a graph that captures dependencies between data items, but not much detail is given about how the repartitioning can be done dynamically without violating consistency.
+Similarly to \dynastar{}, Schism~\cite{curino2010sch} and Clay~\cite{SerafiniTEPAS16} also use graph-based partitioning to decide where to place data items in a transactional database.
+In either case, not much detail is given about how to handle repartitioning dynamically without violating consistency.
 Sword~\cite{quamar2013sword} is another graph-based dynamic repartitioning technique.
 It uses a hypergraph partitioning algorithm to distribute rows of tables in a relational database across database shards.
 Sword does not ensure linearizability and it is not clear how it implements repartitions without violating consistency.

@@ -61,7 +61,7 @@ In the next section, we explain how clients can use a caching technique to avoid
 
 To execute a command, the client atomically multicasts the command to the oracle in a consult message to find out the partitions involved.
 The oracle replies with a prophecy, which may already tell the client that the command cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
-If the command can be executed, the client receives a prophecy containing a tuple $(dests, sync)$, where $dests$ is the set of partitions the command must be atomically multicast for execution, and $sync$ is a flag.
+If the command can be executed, the client receives a prophecy containing a tuple $(dests, sync)$, where $dests$ is the set of partitions the command must be atomically multicast to for execution, and $sync$ is a flag.
 The $sync$ flag tells the client whether it should wait for the destination partition to receive the variables accessed by the command, in case the oracle had to move these variables to a single destination partition.
 
 After the client atomically multicasts the command to the destination partition, it waits for a response from the servers in the partition.

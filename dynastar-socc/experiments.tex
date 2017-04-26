@@ -9,7 +9,7 @@ service described in the previous section.  As a point of comparison,
 we perform the same experiments with both
 \ssmr{}~\cite{bezerra2014ssmr} and \dssmr. Our experiments show that
 \dynastar{} is able to rapidly adapt to changing workloads, while
-achiving throughputs and latencies far better than the existing
+achieving throughputs and latencies far better than the existing
 state-of-the-art approaches to partitioning.
 
 
@@ -87,9 +87,8 @@ geometry of the social graph, and the technique used to partition the
 data. We ran experiments with 2, 4, and 8 partitions.  To vary the
 geometry, we generated graphs with varying percentages of edge-cuts as
 computed by METIS on a static graph. Our experiments used graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts. We let METIS optimize the partitioning
-to keep the size of the most unbalanced partition up to 30\% more than the average
-partition size, that gives flexibility to decrease more the edge-cuts.
+0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of the most unbalanced partition up to 30\% more than the average
+partition size.
 As already mentioned, we compared 
 three strategies: \ssmr{}, \dssmr, and \dynastar.
 
@@ -144,7 +143,7 @@ The large number of move operations in DS-SMR with social graphs that cannot be 
 
 While in the previous section we considered executions with a fixed percentage of edge cuts as we increased the number of partitions (by adjusting the social graph clustering coefficient), we now consider a fixed graph and vary the number of partitions.
 Increasing the number of partitions with a fixed graph introduces a tradeoff.
-On the one hand, additional partitions improve performance as there is more resources to execute posts.
+On the one hand, additional partitions improve performance as there are more resources to execute posts.
 On the other hand, the number of edge cuts augments with the number of partitions, which hurts performance as there are additional moves.
 We evaluate the performance of \dynastar when subject to this tradeoff. 
 
@@ -217,7 +216,7 @@ suggest that the oracle would not become a bottleneck for reasonably large
 deployments.
 
 \begin{figure}[ht]
-	\includegraphics{figures/experiments/oracle-load}
+	\includegraphics[width=\columnwidth]{figures/experiments/oracle-load}
 	\caption{CPU load in the oracle.}
 	\label{fig:cpu_oracle}
 \end{figure}

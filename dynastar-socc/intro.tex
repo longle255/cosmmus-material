@@ -53,6 +53,7 @@ partition only, and (ii) evenly distribute data so that load is
 balanced among partitions.  We refer to workloads that can be
 partitioned in a way that satisfies these two properties as exhibiting
 \emph{strong locality}.
+Conversely, workloads that cannot avoid multi-partition commands with balanced load among partitions exhibit \emph{weak locality}.
 
 Broadly speaking, there are two classes of techniques for
 partitioning: \emph{static} and \emph{dynamic}.
@@ -81,7 +82,7 @@ As expected, we see that the throughput is less
 for the weak locality workload, due to the more expensive execution of multi-partition posts.
 %since the static scheme incurs overhead when accessing multiple partitions to execute commands.
 For workloads that do not change the graph structure, the
-results in Figure~\ref{fig:motivation} show a theoretical optimal
+results in Figure~\ref{fig:motivation} show a theoretical maximum
 throughput.  Of course, these results are not achievable in practice,
 since for real workloads, the graph would change over time (e.g., in
 social networks users join and leave the system, connections are
@@ -99,8 +100,8 @@ scheme is determining how the system selects the partition to which to
 move data.
 %
 The second system in Figure~\ref{fig:motivation} evaluates the dynamic
-partitioning strategy implemented by the DS-SMR system~\cite{hoang2016}.
-DS-SMR selects partitions randomly. This allows for a completely 
+partitioning strategy implemented by  Long et al.~\cite{hoang2016}.
+This system selects partitions randomly, which allows for a completely 
 decentralized implementation, in which partitions make only local
 choices about data movement.  We refer to this approach as
 \emph{decentralized dynamic}.  As Figure~\ref{fig:motivation} shows,
@@ -113,13 +114,13 @@ In this paper, we introduce \dynastar, a new dynamic approach to the
 state partitioning problem.  Like other dynamic approaches, \dynastar
 does not require any a priori knowledge about the workload. However,
 \dynastar differs from prior approaches because it maintains a
-centralized, global view of the network.  \dynastar minimizes the
+location oracle with a global view of the network.  The oracle minimizes the
 number of state relocations by monitoring the workload, and
-re-computing an optimal partitioning on demand using a static
+re-computing an optimized partitioning on demand using a static
 partitioning algorithm.  As a preview of our results,
 Figure~\ref{fig:motivation} also includes measurements for \dynastar.
 We see that \dynastar is able to achieve throughputs comparable to
-the optimal static scheme, while adapting to workload changes
+the optimized static scheme, while adapting to workload changes
 on-the-fly, and preserving strong consistency.
 
 
@@ -135,10 +136,10 @@ is faced with a choice of which partition to use as a destination.
 \dynastar chooses the partition for relocation (i.e., one that
 would minimize the number of state relocations) by partitioning the
 workload graph using the METIS partitioner.
-Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
+%Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
 
-\dynastar implements the oracle as a regular partition, replicated in a set of nodes, to tolerate failures.
-To ensure that the oracle does not become a performance bottleneck, clients can cache location information.
+To tolerate failures, \dynastar implements the oracle as a regular partition, replicated in a set of nodes.
+To ensure that the oracle does not become a performance bottleneck, clients cache location information.
 Therefore, clients only query the oracle when they access a variable for the first time or when cached entries become invalid (i.e., because a variable changed location).
 \dynastar copes with commands addressed to wrong partitions by telling clients to retry a command.
 
@@ -152,7 +153,7 @@ al.~\cite{hoang2016} and to the optimized static partitioning scheme.
 In workloads that present strong
 locality, all three protocols eventually delivered comparable
 performance, although \dynastar converged more quickly than the
-decentralized scheme.  In workloads with weak locality, however,
+decentralized scheme.  In workloads with weak locality,
 \dynastar largely outperformed the decentralized scheme and performed
 similar to the optimized static partitioning scheme.
 
@@ -171,7 +172,7 @@ The paper makes the following contributions:
 \begin{itemize}
 \item It introduces \dynastar and discusses its implementation. 
 \item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
-\item It describes \appname{} to demonstrate how \libname{} can be used to implement a scalable social network service.
+\item It describes \appname{} to demonstrate how \dynastar can be used to implement a scalable social network service.
 \item It presents a detailed experimental evaluation of \dynastar
 %including real social network graphs with half a million users and 14 million edges.
 \end{itemize}
