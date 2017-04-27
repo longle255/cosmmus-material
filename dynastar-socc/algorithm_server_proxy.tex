@@ -1,36 +1,35 @@
-\begin{algorithm}[t!]
+\begin{algorithm}[h!]
 \small
 
 \begin{distribalgo}[1]
 
-\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(access(\omega))$}}
+\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(C)$}}
 	% \IF{$\forall v \in \omega : v \in \ppm$}
-		\STATE execute command $access(\omega)$
+		\STATE execute command $C$
 		\STATE send response to the client
 	% \ELSE
 		% \STATE send $retry$ to the client
 	% \ENDIF
 \ENDINDENT
 \vspace{1.0mm}
-	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,dests,\ppm_d), access(\omega))$}}
+	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,\ppm_s,\ppm_d), C)$}}
 %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-		\IF[if $\ppm$ is a source partition:]{$\ppm \in dests \setminus \ppm_d$}
+		\IF[if $\ppm$ is a source partition:]{$\ppm \in \ppm_s \setminus \ppm_d$}
 			\STATE $vars \leftarrow \omega \cap \ppm$
 			\COMMENT{all needed variables in $\ppm$}
-			\STATE \rmcast$(\ppm_d$,$\langle vars, C \rangle)$
+			\STATE \rmcast$(\ppm_d, vars)$
 			\COMMENT{send variables to destination}
 			\STATE $\ppm \leftarrow \ppm \setminus \omega$
 			\COMMENT{update source partition}
 		\ELSE[$\ppm$ is destination partition:]
-			\STATE wait until $\exists vars : \langle vars, C \rangle \in rcvd\_msgs$
-				\STATE $\ppm \leftarrow \ppm \cup vars$
-				\COMMENT{update partition}
-				\STATE execute command $access(\omega)$
+			\STATE wait until $\omega \subset \ppm$
+			\COMMENT{wait for needed variables}
+				\STATE execute command $C$
 				\STATE send response to the client
 		\ENDIF
 	\ENDINDENT
 	\vspace{1.0mm}
-	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(create(v))$}}
+	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v, create(v))$}}
 		\STATE $\ppm \leftarrow \ppm \cup \{v\}$
 		\STATE send $ok$ to the client
 	\ENDINDENT
@@ -45,8 +44,9 @@
 
   \vspace{1.0mm}
 
-  \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
-      \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+  \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(vars)$}}
+	\STATE $\ppm \leftarrow \ppm \cup vars$
+	\COMMENT{update partition}
   \ENDINDENT
 
 %\ENDINDENT

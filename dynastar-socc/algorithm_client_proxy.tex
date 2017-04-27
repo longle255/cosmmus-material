@@ -1,4 +1,4 @@
-\begin{algorithm}[t!]
+\begin{algorithm}[h!]
 \small
 
 \begin{distribalgo}[1]
@@ -8,14 +8,14 @@
 \INDENT{\colorbox{\coloralgo}{To issue a command $C$, the client does:}}
 
 \vspace{1.0mm}
-	\STATE \amcast$($oracle, $consult(C))$
-	\COMMENT{$C$ could be either $create(v)$ or $access(\omega)$}
+	\STATE \amcast$($oracle, $exec(C))$
+%	\COMMENT{$C$ could be either $create(v)$ or $access(\omega)$}
 	\STATE wait for $prophecy$
-	\IF[if receive $nok$ then...]{$prophecy \in \{nok\}$}
+	\IF[if receive $nok$ then...]{$prophecy = nok$}
 		\STATE $reply \leftarrow prophecy$
 		\COMMENT{...there's nothing to execute}
 	\ELSE[in this case, $prophecy$ is $(dest)$]
-		\STATE wait for $reponse$ from a server in $dest$
+		\STATE wait for $reponse$ from a server in $prophecy$
 		\STATE $reply \leftarrow reponse$
 	\ENDIF
 \STATE return $reply$ to the application
