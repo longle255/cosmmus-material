@@ -60,42 +60,41 @@ In the next section, we explain how clients can use a caching technique to avoid
 
 \subsubsection{The client process} 
 
-To execute a command, the client atomically multicasts the command to the oracle in a consult message to find out the partitions involved.
+To execute a command, the client atomically multicasts the command to the oracle in a consult message.
 The oracle replies with a prophecy, which may already tell the client that the command cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
-If the command can be executed, the client receives a prophecy containing a tuple $(dests, sync)$, where $dests$ is the set of partitions the command must be atomically multicast to for execution, and $sync$ is a flag.
-The $sync$ flag tells the client whether it should wait for the destination partition to receive the variables accessed by the command, in case the oracle had to move these variables to a single destination partition.
-
-After the client atomically multicasts the command to the destination partition, it waits for a response from the servers in the partition.
-The client must retry the command if the partition cannot execute the command.
-This happens if some of the variables needed by the command were moved to another partition due to other commands. 
-To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
+If the command can be executed, the client receives a prophecy containing a variable $dest$ which is the partition where the command will be executed. The client then waits for a response from the servers in the $dest$ partition for the result of the execution.
+% The client must retry the command if the partition cannot execute the command.
+%This happens if some of the variables needed by the command were moved to another partition due to other commands. 
+%To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
 
 \subsubsection{The server process} 
 
-When a server delivers a command for execution, it first checks that all variables accessed by the command are stored locally, in which case the command is executed and the response is sent back to the client (Task 1 in Algorithm~\ref{alg:server_proxy}).
-If one or more variables are not stored at the partition, the server returns a message to the client to retry the operation.
-This happens if the oracle moved some variables to another partition as part of another command. 
+When a server delivers a command $C$ that was forwarded from from the oracle, it executes that command and the response is sent back to the client (Task 1 and 3 in Algorithm~\ref{alg:server_proxy}).
+%If one or more variables are not stored at the partition, the server returns a message to the client to retry the operation.
+%This happens if the oracle moved some variables to another partition as part of another command. 
 
-Upon delivering a message to move variables (Task 2), a server in the source partition reliably multicasts all the needed variables stored locally to the destination partition (possibly none, if these variables have already been moved).
-Servers in the destination partition simply wait for a message from each source partition.
+Upon delivering a message containing $(move, C)$ from the oracle (Task 2), a server in the source partition reliably multicasts all the needed variables stored locally to the destination partition.
+Servers in the destination partition wait for a message from each source partition. Once all variables needed are available, destination servers execute the command $C$ and send the response back to the client.
 
-When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
-The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
+%When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
+%The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
 
 \subsubsection{The oracle} 
 
 When the oracle delivers a consult request (Task 1 in Algorithm~\ref{alg:oracle_proxy}), it distinguishes between two cases.
 \begin{itemize}
-\item If the command is to create a variable $v$, and $v$ does not already exist, the oracle determines the partition of $v$ and returns such a partition to the client.
+\item If the command is to create a variable $v$, and $v$ does not already exist, the oracle determines the partition of $v$, then multicasts that create command to such a partition and itself, and also returns that partition to the client as a prophecy.
 In the case of a create, the oracle chooses a random partition for the new variable.
 \item If the command is not a create, the oracle first checks that all variables involved in the command exist.
-If the variables exist and they are all in a single partition, the oracle returns to the client a prophecy with the partition to which the command must be atomically multicast for execution.
-If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition, atomically multicasts a move command to all such partitions and to the destination partition, and returns a prophecy back to the client with the $sync$ flag set to true.
+If the variables exist and they are all in a single partition, the oracle forwards the command to that partition for execution by multicast.
+If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition, atomically multicasts a command containing a tuple $(move, $C$)$, to all such partitions, the destination partition and to itself.
+In either case, oracle returns a prophecy back to the client with the $dest$ variable set to the destination partition.
 \end{itemize}
 
-The oracle executes a create command (Task 2) by updating its partition information and coordinating with the destination partition of the variable.
-This is done to avoid interleaved executions with other commands, which could lead to consistency violations. 
-To execute a move command (Task 3), the oracle updates its local information about source and destination partitions.
+Upon delivering create command (Task 2) or move command (Task 3), the oracle executes that command by updating its partition information
+%The oracle executes a create command (Task 2) by updating its partition information and coordinating with the destination partition of the variable.
+%This is done to avoid interleaved executions with other commands, which could lead to consistency violations. 
+%To execute a move command (Task 3), the oracle updates its local information about source and destination partitions.
 %In the case of a move command, the oracle does not coordinate with the involved partitions.
 %This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients. \eb{These claims sound a bit strong... Do we have a proof for them?}
 
@@ -115,7 +114,7 @@ To determine the destination partition of a set of variables, as part of a move,
 \subsection{Performance optimizations}
 \label{sec:optm}
 
-In the algorithm presented in the previous section, clients always need to consult the oracle to determine the partition a command must be atomically multicast to for execution.
+In the algorithm presented in the previous section, clients always need to consult the oracle, and the oracle dispatches every command to the partitions for execution.
 Obviously, if every command involves the oracle, the system is unlikely to scale, as the oracle will likely become a bottleneck.
 To address this issue, clients are equipped with a location cache.
 Before submitting a consult request to the oracle, the client checks its location cache.
