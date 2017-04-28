@@ -100,7 +100,7 @@ scheme is determining how the system selects the partition to which to
 move data.
 %
 The second system in Figure~\ref{fig:motivation} evaluates the dynamic
-partitioning strategy implemented by  Long et al.~\cite{hoang2016}.
+partitioning strategy implemented by  Le et al.~\cite{hoang2016}.
 This system selects partitions randomly, which allows for a completely 
 decentralized implementation, in which partitions make only local
 choices about data movement.  We refer to this approach as
@@ -146,7 +146,7 @@ Therefore, clients only query the oracle when they access a variable for the fir
 %\rjs{Should we say something about the location oracle not being a bottleneck?}
 
 We have fully implemented \dynastar and compared its performance to
-the dynamic partitioning protocol proposed by Long et
+the dynamic partitioning protocol proposed by Le et
 al.~\cite{hoang2016} and to the optimized static partitioning scheme.
 %Our prototype can handle workload graphs with half a million variables
 %and tens of millions of connections. \ef{Not yet :-|}
