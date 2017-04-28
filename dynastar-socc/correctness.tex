@@ -7,9 +7,6 @@
 \newcommand{\tes}{\ensuremath{t^{srv}_{end}}}
 \newcommand{\tss}{\ensuremath{t^{srv}_{start}}}
 
-
-In this section, we argue that \dynastar is safe (i.e., it ensures linearizability) and live (i.e., it ensures termination).
-
 To prove that \dynastar ensures linearizability, we must show that for any execution $\sigma$ of the system, there is a total order $\pi$ on client commands that 
 (i)~respects the semantics of the commands, as defined in their sequential specifications, and 
 (ii)~respects the real-time precedence of commands~(Section~\ref{sec:correctcrit}).
@@ -57,10 +54,11 @@ Therefore, either $C_i < C_j$ and from the definition of $\pi$, $C_i$ precedes $
 %\caption{Two cases in proof.}
 %\end{figure}
 
-For termination, we argue that every correct client eventually receives a reply different than $retry$ for every command $C$ that it issues.
+For termination, we argue that every correct client eventually receives a response for every command $C$ that it issues.
 This assumes that every partition (including the oracle partition) is always operational, despite the failure of some servers in the partition.
-For a contradiction, assume that some client submits a command $C$ that always returns $retry$.
-Therefore, from the algorithm, whenever $C$ is delivered at a partition, the partition does not contain all the variables needed by $C$.
-As a consequence, the client eventually falls back to \ssmr\ and multicasts $C$ to all partitions and $C$ is executed as a multi-partition command, which is guaranteed to succeed, a contradiction that concludes our argument.
+For a contradiction, assume that some correct client submits a command $C$ that is not executed.
+Atomic multicast ensures that $C$ is delivered by the involved partition.
+Therefore, $C$ is delivered at a partition that does not contain all the variables needed by $C$.
+As a consequence, the client retries with the oracle, which moves all variables to a single partition and requests the destination partition to execute $C$, a contradiction that concludes our argument.
 
 

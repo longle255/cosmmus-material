@@ -75,6 +75,8 @@ Atomic multicast ensures the following properties:
       once, and only if some process has \amcast{} $m$ previously
       \emph{(integrity)}.
     
+    \item[--] If a process \amcast{}s $m$ and then $m'$, then no process \amdel{}s $m'$ before $m$ \emph{(fifo order)}.
+
     \item[--] The delivery order is acyclic \emph{(atomic order)}.
 
     \item[--] For any messages $m$ and $m'$ and any processes $p$ and

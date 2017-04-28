@@ -61,6 +61,10 @@
 
 	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v,create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+		\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
+		\COMMENT{exchange signal to...}
+		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+		\COMMENT{...coordinate}
 		\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
     % \STATE send $ok$ to the client
 	\ENDINDENT
@@ -77,29 +81,30 @@
 
   \vspace{1.0mm}
     
-%	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
-%		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
-%	\ENDINDENT
-%	
-%	\vspace{1.0mm}
+	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+	\ENDINDENT
+	
+	\vspace{1.0mm}
 	\INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
 		\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
 		\STATE return $dests$
 	\ENDINDENT
 	
-	\vspace{4.0mm}
-%%	\vspace{1.0mm}
-%	\rule{83mm}{0.4pt}
-%%	\vspace{0.1mm}
+		\vspace{1.0mm}
 
-	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+%	\vspace{1.0mm}\hspace{-6.2mm}
+%	\rule{81mm}{0.4pt}
+%	\vspace{0.1mm}
+
+	\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 		\STATE update $G_W$ with $(V_h,E_h)$
 %		\STATE send $ok$ to the client
 	\ENDINDENT
 	
 	\vspace{1.0mm}
     
-	\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new\ partitioning})$}}
+	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new\ partitioning})$}}
 %	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
 		\STATE compute partitioning $\ip_1, ..., \ip_m$ from $G_W$
 	\ENDINDENT
@@ -111,18 +116,11 @@
 		\STATE return $\ppm$
 	\ENDINDENT	
 	
-%	\vspace{1.0mm}
-%        
-%	\INDENT{\textbf{case} $C$ is a $delete(v)$ command:}
-%		\STATE let $\ppm_d$ be $\ppm : \{\ppm\} = C.dests \setminus \{$oracle$\}$
-%		\STATE $\ppm_c \leftarrow \ppm_c \setminus      \{v\}$
-%		\STATE \rmcast$(\ppm_c, \langle ok, C \rangle )$
-%			\STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_msgs$
-%	\ENDINDENT
-
-%\ENDINDENT
 
 \caption{Oracle}
 \label{alg:oracle_proxy}
 \end{distribalgo}
 \end{algorithm}
+
+
+

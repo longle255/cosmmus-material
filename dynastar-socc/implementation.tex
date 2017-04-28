@@ -100,17 +100,17 @@ follower to the followee. Each user has an associated \emph{timeline},
 which is a sequence of post messages from the people that the user
 follows. Thus, when a user issues a post command, it results in
 writing the message to the timeline of all the user's followers.  In
-contrast, when a user wants to read their own timeline, they only need
+contrast, when users read their own timeline, they only need
 to access the state associated with their own node.
 
 Overall, in \appname, post, follow or unfollow commands can lead to
 object moves.  Follow and unfollow commands can involve at most two
 partitions, while posts may require object moves from many partitions.
 
-Of course, other implementations are possible. But, given that users
-in social networks spend most of the time reading (i.e., performing
-getTimeline)~\cite{facebookTAO}, it is useful to implement getTimeline
-as an efficient single-partition command.
+%Of course, other implementations are possible. But, given that users
+%in social networks spend most of the time reading (i.e., performing
+%getTimeline)~\cite{facebookTAO}, it is useful to implement getTimeline
+%as an efficient single-partition command.
 
 
 \subsection{Alternative systems}

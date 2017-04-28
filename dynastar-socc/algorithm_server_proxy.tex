@@ -17,12 +17,12 @@
 		\IF[if $\ppm$ is a source partition:]{$\ppm \in \ppm_s \setminus \ppm_d$}
 			\STATE $vars \leftarrow \omega \cap \ppm$
 			\COMMENT{all needed variables in $\ppm$}
-			\STATE \rmcast$(\ppm_d, vars)$
+			\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
 			\COMMENT{send variables to destination}
 			\STATE $\ppm \leftarrow \ppm \setminus \omega$
 			\COMMENT{update source partition}
 		\ELSE[$\ppm$ is destination partition:]
-			\STATE wait until $\omega \subset \ppm$
+			\STATE wait until $\forall v \in \omega \setminus \ppm: \exists \langle vars, C \rangle \in rcvd\_msgs :$\\ ~~~~~$v \in vars$
 			\COMMENT{wait for needed variables}
 				\STATE execute command $C$
 				\STATE send response to the client
@@ -30,8 +30,15 @@
 	\ENDINDENT
 	\vspace{1.0mm}
 	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v, create(v))$}}
+		\STATE \rmcast$(oracle, \langle signal, C \rangle )$
+		\COMMENT{exchange signal to...}
+		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+		\COMMENT{...coordinate}
 		\STATE $\ppm \leftarrow \ppm \cup \{v\}$
 		\STATE send $ok$ to the client
+
+
+
 	\ENDINDENT
 %	\vspace{1.0mm}
 %	\INDENT{\textbf{case} $C$ is a $delete(v)$ command:}
@@ -44,9 +51,8 @@
 
   \vspace{1.0mm}
 
-  \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(vars)$}}
-	\STATE $\ppm \leftarrow \ppm \cup vars$
-	\COMMENT{update partition}
+  \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(\langle val, C \rangle)$}}
+        \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
   \ENDINDENT
 
 %\ENDINDENT

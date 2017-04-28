@@ -20,46 +20,31 @@ An edge connects two variables in the graph if a command accesses both of them.
 A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
 \item \emph{On-demand relocation of service state.}
 Periodically, the oracle computes a partitioning of the workload graph.
-Based on this partitioning and the current location of variables, the oracle computes the destination partition for commands that access variables spread on multiple partitions.
+Based on this partitioning and the current location of variables, the oracle determines the destination partition for commands that access variables spread on multiple partitions.
 When computing the destination partition, the oracle strives to minimize the number of moves.
-Variables are only moved on demand, when a command that needs the variable is issued.
+Variables are moved on demand, when a command needs the variables.
 \end{itemize}
 
-
+In \dynastar a partition executes a command right after it has gathered all variables it needs.
+Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (e.g., S-SMR).
 
 
 \subsection{The \dynastar protocol}
 
-Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe in detail how the client, server and oracle processes execute, respectively. 
-For brevity, we omit the delete command since the coordination involved in the execution of a create and delete commands are analogous. 
-Moreover, in the discussion in this section, every command involves the oracle.
-In the next section, we explain how clients can use a caching technique to avoid using the oracle in the execution of most commands.
+Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe the client, server and oracle processes, respectively. 
+For brevity, we omit the delete command since the coordination involved in the create and delete commands are analogous. 
+The oracle is replicated and handled as a partition.
+In the discussion in this section, every command involves the oracle.
+In the next section, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
-%\begin{figure*}
-%\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
-%\centering
-%      \includegraphics[width=0.9\linewidth]{figures/dynastar}
-%\end{minipage}
-%\caption{The execution of a create command and a read command in \dynastar.}
-%\label{fig:oracle_repartition}
-%\end{figure*}
-
-%When issuing a command, the application simply forwards the command to the client proxy and waits for the reply.
-%Consulting the oracle and multicasting the command to different partitions is done internally by the proxy at the client.
-%Every server proxy at a server in $\ssm_i$ has only partial knowledge of the partitioning: it knows only which variables belong to $\ppm_i$.
-%The oracle proxy has knowledge of every $\ppm \in \Psi$.
-%To maintain such a global knowledge, the oracle must \amdel{} every command that creates, moves, or deletes variables.
-%(In Section~\ref{sec:optm}, we introduce a caching mechanism to prevent the oracle from becoming a performance bottleneck.)
-
-%\clearpage
 
 
 
 \subsubsection{The client process} 
 
-To execute a command, the client atomically multicasts the command to the oracle in a consult message.
+To execute a command, the client atomically multicasts the command to the oracle (Algorithm 1).
 The oracle replies with a prophecy, which may already tell the client that the command cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
-If the command can be executed, the client receives a prophecy containing a variable $dest$ which is the partition where the command will be executed. The client then waits the result of the execution from the servers in the $dest$ partition.
+If the command can be executed, the client receives a prophecy containing the partition where the command will be executed. The client then waits for the result of the execution of the command.
 % The client must retry the command if the partition cannot execute the command.
 %This happens if some of the variables needed by the command were moved to another partition due to other commands. 
 %To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
@@ -80,47 +65,49 @@ Servers in the destination partition wait for a message from each source partiti
 
 \subsubsection{The oracle} 
 
-When the oracle delivers a consult request (Task 1 in Algorithm~\ref{alg:oracle_proxy}), it distinguishes between two cases.
+When the oracle delivers a request, it distinguishes between two cases (Task 1 in Algorithm~\ref{alg:oracle_proxy}).
 \begin{itemize}
-\item If the command is to create a variable $v$, and $v$ does not already exist, the oracle chooses a random partition for $v$, multicasts the create command to the partition and itself, and returns the partition to the client as a prophecy.
-\item If the command is not a create, the oracle first checks that all variables involved in the command exist.
+\item If the command is to create a variable $v$, and $v$ does not already exist, the oracle chooses a random partition for $v$, multicasts the create command to the partition and itself, and returns the partition to the client as a prophecy (Figure~\ref{fig:oracle_repartition}).
+\item If the command reads and writes existing variables, the oracle first checks that all such variables exist.
 If the variables exist and they are all in a single partition, the oracle multicasts the command to that partition for execution.
-If the variables accessed by the command are distributed in multiple partitions, the oracle determines the destination partition, atomically multicasts a command containing a tuple $(move, C)$, to all such partitions, the destination partition and to itself.
-In either case, oracle returns a prophecy back to the client with the destination partition.
+If the variables are distributed in multiple partitions, the oracle determines the destination partition, and atomically multicasts a command to the involved partitions and to itself so that all variables are moved to the destination partition.
+The destination partition executes the command once it has received all variables needed by the command. 
+%In either case, oracle returns a prophecy back to the client with the destination partition.
 \end{itemize}
 
 \input{algorithm_client_proxy}
 \input{algorithm_server_proxy}
 \input{algorithm_oracle_proxy}
 
-Upon delivering create command (Task 2) or move command (Task 3), the oracle executes that command by updating its partition information
-%The oracle executes a create command (Task 2) by updating its partition information and coordinating with the destination partition of the variable.
-%This is done to avoid interleaved executions with other commands, which could lead to consistency violations. 
-%To execute a move command (Task 3), the oracle updates its local information about source and destination partitions.
-%In the case of a move command, the oracle does not coordinate with the involved partitions.
-%This is not necessary because a move cannot interleave its execution with a create and interleaved executions with other move commands simply result in retries by the clients. \eb{These claims sound a bit strong... Do we have a proof for them?}
+\begin{figure*}
+\begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
+\centering
+      \includegraphics[width=0.9\linewidth]{figures/dynastar}
+\end{minipage}
+\caption{The execution of a create command and a write command in \dynastar.}
+\label{fig:oracle_repartition}
+\end{figure*}
 
-The oracle also keeps track of the workload graph, computes the optimized partitioning of the graph, and determines the destination partition for move operations. %\rjs{We never say what is the periodicity.}
-To maintain the workload graph (Task 4), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
-These hints can be submitted by the clients (e.g., after the execution of a command), or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-%\eb{I don't think the next sentence belongs to this section...}
-%In our social network application, clients inform the oracle when submitting ``structural operations" on change the social graph (i.e., follow and unfollow requests).
+Upon delivering a create (Task 2) or a move command (Task 3), the oracle updates its partition information.
+As part of a create command, the oracle coordinates with the partition to ensure correctness (Task 4)~\cite{bezerra2014ssmr}.
+%
+The oracle also keeps track of the workload graph, computes a partitioning of the graph, and determines the destination partition for move operations.
+To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
+These hints can be submitted by the clients or by the partitions, which collect data upon executing commands and periodically inform the oracle.
 
-To compute an optimized partitioning (Task 5), the oracle uses a graph partitioner.
+To compute an optimized partitioning (Task 6), the oracle uses a graph partitioner.
 A new partitioning can be requested by the application, by a partition, or by the oracle itself (e.g., upon delivering a certain number of hints).
-%Moreover, the algorithm used to compute the partitioning of the graph must be also deterministic.
-To determine the destination partition of a set of variables, as part of a move, the oracle uses the current location of variables and the last partitioning produced by the graph partitioner.
+To determine the destination partition of a set of variables, as part of a move, the oracle uses the current location of variables and the last computed partitioning.
 
-%partition that results in the minimum number of variables that need to be moved given the ideal partitioning and the current location of the variables. \eb{I'd begin this last sentence with ``When executing a command, and the variables are not in the same partition, the oracle chooses a partition to move them all to based on...'' or something like that.}
 
-\subsection{Fault tolerance and performance}
+\subsection{Performance optimizations}
 %\subsection{Performance optimizations}
 \label{sec:optm}
 
-In the algorithm presented in the previous section, clients always need to consult the oracle, and the oracle dispatches every command to the partitions for execution.
+In the algorithm presented in the previous section, clients always need to involve the oracle, and the oracle dispatches every command to the partitions for execution.
 Obviously, if every command involves the oracle, the system is unlikely to scale, as the oracle will likely become a bottleneck.
 To address this issue, clients are equipped with a location cache.
-Before submitting a consult request to the oracle, the client checks its location cache.
+Before submitting a command to the oracle, the client checks its location cache.
 If the cache contains the partition of the variables needed by the command and all variables are in a single destination partition, the client can atomically multicast the command to the partition and avoid contacting the oracle. 
 
 The client still needs to contact the oracle in one of these situations:
