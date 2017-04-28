@@ -25,8 +25,9 @@ When computing the destination partition, the oracle strives to minimize the num
 Variables are moved on demand, when a command needs the variables.
 \end{itemize}
 
-In \dynastar a partition executes a command right after it has gathered all variables it needs.
-Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (e.g., S-SMR).
+In \dynastar a move request is multicast together with the command that triggered the request.
+%a partition executes a command right after it has gathered all variables it needs.
+Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
 
 
 \subsection{The \dynastar protocol}
