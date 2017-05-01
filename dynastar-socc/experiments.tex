@@ -25,7 +25,9 @@ ProCurve 2920-48G gigabit network switch, and the Dell nodes were
 connected to another, identical switch. Those switches were
 interconnected by a 20 Gbps link.  All nodes ran CentOS Linux 7.1 with
 kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
-\mbox{64-Bit} Server VM (build 25.45-b02).
+\mbox{64-Bit} Server VM (build 25.45-b02). In all experiments, the oracle 
+had the same resources as every other partition: 2 replicas and 3 acceptors 
+(in total five nodes per partition).
 
 
 \subsection{Methodology and goals}
@@ -44,7 +46,7 @@ The experiments explore the following questions:
 \paragraph*{Social network graph creation}
 %
 To generate the social graphs used in the experiments, we used the
-Holme-Kim model~\cite{holme-kim}.  We created power-law graphs (also
+Holme-Kim model~\cite{holme-kim}. We created power-law graphs (also
 known as scale-free graphs) with a clustering coefficient varying from
 0.6 to 1, which represent the geometric structures of social
 networks. The coefficient is the probability that whenever an edge
@@ -66,8 +68,10 @@ partitions.  Each client repeatedly issued synchronous post commands,
 waiting for a response from the storage.
 
 \begin{figure*}[ht!]
-	\includegraphics{figures/experiments/throughput-latency-avg-all}
-	\caption{Throughput and latency, varying edge-cuts for different partitioning size.}
+	\includegraphics{figures/socc/socc-throughput-latency-avg-all}
+	\caption{Throughput and latency, varying edge-cuts for different partitioning size. 
+  Throughput is shown in thousands of commands per second (kcps). 
+  Latency is measured in milliseconds (bars show average and whiskers show 95-th percentile).}
 	\label{fig:varying_edge_cut}
 \end{figure*}
 
@@ -113,7 +117,7 @@ In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that
 With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweight the gains from additional partitions.
 
 \begin{figure}[ht]
-	\includegraphics{figures/experiments/throughput-avg-vary-partition}
+	\includegraphics[width=0.95\columnwidth]{figures/socc/socc-throughput-avg-vary-partition}
 	\caption{Performance of social graph with increasing partitions.}
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
@@ -216,7 +220,7 @@ suggest that the oracle would not become a bottleneck for reasonably large
 deployments.
 
 \begin{figure}[ht]
-	\includegraphics[width=\columnwidth]{figures/experiments/oracle-load}
+	\includegraphics[width=\columnwidth]{figures/socc/socc-oracle-load}
 	\caption{CPU load in the oracle.}
 	\label{fig:cpu_oracle}
 \end{figure}
