@@ -170,10 +170,10 @@ continuously create users and connections between them during the experiment
 (running the follow command).  
 The rate at which users and connections are created is shown in Figure~\ref{fig:dynamic_load_tput} (right).
 The oracle monitors changes in the
-graph's structure and was configured to trigger a repartitioning after receiving a number of hints from client.
+graph's structure and was configured to trigger a repartitioning after receiving a number of hints (object creating and connecting) from client.
 %after all users were in the system and after 300 seconds into the execution.
 %when the number of changes exceed a threshold.  
-Each time the repartitioning took place, the partitioning became better and helped the throughput increase.
+When the repartitioning took place, the partitioning became better and helped the throughput increase.
 We also show the behavior of DS-SMR.
 When few connections are in the system, most posts are single-partition commands, but as connections are added, moves are needed to execute posts and performance decreases quickly.
 
@@ -195,8 +195,9 @@ that maintains a global view of the workload graph. This oracle allows
 \dynastar to make better choices about data movement, resulting in overall
 better throughput and lower latency. However, introducing centralized
 components in a distributed system is always a cause for some skepticism,
-in case the component becomes a bottleneck. We therefore conducted two
-experiments to evaluate if the \dynastar oracle is a bottleneck to
+in case the component becomes a bottleneck, and a single point of failure. 
+We therefore setup the oracle as a replicated partition 
+and conducted two experiments to evaluate if the \dynastar oracle is a bottleneck to
 system performance. The results show that the load on the oracle is
 low, suggesting that \dynastar scales well.
 
