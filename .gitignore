@@ -136,3 +136,5 @@ dynamic-ssmr/dsn-presentation/DS-SMR-v2.key
 dynastar/figures/experiments/latency-cdf-all-2p.pdf
 dynastar/figures/experiments/latency-cdf-all-4p.pdf
 dynastar/figures/experiments/latency-cdf-all-8p.pdf
+*.ps
+convert.sh

@@ -59,12 +59,10 @@ Graphs with some percentage of edge-cuts have \emph{weak locality}.
 
 \paragraph*{Command generation}
 %
-As a workload for the social graph, clients issued a sequence of post
+As a workload for the social graph, we have simulated clients issued a sequence of post
 commands.  For each command, the client selects a random node as
 the poster.  We focused on post commands, since they may access
-multiple partitions.  We used 100 clients per partition. In other
-words, the number of clients varied linearly with the number of
-partitions.  Each client repeatedly issued synchronous post commands,
+multiple partitions. Each client repeatedly issued synchronous post commands,
 waiting for a response from the storage.
 
 \begin{figure*}[ht!]
@@ -91,28 +89,32 @@ geometry of the social graph, and the technique used to partition the
 data. We ran experiments with 2, 4, and 8 partitions.  To vary the
 geometry, we generated graphs with varying percentages of edge-cuts as
 computed by METIS on a static graph. Our experiments used graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of the most unbalanced partition up to 30\% more than the average
-partition size.
-As already mentioned, we compared 
-three strategies: \ssmr{}, \dssmr, and \dynastar.
+0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of 
+the most unbalanced partition up to 30\% more than the average partition size.
+As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
 \subsection{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
 
-Figure~\ref{fig:varying_edge_cut} shows the throughput and latency of the three strategies, as we vary the number of partitions for social networks with different percentages of edge cuts.
+Figure~\ref{fig:varying_edge_cut} shows the peak throughput and average latency of the three strategies, 
+as we vary the number of partitions for social networks with different percentages of edge cuts.
 
 All three techniques perform similarly on experiments with
 strong locality, because there are no cross-partition commands after
 the graph is perfectly partitioned and no more moves occur in
 \dynastar or \dssmr, and no synchronization among partitions is
-necessary for \ssmr.
+necessary for \ssmr. 
 Consequently, all three schemes scale remarkably well.
+The vary in throughput between those techniques due to the implementation of each one.
 Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
-As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges to maximum throughput after 30 seconds from the beginning of the execution, while it takes DS-SMR (decentralized dynamic scheme) about 90 seconds to converge.
+As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges 
+to maximum throughput after 20 seconds from the beginning of the execution, while it takes 
+DS-SMR (decentralized dynamic scheme) about 80 seconds to converge.
 
 With social networks that exhibit weak locality (edge cut percentage greater than zero) \dssmr\ performance decreases significantly.  
-This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions without converging to a stable configuration (see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
+This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions 
+without converging to a stable configuration (see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
 In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions up to 10\% of edge cuts. 
 With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweight the gains from additional partitions.
 
@@ -126,36 +128,38 @@ With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cro
   \centering
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynamicload-tp-move-4p}
-    \caption{\dynastar versus decentralized dynamic strategy (DS-SMR)}
+    \includegraphics[width=0.95\columnwidth]{figures/socc/socc-dynamicload-tp}
+    \caption{\dynastar versus DS-SMR}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynamicload-graph-structure}
+    \includegraphics[width=0.95\columnwidth]{figures/socc/socc-dynamicload-graph}
     \caption{The creation of a social network graph}
   \end{subfigure}
     \caption{Performance under dynamic workload.}
 	\label{fig:dynamic_load_tput}
 \end{figure*}
 
-We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
-The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
+% We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
+% The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
 
 
 \subsection{The ideal number of partitions}
 \label{sec:evaluation:results}
 
-While in the previous section we considered executions with a fixed percentage of edge cuts as we increased the number of partitions (by adjusting the social graph clustering coefficient), we now consider a fixed graph and vary the number of partitions.
+While in the previous section we considered executions with a fixed percentage of edge cuts as we increased the number of partitions 
+(by adjusting the social graph clustering coefficient), we now consider a fixed graph and vary the number of partitions.
 Increasing the number of partitions with a fixed graph introduces a tradeoff.
 On the one hand, additional partitions improve performance as there are more resources to execute posts.
 On the other hand, the number of edge cuts augments with the number of partitions, which hurts performance as there are additional moves.
-We evaluate the performance of \dynastar when subject to this tradeoff. 
+We evaluate the performance of \dynastar and \ssmr with an optimized partitioning when subject to this tradeoff. 
 
 Figure~\ref{fig:4p1p_varying_partition_size} shows that throughput scales with the number of partitions up to 6 partitions.
-For each configuration, we computed the percentage of edge cuts and found that for 2, 4, 6 and 8 partitions the percentages were respectively 
-0.13\%, 1.06\%, 2.28\% and 2.67\%.
+For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
+0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
-As discussed before, getTimeline, the most common operations in social networks, are all single-partition operations in our application and as a consequence scale linearly with the number of partitions.
+As discussed before, getTimeline, the most common operations in social networks, are all single-partition operations in our application 
+and as a consequence scale linearly with the number of partitions.
 
 
 \subsection{Performance under dynamic workloads}
@@ -166,10 +170,11 @@ continuously create users and connections between them during the experiment
 (running the follow command).  
 The rate at which users and connections are created is shown in Figure~\ref{fig:dynamic_load_tput} (right).
 The oracle monitors changes in the
-graph's structure and was configured to trigger a repartitioning after all users were in the system and after 300 seconds into the execution.
+graph's structure and was configured to trigger a repartitioning after receiving a number of hints from client.
+%after all users were in the system and after 300 seconds into the execution.
 %when the number of changes exceed a threshold.  
 Each time the repartitioning took place, the partitioning became better and helped the throughput increase.
-We also show the behavior of decentralized dynamic strategy.
+We also show the behavior of DS-SMR.
 When few connections are in the system, most posts are single-partition commands, but as connections are added, moves are needed to execute posts and performance decreases quickly.
 
 %\begin{figure}[ht]
