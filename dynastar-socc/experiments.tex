@@ -150,16 +150,16 @@ With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cro
 While in the previous section we considered executions with a fixed percentage of edge cuts as we increased the number of partitions 
 (by adjusting the social graph clustering coefficient), we now consider a fixed graph and vary the number of partitions.
 Increasing the number of partitions with a fixed graph introduces a tradeoff.
-On the one hand, additional partitions improve performance as there are more resources to execute posts.
-On the other hand, the number of edge cuts augments with the number of partitions, which hurts performance as there are additional moves.
+On one hand, additional partitions improve performance as there are more resources to execute posts.
+On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional moves.
 We evaluate the performance of \dynastar and \ssmr with an optimized partitioning when subject to this tradeoff. 
 
-Figure~\ref{fig:4p1p_varying_partition_size} shows that throughput scales with the number of partitions up to 6 partitions.
+Figure~\ref{fig:4p1p_varying_partition_size} shows that throughput scales with the number of partitions until partitioned in more than 6 partitions.
 For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
-As discussed before, getTimeline, the most common operations in social networks, are all single-partition operations in our application 
-and as a consequence scale linearly with the number of partitions.
+The most common operation in social networks is the request to read a user timeline. This is a single-partition
+command in our application and as a consequence it scales linearly with the number of partitions.
 
 
 \subsection{Performance under dynamic workloads}
@@ -167,7 +167,7 @@ and as a consequence scale linearly with the number of partitions.
 Figure~\ref{fig:dynamic_load_tput} (left) depicts dynamically repartitioning
 on-the-fly.  We started the system with an empty graph. Then clients
 continuously create users and connections between them during the experiment
-(running the follow command).  
+by executing the follow command.
 The rate at which users and connections are created is shown in Figure~\ref{fig:dynamic_load_tput} (right).
 The oracle monitors changes in the
 graph's structure and was configured to trigger a repartitioning after receiving a number of hints (object creating and connecting) from client.
@@ -192,7 +192,7 @@ When few connections are in the system, most posts are single-partition commands
 
 \dynastar differs from \dssmr\ in that it uses a centralized oracle
 that maintains a global view of the workload graph. This oracle allows
-\dynastar to make better choices about data movement, resulting in overall
+\dynastar to make better choices about data movement, resulting in an overall
 better throughput and lower latency. However, introducing centralized
 components in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, and a single point of failure. 
@@ -202,8 +202,8 @@ system performance. The results show that the load on the oracle is
 low, suggesting that \dynastar scales well.
 
 
-The first experiment assesses the scalability of the static METIS algorithm
-in isolation. We measured the time to compute the partitioning solution, and
+The first experiment assesses the scalability of the METIS algorithm only.
+We measured the time to compute the partitioning solution, and
 the memory usage of the algorithms for increasingly large graphs. 
 The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
 linearly in both memory and computation time on graphs of up to 10 million vertices.
@@ -217,9 +217,9 @@ linearly in both memory and computation time on graphs of up to 10 million verti
 
 The second experiment evaluates the oracle in terms of CPU load over
 time, for varying numbers of partitions. The results are shown in
-Figure~\ref{fig:cpu_oracle}. The plot shows that load is higher in the
+Figure~\ref{fig:cpu_oracle}. The load is higher in the
 beginning of the experiment, when the clients had not yet cached the
-requests and the oracle was busy moving state. However, the load diminishes rapidly, and remains relatively
+requests and the oracle was busy moving the state. However, the load diminishes rapidly, and remains relatively
 low over time. This is because access to the oracle is necessary only
 when clients have an invalid log or when a repartition happens. This experiments
 suggest that the oracle would not become a bottleneck for reasonably large
