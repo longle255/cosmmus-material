@@ -56,7 +56,7 @@ When a server delivers a command $C$, multicast by the oracle, it executes the c
 If not all the variables needed by the command are in a single partition, the oracle issues a move command that involves all partitions containing the needed variables (Task 2).
 %If one or more variables are not stored in a single partition, the server returns a message to the client to retry the operation.
 %This happens if the oracle moved some variables to another partition as part of another command. 
-In this case, a server in the source partition reliably multicasts all the needed variables stored locally to the destination partition.
+In this case, a server in the source partitions reliably multicasts all the needed variables stored locally to the destination partition.
 Servers in the destination partition wait for a message from each source partition. Once all variables needed are available, destination servers execute the command $C$ and send the response back to the client.
 
 %When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
@@ -98,7 +98,9 @@ These hints can be submitted by the clients or by the partitions, which collect 
 
 To compute an optimized partitioning (Task 6), the oracle uses a graph partitioner.
 A new partitioning can be requested by the application, by a partition, or by the oracle itself (e.g., upon delivering a certain number of hints).
-To determine the destination partition of a set of variables, as part of a move, the oracle uses the current location of variables and the last computed partitioning.
+To determine the destination partition of a set of variables, as part of a move, the oracle uses 
+% the current location of variables and 
+the last computed partitioning.
 
 
 \subsection{Performance optimizations}
