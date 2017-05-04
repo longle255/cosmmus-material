@@ -24,7 +24,7 @@
     \includegraphics[width=0.95\columnwidth]{figures/socc/socc-moves-weak-locality}
     \caption{Number of move commands with weak locality}
   \end{subfigure}
-  \caption{\dynastar, S-SMR with optimized partitioning and decentralized dynamic schemes (DS-SMR) under strong and weak locality (4 partitions).}
+  \caption{\dynastar, optimized S-SMR and DS-SMR under strong and weak locality (4 partitions).}
   \label{fig:motivation}
 \end{figure*}
 
@@ -38,8 +38,8 @@ executes the same sequence of client commands in order to maintain
 consistency~\cite{Lam78,Sch90}. Unfortunately, classic state machine replication does not
 scale, since each replica must execute every command. In order to
 improve the scalability of SMR, several systems have investigated the
-use of state partitioning~(e.g., \cite{corbett2013spanner, bezerra2014ssmr,Glendenning:2011kj,
-  Aguilera:2007,bli16edcc}).
+use of state partitioning~(e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,Glendenning:2011kj,
+  bli16edcc}).
 
 In principle, increasing the number of partitions should result in
 increased system performance. However, if the execution of commands involves
@@ -78,11 +78,10 @@ algorithm is optimized to minimize edge-cuts when partitioning a
 static social graph. 
 In the workload with strong locality, METIS partitions the social graph such that all posts are single partition;
 in the workload with weak locality, although most commands are single partition, a small fraction of posts involves multiple partitions.
-As expected, we see that the throughput is less
-for the weak locality workload, due to the more expensive execution of multi-partition posts.
+The throughput is less for the weak locality workload due to the more expensive execution of multi-partition posts.
 %since the static scheme incurs overhead when accessing multiple partitions to execute commands.
-For workloads that do not change the graph structure, the
-results in Figure~\ref{fig:motivation} show a theoretical maximum
+For workloads that do not change the graph structure and exhibit strong locality, the
+results for optimized S-SMR in Figure~\ref{fig:motivation} show a theoretical maximum
 throughput.  Of course, these results are not achievable in practice,
 since for real workloads, the graph would change over time (e.g., in
 social networks users join and leave the system, connections are

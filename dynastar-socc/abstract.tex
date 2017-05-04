@@ -9,7 +9,7 @@ adapt as workloads change, to dynamic schemes, which move data on-demand.
 
 This paper presents DynaStar, a new dynamic partitioning scheme for
 scaling state machine replication. In contrast to prior dynamic
-schemes, DynaStar uses a location oracle to maintain a global view
+schemes, DynaStar uses a replicated location oracle to maintain a global view
 of the workload and inform heuristics about data placement. Using this
 oracle, DynaStar is able to adapt to workload changes over time,
 while also minimizing the number of state moves. The result is a
