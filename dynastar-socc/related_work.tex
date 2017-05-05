@@ -22,9 +22,9 @@ Although this indeed improves performance, it allows non-linearizable executions
 Database systems usually ensure serializability \cite{BHG87} or snapshot isolation \cite{LinKJPA09}, which do not take into account real-time precedence of different commands among different clients. 
 For some applications, these consistency levels may be enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
-Efforts to make linearizable systems scalable have been made in the past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, hoang2016, Marandi11}.
+Efforts to make linearizable systems scalable have been made in the past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, hoang2016, Marandi:2011dj}.
 In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
-In \cite{Marandi11}, variant of SMR is proposed in which data items are partitioned but commands have to be totally ordered.
+In \cite{Marandi:2011dj}, variant of SMR is proposed in which data items are partitioned but commands have to be totally ordered.
 Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and, to ensure strong consistency across partitions, clocks are assumed to be synchronized.
 Although the authors say that Spanner works well with GPS and atomic clocks, if clocks become out of synch beyond tolerated bounds, correctness is not guaranteed.
 \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any assumption about clock synchronization, but relies on a static partitioning of the state.
