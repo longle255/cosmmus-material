@@ -1,0 +1,67 @@
+\begin{algorithm}[htb]
+    \small
+
+    \begin{distribalgo}[1]
+
+        \vspace{1.5mm}
+
+        \INDENT{\emph{Initialization:}}
+            \STATE $round: 0$
+            \STATE $new\_partitioning_{r}: \emptyset$
+            \STATE $rcvd\_applies_{r} \leftarrow \emptyset$
+
+        \ENDINDENT
+        \vspace{1.5mm}
+        \INDENT{Each oracle partition $o \in \oom$ does:}
+            \vspace{1.5mm}
+            \INDENT{\textbf{when} $receive(Partition)$}
+                \STATE $round \leftarrow round + 1$
+                \STATE $new\_partitioning_{round} \leftarrow$ partitioner($o.graph$)
+                \STATE \rmcast$(\oom, Apply(round))$
+            \ENDINDENT
+
+            \vspace{1.5mm}
+
+            \INDENT{\textbf{when} \rmdel$(Apply(round))$ from partition $o'$}
+                \STATE $rcvd\_applies_{round} \leftarrow rcvd\_applies_{round} \cup o'$
+                \IF{$rcvd\_applies_{round} \cap \oom = \emptyset$}
+                    \STATE \amcast$(\oom \cup \ppm, Apply(round))$
+                \ENDIF
+            \ENDINDENT
+
+            \vspace{1.5mm}
+            
+             \INDENT{\textbf{when} \amdel$(Apply(round))$}
+                \STATE $o.partitioning \leftarrow new\_partitioning_{round}$
+            \ENDINDENT
+
+        \ENDINDENT
+
+    \vspace{1.7mm}
+
+    \textbf{Algorithm variables:}
+
+    \vspace{1.25mm}
+
+    partitioner: An external partition algorithm
+
+    \vspace{1.25mm}
+
+    \oo: The set of oracle partitions
+
+    \vspace{1.25mm}
+    
+    \pp: The set of server partitions
+
+    \vspace{1.25mm}
+
+    $o.graph$: The graph stored in the oracle
+
+    \vspace{1.25mm}
+
+    $o.partitioning$: The current graph partitioning
+
+    \caption{Oracle's partitioning}
+    \label{alg:oracle_partition}
+\end{distribalgo}
+\end{algorithm}
