@@ -6,21 +6,21 @@
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(C)$}}
 	\STATE $\omega \leftarrow vars(C)$
 	\COMMENT{variables accessed by $C$}
-	\IF{$\forall v \in \omega : v \in \ppm$}
+	\IF[\textbf{Task 1a}]{$\forall v \in \omega : v \in \ppm$}
 		\STATE execute command $C$
 		\STATE send response to the client
-	\ELSE
-		\IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
-			\STATE $response \leftarrow retry$
-			\COMMENT{tell the client}
-		\ELSE
+	\ELSE[\textbf{Task 1b}]
+		% \IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
+		% 	\STATE $response \leftarrow retry$
+		% 	\COMMENT{tell the client}
+		% \ELSE
 			\STATE $dests \leftarrow \parts(\omega)$
 			\COMMENT{get all partition involved}
 			\STATE $\ppm_d \leftarrow target(G_W, \omega)$
 			\COMMENT{$\ppm_d$ will execute $C$}
 			\STATE \amcast$(dests, (move(\omega,dests,\ppm_d), C))$
-			\STATE $hint(vars)$
-		\ENDIF
+			% \STATE $hint(vars)$
+		% \ENDIF
 	\ENDIF
 \ENDINDENT
 
@@ -40,7 +40,7 @@
 		\STATE execute command $C$
 		\STATE send response to the client
 		\STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} \rmcast$(\pqm, \langle v:v \in \pqm \rangle, C)$
-		\STATE $hint(vars)$
+		% \STATE $hint(vars)$
 	\ENDIF
 \ENDINDENT
 
@@ -77,11 +77,11 @@
     \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
 \ENDINDENT
 
-\vspace{1.0mm}
-\INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}
-	\STATE $e \leftarrow \{u, v: u,v \in vars, u \neq v\}$
-	\STATE \rmcast(oracle, $e$)
-\ENDINDENT
+% \vspace{1.0mm}
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}
+% 	\STATE $e \leftarrow \{u, v: u,v \in vars, u \neq v\}$
+% 	\STATE \rmcast(oracle, $e$)
+% \ENDINDENT
 
 \caption{Server in partition $\ppm$}
 \label{alg:server_proxy}
