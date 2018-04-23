@@ -5,49 +5,39 @@
 
 %\vspace{1.0mm}
 
-	\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
-%		\INDENT{\textbf{case} $C$ is a $consult(C_c)$ command:}
-%			\STATE $update(G_W, \omega)$
-			\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
-				\IF[if $v$ already exists...]{$\parts(\{v\}) \neq \bot$}
-					\STATE $prophecy \leftarrow nok$
-					\COMMENT{...notify client}
-				\ELSE[if $v$ doesn't exist...]
-					\STATE $\ppm \leftarrow$ choose $v$'s partition
-					\COMMENT{...determine $v$'s partition}
-					\STATE $prophecy \leftarrow \ppm$
-					\COMMENT{prepare client's response}
-					\STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
-					\STATE \amcast$(alldest, (\ppm,create(v)))$
+\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
+	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+		\IF[if $v$ already exists...]{$\parts(\{v\}) \neq \bot$}
+			\STATE $prophecy \leftarrow nok$
+			\COMMENT{...notify client}
+		\ELSE[if $v$ doesn't exist...]
+			\STATE $\ppm \leftarrow$ choose $v$'s partition
+			\COMMENT{...determine $v$'s partition}
+			\STATE $prophecy \leftarrow \ppm$
+			\COMMENT{prepare client's response}
+			\STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
+			\STATE \amcast$(alldest, (\ppm,create(v)))$
 %					\COMMENT{send command to partition}
-				\ENDIF
-			\ENDINDENT
-			\INDENT{\textbf{case} $C$ is any command, but $create(v)$:}
-				\STATE $\omega \leftarrow vars(C)$
-				\COMMENT{variables accessed by $C$}
-				\IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
-					\STATE $prophecy \leftarrow nok$
-					\COMMENT{tell the client}
-				\ELSE[if all vars in $\omega$ exist]
-					\STATE $dests \leftarrow \parts(\omega)$
-					\COMMENT{get all partition involved}
-					\IF[if only one partition:]{$|dests| = 1$}
-						\STATE $prophecy \leftarrow dest$
-						\STATE \amcast$(dest, C)$
-%						\COMMENT{forward command to partition}
-%						\COMMENT{tell client which partition}
-					\ELSE[if multiple partitions involved]
-						\STATE $\ppm_d \leftarrow target(G_W, \omega)$
-						\COMMENT{$\ppm_d$ will store vars in $\omega$}
-%						\COMMENT{move $v$ from $\ppm_s$...}
-						\STATE $alldest \leftarrow \{oracle\} \cup dests$
-						\STATE \amcast$(alldest, (move(\omega,dests,\ppm_d), C))$
-%						\COMMENT{...to $\ppm_d$}						
-						\STATE $prophecy \leftarrow \ppm_d$
-					\ENDIF 
-				\ENDIF
-			\ENDINDENT
-			\STATE send $prophecy$ to the client
+		\ENDIF
+	\ENDINDENT
+
+	\INDENT{\textbf{case} $C$ is any command, but $create(v)$:}
+		\STATE $\omega \leftarrow vars(C)$
+		\COMMENT{variables accessed by $C$}
+		\IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
+			\STATE $prophecy \leftarrow nok$
+			\COMMENT{tell the client}
+		\ELSE[if all vars in $\omega$ exist]
+			\STATE $dests \leftarrow \parts(\omega)$
+			\COMMENT{get all partition involved}
+			\STATE $\ppm_d \leftarrow target(dests, \omega)$
+			\COMMENT{$\ppm_d$ will excecute $C$}
+			% \STATE $alldest \leftarrow \{oracle\} \cup dests$
+			\STATE \amcast$(dests, (move(\omega,dests,\ppm_d), C))$
+			\STATE $prophecy \leftarrow \ppm_d$
+		\ENDIF
+	\ENDINDENT
+	\STATE send $prophecy$ to the client
 %			\INDENT{\textbf{case} $C_c$ is a $delete(v)$ command:}
 %				\IF{$partition(v) = \bot$}
 %					\STATE $prophecy \leftarrow ok$
@@ -56,65 +46,69 @@
 %				\ENDIF
 %			\ENDINDENT
 %		\ENDINDENT
-	\ENDINDENT
-	\vspace{1.0mm}
+\ENDINDENT
+\vspace{1.0mm}
 
-	\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v,create(v))$}}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v,create(v))$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
-		\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
-		\COMMENT{exchange signal to...}
-		\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
-		\COMMENT{...coordinate}
-		\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
-    % \STATE send $ok$ to the client
-	\ENDINDENT
+	\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
+	\COMMENT{exchange signal to...}
+	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+	\COMMENT{...coordinate}
+	\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
+% \STATE send $ok$ to the client
+\ENDINDENT
+
+% \vspace{1.0mm}
+% \INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,\ppm_s,\ppm_d),C)$}}
+% %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
+% \STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\pqm \leftarrow \pqm \setminus \omega$
+% \COMMENT{update partition...}
+% \STATE $\ppm_d \leftarrow \ppm_d \cup \omega$
+% \COMMENT{...and add new variables}
+% % \STATE send $ok$ to the client
+% \ENDINDENT
+
+% \vspace{1.0mm}
+% \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+% 	\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+% \ENDINDENT
+
+\vspace{1.0mm}
+\INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
+	\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
+	\STATE return $dests$
+\ENDINDENT
 
 	\vspace{1.0mm}
-	\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,\ppm_s,\ppm_d),C)$}}
-%	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-    \STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\pqm \leftarrow \pqm \setminus \omega$
-    \COMMENT{update partition...}
-    \STATE $\ppm_d \leftarrow \ppm_d \cup \omega$
-    \COMMENT{...and add new variables}
-    % \STATE send $ok$ to the client
-	\ENDINDENT
-
-  \vspace{1.0mm}
-    
-	\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
-		\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
-	\ENDINDENT
-	
-	\vspace{1.0mm}
-	\INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
-		\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
-		\STATE return $dests$
-	\ENDINDENT
-	
-		\vspace{1.0mm}
 
 %	\vspace{1.0mm}\hspace{-6.2mm}
 %	\rule{81mm}{0.4pt}
 %	\vspace{0.1mm}
 
-	\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
-		\STATE update $G_W$ with $(V_h,E_h)$
-%		\STATE send $ok$ to the client
-	\ENDINDENT
-	
-	\vspace{1.0mm}
-    
-	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new\ partitioning})$}}
-%	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+	\STATE update $G_W$ with $(V_h,E_h)$
+	\STATE $inc(changes)$
+	\IF {$changes \geq threshold$}
 		\STATE compute partitioning $\ip_1, ..., \ip_m$ from $G_W$
-	\ENDINDENT
-	
-	\vspace{1.0mm}
-    
-	\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
-		\STATE $\ppm \leftarrow$ compute destination partition for $vars$ from\\ \hspace{8mm}current $\ppm_1, ..., \ppm_m$ and $\ip_1, ..., \ip_m$ partitioning
-		\STATE return $\ppm$
-	\ENDINDENT	
+		\STATE $alldest \leftarrow \{oracle\} \cup all partitions$
+		\STATE \amcast$(alldest, (new partitioning))$
+	\ENDIF
+\ENDINDENT
+
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new partitioning})$}}
+%	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
+	\STATE compute partitioning $\ip_1, ..., \ip_m$ from $G_W$
+\ENDINDENT
+
+\vspace{1.0mm}
+
+\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
+	\STATE $\ppm \leftarrow$ compute destination partition for $vars$ from\\ \hspace{8mm}current $\ppm_1, ..., \ppm_m$ and $\ip_1, ..., \ip_m$ partitioning
+	\STATE return $\ppm$
+\ENDINDENT	
 	
 
 \caption{Oracle}
