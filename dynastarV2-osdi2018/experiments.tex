@@ -3,17 +3,18 @@
 \label{sec:experiments}
 
 In this section, we evaluate \dynastar{} according to various metrics,
-under a variety of different operational parameters.  As a
-representative application, we use the \appname{} social networking
-service described in the previous section.  As a point of comparison,
-we perform the same experiments with both
-\ssmr{} and \dssmr. Our experiments show that
-\dynastar{} is able to rapidly adapt to changing workloads, while
-achieving throughputs and latencies far better than the existing
+under a variety of different operational parameters.
+We ran a number of experiments using two benchmarks: the TPC-C benchmark and
+\appname{} social networking service described in the previous section as a
+representative application.  
+% As a point of comparison, we perform the same experiments with both
+% \ssmr{} and \dssmr. 
+Our experiments show that \dynastar{} is able to rapidly adapt to changing 
+workloads, while achieving throughputs and latencies far better than the existing
 state-of-the-art approaches to state machine replication partitioning.
 
 
-\subsection{Experiemental environment}
+\subsection{Experimental environment}
 \label{sec:evaluation:setup}
 
 We conducted all experiments on a cluster with two types of nodes: (a)
@@ -33,38 +34,103 @@ had the same resources as every other partition: 2 replicas and 3 acceptors
 \subsection{Methodology and goals}
 \label{sec:evaluation:methodology}
 
+In order to show the scalability of our approach we tested the performance as the 
+number of partitions increases, and performance as the size and complexity of the graph grows.
 The experiments explore the following questions:
 \begin{itemize}
 \item \emph{How does \dynastar performance compare to other approaches?} 
-\item \emph{How does the number of partitions affect the performance of posts for a fixed social graph?}
+\item \emph{How does the number of partitions affect the performance of global commands for a fixed graph?}
 \item \emph{How does \dynastar perform under dynamic workloads?}
-\item \emph{When will the oracle become a bottleneck?}
+% \item \emph{When will the oracle become a bottleneck?}
 \end{itemize}
 
-
-
-\paragraph*{Social network graph creation.}
+\paragraph*{Performance metrics.}
 %
-To generate the social graphs used in the experiments, we used the
-Holme-Kim model~\cite{holme-kim}. We created power-law graphs (also
+The latency was measured as the end-to-end time between issuing the
+command, and receiving the response.  Throughput was measured as the
+number of posts/second or transactions/second that the clients were able to send.
+
+\subsection{TPC-C benchmark}
+\label{sec:evaluation:tpc-c}
+
+\paragraph*{Workloads.}
+The TPC-C benchmark has five transaction types, three of which are read-write 
+transactions and two are read-only transactions: \textit{New-Order (45\%), Payment (43\%), Delivery
+(4\%), Order-Status (4\%) and Stock-Level (4\%).} On average, 10\%
+of transactions are distributed transactions. On all experiments, we use one warehouse for
+one partition. When we increased number of partitions, we also increased number
+of warehouse.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-repartitioning/tpcc-repartitioning}
+  \caption{Repartitioning on \dynastar}
+  \label{fig:tpcc_repartitioning}
+\end{figure}
+
+\paragraph{The impact of graph repartitioning.}
+In order to assess the impact of applying graph partitioning to a database, we
+ran the benchmark on an un-partitioned database.  Figure ~\ref{fig:tpcc_repartitioning} 
+shows the performance of \dynastar in the experiment with 4 warehouses on 4 partitions.
+At the beginning of experiments, all the variables are randomly distributed across all 
+servers, makes almost every transaction access all partitions. Thus every transaction 
+required coordination between partitions, and objects were constantly moving back and forth. 
+In additions, transactions from different clients were blocked by the others, 
+makes the time it took for executing one transaction remarkably high.
+
+%In addition to that, when a partition takes part in an execution of a transaction, 
+%if another command access variables that are being accesses by the ongoing command will 
+% be blocked until the previous command finish
+
+After 45 seconds, the oracle triggered repartitioning process, computed new partitioning 
+based on previous transactions, and told partitions to apply the new partitioning.
+When the partitions delivered the signal, they exchanged objects and applied the new partitioning.
+During this process, servers didn't execute any other transactions, thus the throughput decreased 
+to 0, and the average latency was not applicable. After applying new partitioning, each 
+server continued to execute transactions. At this points, most of objects requires for a transaction
+could be found on local partition, thus partitions didn't need to communicate most of the time, helped
+increasing the performance of the system significantly.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-scaling/tpcc-scaling}
+  \caption{TPC-C Throughput Scaling}
+  \label{fig:tpcc_scaling}
+\end{figure}
+\paragraph*{Scalability.}
+In order to show how \dynastar scales out, we ran tests with the cluster with 1, 2, 4, 8 
+and 16 partitions. We also added warehouses while adding partitions to demonstrate using 
+\dynastar to grow an application by adding more hardware. We used sufficient clients to 
+saturate the throughput of the system for each test. 
+Figure ~\ref{fig:tpcc_scaling} shows the peak throughput of \dynastar as we vary the 
+number of partitions. The result shows that \dynastar is capable of applying
+a partitioning scheme that allow us to obtain a good scalability.
+
+
+\subsection{Social network}
+
+\paragraph*{Workloads.}
+We used the Holme-Kim model~\cite{holme-kim} to generate the social 
+graphs used in the experiments. We created power-law graphs (also
 known as scale-free graphs) with a clustering coefficient varying from
 0.6 to 1, which represent the geometric structures of social
 networks. The coefficient is the probability that whenever an edge
 $(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$.
-In the experiments, we tested graphs with 10000 users. We characterize
+In the experiments, we tested graphs with 100000 users. We characterize
 different workloads by varying the percentage of edge-cuts.  For
 example, a graph with a 5\% edge cut means that 5\% of the total edges
 in the graph have connected vertices located in different partitions.
 Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
-\paragraph*{Command generation.}
-%
-As a workload for the social graph, we have simulated clients,
-and each client issues a sequence of post
-commands.  For each command, the client selects a random node as
-the poster.  We focused on post commands, since they may access
-multiple partitions. Each client operates synchronously,
-waiting for a response from the storage (i.e., in a closed loop).
+
+% \paragraph*{Command generation.}
+% %
+% As a workload for the social graph, we have simulated clients,
+% and each client issues a sequence of post
+% commands.  For each command, the client selects a random node as
+% the poster.  We focused on post commands, since they may access
+% multiple partitions. Each client operates synchronously,
+% waiting for a response from the storage (i.e., in a closed loop).
 
 \begin{figure*}[ht!]
 	\includegraphics{figures/socc/socc-throughput-latency-avg-all}
@@ -76,26 +142,21 @@ waiting for a response from the storage (i.e., in a closed loop).
 
 
 
-\paragraph*{Performance metrics.}
-%
-The latency was measured as the end-to-end time between issuing the
-command, and receiving the response.  Throughput was measured as the
-number of posts/second that the clients were able to send.
 
-\paragraph*{Operational parameters.}
-%
-With post commands, the frequency of single-partition
-vs. multi-partition commands depends on the number of partitions, the
-geometry of the social graph, and the technique used to partition the
-data. We ran experiments with 2 to 8 partitions.  To vary the
-geometry, we generated graphs with varying percentages of edge-cuts as
-computed by METIS on a static graph. Our experiments used graphs with
-0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of 
-the most unbalanced partition up to 30\% more than the average partition size.
-%As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
+% \paragraph*{Operational parameters.}
+% %
+% With post commands, the frequency of single-partition
+% vs. multi-partition commands depends on the number of partitions, the
+% geometry of the social graph, and the technique used to partition the
+% data. We ran experiments with 2 to 8 partitions.  To vary the
+% geometry, we generated graphs with varying percentages of edge-cuts as
+% computed by METIS on a static graph. Our experiments used graphs with
+% 0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of 
+% the most unbalanced partition up to 30\% more than the average partition size.
+% %As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
-\subsection{\dynastar vs. alternative systems}
+\paragraph*{\dynastar vs. alternative systems}
 \label{sec:evaluation:results}
 
 Figure~\ref{fig:varying_edge_cut} shows the peak throughput and latency for $\approx$75\% of peak throughput (average and 95-th percentile) of the three strategies, 
@@ -123,7 +184,7 @@ With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cro
 
 
 
-\subsection{The ideal number of partitions}
+\paragraph*{The ideal number of partitions}
 \label{sec:evaluation:results}
 
 While in the previous section we considered executions with a fixed percentage of edge cuts.
@@ -153,12 +214,12 @@ command in our application and as a consequence it scales linearly with the numb
   \centering
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/socc/socc-dynamicload-tp}
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-dynamic/social-network-dynamic}
     \caption{\dynastar versus DS-SMR}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/socc/socc-dynamicload-graph}
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-dynamic/social-network-dynamic-structure}
     \caption{The creation of a social network graph}
   \end{subfigure}
     \caption{Performance under dynamic workload (four partitions and 10\% of edge cuts).}
@@ -168,7 +229,7 @@ command in our application and as a consequence it scales linearly with the numb
 % We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
 % The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
 
-\subsection{Performance under dynamic workloads}
+\paragraph*{Performance under dynamic workloads}
 
 Figure~\ref{fig:dynamic_load_tput} (left) depicts performance of an evolving social network.  
 We started the system with an empty graph. Then clients
