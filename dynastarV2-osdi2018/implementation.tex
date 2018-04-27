@@ -91,11 +91,11 @@ The TPC-C benchmark consists of several classes of transactions, which is the
 current industry standard for evaluating the performance of OLTP systems.
 It has 9 tables and five stored procedures that simulate a warehouse-centric 
 order processing application: \textit{New-Order, Payment, Delivery, Order-Status
-and Stock-Level.}, The ITEM table is replicated to
+and Stock-Level}. The ITEM table is replicated to
 all servers, considering that the ITEM table is not updated on this benchmark.
 We implemented a Java version of TPC-C benchmark running on top of \dynastar. 
-Each row in TPC-C tables is an variable. The granularity is set to DISTRICT level,
-thus is district or warehouse is a node in the graph. A transaction access a district 
+Each row in TPC-C tables is an object in \dynastar. The granularity is set to DISTRICT level,
+thus each district or warehouse is a node in the graph. A transaction access a district 
 belongs to a warehouse creates a vertext between that district and warehouse.
 The object objects (e.g., customers, orders, etc.) that belong to a district 
 will be considers as a property of that district. However, if a transaction requires

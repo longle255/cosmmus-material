@@ -11,9 +11,9 @@ set style data lines
 set style line 1 lt 2 dashtype "-" lc rgb "black" lw 1.5
 
 set key top center
-set xrange [0:200]
+set xrange [0:150]
 set yrange [0:50000]
-set xtics 0,50,200
+set xtics 0,50,150
 
 set logscale y
 
