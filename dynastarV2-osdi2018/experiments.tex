@@ -58,7 +58,7 @@ The TPC-C benchmark has five transaction types, three of which are read-write
 transactions and two are read-only transactions: \textit{New-Order (45\%), Payment (43\%), Delivery
 (4\%), Order-Status (4\%) and Stock-Level (4\%).} On average, 10\%
 of transactions are distributed transactions. On all experiments, we use one warehouse for
-one partition. When we increased number of partitions, we also increased number
+one partition. When we increased number of partitions, we also increased the number
 of warehouse.
 
 \begin{figure}[ht!]
@@ -75,19 +75,19 @@ shows the performance of \dynastar in the experiment with 4 warehouses on 4 part
 At the beginning of experiments, all the variables are randomly distributed across all 
 servers, makes almost every transaction access all partitions. Thus every transaction 
 required coordination between partitions, and objects were constantly moving back and forth. 
-In additions, transactions from different clients were blocked by the others, 
-makes the time it took for executing one transaction remarkably high.
+In addition, transactions from different clients were blocked by the others, 
+made the time it took for executing one transaction remarkably high.
 
 %In addition to that, when a partition takes part in an execution of a transaction, 
 %if another command access variables that are being accesses by the ongoing command will 
 % be blocked until the previous command finish
 
 After 45 seconds, the oracle triggered repartitioning process, computed new partitioning 
-based on previous transactions, and told partitions to apply the new partitioning.
+based on previous transactions, and asked partitions to apply the new partitioning.
 When the partitions delivered the signal, they exchanged objects and applied the new partitioning.
 During this process, servers didn't execute any other transactions, thus the throughput decreased 
 to 0, and the average latency was not applicable. After applying new partitioning, each 
-server continued to execute transactions. At this points, most of objects requires for a transaction
+server continued to execute transactions. At this point, most of objects involved in a transaction
 could be found on local partition, thus partitions didn't need to communicate most of the time, helped
 increasing the performance of the system significantly.
 
@@ -156,31 +156,31 @@ Graphs with 0\% of edge-cuts have \emph{strong locality}.
 % %As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
-\paragraph*{\dynastar vs. alternative systems}
+\paragraph*{\dynastar vs. alternative techniques}
 \label{sec:evaluation:results}
 
-Figure~\ref{fig:varying_edge_cut} shows the peak throughput and latency for $\approx$75\% of peak throughput (average and 95-th percentile) of the three strategies, 
+Figure~\ref{fig:varying_edge_cut} shows the peak throughput and latency for $\approx$75\% of peak throughput (average and 95-th percentile) of the three techniques, 
 as we vary the number of partitions for social networks with different percentages of edge cuts.
 
 All three techniques perform similarly on experiments with
-strong locality, because there are no cross-partition commands after
+strong locality because there are no cross-partition commands after
 the graph is perfectly partitioned. No more moves occur in
 \dynastar or \dssmr, and no synchronization among partitions is
 necessary for \ssmr in this case. 
 Consequently, all three schemes scale remarkably well, and
 the difference in throughput between each technique is due to the implementation of each one.
-Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
-As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges 
-to maximum throughput after 20 seconds from the beginning of the execution, while it takes 
-DS-SMR (decentralized dynamic scheme) about 80 seconds to converge.
-This means that \dynastar can react to workload changes more rapidly than DS-SMR.
+%Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
+%As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges 
+%to maximum throughput after 20 seconds from the beginning of the execution, while it takes 
+%DS-SMR (decentralized dynamic scheme) about 80 seconds to converge.
+%This means that \dynastar can react to workload changes more rapidly than DS-SMR.
 
 With social networks that exhibit weak locality (edge cut percentage greater than zero) \dssmr\ performance decreases significantly.  
 This happens because with weak locality, objects in \dssmr\ are constantly being moved back and forth between partitions 
 without converging to a stable configuration.
 %(see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
-In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions up to 10\% of edge cuts. 
-With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
+In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts. 
+%With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
 
 
@@ -245,7 +245,7 @@ from the partitions.
 %When the repartitioning took place, the partitioning became better and helped the throughput increase.
 %We also show the behavior of DS-SMR.
 When the repartitioning takes place, around 122 seconds into the execution, the previously random user mapping got a better location from the oracle.
-After the repartitioning, the clients triggered the users to move to a better partition. 
+After the repartitioning, the objects are moved to a better partition.
 The partitioning became better and thus the throughput increased.
 We also show the behavior of DS-SMR.
 When few connections are in the system, most of the posts are single-partition commands, but as connections are added, moves are needed to execute posts and performance decreases quickly.
@@ -263,9 +263,9 @@ When few connections are in the system, most of the posts are single-partition c
 
 \subsection{The performance of the oracle}
 
-\dynastar differs from \dssmr\ in that it uses an oracle
+\dynastar differs from \dssmr\ in the sense that it uses an oracle
 that maintains a global view of the workload graph. The oracle allows
-\dynastar to make better choices about data movement, resulting in an overall
+\dynastar to make better choices about data movement, resulting in an overally
 better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, or a single point of failure. 
@@ -292,9 +292,9 @@ The second experiment evaluates the oracle in terms of CPU load over
 time, for varying numbers of partitions. The results are shown in
 Figure~\ref{fig:cpu_oracle}. The load is higher in the
 beginning of the experiment, when the clients had not yet cached the
-requests and the oracle was busy moving the state. However, the load diminishes rapidly, and remains relatively
+requests and the oracle was busy moving the states. However, the load diminishes rapidly, and remains relatively
 low over time. This is because access to the oracle is necessary only
-when clients have an invalid cache or when a repartition happens. This experiments
+when clients have an invalid cache or when a repartition happens. These experiments
 suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
 

@@ -19,8 +19,8 @@ The key insights of \dynastar are to create the workload graph on-the-fly and us
 An edge connects two variables in the graph if a command accesses both of them.
 A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
 \item \emph{On-demand relocation of service state.}
-Periodically, the oracle computes a partitioning of the workload graph and multicast to the partitions.
-Based on this partitioning and the current location of variables, the partitions determines the destination for partition for commands that access variables spread on multiple partitions.
+Periodically, the oracle computes a partitioning of the workload graph and multicasts to the partitions.
+Based on this partitioning and the current location of variables, the partitions determine the destination for commands that access variables spread over multiple partitions.
 Variables are moved on demand to the destination partition where the command will be executed. After the execution, variables are moved back to the source partition to keep the optimized partitioning.
 \end{itemize}
 
@@ -33,8 +33,8 @@ Therefore, differently from DS-SMR, \dynastar ensures termination without resort
 
 Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe the client, server and oracle processes, respectively. 
 For brevity, we omit the delete command since the coordination involved in the create and delete commands are analogous. 
-The oracle is replicated and handled as a partition.
 In the discussion in this section, every command involves the oracle.
+The oracle is replicated and handled as a partition.
 In the next section, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
 
@@ -53,13 +53,13 @@ If the command can be executed, the client receives a prophecy containing the pa
 
 \subsubsection{The server process} 
 
-All servers keep a workload graph in their memory. When a server delivers a command $C$, multicast by the oracle, it first check if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 3 in Algorithm~\ref{alg:server_proxy}).
-If not all the variables needed by the command are in a that partition, the server issues a move command that involves all partitions containing the needed variables (Task 1b and 2).
+All servers keep a workload graph in their memory. When a server delivers a command $C$, multicast by the oracle, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 3 in Algorithm~\ref{alg:server_proxy}).
+If not all the variables needed by the command are in that partition, the server issues a move command that involves all partitions containing the needed variables (Task 1b and 2).
 %If one or more variables are not stored in a single partition, the server returns a message to the client to retry the operation.
 %This happens if the oracle moved some variables to another partition as part of another command. 
-In this case, a server in the source partitions reliably multicasts all the needed variables stored locally to the destination partition and wait to receive them back.
-Servers in the destination partition wait for a message from each source partition. Once all variables needed are available, destination servers execute the command $C$, send the response back to the client, and returns the variables to their source.
-Periodically, the servers delivers a new partitioning plan from the oracle. Each server will send the variables to the designated partition as in the plan and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
+In this case, a server in the source partitions reliably multicasts all the needed variables stored locally to the destination partition and waits to receive them back.
+Destination partition waits for a message from each source partition. Once all variables needed are available, destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
+Periodically, the servers deliver a new partitioning plan from the oracle. Each server will send the variables to the designated partition as in the plan and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
 %When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
 %The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
 To determine the destination partition for a command, the servers uses the last computed partitioning.
@@ -94,7 +94,7 @@ Upon delivering a create (Task 2) or a move command (Task 3), the oracle updates
 As part of a create command, the oracle coordinates with the partition to ensure correctness (Task 4)~\cite{bezerra2014ssmr}.
 %
 The oracle also keeps track of the workload graph by receiving hints with variables (i.e., vertices in the graph) and executing commands (i.e., edges in the graph). These hints can be submitted by the clients or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-The oracle computes a partitioning plan of the graph and multicast it to all servers and to itself. Upon delivering new partition plan, the oracle update its location map accordingly.
+The oracle computes a partitioning plan of the graph and multicasts it to all servers and to itself. Upon delivering new partition plan, the oracle updates its location map accordingly.
 % The oracle also keeps track of the workload graph, computes a partitioning of the graph, and determines the destination partition for move operations.
 % To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
 
@@ -116,10 +116,12 @@ Before submitting a command to the oracle, the client checks its location cache.
 If the cache contains the partition of the variables needed by the command and all variables are in a single destination partition, the client can atomically multicast the command to the partition and avoid contacting the oracle. 
 
 The client still needs to contact the oracle in one of these situations:
-(a)~according to client's cache, not all variables accessed by the command are in the same partition and it is necessary to move variables;
-(b)~the cache contains outdated information, and the command is multicast to a partition that does not contain all needed variables; or
-(c)~the command is a create, in which case it must involve the oracle, as explained before.
-If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
+%(a)~according to client's cache, not all variables accessed by the command are in the same partition and it is necessary to move variables;
+%(b)~the cache contains outdated information, and the command is multicast to a partition that does not contain all needed variables; or
+(b)~the cache contains outdated information; or
+(c)~the command is a create, in which it must involve the oracle, as explained before.
+%If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
+If the cache contains outdated information, the partition tells the client to retry the command.
 In this case, the client contacts the oracle and then updates its cache with the oracle's response.
 
 \textbf{Subgraph on servers}. If all partitions have to keep a copy of the the workload graph, scaling is also a problem as the graph is growing over time. Thus, servers only keep a subgraph of variables they are holding and the neighbors of those objects, by observing the access pattern of the commands. Using this subgraph only, the servers can compute the destination partition for executing commands without the need of having the full graph.
