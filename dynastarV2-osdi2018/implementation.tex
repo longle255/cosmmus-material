@@ -5,13 +5,13 @@
 
 Our  \dynastar prototype is written as a
 Java 8 library.
-All code, including the experiment harness,
-is publicly available with an open-source
+%All code, including the experiment harness,
+The code is publicly available with an open-source
 license.\footnote{https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html}
 Application designers who use \dynastar
  to implement a replicated service must extend three key classes:
  \begin{itemize}
- \item[--] \emph{PRObject}: provides a common interface for (partially) replicated data items.
+ \item[--] \emph{PRObject}: provides a common interface for replicated data items.
  \item[--] \emph{PartitionStateMachine}: encapsulates the logic of the server
    proxy. Note that the server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
    handles all communication between partitions and the oracle transparently.
@@ -89,16 +89,16 @@ Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/
 
 The TPC-C benchmark consists of several classes of transactions, which is the 
 current industry standard for evaluating the performance of OLTP systems.
-It has 9 tables and five stored procedures that simulate a warehouse-centric 
+It has 9 tables and five stored procedures that simulates a warehouse-centric 
 order processing application: \textit{New-Order, Payment, Delivery, Order-Status
 and Stock-Level}. The ITEM table is replicated to
-all servers, considering that the ITEM table is not updated on this benchmark.
+all servers, considering that the ITEM table is not updated in this benchmark.
 We implemented a Java version of TPC-C benchmark running on top of \dynastar. 
 Each row in TPC-C tables is an object in \dynastar. The granularity is set to DISTRICT level,
-thus each district or warehouse is a node in the graph. A transaction access a district 
-belongs to a warehouse creates a vertext between that district and warehouse.
-The object objects (e.g., customers, orders, etc.) that belong to a district 
-will be considers as a property of that district. However, if a transaction requires
+thus each district or warehouse is a node in the graph. A transaction accesses a district 
+belongs to a warehouse and creates a vertex between that district and the warehouse.
+The objects (e.g., customers, orders, etc.) that belong to a district 
+will be considered as a property of that district. However, if a transaction requires
 some objects belong to a district, only those objects will be moved on demand, rather than
 moving everything in that district.
 A transaction is a set of commands that access those variables, implemented 
