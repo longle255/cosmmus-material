@@ -133,7 +133,7 @@ Graphs with 0\% of edge-cuts have \emph{strong locality}.
 % waiting for a response from the storage (i.e., in a closed loop).
 
 \begin{figure*}[ht!]
-	\includegraphics{figures/socc/socc-throughput-latency-avg-all}
+	\includegraphics{figures/experiments/social-network-tp-lat/social-network-tp-lat}
 	\caption{Throughput and latency for different partition numbers. 
   Throughput is in thousands of commands per second (kcps). 
   Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
@@ -197,7 +197,7 @@ On the other hand, the number of edge cuts increases with the number of partitio
 We evaluate the performance of \dynastar and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
 
 \begin{figure}[ht]
-	\includegraphics[width=0.95\columnwidth]{figures/socc/socc-throughput-avg-vary-partition}
+	\includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-ideal-partition/social-network-ideal-partition}
 	\caption{\dynastar and S-SMR with increasing partitions.}
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
@@ -299,8 +299,8 @@ suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
 
 \begin{figure}[ht]
-	\includegraphics[width=\columnwidth]{figures/socc/socc-oracle-load}
-	\caption{CPU load in the oracle (10\% of edge cuts).}
+	\includegraphics[width=\columnwidth]{figures/experiments/social-network-oracle-load/social-network-oracle-load}
+  \caption{CPU load in the oracle (5\% of edge cuts).}
 	\label{fig:cpu_oracle}
 \end{figure}
 
