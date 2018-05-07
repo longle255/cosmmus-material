@@ -55,9 +55,9 @@ set origin 1,0.5
 set size 0.3,0.5
 set title "10% Edge-cut"
 set key at 3,110
-plot 'social-network-tp-lat-0.10-edgecut.dat' using 2 fs pattern 0 lc rgb '#888888' notitle, \
-        '' using 3 fs pattern 1 lc rgb '#888888' notitle, \
-        '' using 4 fs pattern 2 lc rgb '#888888' notitle
+plot 'social-network-tp-lat-0.10-edgecut.dat' using 2 fs pattern 0 lc rgb '#888888' title 'DS-SMR', \
+        '' using 3 fs pattern 1 lc rgb '#888888' title 'DynaStar', \
+        '' using 4 fs pattern 2 lc rgb '#888888' title "S-SMR~ {.1*}"
 
 
 
