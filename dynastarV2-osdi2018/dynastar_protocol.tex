@@ -1,17 +1,9 @@
 %!TEX root =  main.tex
-\section{State partitioning with \dynastar}
+\section{\dynastar}
 %\section{Optimized dynamic state partitioning with \dynastar}
 \label{sec:dynastar}
 
-In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
-
-\subsection{Overview}
-%\subsection{State partitioning as a graph problem}
-
-%\dynastar improves DS-SMR to cope with workloads that exhibit both strong and weak locality.
-%In the presence of strong locality, \dynastar converges more quickly than the decentralized dynamic scheme.
-%Under weak locality (i.e., workloads that cannot be perfectly partitioned), \dynastar largely outperforms DS-SMR.
-
+%In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
 The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to efficiently relocate application state on-demand.
 \begin{itemize}
 \item \emph{On-the-fly workload modeling.}
@@ -28,8 +20,62 @@ In \dynastar a move request is multicast together with the command that triggere
 %a partition executes a command right after it has gathered all variables it needs.
 Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
 
+\subsection{Overview}
+%\subsection{State partitioning as a graph problem}
 
-\subsection{The \dynastar protocol}
+
+
+\dynastar defines a dynamic mapping of variables to partitions.
+Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.
+Such a mapping is managed by a partitioning oracle, implemented as a replicated service run by a group of server processes.
+The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
+In more detail, \dssmr\ distinguishes five types of commands:
+$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
+$create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
+$delete(v)$ removes $v$ from the service state,
+% resulting in $part(v) = \emptyset$,
+$move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
+and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
+The reply from the oracle is called a $prophecy$, and usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning $v \in \ppm$.
+% The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively (more details in Section~\ref{sec:algorithm}).
+%If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
+
+% explain which partitions deliver each partitioning command:
+% how are access, consult, create, move and delete implemented?
+
+%Once the oracle is in place, 
+Clients consult the oracle to know which partitions each command should be multicast to, based on the objects accessed by the command.
+If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
+If the command accesses objects from multiple partitions, the client first multicasts one or more $move$ commands to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
+Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
+If a subsequent command accesses the same variables, it will also access a single partition.
+Thus, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
+
+Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dssmr{}.
+It may happen that, between those operations, the partitioning changes.
+%We illustrate this in Figure~\ref{fig:move_case_1}.
+%Commands $C_1$ and $C_2$ read variable $x$.
+%Since partitioning is dynamic, the client issuing the commands first consults the oracle before multicasting each command.
+%$C_1$ executes without the interference of other commands, so consulting the oracle and multicasting the command only once is enough for $C_1$ to be executed.
+%However, before $C_2$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
+%When $C_2$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
+%A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting at least three commands separately: $consult$, $move$ and $access$.
+%The partitioning can change between the execution of any two of those commands.
+%\begin{figure}[b!]
+%  \includegraphics[width=\linewidth]{figures/move_case_1}
+%  \caption{Consulting the oracle and issuing an application command consist of multiple calls to \amcast{}.}
+%  \label{fig:move_case_1}
+%\end{figure}
+% \pagebreak
+To solve this problem, the client multicasts the set of variables accessed along with each access command.
+Upon delivery, each server checks the set of variables sent by the client.
+If all variables in the set belong to the local partition, the command is executed; otherwise, a $retry$ message is sent back to the client.
+When the client receives a $retry$ message, it consults the oracle again, possibly moves variables across partitions, and then reissues the access command.
+To guarantee termination, if the command fails a certain number of times, the client multicasts the command to all partitions and the servers execute it as in the original \ssmr{}.
+
+
+
+\subsection{The detailed protocol}
 
 Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe the client, server and oracle processes, respectively. 
 For brevity, we omit the delete command since the coordination involved in the create and delete commands are analogous. 
