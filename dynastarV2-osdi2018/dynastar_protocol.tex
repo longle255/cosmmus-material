@@ -38,8 +38,6 @@ The oracle is replicated and handled as a partition.
 In the next section, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
 
-
-
 \subsubsection{The client process} 
 
 To execute a command, the client atomically multicasts the command to the oracle (Algorithm 1).
@@ -59,7 +57,7 @@ If not all the variables needed by the command are in that partition, the server
 %This happens if the oracle moved some variables to another partition as part of another command. 
 In this case, a server in the source partitions reliably multicasts all the needed variables stored locally to the destination partition and waits to receive them back.
 Destination partition waits for a message from each source partition. Once all variables needed are available, destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
-Periodically, the servers deliver a new partitioning plan from the oracle. Each server will send the variables to the designated partition as in the plan and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
+Periodically, the servers deliver a new partitioning plan from the oracle (Task 4). Each server will send the variables to the designated partition as in the plan and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
 %When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
 %The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
 To determine the destination partition for a command, the servers uses the last computed partitioning.
@@ -90,20 +88,19 @@ The destination partition executes the command once it has received all variable
 \label{fig:oracle_repartition}
 \end{figure*}
 
-Upon delivering a create (Task 2) or a move command (Task 3), the oracle updates its partition information.
-As part of a create command, the oracle coordinates with the partition to ensure correctness (Task 4)~\cite{bezerra2014ssmr}.
+Upon delivering a create (Task 2), the oracle updates its partition information.
+As part of a create command, the oracle coordinates with the partition to ensure correctness (Task 3)~\cite{bezerra2014ssmr}.
 %
-The oracle also keeps track of the workload graph by receiving hints with variables (i.e., vertices in the graph) and executing commands (i.e., edges in the graph). These hints can be submitted by the clients or by the partitions, which collect data upon executing commands and periodically inform the oracle.
-The oracle computes a partitioning plan of the graph and multicasts it to all servers and to itself. Upon delivering new partition plan, the oracle updates its location map accordingly.
+The oracle also keeps track of the workload graph by receiving hints with variables (i.e., vertices in the graph) and executing commands (i.e., edges in the graph). These hints can be submitted by the clients or by the partitions, which collect data upon executing commands and periodically inform the oracle (Task 4).
+The oracle computes a partitioning plan of the graph and multicasts it to all servers and to itself. Upon delivering new partition plan, the oracle updates its location map accordingly (Task 5).
 % The oracle also keeps track of the workload graph, computes a partitioning of the graph, and determines the destination partition for move operations.
 % To maintain the workload graph (Task 5), the oracle receives hints with variables (i.e., vertices in the graph) and executed commands (i.e., edges in the graph).
 
-To compute an optimized partitioning (Task 6), the oracle uses a graph partitioner.
+To compute an optimized partitioning, the oracle uses a graph partitioner.
 A new partitioning can be requested by the application, by a partition, or by the oracle itself (e.g., upon delivering a certain number of hints).
 To determine the destination partition of a set of variables, as part of a move, the oracle uses 
 % the current location of variables and 
 the last computed partitioning.
-
 
 \subsection{Performance optimizations}
 %\subsection{Performance optimizations}
@@ -118,10 +115,10 @@ If the cache contains the partition of the variables needed by the command and a
 The client still needs to contact the oracle in one of these situations:
 %(a)~according to client's cache, not all variables accessed by the command are in the same partition and it is necessary to move variables;
 %(b)~the cache contains outdated information, and the command is multicast to a partition that does not contain all needed variables; or
-(b)~the cache contains outdated information; or
-(c)~the command is a create, in which it must involve the oracle, as explained before.
+(a)~the cache contains outdated information; or
+(b)~the command is a create, in which it must involve the oracle, as explained before.
 %If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
-If the cache contains outdated information, the partition tells the client to retry the command.
+If the cache contains outdated information and the addressed partition does not have the information of all the variables accessed by the command, the partition tells the client to retry the command.
 In this case, the client contacts the oracle and then updates its cache with the oracle's response.
 
 \textbf{Subgraph on servers}. If all partitions have to keep a copy of the the workload graph, scaling is also a problem as the graph is growing over time. Thus, servers only keep a subgraph of variables they are holding and the neighbors of those objects, by observing the access pattern of the commands. Using this subgraph only, the servers can compute the destination partition for executing commands without the need of having the full graph.
