@@ -69,10 +69,10 @@
 % % \STATE send $ok$ to the client
 % \ENDINDENT
 
-% \vspace{1.0mm}
-% \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
-% 	\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
-% \ENDINDENT
+\vspace{1.0mm}
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+	\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+\ENDINDENT
 
 \vspace{1.0mm}
 \INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
@@ -86,7 +86,7 @@
 %	\rule{81mm}{0.4pt}
 %	\vspace{0.1mm}
 
-\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 	\STATE update $G_W$ with $(V_h,E_h)$
 	\STATE $inc(changes)$
 	\IF {$changes \geq threshold$}
@@ -98,9 +98,9 @@
 
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new partitioning})$}}
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new partitioning})$}}
 %	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
-	\STATE compute partitioning $\ip_1, ..., \ip_m$ from $G_W$
+	\STATE apply new partitioning $plan$
 \ENDINDENT
 
 \vspace{1.0mm}

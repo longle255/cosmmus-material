@@ -71,7 +71,7 @@ of warehouse.
 \paragraph{The impact of graph repartitioning.}
 In order to assess the impact of applying graph partitioning to a database, we
 ran the benchmark on an un-partitioned database.  Figure ~\ref{fig:tpcc_repartitioning} 
-shows the performance of \dynastar in the experiment with 4 warehouses on 4 partitions.
+shows the performance of \dynastar in the experiment with 8 warehouses on 8 partitions.
 At the beginning of experiments, all the variables are randomly distributed across all 
 servers, makes almost every transaction access all partitions. Thus every transaction 
 required coordination between partitions, and objects were constantly moving back and forth. 
@@ -85,8 +85,9 @@ made the time it took for executing one transaction remarkably high.
 After 45 seconds, the oracle triggered repartitioning process, computed new partitioning 
 based on previous transactions, and asked partitions to apply the new partitioning.
 When the partitions delivered the signal, they exchanged objects and applied the new partitioning.
-During this process, servers didn't execute any other transactions, thus the throughput decreased 
-to 0, and the average latency was not applicable. After applying new partitioning, each 
+% During this process, servers didn't execute any other transactions, thus the throughput decreased 
+% to 0, and the average latency was not applicable. 
+After applying new partitioning, each 
 server continued to execute transactions. At this point, most of objects involved in a transaction
 could be found on local partition, thus partitions didn't need to communicate most of the time, helped
 increasing the performance of the system significantly.
@@ -202,7 +203,7 @@ We evaluate the performance of \dynastar and \ssmr with an optimized partitionin
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
-Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar throughput scales up to eight partitions, after which performance decreases.
+Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar throughput scales up with certain number of partitions. From 8 to 9 partitions, the performance decreases.
 % For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
 % 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.

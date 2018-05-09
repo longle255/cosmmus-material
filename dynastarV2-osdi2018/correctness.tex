@@ -43,7 +43,7 @@ There are two cases:
 In this case, since $C_i$ only starts after $C_j$ at a server, it follows that $\tes(C_j) < \tss(C_i)$, a contradiction.
 \item[(b)] $C_i$ is a client command executed by $\ppm_i$ that first involves a move of variables $vars$ from $\ppm_j$ to $\ppm_i$.
 At $\ppm_j$, $\tes(C_j) < \tss(move(vars,\ppm_j,\ppm_i))$ since the move is only executed after $C_j$ ends.
-Since the move only finishes when variables in $vars$ are in $\ppm_i$ and then $C_i$ can be executed, it must be that
+Since the move only finishes when variables in $vars$ are in $\ppm_i$ and then $C_i$ can be executed\lle{move only finishes when $P_j$ gets back its variable}, it must be that
 $\tes(move(vars,\ppm_j,\ppm_i)) < \tss(C_i)$.
 We conclude that $\tes(C_j) < \tss(C_i)$, a contradiction.
 \end{enumerate}
