@@ -42,10 +42,10 @@ However, a command that increments $x$ and $z$ allows these variables to be plac
 More general solutions do not impose restrictions on state partitioning, but must incur additional overhead in the execution of multi-partition commands \cite{bezerra2014ssmr, hoang2016}.
 More precisely, upon delivering a multi-partition command, replicas may need to exchange state, since some partitions may not have all the variables needed in the command.
 For example, consider command ``$x \leftarrow y$" in a system where $x$ and $y$ are stored in different partitions.
-With the protocol in \cite{bezerra2014ssmr}, the partitions first exchange $x$ and $y$ and then both execute the command.
-The protocol in \cite{hoang2016} supports dynamic partitioning of state; thus, either $x$ is moved to the partition that contains $y$ or vice-versa, and the command is executed at a single partition.
+With S-SMR \cite{bezerra2014ssmr}, the partitions first exchange $x$ and $y$ and then both execute the command.
+DS-SMR \cite{hoang2016} supports dynamic partitioning of state; thus, either $x$ is moved to the partition that contains $y$ or vice-versa, and the command is executed at a single partition.
 
 None of the existing approaches discuss how to partition the state of a general service in order to minimize multi-partition commands and keep the load across partitions balanced.
-The protocol in \cite{hoang2016} achieves these goals for workloads that can be perfectly partitioned.
+DS-SMR \cite{hoang2016} achieves these goals for workloads that can be perfectly partitioned.
 In the next section, we introduce \dynastar, a protocol that minimizes multi-partition commands and balances partition load without these restrictions. 
 

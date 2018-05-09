@@ -4,21 +4,21 @@
 \label{sec:dynastar}
 
 %In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
-The key insights of \dynastar are to create the workload graph on-the-fly and use graph partitioning techniques to efficiently relocate application state on-demand.
+The key insights of \dynastar are to optimize state partitioning based on the workload and to relocate application state on-the-fly, without service disruption.
 \begin{itemize}
-\item \emph{On-the-fly workload modeling.}
+\item \emph{Optimized state partitioning.}
 \dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges dependencies between variables.
 An edge connects two variables in the graph if a command accesses both of them.
-A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
-\item \emph{On-demand relocation of service state.}
-Periodically, the oracle computes a partitioning of the workload graph and multicasts to the partitions.
+A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed, periodically computes a partitioning of the workload graph, and sends the partitioning to the various partitions.
+
+\item \emph{On-the-fly relocation of service state.}
 Based on this partitioning and the current location of variables, the partitions determine the destination for commands that access variables spread over multiple partitions.
 Variables are moved on demand to the destination partition where the command will be executed. After the execution, variables are moved back to the source partition to keep the optimized partitioning.
 \end{itemize}
 
-In \dynastar a move request is multicast together with the command that triggered the request.
-%a partition executes a command right after it has gathered all variables it needs.
-Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
+%In \dynastar a move request is multicast together with the command that triggered the request.
+%%a partition executes a command right after it has gathered all variables it needs.
+%Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
 
 \subsection{Overview}
 %\subsection{State partitioning as a graph problem}
@@ -29,7 +29,7 @@ Therefore, differently from DS-SMR, \dynastar ensures termination without resort
 Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.
 Such a mapping is managed by a partitioning oracle, implemented as a replicated service run by a group of server processes.
 The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
-In more detail, \dssmr\ distinguishes five types of commands:
+In more detail, \dynastar\ distinguishes five types of commands:
 $access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
 $delete(v)$ removes $v$ from the service state,
@@ -51,7 +51,7 @@ Then, the command itself is multicast to the one partition that now holds all va
 If a subsequent command accesses the same variables, it will also access a single partition.
 Thus, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
 
-Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dssmr{}.
+Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dynastar.
 It may happen that, between those operations, the partitioning changes.
 %We illustrate this in Figure~\ref{fig:move_case_1}.
 %Commands $C_1$ and $C_2$ read variable $x$.
@@ -152,6 +152,8 @@ the last computed partitioning.
 %\subsection{Performance optimizations}
 \label{sec:optm}
 
+We now describe two performance optimizations.
+
 \textbf{Caching.} In the algorithm presented in the previous section, clients always need to involve the oracle, and the oracle dispatches every command to the partitions for execution.
 Obviously, if every command involves the oracle, the system is unlikely to scale, as the oracle will likely become a bottleneck.
 To address this issue, clients are equipped with a location cache.
@@ -167,7 +169,7 @@ The client still needs to contact the oracle in one of these situations:
 If the cache contains outdated information and the addressed partition does not have the information of all the variables accessed by the command, the partition tells the client to retry the command.
 In this case, the client contacts the oracle and then updates its cache with the oracle's response.
 
-\textbf{Subgraph on servers}. If all partitions have to keep a copy of the the workload graph, scaling is also a problem as the graph is growing over time. Thus, servers only keep a subgraph of variables they are holding and the neighbors of those objects, by observing the access pattern of the commands. Using this subgraph only, the servers can compute the destination partition for executing commands without the need of having the full graph.
+\textbf{Subgraph on servers}. If all partitions have to keep a copy of the the workload graph, scaling is also a problem if the graph grows over time. Thus, servers only keep a subgraph of variables they hold and the neighbors of those objects, by observing the access pattern of the commands. Using this subgraph only, the servers can compute the destination partition for commands without the need of the full graph.
 
 \input{correctness}
 
