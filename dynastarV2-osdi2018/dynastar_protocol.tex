@@ -29,14 +29,14 @@ Variables are moved on demand to the destination partition where the command wil
 Each variable $v$ is mapped to a partition $\ppm$, that is, $v \in \ppm$.
 Such a mapping is managed by a partitioning oracle, implemented as a replicated service run by a group of server processes.
 The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
-In more detail, \dynastar\ distinguishes five types of commands:
-$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
+In more detail, \dynastar\ distinguishes three types of commands:
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
+$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
 $delete(v)$ removes $v$ from the service state,
 % resulting in $part(v) = \emptyset$,
-$move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
-and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
-The reply from the oracle is called a $prophecy$, and usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning $v \in \ppm$.
+% $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
+% and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
+
 % The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively (more details in Section~\ref{sec:algorithm}).
 %If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
 
@@ -44,36 +44,30 @@ The reply from the oracle is called a $prophecy$, and usually consists of a set 
 % how are access, consult, create, move and delete implemented?
 
 %Once the oracle is in place, 
-Clients consult the oracle to know which partitions each command should be multicast to, based on the objects accessed by the command.
-If the reply received from the oracle tells the client that the command accesses a single partition, the client multicasts the command to that partition.
-If the command accesses objects from multiple partitions, the client first multicasts one or more $move$ commands to the oracle and to the involved partitions, with the intent of having all variables in the same partition.
-Then, the command itself is multicast to the one partition that now holds all variables accessed by the command.
-If a subsequent command accesses the same variables, it will also access a single partition.
-Thus, the access patterns of commands will shape the mapping of variables to partitions, reducing the number of multi-partition commands.
+Clients submit commands to the oracle and wait for the reply. 
+The reply from the oracle is called a $prophecy$, and usually 
+consists of a set of tuples $\langle v, \ppm \rangle$, meaning 
+$v \in \ppm$, and a target partition $\ppm_d$ on which the commands 
+will be executed. The $prophecy$ could also tell the clients 
+if the commands can not be executed (e.g., command that accesses 
+variables that does not exist). If the command can be executed, 
+the clients wait for reply from the target partition.
 
-Consulting the oracle and issuing the application command are done with separate calls to atomic multicast in \dynastar.
-It may happen that, between those operations, the partitioning changes.
-%We illustrate this in Figure~\ref{fig:move_case_1}.
-%Commands $C_1$ and $C_2$ read variable $x$.
-%Since partitioning is dynamic, the client issuing the commands first consults the oracle before multicasting each command.
-%$C_1$ executes without the interference of other commands, so consulting the oracle and multicasting the command only once is enough for $C_1$ to be executed.
-%However, before $C_2$ is multicast to $\ppm_1$, another client issues a $move$ command that relocates $x$ to $\ppm_2$.
-%When $C_2$ is delivered at the servers of $\ppm_1$, the command is not executed, since $x$ is not available at $\ppm_1$ anymore.
-%A similar situation may arise when a command accesses variables from multiple partitions, as it consists of multicasting at least three commands separately: $consult$, $move$ and $access$.
-%The partitioning can change between the execution of any two of those commands.
-%\begin{figure}[b!]
-%  \includegraphics[width=\linewidth]{figures/move_case_1}
-%  \caption{Consulting the oracle and issuing an application command consist of multiple calls to \amcast{}.}
-%  \label{fig:move_case_1}
-%\end{figure}
-% \pagebreak
-To solve this problem, the client multicasts the set of variables accessed along with each access command.
-Upon delivery, each server checks the set of variables sent by the client.
-If all variables in the set belong to the local partition, the command is executed; otherwise, a $retry$ message is sent back to the client.
-When the client receives a $retry$ message, it consults the oracle again, possibly moves variables across partitions, and then reissues the access command.
-To guarantee termination, if the command fails a certain number of times, the client multicasts the command to all partitions and the servers execute it as in the original \ssmr{}.
+If a command $C$ accesses variables in $\omega$ on single partition, 
+the oracle forwards $C$ to that partition to execute. If the command 
+accesses variables from multiple partitions, the oracle multicasts a 
+$move(\omega,\ppm_d, C)$ command to the involved partitions to gather 
+all variables in $\omega$ to one target partition. After having all 
+required variables, the target partition executes the command $C$, 
+send reply to the client and returns the variables to their source. 
+%Moving variables back to their source partitions help preserving the 
+partitioning, thus make the cache on client efficient.
 
-
+The oracle also collects hints from client commands and partitions to 
+build up the workload graph and monitors the changes in the graph. 
+Periodically, it computes new optimized partitioning and sends the 
+partitioning plan to all partitions. Upon delivering the new partitioning, 
+the partitions exchanges variables and update their state accordingly.
 
 \subsection{The detailed protocol}
 
