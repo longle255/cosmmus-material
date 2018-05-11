@@ -33,7 +33,7 @@
 			\STATE $\ppm_d \leftarrow target(dests, \omega)$
 			\COMMENT{$\ppm_d$ will excecute $C$}
 			% \STATE $alldest \leftarrow \{oracle\} \cup dests$
-			\STATE \amcast$(dests, (move(\omega,dests,\ppm_d), C))$
+			\STATE \amcast$(dests, (global(\omega,dests,\ppm_d), C))$
 			\STATE $prophecy \leftarrow \ppm_d$
 		\ENDIF
 	\ENDINDENT

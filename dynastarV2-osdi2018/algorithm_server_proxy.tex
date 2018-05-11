@@ -25,7 +25,7 @@
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,\ppm_s,\ppm_d), C)$}}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(global(\omega,\ppm_s,\ppm_d), C)$}}
 %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
 	\IF[if $\ppm$ is a source partition:]{$\ppm \in \ppm_s \setminus \ppm_d$}
 		\STATE $vars \leftarrow \omega \cap \ppm$
@@ -67,7 +67,7 @@
 			% \rmcast$(\pqm, v:v \in \pqm, C)$
 			\STATE $vars \leftarrow plan(\pqm) \cap v:v \in \ppm$
 			\STATE \rmcast$(\pqm, \langle vars, \ppm \rangle )$
-			\COMMENT{sendiing objects belong to $\pqm$...}
+			\COMMENT{send objects that belong to $\pqm$}
 		\ENDIF
 	% \ENDINDENT
 \ENDINDENT

@@ -42,9 +42,9 @@ There are two cases:
 \item[(a)] $C_i$ is a client command executed by $\ppm_j$.
 In this case, since $C_i$ only starts after $C_j$ at a server, it follows that $\tes(C_j) < \tss(C_i)$, a contradiction.
 \item[(b)] $C_i$ is a client command executed by $\ppm_i$ that first involves a move of variables $vars$ from $\ppm_j$ to $\ppm_i$.
-At $\ppm_j$, $\tes(C_j) < \tss(move(vars,\ppm_j,\ppm_i))$ since the move is only executed after $C_j$ ends.
+At $\ppm_j$, $\tes(C_j) < \tss(global(vars,\ppm_j,\ppm_i))$ since the move is only executed after $C_j$ ends.
 Since the move only finishes when variables in $vars$ are in $\ppm_i$ and then $C_i$ can be executed\lle{move only finishes when $P_j$ gets back its variable}, it must be that
-$\tes(move(vars,\ppm_j,\ppm_i)) < \tss(C_i)$.
+$\tes(global(vars,\ppm_j,\ppm_i)) < \tss(C_i)$.
 We conclude that $\tes(C_j) < \tss(C_i)$, a contradiction.
 \end{enumerate}
 Therefore, either $C_i < C_j$ and from the definition of $\pi$, $C_i$ precedes $C_j$ or neither $C_i < C_j$ nor $C_j < C_i$, and there is a total order in which $C_i$ precedes $C_j$.
