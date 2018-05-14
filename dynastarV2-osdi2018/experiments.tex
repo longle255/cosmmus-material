@@ -195,7 +195,7 @@ We now consider a fixed graph and vary the number of partitions.
 Increasing the number of partitions with a fixed graph introduces a tradeoff.
 On the one hand, additional partitions improve performance as there are more resources to execute posts.
 On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
-We evaluate the performance of \dynastar and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
+We evaluate the performance of \dynastar, \dssmr\ and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
 
 \begin{figure}[ht]
 	\includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-ideal-partition/social-network-ideal-partition}
@@ -203,7 +203,7 @@ We evaluate the performance of \dynastar and \ssmr with an optimized partitionin
 	\label{fig:4p1p_varying_partition_size}
 \end{figure}
 
-Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar throughput scales up with certain number of partitions. From 8 to 9 partitions, the performance decreases.
+Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and optimized \ssmr throughput scale up to ten partitions, after which performance decreases. \dssmr\ throughput decreases gradually as we increase partitions, since the chance that objects are spread between partitions also increases.
 % For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
 % 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
