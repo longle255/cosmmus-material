@@ -17,6 +17,6 @@ set xlabel "Number of partitions"
 set yrange [0:30]
 set ylabel "Throughput (kcps)"
 
-set xrange [1:8]
+set xrange [1:12]
 plot 'social-network-ideal-partition.dat' using 2:xtic(1) with linespoints ls 1 title "DynaStar", \
         '' using 3:xtic(1) with linespoints ls 2 title "S-SMR~ {.1*}"
