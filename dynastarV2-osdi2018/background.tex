@@ -36,12 +36,12 @@ Some protocols assume a workload that can be ``perfectly partitioned," that is, 
 Since commands are essentially single-partition, if the load is balanced across partitions then performance scales with the number of partitions.
 With protocols that support commands that span multiple partitions, the multi-partition command is first ordered across the involved partitions (e.g., using an atomic multicast) and then executed by each involved partition.
 Some protocols assume the workload can be sharded such that multi-partition commands are executed locally by each of the involved partitions \cite{Mu2016}, that is, the execution of a multi-partition command in one partition does not need data stored in a different partition.
-For example, to support command ``$x \leftarrow y$", variables $x$ and $y$ must be placed in the same partition.
+For example, to support the assignment command ``$x := y$", variables $x$ and $y$ must be placed in the same partition.
 However, a command that increments $x$ and $z$ allows these variables to be placed in different partitions.
 
 More general solutions do not impose restrictions on state partitioning, but must incur additional overhead in the execution of multi-partition commands \cite{bezerra2014ssmr, hoang2016}.
 More precisely, upon delivering a multi-partition command, replicas may need to exchange state, since some partitions may not have all the variables needed in the command.
-For example, consider command ``$x \leftarrow y$" in a system where $x$ and $y$ are stored in different partitions.
+For example, consider command ``$x := y$" in a system where $x$ and $y$ are stored in different partitions.
 With S-SMR \cite{bezerra2014ssmr}, the partitions first exchange $x$ and $y$ and then both execute the command.
 DS-SMR \cite{hoang2016} supports dynamic partitioning of state; thus, either $x$ is moved to the partition that contains $y$ or vice-versa, and the command is executed at a single partition.
 

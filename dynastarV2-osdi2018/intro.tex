@@ -3,9 +3,9 @@
 
 State machine replication (SMR) is a fundamental technique for building fault-tolerant systems and services. 
 With SMR, state is replicated on a set of servers and each replica deterministically executes the same sequence of client commands in order to maintain consistency~\cite{Lam78,Sch90}. 
-State machine replication provides configurable fault tolerance (i.e., by setting the number of replicas) but limited performance, capped by what a single replica can execute since all replicas must execute all commands.
-
-In order to to provide both configurable fault tolerance and scalable performance, some recent proposals have extended state machine replication with sharding (e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,Glendenning:2011kj,
+State machine replication provides configurable fault tolerance (i.e., by setting the number of replicas) but limited performance since all replicas must execute all commands.
+%
+In order to provide both configurable fault tolerance and scalable performance, some recent proposals have extended state machine replication with sharding (e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,Glendenning:2011kj,
   bli16edcc}).
 Essentially, these approaches partition (shard) the service state and replicate each partition.
 Commands that access state in a single partition are handled as in classic state machine replication.
@@ -21,14 +21,15 @@ Partitioning the service state in order to achieve scalable performance, however
 First, it depends on a good understanding of the workload, which may not be available.
 Second, even if enough information is available, finding a good partitioning is a complex optimization problem~\cite{curino2010sch,taft2014est}. 
 Third, workloads may vary over time. 
-In social networks, for example, some users may experience a surge increase in their number of followers (e.g., new Òcelebrities"); workload demand may shift along the hours of the day and the days of the week; and unexpected (e.g., a video that goes viral) or planned events (e.g., a new company starts trading in the stock exchange) may lead to exceptional periods when requests increase significantly higher than in normal periods.
-These challenges perhaps explain why most approaches that extend SMR with state partitioning delegate the task of partitioning the service state to the application designer.
+In social networks, for example, some users may experience a surge increase in their number of followers (e.g., new ``celebrities"); workload demand may shift along the hours of the day and the days of the week; and unexpected (e.g., a video that goes viral) or planned events (e.g., a new company starts trading in the stock exchange) may lead to exceptional periods when requests increase significantly higher than in normal periods.
+These challenges perhaps explain why most approaches that extend SMR with state partitioning delegate the task of partitioning the service state to the application designer (e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,bli16edcc}).
 
 In this paper, we introduce \dynastar, a new approach to scalable state machine replication.
-\dynastar differs from previous solutions in two important aspects:
-it supports dynamic state partitioning and it allows relocation of state on-the-fly.
+\dynastar differs from previous solutions in that it supports \emph{dynamic} state partitioning.
+This means that data can be relocated from one partition to another to optimize performance.
+Moreover, data relocation is done on-the-fly, with minimal service disruption.
 As a result, \dynastar does not require any a priori information about the workload and can adapt to workload variations.
-\dynastar maintains a
+To achieve this design, \dynastar maintains a
 location oracle with a global view of the application state.  The oracle minimizes the
 number of state relocations by monitoring the workload, and
 re-computing an optimized partitioning on demand using a 
@@ -37,12 +38,13 @@ The location oracle maintains two data structures: (i) a mapping of application 
 Before a client submits a command, it contacts the
 location oracle to discover the partitions on which state variables are
 stored.  If the command accesses variables in multiple partitions, the
-oracle chooses one partition to execute the command and instructs the other involved partitions to temporarily re-locate 
-the needed variables to the chosen partition. Of course, when re-locating a variable, the oracle
+oracle chooses one partition to execute the command and instructs the other involved partitions to temporarily relocate 
+the needed variables to the chosen partition. Of course, when relocating a variable, the oracle
 is faced with a choice of which partition to use as a destination.
 \dynastar chooses the partition for relocation (i.e., one that
 would minimize the number of state relocations) by partitioning the
-workload graph using the METIS partitioner.
+workload graph.
+% using the METIS partitioner.
 %Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
 
 To tolerate failures, \dynastar implements the oracle as a regular partition, replicated in a set of nodes.
@@ -50,7 +52,7 @@ To ensure that the oracle does not become a performance bottleneck, clients cach
 Therefore, clients only query the oracle when they access a variable for the first time or when cached entries become invalid (i.e., because a variable changed location).
 \dynastar copes with commands addressed to wrong partitions by telling clients to retry a command.
 
-We have fully implemented \dynastar and compared its performance to
+We implemented \dynastar and compared its performance to
 alternative schemes, including an idealized approach that knows the workload ahead of time.
 Although this scheme is not achievable in practice, it provides an interesting baseline to compare against.
 \dynastar's performance rivals that of the idealized scheme, while having no a priori knowledge of the workload.

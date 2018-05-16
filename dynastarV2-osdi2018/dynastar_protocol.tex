@@ -31,8 +31,8 @@ In the case of a temporary move, after the command is executed, updated variable
 \dynastar defines a dynamic mapping of variables to partitions (i.e., each variable $v$ is mapped to a partition $\ppm$).
 Such a mapping is managed by a partitioning oracle, which is replicated and handled as a partition.
 The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
-In the discussion in this section and Section~\ref{sec:detailed}, we assume that every command involves the oracle.
-In Section~\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
+In the discussion in this section and in \S\ref{sec:detailed}, we assume that every command involves the oracle.
+In \S\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
 \dynastar\ distinguishes three types of commands:
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
@@ -65,13 +65,14 @@ $global(\omega,\ppm_d, C)$ command to the involved partitions to gather
 all variables in $\omega$ to one target partition. After having all 
 required variables, the target partition executes the command $C$, 
 sends the reply to the client, and returns the variables to their source. 
-Moving variables back to their source partitions improves the client cache (described later).
+Moving variables back to their source partitions improves the client cache (described in \S\ref{sec:optm}).
 
 The oracle also collects hints from client commands and partitions to 
 build up the workload graph and monitors the changes in the graph. 
 Periodically, it computes new optimized partitioning and sends the 
 partitioning plan to all partitions. Upon delivering the new partitioning, 
 the partitions exchanges variables and update their state accordingly.
+\dynastar relocates variables without blocking the execution of commands.
 
 \subsection{The detailed protocol}
 \label{sec:detailed}
@@ -163,8 +164,10 @@ The client still needs to contact the oracle in one of these situations:
 (a)~the cache contains outdated information; or
 (b)~the command is a create, in which case it must involve the oracle, as explained before.
 %If the cache contains outdated information and the addressed partition does not contain all the variables accessed by the command, the partition tells the client to retry the command.
-If the cache contains outdated information and the addressed partition does not have the information of all the variables accessed by the command, the partition tells the client to retry the command.
-In this case, the client contacts the oracle and then updates its cache with the oracle's response.
+If the cache contains outdated information, it may address a partition that does not have the information of all the variables accessed by the command.
+In this case, the addressed partition tells the client to retry the command.
+The client then contacts the oracle and updates its cache with the oracle's response.
+Although outdated cache information results in execution overhead, it is expected to happen rarely since repartitioning is not frequent.
 
 %\textbf{Subgraph on servers}. If all partitions have to keep a copy of the the workload graph, scaling is also a problem if the graph grows over time. Thus, servers only keep a subgraph of variables they hold and the neighbors of those objects, by observing the access pattern of the commands. Using this subgraph only, the servers can compute the destination partition for commands without the need of the full graph.
 
