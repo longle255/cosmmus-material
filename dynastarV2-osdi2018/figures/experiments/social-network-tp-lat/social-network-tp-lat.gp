@@ -1,4 +1,4 @@
-set terminal postscript eps enhanced color solid lw 2 "Times-Roman" 16
+set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16
 set output './social-network-tp-lat.ps'
 set size 1.35,1.1
 set multiplot
