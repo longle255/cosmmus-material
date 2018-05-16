@@ -1,4 +1,4 @@
-set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16
+set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 22
 set output './social-network-dynamic.ps'
 set size 1,0.7
 

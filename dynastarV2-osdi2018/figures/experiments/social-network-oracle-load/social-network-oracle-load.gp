@@ -1,4 +1,4 @@
-set terminal postscript eps enhanced dashed color solid lw 2 "Helvetica" 18
+set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 22
 set output './social-network-oracle-load.ps'
 set size 1,0.7
 set grid ytics

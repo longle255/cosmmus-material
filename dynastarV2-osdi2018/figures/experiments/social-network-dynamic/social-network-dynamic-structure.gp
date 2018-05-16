@@ -1,4 +1,4 @@
-set terminal postscript eps enhanced dashed color solid lw 2 "Helvetica" 18
+set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 22
 set output './social-network-dynamic-structure.ps'
 set size 1,0.7
 set grid ytics
@@ -12,7 +12,9 @@ set xlabel "Time(s)"
 set xrange [0:250]
 set xtics 0,50,250
 
-#set ytics 0,100000,500000
+set yrange [0:1000]
+set ytics 0,200,1000
+
 #set y2label "Vertices" offset 1.5
 
 #set y2label "Edges" offset 1.5

@@ -1,4 +1,4 @@
-set terminal postscript eps enhanced color solid lw 2 "Times-Roman" 16
+set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 22
 set output './social-network-ideal-partition.ps'
 
 set style data linespoints
@@ -18,5 +18,5 @@ set yrange [0:30]
 set ylabel "Throughput (kcps)"
 
 set xrange [1:12]
-plot 'social-network-ideal-partition.dat' using 2:xtic(1) with linespoints ls 1 title "DynaStar", \
-        '' using 3:xtic(1) with linespoints ls 2 title "S-SMR~ {.1*}"
+plot 'social-network-ideal-partition.dat' using 3:xtic(1) with linespoints ls 1 title "S-SMR~ {.1*}", \
+        '' using 2:xtic(1) with linespoints ls 2 title "DynaStar"
