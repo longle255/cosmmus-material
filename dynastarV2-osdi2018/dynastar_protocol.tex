@@ -13,10 +13,10 @@ A location oracle builds the workload graph based on feedback from the clients o
 The oracle periodically computes a partitioning of the workload graph and propagates the partitioning to the various partitions.
 
 \item \emph{On-the-fly relocation of service state.}
-Based on this partitioning, the partitions determine the destination of commands that access variables spread over multiple partitions.
-State can be relocated (i.e., variables moved from one partition to another) or temporarily moved on demand to the destination partition where the command will be executed. 
-In the case of a temporary move, after the command is executed, updated variables are moved back to the source partition to keep the optimized partitioning.
-%Moreover, partitions use a new partitioning computed by the oracle to relocate the state.
+Based on the partitioning computed by the oracle, servers determine the best partition to execute a multi-partition command.
+State is then temporarily moved on demand to the destination partition where the command will be executed.
+After the command is executed, updated variables are moved back to their source partition to keep the optimized partitioning.
+When the oracle computes a new partitioning of the data, state is relocated (i.e., variables moved from one partition to another) to reflect the new optimized partitioning. 
 \end{itemize}
 
 %In \dynastar a move request is multicast together with the command that triggered the request.
@@ -28,15 +28,15 @@ In the case of a temporary move, after the command is executed, updated variable
 
 
 
-\dynastar defines a dynamic mapping of variables to partitions (i.e., each variable $v$ is mapped to a partition $\ppm$).
-Such a mapping is managed by a partitioning oracle, which is replicated and handled as a partition.
-The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
-In the discussion in this section and in \S\ref{sec:detailed}, we assume that every command involves the oracle.
+\dynastar defines a dynamic mapping of variables to partitions (i.e., each variable is mapped to a partition).
+Such a mapping is managed by a partitioning oracle, which is handled as a replicated partition.
+%The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
+To simplify the discussion, we initially assume that every command involves the oracle.
 In \S\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
 \dynastar\ distinguishes three types of commands:
-$create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle,
-$access(\omega)$ is an application command that accesses (reads or writes) variables in set $\omega \subseteq \vvm$,
+$create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle;
+$access(\omega)$ is an application command that reads and modifies variables in set $\omega \subseteq \vvm$; and
 $delete(v)$ removes $v$ from the service state.
 % resulting in $part(v) = \emptyset$,
 % $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
@@ -54,11 +54,11 @@ The reply from the oracle is called a $prophecy$, and usually
 consists of a set of tuples $\langle v, \ppm \rangle$, meaning 
 $v \in \ppm$, and a target partition $\ppm_d$ on which the commands 
 will be executed. The $prophecy$ could also tell the clients 
-if the commands can not be executed (e.g., command that accesses 
+if a command cannot be executed (e.g., it accesses 
 variables that does not exist). If the command can be executed, 
-the clients wait for reply from the target partition.
+the clients wait for the reply from the target partition.
 
-If a command $C$ accesses variables in $\omega$ on single partition, 
+If a command $C$ accesses variables in $\omega$ on a single partition, 
 the oracle forwards $C$ to that partition for execution. If the command 
 accesses variables from multiple partitions, the oracle multicasts a 
 $global(\omega,\ppm_d, C)$ command to the involved partitions to gather 
@@ -67,9 +67,9 @@ required variables, the target partition executes the command $C$,
 sends the reply to the client, and returns the variables to their source. 
 Moving variables back to their source partitions improves the client cache (described in \S\ref{sec:optm}).
 
-The oracle also collects hints from client commands and partitions to 
+The oracle also collects hints from clients and partitions to 
 build up the workload graph and monitors the changes in the graph. 
-Periodically, it computes new optimized partitioning and sends the 
+Periodically, the oracle computes a new optimized partitioning and sends the 
 partitioning plan to all partitions. Upon delivering the new partitioning, 
 the partitions exchanges variables and update their state accordingly.
 \dynastar relocates variables without blocking the execution of commands.
