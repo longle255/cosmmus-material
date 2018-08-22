@@ -1,0 +1,89 @@
+\begin{algorithm}[h!]
+\small
+
+\begin{distribalgo}[1]
+
+\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(C)$}}
+	\STATE $\omega \leftarrow vars(C)$
+	\COMMENT{variables accessed by $C$}
+	\IF[\textbf{Task 1a}]{$\forall v \in \omega : v \in \ppm$}
+		\STATE execute command $C$
+		\STATE send response to the client
+	\ELSE[\textbf{Task 1b}]
+		% \IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
+		% 	\STATE $response \leftarrow retry$
+		% 	\COMMENT{tell the client}
+		% \ELSE
+			\STATE $dests \leftarrow \parts(\omega)$
+			\COMMENT{get all partition involved}
+			\STATE $\ppm_d \leftarrow target(G_W, \omega)$
+			\COMMENT{$\ppm_d$ will execute $C$}
+			\STATE \amcast$(dests, (global(\omega,dests,\ppm_d), C))$
+			% \STATE $hint(vars)$
+		% \ENDIF
+	\ENDIF
+\ENDINDENT
+
+\vspace{1.0mm}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(global(\omega,\ppm_s,\ppm_d), C)$}}
+%	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
+	\IF[if $\ppm$ is a source partition:]{$\ppm \in \ppm_s \setminus \ppm_d$}
+		\STATE $vars \leftarrow \omega \cap \ppm$
+		\COMMENT{all needed variables in $\ppm$}
+		\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
+		\COMMENT{send variables to destination}
+		\STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
+	\ELSE[$\ppm$ is destination partition:]
+	% \ELSE
+		\STATE wait until $\forall v \in \omega \setminus \ppm: \exists \langle vars, C \rangle \in rcvd\_msgs :v \in vars$
+		\COMMENT{wait for needed variables}
+		\STATE execute command $C$
+		\STATE send response to the client
+		\STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} \rmcast$(\pqm, \langle v:v \in \pqm \rangle, C)$
+		% \STATE $hint(vars)$
+	\ENDIF
+\ENDINDENT
+
+\vspace{1.0mm}
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v, create(v))$}}
+	\STATE \rmcast$(oracle, \langle signal, C \rangle )$
+	\COMMENT{exchange signal to...}
+	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+	\COMMENT{...coordinate}
+	\STATE $\ppm \leftarrow \ppm \cup \{v\}$
+	\STATE send $ok$ to the client
+\ENDINDENT
+
+\vspace{1.0mm}
+\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(new partitioning)$}}
+	\STATE \textbf{for} each $\pqm \in \ppm_v \in plan$ \textbf{do} 
+	% \INDENT
+		\IF{$\ppm$ is $\pqm$}
+			\STATE $vars \leftarrow plan(\pqm) \setminus v:v \in \ppm$
+			\IF {$\forall v \in var, \ppm_i \in plan: \exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
+				\STATE apply new partitioning $plan$
+			\ENDIF
+		\ELSE 
+			% \rmcast$(\pqm, v:v \in \pqm, C)$
+			\STATE $vars \leftarrow plan(\pqm) \cap v:v \in \ppm$
+			\STATE \rmcast$(\pqm, \langle vars, \ppm \rangle )$
+			\COMMENT{send objects that belong to $\pqm$}
+		\ENDIF
+	% \ENDINDENT
+\ENDINDENT
+
+\vspace{1.0mm}
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(\langle val, C \rangle)$}}
+    \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+\ENDINDENT
+
+% \vspace{1.0mm}
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}
+% 	\STATE $e \leftarrow \{u, v: u,v \in vars, u \neq v\}$
+% 	\STATE \rmcast(oracle, $e$)
+% \ENDINDENT
+
+\caption{Server in partition $\ppm$}
+\label{alg:server_proxy}
+\end{distribalgo}
+\end{algorithm}

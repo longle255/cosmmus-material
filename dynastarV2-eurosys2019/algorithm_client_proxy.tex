@@ -1,0 +1,60 @@
+\begin{algorithm}[h!]
+\small
+
+\begin{distribalgo}[1]
+
+%\vspace{1.0mm}
+
+\INDENT{\colorbox{\coloralgo}{To issue a command $C$, the client does:}}
+
+\vspace{1.0mm}
+	% \STATE $\omega \leftarrow vars(C)$
+	% \COMMENT{variables accessed by $C$}
+
+	% \IF[if $v$ $\neg$exists in cache:]{$\exists v \in \omega : cache(\{v\}) = \bot$}
+		\STATE \amcast$($oracle, $exec(C))$
+		% \COMMENT{multicast command to $oracle$}
+		\STATE wait for $prophecy$
+		\IF[if receive $nok$ then...]{$prophecy = nok$}
+			\STATE $reply \leftarrow prophecy$
+			\COMMENT{...there's nothing to execute}
+		\ELSE[in this case, $prophecy$ is $(dest)$]
+			% \STATE $cache(\{v\}) \leftarrow prophecy$
+			\STATE wait for $reponse$ from a server in $prophecy$
+			\STATE $reply \leftarrow reponse$
+		\ENDIF
+	% \ELSE[if all vars in $\omega$ exist in cache]
+	% 	\STATE $\ppm_d \leftarrow target(G_W, \omega)$
+	% 	\COMMENT{select partition to execute}
+	% 	\STATE \amcast$(\ppm_d, exec(C))$
+	% 	\STATE wait for $reponse$ from server $\ppm_d$
+	% 	\IF[if receive $retry$ then...]{$reponse = retry$}
+	% 		\STATE $cache(\{v\}) \leftarrow \bot$
+	% 		\COMMENT {clear cache of $\omega$}
+	% 		\STATE return retry $C$
+	% 	\ELSE
+	% 		\STATE $reply \leftarrow reponse$
+	% 	\ENDIF	
+
+	% \ENDIF
+\STATE return $reply$ to the application
+
+\vspace{1.0mm}
+
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} cache$(vars)$}}
+% 	\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
+% 	\STATE return $dests$
+% \ENDINDENT
+
+% \vspace{1.0mm}
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
+% 	\STATE $\ppm \leftarrow$ compute destination partition for $vars$ from\\ \hspace{8mm}current $\ppm_1, ..., \ppm_m$ and $\ip_1, ..., \ip_m$ partitioning
+% 	\STATE return $\ppm$
+% \ENDINDENT	
+
+\ENDINDENT
+
+\caption{Client}
+\label{alg:client_proxy}
+\end{distribalgo}
+\end{algorithm}

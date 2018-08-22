@@ -1,0 +1,102 @@
+%!TEX root =  main.tex
+\section{System model and definitions}
+\label{sec:sysmodel}
+
+\dynastar relies on multicast abstractions to handle complex coordination among partitions without violating correctness. 
+In this section, we detail the system model, define multicast, and state our correctness criterion. 
+
+\subsection{Processes and communication}
+
+We consider a distributed system consisting of an unbounded set of
+client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of
+server processes (replicas) $\ssm = \{s_1, ..., s_n\}$.  Set $\ssm$ is
+divided into disjoint groups of servers $\ssm_0, ..., \ssm_k$.
+Processes are either \emph{correct}, if they never fail, or
+\emph{faulty}, otherwise.  In either case, processes do not experience
+arbitrary behavior (i.e., no Byzantine failures).
+
+Processes communicate by message passing, using either one-to-one or
+one-to-many communication.  The system is asynchronous: there is no
+bound on message delay or on relative process speed.  One-to-one
+communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
+is a message and $p$ is the process $m$ is addressed to.  If sender
+and receiver are correct, then every message sent is eventually
+received.
+%
+One-to-many communication relies on reliable multicast and atomic
+multicast,\footnote{Solving atomic multicast requires additional
+  assumptions~\cite{CT96,FLP85}. In the following, we simply assume
+  the existence of an atomic multicast oracle.} defined in
+\S\ref{sec:rmcast} and \S\ref{sec:amcast}, respectively.
+
+
+\subsection{Reliable multicast}
+\label{sec:rmcast}
+
+To reliably multicast a message $m$ to a set of groups $\gamma$,
+processes use primitive \rmcast$(\gamma, m)$.  Message $m$ is
+delivered at the destinations with \rmdel$(m)$.  Reliable multicast
+has the following properties:
+
+\begin{itemize}
+
+    \item[--] If a correct process \rmcast{}s $m$, then every correct
+      process in $\gamma$ \rmdel{}s $m$ \emph{(validity)}.
+    
+    \item[--] If a correct process \rmdel{}s $m$, then every correct
+      process in $\gamma$ \rmdel{}s $m$ \emph{(agreement)}.
+    
+    \item[--] For any message $m$, every process $p$ in $\gamma$
+      \rmdel{}s $m$ at most once, and only if some process has
+      \rmcast{} $m$ to $\gamma$ previously \emph{(integrity)}.
+    
+\end{itemize}
+
+\subsection{Atomic multicast}
+\label{sec:amcast}
+
+To atomically multicast a message $m$ to a set of groups $\gamma$,
+processes use primitive \amcast$(\gamma, m)$.  Message $m$ is
+delivered at the destinations with \amdel$(m)$.  We define delivery
+order $<$ as follows: $m < m'$ iff there exists a process that
+delivers $m$ before $m'$.
+
+Atomic multicast ensures the following properties:
+
+\begin{itemize}
+    
+    \item[--] If a correct process \amcast{}s $m$, every correct
+      process in a group in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
+    
+    \item[--] If a process \amdel{}s $m$, then every correct process
+      in a group in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
+    
+    \item[--] For any message $m$, every process \amdel{}s $m$ at most
+      once, and only if some process has \amcast{} $m$ previously
+      \emph{(integrity)}.
+    
+    \item[--] If a process \amcast{}s $m$ and then $m'$, then no process \amdel{}s $m'$ before $m$ \emph{(fifo order)}.
+
+    \item[--] The delivery order is acyclic \emph{(atomic order)}.
+
+    \item[--] For any messages $m$ and $m'$ and any processes $p$ and
+      $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq
+      \gamma$, if $p$ delivers $m$ and $q$ delivers $m'$, then either
+      $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$
+      \emph{(prefix order)}.
+    
+\end{itemize}
+
+Atomic broadcast is a special case of atomic multicast in which there
+is a single group of processes.
+
+\subsection{Correctness criterion}
+\label{sec:correctcrit}
+
+Our consistency criterion is linearizability.  A system is
+\emph{linearizable} if there is a way to reorder the client commands
+in a sequence that (i)~respects the semantics of the commands, as
+defined in their sequential specifications, and (ii)~respects the
+real-time precedence of commands~\cite{Attiya04}.
+
+
