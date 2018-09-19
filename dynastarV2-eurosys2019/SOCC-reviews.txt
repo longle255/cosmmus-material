@@ -1,11 +1,11 @@
 
 PRESENTATION
--Why even define r-multicast if it is used only for interactions between just two processes (Fig 1)?
+[DONE]-Why even define r-multicast if it is used only for interactions between just two processes (Fig 1)?
 -why are so many separate invocations of a-multicast required here?
 -How do you choose the host partition where the command is executed?
 -How often does the oracle re-partition the data? What factors determine it?
 -What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
--Section 4 is more appropriate as a appendix section 
+[DONE] -Section 4 is more appropriate as a appendix section 
 -The design is very high-level and does not detail how the partitioning works.
 -The base communication means is an atomic multicast, which can be a source of overhead, but it is not clear whether this is implemented. 
 -The oracle keeps track of the dependencies, but how are the dependencies used to plan a new partition? 
@@ -18,18 +18,33 @@ PRESENTATION
 
 PERFORMANCE
 -sluggish 10KB TPC transactions per second, and absolutely no sign of improved speed as the number of partitions (nodes) increases
--the experiments don't trigger frequent migration, and no effort was made to actually measure the overheads due to migration as a function of data size
+	> let's try a EC2 deployment of TPCC with up to 128 partitions
+-the experiments don't trigger frequent migration, 
+	> in social network with 8P, make a user become celebrity, then reconfigure
+-and no effort was made to actually measure the overheads due to migration as a function of data size
+	> in above experiment, measure moved data during execution; also measure number of queries answered
 -measurement of the data migration overhead as a function of cluster size (number of partitions), data size, and frequency of migration
+	> in scalability results, compute average amount of data moved over partition, number of queries at oracle
 -What happens if the next command also accesses the same or subset of variables? 
+	> skip
 -What is the cost of temporarily moving the variables for each command? 
+	> measure amount of moved across partitions during experiments
 -figure 3 why is the latency as well as throughput high of DynaStar compared to S-SMR (e.g., 8 and 16 partitions)?
+	> skip
 -depending on the workload and the frequency of repartitioning, won't sending data back and forth become an overhead? 
+	> already taken care of
 -Showing a breakdown of data being moved would clear this question. 
+	> we'll how data moves around from source to destination partitions
 -It would have been nice to target real world applications that require it. It's not clear to me that Twitter-like application has that need.
+	> we'll use TPCC and Higgs workload; explain that with DynaStar we don't causality violations
 -Does the oracle really scale? Sometimes, the size of the workload-graph could be bigger than the store itself. How would this approach scale?
+	> we'll measure activity at the oracle
 -The size of the workload used for evaluation is not clearly spelled out. What is the number of state variables in the TPCC benchmark?
+	> fix this in the text
 -The experimental setup is a single cluster, other scenarios where state-machine-replication is used tend to be geo-replicated (Spanner). 
+	> skip
 -Evaluation needs to demonstrate failure scenarios and cost of repartitioning.
+	> failures???
 
 NOVELTY & RELATED WORK
 -The concept is not really "new": data migration as opposed to remote access was explored in many distributed transactional systems in the 1980's

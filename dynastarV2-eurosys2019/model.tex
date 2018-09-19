@@ -15,42 +15,19 @@ Processes are either \emph{correct}, if they never fail, or
 \emph{faulty}, otherwise.  In either case, processes do not experience
 arbitrary behavior (i.e., no Byzantine failures).
 
-Processes communicate by message passing, using either one-to-one or
-one-to-many communication.  The system is asynchronous: there is no
-bound on message delay or on relative process speed.  One-to-one
+Processes communicate by message passing, using one-to-one or
+one-to-many communication.  
+One-to-one
 communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
 is a message and $p$ is the process $m$ is addressed to.  If sender
 and receiver are correct, then every message sent is eventually
 received.
-%
-One-to-many communication relies on reliable multicast and atomic
-multicast,\footnote{Solving atomic multicast requires additional
-  assumptions~\cite{CT96,FLP85}. In the following, we simply assume
-  the existence of an atomic multicast oracle.} defined in
-\S\ref{sec:rmcast} and \S\ref{sec:amcast}, respectively.
+One-to-many communication relies on atomic
+multicast, defined in \S\ref{sec:amcast}.
 
-
-\subsection{Reliable multicast}
-\label{sec:rmcast}
-
-To reliably multicast a message $m$ to a set of groups $\gamma$,
-processes use primitive \rmcast$(\gamma, m)$.  Message $m$ is
-delivered at the destinations with \rmdel$(m)$.  Reliable multicast
-has the following properties:
-
-\begin{itemize}
-
-    \item[--] If a correct process \rmcast{}s $m$, then every correct
-      process in $\gamma$ \rmdel{}s $m$ \emph{(validity)}.
-    
-    \item[--] If a correct process \rmdel{}s $m$, then every correct
-      process in $\gamma$ \rmdel{}s $m$ \emph{(agreement)}.
-    
-    \item[--] For any message $m$, every process $p$ in $\gamma$
-      \rmdel{}s $m$ at most once, and only if some process has
-      \rmcast{} $m$ to $\gamma$ previously \emph{(integrity)}.
-    
-\end{itemize}
+The system is \emph{partially synchronous}~\cite{DLS88}: it is initially asynchronous and eventually becomes synchronous. 
+When the system is asynchronous, there are no bounds on the time it takes for messages to be transmitted and actions to be executed; when the system  is synchronous, such bounds exist but are unknown to the processes.
+%The partially synchronous assumption allows consensus, a fundamental problem at the core of replication~\cite{Lam98,Sch90}, to be implemented under realistic conditions~\cite{FLP85,Lam98}.
 
 \subsection{Atomic multicast}
 \label{sec:amcast}
@@ -93,7 +70,7 @@ is a single group of processes.
 \subsection{Correctness criterion}
 \label{sec:correctcrit}
 
-Our consistency criterion is linearizability.  A system is
+DynaStar ensures linearizable executions.  An execution is
 \emph{linearizable} if there is a way to reorder the client commands
 in a sequence that (i)~respects the semantics of the commands, as
 defined in their sequential specifications, and (ii)~respects the
