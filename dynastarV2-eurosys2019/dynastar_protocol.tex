@@ -94,18 +94,6 @@ If the command can be executed, the client receives a prophecy containing the pa
 % This happens if the cache on client is invalid, some of the variables needed by the command were moved to another partition due a new partitioning. 
 %To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
 
-\subsubsection{The server process} 
-
-All servers keep a workload graph in their memory. When a server delivers a command $C$, multicast by the oracle, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 3 in Algorithm~\ref{alg:server_proxy}).
-If not all the variables needed by the command are in that partition, the server contacts all partitions containing the needed variables (Task 1b and 2).
-%If one or more variables are not stored in a single partition, the server returns a message to the client to retry the operation.
-%This happens if the oracle moved some variables to another partition as part of another command. 
-In this case, a server in the source partitions reliably multicasts all the needed variables stored locally to the destination partition and waits to receive them back.
-The destination partition waits for a message from each source partition. Once all variables needed are available, the destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
-Periodically, the servers deliver a new partitioning plan from the oracle (Task 4). Each server will send the variables to the designated partition, as in the plan, and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
-%When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
-%The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
-To determine the destination partition for a command, the servers uses the last computed partitioning.
 
 \subsubsection{The oracle} 
 
@@ -114,15 +102,16 @@ When the oracle delivers a request, it distinguishes between two cases (Task 1 i
 \item If the command is to create a variable $v$, and $v$ does not already exist, the oracle chooses a random partition for $v$, multicasts the create command to the partition and itself, and returns the partition to the client as a prophecy (Figure~\ref{fig:oracle_repartition}).
 \item If the command reads and writes existing variables, the oracle first checks that all such variables exist.
 If the variables exist and they are all in a single partition, the oracle multicasts the command to that partition for execution.
-If the variables are distributed in multiple partitions, the oracle determines the destination partition, and atomically multicasts a command to the involved partitions and to itself so that all variables are gathered at the destination partition.
+If the variables are distributed in multiple partitions, the oracle deterministically determines the destination partition, and atomically multicasts a command to the involved partitions and to itself so that all variables are gathered at the destination partition.
 The destination partition executes the command once it has received all variables needed by the command, then returns those variables to their source partition.
 
 %In either case, oracle returns a prophecy back to the client with the destination partition.
 \end{itemize}
 
+
 \input{algorithm_client_proxy}
-\input{algorithm_server_proxy}
 \input{algorithm_oracle_proxy}
+\input{algorithm_server_proxy}
 
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
@@ -146,6 +135,17 @@ A new partitioning can be requested by the application, by a partition, or by th
 To determine the destination partition of a set of variables, as part of a move, the oracle uses 
 % the current location of variables and 
 the last computed partitioning.
+
+\subsubsection{The server process} 
+
+When a server delivers a command $C$, multicast by the oracle, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 2 in Algorithm~\ref{alg:server_proxy}).
+If not all the variables needed by the command are in that partition, the server run a the same deterministic function as the oracle to determine the destination partition to execute the command (Task 1b). In this case, each server that is in the multicast group of the command $C$ but is not the destination partition reliably multicasts all the needed variables stored locally to the destination partition and waits to receive them back. 
+The destination partition waits for a message from other partitions. Once all variables needed are available, the destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
+Periodically, the servers deliver a new partitioning plan from the oracle (Task 3). Each server will send the variables to the designated partition, as in the plan, and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
+%When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
+%The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).
+To determine the destination partition for a command, the servers uses the last computed partitioning.
+
 
 \subsection{Performance optimization}
 %\subsection{Performance optimizations}

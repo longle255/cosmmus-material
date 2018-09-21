@@ -10,42 +10,32 @@
 		\STATE execute command $C$
 		\STATE send response to the client
 	\ELSE[\textbf{Task 1b}]
-		% \IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
-		% 	\STATE $response \leftarrow retry$
-		% 	\COMMENT{tell the client}
-		% \ELSE
-			\STATE $dests \leftarrow \parts(\omega)$
-			\COMMENT{get all partition involved}
-			\STATE $\ppm_d \leftarrow target(G_W, \omega)$
-			\COMMENT{$\ppm_d$ will execute $C$}
-			\STATE \amcast$(dests, (global(\omega,dests,\ppm_d), C))$
-			% \STATE $hint(vars)$
-		% \ENDIF
+		\STATE $dests \leftarrow \parts(\omega)$
+		\COMMENT{get all involved partition}			
+		\STATE $\ppm_d \leftarrow target(dest, C)$
+		\COMMENT{$\ppm_d$ $\in dest$ will execute $C$}
+
+		\IF[$\ppm$ is the target partition:] {$\ppm = \ppm_d$}
+			\STATE wait until $\forall v \in \omega \setminus \ppm: \exists \langle vars, C \rangle \in rcvd\_msgs :v \in vars$
+			\COMMENT{wait for needed variables}
+			\STATE execute command $C$
+			\STATE send response to the client
+			\STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} \rmcast$(\pqm, \langle v:v \in \pqm \rangle, C)$
+			\COMMENT{return the variables}		
+		\ELSE[if $\ppm$ is not the target partition:]
+			\STATE $vars \leftarrow \omega \cap \ppm$
+			\COMMENT{all needed variables in $\ppm$}
+			\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
+			\COMMENT{send variables to destination}
+			\STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
+		\ENDIF		
 	\ENDIF
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(global(\omega,\ppm_s,\ppm_d), C)$}}
-%	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-	\IF[if $\ppm$ is a source partition:]{$\ppm \in \ppm_s \setminus \ppm_d$}
-		\STATE $vars \leftarrow \omega \cap \ppm$
-		\COMMENT{all needed variables in $\ppm$}
-		\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
-		\COMMENT{send variables to destination}
-		\STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
-	\ELSE[$\ppm$ is destination partition:]
-	% \ELSE
-		\STATE wait until $\forall v \in \omega \setminus \ppm: \exists \langle vars, C \rangle \in rcvd\_msgs :v \in vars$
-		\COMMENT{wait for needed variables}
-		\STATE execute command $C$
-		\STATE send response to the client
-		\STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} \rmcast$(\pqm, \langle v:v \in \pqm \rangle, C)$
-		% \STATE $hint(vars)$
-	\ENDIF
-\ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v, create(v))$}}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm, create(v))$}}
 	\STATE \rmcast$(oracle, \langle signal, C \rangle )$
 	\COMMENT{exchange signal to...}
 	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
@@ -55,17 +45,17 @@
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(new partitioning)$}}
-	\STATE \textbf{for} each $\pqm \in \ppm_v \in plan$ \textbf{do} 
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(partitioning)$}}
+	\STATE \textbf{for} each $\pqm \in \ppm_v \in partitioning$ \textbf{do} 
 	% \INDENT
 		\IF{$\ppm$ is $\pqm$}
-			\STATE $vars \leftarrow plan(\pqm) \setminus v:v \in \ppm$
-			\IF {$\forall v \in var, \ppm_i \in plan: \exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
-				\STATE apply new partitioning $plan$
+			\STATE $vars \leftarrow partitioning(\pqm) \setminus v:v \in \ppm$
+			\IF {$\forall v \in var, \ppm_i \in partitioning: \exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
+				\STATE apply $partitioning$
 			\ENDIF
 		\ELSE 
 			% \rmcast$(\pqm, v:v \in \pqm, C)$
-			\STATE $vars \leftarrow plan(\pqm) \cap v:v \in \ppm$
+			\STATE $vars \leftarrow partitioning(\pqm) \cap v:v \in \ppm$
 			\STATE \rmcast$(\pqm, \langle vars, \ppm \rangle )$
 			\COMMENT{send objects that belong to $\pqm$}
 		\ENDIF
@@ -73,9 +63,23 @@
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(\langle val, C \rangle)$}}
+\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$(\langle val, C \rangle)$}}
     \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
 \ENDINDENT
+
+\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(\ppm, C)$}}
+	\STATE $\ppm_d \leftarrow$ deterministicly compute partition to execute\\ \hspace{8mm} command $C$ from $\forall \ppm_i \in \ppm$
+	\STATE return $\ppm_d$
+\ENDINDENT	
+
+\vspace{1.5mm}
+
+\textbf{Algorithm variables:}
+
+\vspace{1mm}
+
+$partitioning$: the partition configuration from the $oracle$
+
 
 % \vspace{1.0mm}
 % \INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}

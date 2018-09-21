@@ -30,22 +30,13 @@
 		\ELSE[if all vars in $\omega$ exist]
 			\STATE $dests \leftarrow \parts(\omega)$
 			\COMMENT{get all partition involved}
-			\STATE $\ppm_d \leftarrow target(dests, \omega)$
+			\STATE $\ppm_d \leftarrow target(dests, C)$
 			\COMMENT{$\ppm_d$ will excecute $C$}
-			% \STATE $alldest \leftarrow \{oracle\} \cup dests$
-			\STATE \amcast$(dests, (global(\omega,dests,\ppm_d), C))$
+			\STATE \amcast$(dests, C)$
 			\STATE $prophecy \leftarrow \ppm_d$
 		\ENDIF
 	\ENDINDENT
 	\STATE send $prophecy$ to the client
-%			\INDENT{\textbf{case} $C_c$ is a $delete(v)$ command:}
-%				\IF{$partition(v) = \bot$}
-%					\STATE $prophecy \leftarrow ok$
-%				\ELSE
-%					\STATE $prophecy \leftarrow (\{ \ppm : v \in \ppm, oracle \}, -)$
-%				\ENDIF
-%			\ENDINDENT
-%		\ENDINDENT
 \ENDINDENT
 \vspace{1.0mm}
 
@@ -59,15 +50,6 @@
 % \STATE send $ok$ to the client
 \ENDINDENT
 
-% \vspace{1.0mm}
-% \INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(move(\omega,\ppm_s,\ppm_d),C)$}}
-% %	\INDENT{\textbf{case} $C$ is a $move(v,\ppm_s,\ppm_d)$ command:}
-% \STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\pqm \leftarrow \pqm \setminus \omega$
-% \COMMENT{update partition...}
-% \STATE $\ppm_d \leftarrow \ppm_d \cup \omega$
-% \COMMENT{...and add new variables}
-% % \STATE send $ok$ to the client
-% \ENDINDENT
 
 \vspace{1.0mm}
 \INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
@@ -82,34 +64,39 @@
 
 	\vspace{1.0mm}
 
-%	\vspace{1.0mm}\hspace{-6.2mm}
-%	\rule{81mm}{0.4pt}
-%	\vspace{0.1mm}
-
 \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 	\STATE update $G_W$ with $(V_h,E_h)$
 	\STATE $inc(changes)$
 	\IF {$changes \geq threshold$}
-		\STATE compute partitioning $\ip_1, ..., \ip_m$ from $G_W$
+		\STATE $partitioning  \leftarrow$ compute $\ip_1, ..., \ip_m$ from $G_W$
 		\STATE $alldest \leftarrow \{oracle\} \cup all partitions$
-		\STATE \amcast$(alldest, (new partitioning))$
+		\STATE \amcast$(alldest, (partitioning))$
 	\ENDIF
 \ENDINDENT
 
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{new partitioning})$}}
-%	\INDENT[\textbf{Task 6}]{\colorbox{\coloralgo}{\textbf{periodically} do}}
-	\STATE apply new partitioning $plan$
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{partitioning})$}}
+	\STATE apply $partitioning$
 \ENDINDENT
 
 \vspace{1.0mm}
 
-\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(vars)$}}
-	\STATE $\ppm \leftarrow$ compute destination partition for $vars$ from\\ \hspace{8mm}current $\ppm_1, ..., \ppm_m$ and $\ip_1, ..., \ip_m$ partitioning
-	\STATE return $\ppm$
+\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(\ppm, C)$}}
+	\STATE $\ppm_d \leftarrow$ deterministicly compute partition to execute\\ \hspace{8mm} command $C$ from $\forall \ppm_i \in \ppm$
+	\STATE return $\ppm_d$
 \ENDINDENT	
-	
+
+\vspace{1.5mm}
+
+\textbf{Algorithm variables:}
+
+\vspace{1mm}
+
+$G_W$: the set of all variable and their locations
+
+$partitioning$: the partition configuration of $G_W$
+
 
 \caption{Oracle}
 \label{alg:oracle_proxy}
