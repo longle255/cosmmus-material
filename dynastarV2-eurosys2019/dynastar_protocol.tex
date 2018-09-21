@@ -4,7 +4,9 @@
 \label{sec:dynastar}
 
 %In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
-The key insights of \dynastar are to optimize state partitioning based on the workload and to relocate application state on-the-fly, without service disruption.
+\subsection{Key insights}
+
+\dynastar optimizes state partitioning based on the workload and relocates application state on-the-fly, without service disruption.
 \begin{itemize}
 \item \emph{Optimized state partitioning.}
 \dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges dependencies between variables.

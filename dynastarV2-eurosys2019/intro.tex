@@ -38,8 +38,8 @@ In social networks, for example, some users may experience a surge increase in t
 These challenges perhaps explain why most approaches that rely on state partitioning delegate the task of partitioning the service state to the application designer (e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,bli16edcc}).
 
 In this paper, we introduce \dynastar, a new approach to scalable replication.
-\dynastar differs from previous solutions in that it supports \emph{dynamic} state partitioning.
-This means that data can be relocated from one partition to another to optimize performance.
+\dynastar differs from previous solutions in that it supports \emph{dynamic state partitioning}.
+This means that data can be relocated from one shard (or partition) to another to optimize performance.
 Moreover, data relocation is done on-the-fly, with minimal service disruption.
 As a result, \dynastar does not require any a priori information about the workload and can adapt to workload variations.
 To achieve this design, \dynastar maintains a
@@ -47,14 +47,14 @@ location oracle with a global view of the application state.  The oracle minimiz
 number of state relocations by monitoring the workload, and
 re-computing an optimized partitioning on demand using a 
 partitioning algorithm (METIS).  
-The location oracle maintains two data structures: (i) a mapping of application state variables to partitions, and (ii) a \emph{workload graph} with state variables as vertices and edges as commands that access the variables.  
+The location oracle maintains two data structures: (i) a mapping of application state variables to shards, and (ii) a \emph{workload graph} with state variables as vertices and edges as commands that access the variables.  
 Before a client submits a command, it contacts the
-location oracle to discover the partitions on which state variables are
-stored.  If the command accesses variables in multiple partitions, the
-client chooses one partition to execute the command and instructs the other involved partitions to temporarily relocate 
-the needed variables to the chosen partition. Of course, when relocating a variable, the client
-is faced with a choice of which partition to use as a destination.
-Based on information provided by the oracle, the client estimates the partition that minimizes the number of state relocations.
+location oracle to discover the shards on which state variables are
+stored.  If the command accesses variables in multiple shards, the
+client chooses one shard to execute the command and instructs the other involved shards to temporarily relocate 
+the needed variables to the chosen shard. Of course, when relocating a variable, the client
+is faced with a choice of which shard to use as a destination.
+The client estimates the partition that minimizes the number of state relocations.
 % using the METIS partitioner.
 %Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
 
