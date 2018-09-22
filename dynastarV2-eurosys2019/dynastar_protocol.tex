@@ -102,8 +102,8 @@ When the oracle delivers a request, it distinguishes between two cases (Task 1 i
 \item If the command is to create a variable $v$, and $v$ does not already exist, the oracle chooses a random partition for $v$, multicasts the create command to the partition and itself, and returns the partition to the client as a prophecy (Figure~\ref{fig:oracle_repartition}).
 \item If the command reads and writes existing variables, the oracle first checks that all such variables exist.
 If the variables exist and they are all in a single partition, the oracle multicasts the command to that partition for execution.
-If the variables are distributed in multiple partitions, the oracle deterministically determines the destination partition, and atomically multicasts a command to the involved partitions and to itself so that all variables are gathered at the destination partition.
-The destination partition executes the command once it has received all variables needed by the command, then returns those variables to their source partition.
+If the variables are distributed in multiple partitions, the oracle deterministically determines the destination partition, and atomically multicasts a command to the involved partitions so that all variables are gathered at the destination partition.
+ command once it has received all variables needed by the command, then returns those variables to their source partition.
 
 %In either case, oracle returns a prophecy back to the client with the destination partition.
 \end{itemize}
