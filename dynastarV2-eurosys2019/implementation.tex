@@ -4,6 +4,11 @@
 
 \subsection{Atomic multicast}
 
+Our \dynastar prototype uses the BaseCast atomic multicast protocol described in \cite{Coelho:2017} and available as open source.\footnote{https://bitbucket.org/paulo\_coelho/libmcast}
+Each group of servers in BaseCast executes an instance of Multi-Paxos.\footnote{http://libpaxos.sourceforge.net/paxos\_projects.php\#libpaxos3}
+Commands multicast to multiple groups coordinate to ensure that commands are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
+BaseCast is a genuine atomic multicast in that only the sender and destination replicas of a message communicate to propagate and order a multicast message. 
+%A genuine atomic multicast is the foundation of scalable systems, since it does not depend on a fixed group of processes and does not involve all processes.
 
 \subsection{\dynastar}
 

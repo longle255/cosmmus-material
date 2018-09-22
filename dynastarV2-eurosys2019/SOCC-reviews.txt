@@ -11,7 +11,7 @@ PRESENTATION
 -How frequently should partitioning happen and who should trigger the partition on which occasions? 
 -Invalidation of the workload graph on the client side is mentioned but no protocol is described for invalidations. 
 -Also, how are client failures handled. For e.g., if an invalidation is not received by a failed client.
--The implementation section, however, doesn't talk about how atomic multicast has been implemented. 
+[DONE]-The implementation section, however, doesn't talk about how atomic multicast has been implemented. 
 [DONE]-Section 4 is more appropriate as a appendix section 
 [DONE]-I'm not sure what the footnote on page 2 really means ("We assume the existence of an atomic multicast oracle"). 
 [DONE]-Why even define r-multicast if it is used only for interactions between just two processes (Fig 1)?
