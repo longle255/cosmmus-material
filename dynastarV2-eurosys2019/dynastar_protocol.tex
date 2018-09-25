@@ -36,7 +36,7 @@ Such a mapping is managed by a partitioning oracle, which is handled as a replic
 To simplify the discussion, we initially assume that every command involves the oracle.
 In \S\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
-\dynastar\ distinguishes three types of commands:
+\dynastar\ supports three types of commands:
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle;
 $access(\omega)$ is an application command that reads and modifies variables in set $\omega \subseteq \vvm$; and
 $delete(v)$ removes $v$ from the service state.
@@ -57,29 +57,29 @@ consists of a set of tuples $\langle v, \ppm \rangle$, meaning
 $v \in \ppm$, and a target partition $\ppm_d$ on which the commands 
 will be executed. The $prophecy$ could also tell the clients 
 if a command cannot be executed (e.g., it accesses 
-variables that does not exist). If the command can be executed, 
+variables that do not exist). If the command can be executed, 
 the clients wait for the reply from the target partition.
 
 If a command $C$ accesses variables in $\omega$ on a single partition, 
 the oracle forwards $C$ to that partition for execution. If the command 
-accesses variables from multiple partitions, the oracle multicasts a 
+accesses variables on multiple partitions, the oracle multicasts a 
 $global(\omega,\ppm_d, C)$ command to the involved partitions to gather 
 all variables in $\omega$ to one target partition. After having all 
-required variables, the target partition executes the command $C$, 
+required variables, the target partition executes command $C$, 
 sends the reply to the client, and returns the variables to their source. 
-Moving variables back to their source partitions improves the client cache (described in \S\ref{sec:optm}).
+Moving variables back to their source partitions improves the hit ratio of client caches (described in \S\ref{sec:optm}).
 
 The oracle also collects hints from clients and partitions to 
 build up the workload graph and monitors the changes in the graph. 
 Periodically, the oracle computes a new optimized partitioning and sends the 
 partitioning plan to all partitions. Upon delivering the new partitioning, 
-the partitions exchanges variables and update their state accordingly.
+the partitions exchange variables and update their state accordingly.
 \dynastar relocates variables without blocking the execution of commands.
 
 \subsection{The detailed protocol}
 \label{sec:detailed}
 
-Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and \ref{alg:oracle_proxy} describe the client, server and oracle processes, respectively. 
+Algorithms~\ref{alg:client_proxy}, \ref{alg:oracle_proxy}, and \ref{alg:server_proxy} describe the client, oracle, and server processes, respectively. 
 For brevity, we omit the delete command since the coordination involved in the create and delete commands are analogous. 
 
 
@@ -103,7 +103,7 @@ When the oracle delivers a request, it distinguishes between two cases (Task 1 i
 \item If the command reads and writes existing variables, the oracle first checks that all such variables exist.
 If the variables exist and they are all in a single partition, the oracle multicasts the command to that partition for execution.
 If the variables are distributed in multiple partitions, the oracle deterministically determines the destination partition, and atomically multicasts a command to the involved partitions so that all variables are gathered at the destination partition.
- command once it has received all variables needed by the command, then returns those variables to their source partition.
+Once the destination partition has received all variables needed by the command, it executes the command and returns the variables to their source partition.
 
 %In either case, oracle returns a prophecy back to the client with the destination partition.
 \end{itemize}
@@ -116,9 +116,9 @@ If the variables are distributed in multiple partitions, the oracle deterministi
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the page
 \centering
-      \includegraphics[width=0.9\linewidth]{figures/dynastar}
+      \includegraphics[width=\linewidth]{figures/dynastar}
 \end{minipage}
-\caption{The execution of a create command and a write command in \dynastar.}
+\caption{The execution of a create (C1) and a write without client cache (C2) and with client cache (C3) in \dynastar.}
 \label{fig:oracle_repartition}
 \end{figure*}
 
@@ -138,8 +138,9 @@ the last computed partitioning.
 
 \subsubsection{The server process} 
 
-When a server delivers a command $C$, multicast by the oracle, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 2 in Algorithm~\ref{alg:server_proxy}).
-If not all the variables needed by the command are in that partition, the server run a the same deterministic function as the oracle to determine the destination partition to execute the command (Task 1b). In this case, each server that is in the multicast group of the command $C$ but is not the destination partition reliably multicasts all the needed variables stored locally to the destination partition and waits to receive them back. 
+When a server delivers a command $C$, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 2 in Algorithm~\ref{alg:server_proxy}).
+If not all the variables needed by the command are in that partition, the server runs a deterministic function to determine the destination partition to execute the command (Task 1b). The function uses as input the variables needed by the command and the command itself.
+In this case, each server that is in the multicast group of the command $C$ but is not the destination partition sends all the needed variables stored locally to the destination partition and waits to receive them back. 
 The destination partition waits for a message from other partitions. Once all variables needed are available, the destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
 Periodically, the servers deliver a new partitioning plan from the oracle (Task 3). Each server will send the variables to the designated partition, as in the plan, and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
 %When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
