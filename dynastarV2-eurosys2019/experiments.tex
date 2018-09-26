@@ -14,15 +14,9 @@ state-of-the-art approaches to state machine replication partitioning.
 \subsection{Experimental environment}
 \label{sec:evaluation:setup}
 
-We conducted all experiments on a cluster with two types of nodes: (a)
-HP SE1102 nodes, equipped with two Intel Xeon L5420 processors running
-at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435 nodes,
-equipped with two AMD Opteron 2212 processors running at 2.0 GHz and
-with 4 GB of main memory. The HP nodes were connected to an HP
-ProCurve 2920-48G gigabit network switch, and the Dell nodes were
-connected to another, identical switch. Those switches were
-interconnected by a 20 Gbps link.  All nodes ran CentOS Linux 7.1 with
-kernel 3.10 and had the OpenJDK Runtime Environment~8 with the
+We conducted all experiments on Amazon EC2 T2 large instances (nodes). Each node has 8 GB of RAM, 
+two virtual cores and is equipped with an Amazon EBS standard SSD with a maximal bandwidth 10000 IOPS.
+All nodes ran Ubuntu Server 16.04 LTS 64 and had the OpenJDK Runtime Environment~8 with the
 \mbox{64-Bit} Server VM (build 25.45-b02). In all experiments, the oracle 
 had the same resources as every other partition: 2 replicas and 3 acceptors 
 (in total five nodes per partition).
@@ -141,6 +135,21 @@ Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than
 \end{figure*}
 
 
+\begin{table*}[htp]
+\caption{Average load at each partition at the peak throughput}
+\begin{adjustbox}{max width=\columnwidth}
+\vspace{10mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Partition & Throughput & Multi-partition commands & Exchanged objects \\ \hline
+1         & 12766      & 887                      & 3907              \\ \hline
+2         & 11790      & 643                      & 3036              \\ \hline
+3         & 6775       & 440                      & 1503              \\ \hline
+4         & 6458       & 400                      & 1490              \\ \hline
+\end{tabular}
+\vspace{10mm}
+\end{adjustbox}
+\end{table*}
 
 
 % \paragraph*{Operational parameters.}
