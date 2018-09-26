@@ -104,16 +104,10 @@ a partitioning scheme that leads scalable performance.
 \subsection{Social network}
 
 %\paragraph*{Workloads.}
-We used the Holme-Kim model~\cite{holme-kim} to generate the social 
-graphs used in the experiments. We created power-law graphs (also
-known as scale-free graphs) with a clustering coefficient varying from
-0.6 to 1, which represent the geometric structures of social
-networks. The coefficient is the probability that whenever an edge
-$(v, w)$ is added to the graph, $v$ connects to some neighbour of $w$.
-In the experiments, we tested graphs with 100000 users. We characterize
-different workloads by varying the percentage of edge-cuts.  For
-example, a graph with a 5\% edge cut means that 5\% of the total edges
-in the graph have connected vertices located in different partitions.
+We used Higgs Twitter Dataset~\cite{snapnets} as the social graphs used in the experiments. 
+The graph is a subset of the Twitter network that was built based on the monitoring of the spreading
+processes on Twitter throughout the discovery of a new particle with the features of the elusive 
+Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 milion edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
 
@@ -125,6 +119,18 @@ in the graph have connected vertices located in different partitions.
 % the poster.  We focused on post commands, since they may access
 % multiple partitions. Each client operates synchronously,
 % waiting for a response from the storage (i.e., in a closed loop).
+
+\begin{figure}[ht]
+  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-dynastar}
+  \caption{Dynamic partitioning with DynaStar.}
+  \label{fig:4p1p_varying_partition_size}
+\end{figure}
+
+\begin{figure}[ht]
+  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-ssmr}
+  \caption{Static partitioning with {S-SMR*}}
+  \label{fig:4p1p_varying_partition_size}
+\end{figure}
 
 \begin{figure*}[ht!]
 	\includegraphics{figures/experiments/social-network-tp-lat/social-network-tp-lat}
