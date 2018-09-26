@@ -6,9 +6,10 @@
 
 Our \dynastar prototype uses the BaseCast atomic multicast protocol described in \cite{Coelho:2017} and available as open source.\footnote{https://bitbucket.org/paulo\_coelho/libmcast}
 Each group of servers in BaseCast executes an instance of Multi-Paxos.\footnote{http://libpaxos.sourceforge.net/paxos\_projects.php\#libpaxos3}
-Commands multicast to multiple groups coordinate to ensure that commands are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
-BaseCast is a genuine atomic multicast in that only the sender and destination replicas of a message communicate to propagate and order a multicast message. 
-%A genuine atomic multicast is the foundation of scalable systems, since it does not depend on a fixed group of processes and does not involve all processes.
+Groups coordinate to ensure that commands multicast to multiple groups are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
+%Commands multicast to multiple groups coordinate to ensure that commands are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
+BaseCast is a genuine atomic multicast in that only the sender and destination replicas of a multicast message communicate to order the multicast message. 
+%A genuine atomic multicast is the foundation of scalable systems, since it does not rely on a fixed group of processes and does not involve all processes.
 
 \subsection{\dynastar}
 
@@ -117,7 +118,7 @@ the whole district.
 \subsection{\appname\ social network service}
 \label{sec:imp:\appname}
 
-For the purposes of micro benchmaring, we have developed a Twitter-like
+For the purposes of micro benchmark, we have developed a Twitter-like
 social network service using the \dynastar{} library.  In our social
 network, users can follow, unfollow, post, or read other users' tweets
 according to whom the user is following. Like Twitter, users are
@@ -132,6 +133,9 @@ writing the message to the timeline of all the user's followers.  In
 contrast, when users read their own timeline, they only need
 to access the state associated with their own node.
 
+Since DynaStare guarantees linearizable executions, any causal dependencies between posts in \appname\ will be seen in the correct order. 
+More precisely, if user B posts a message after receiving a message posted by user A, no user who follows A and B will see B's message before seeing A's message.
+
 Overall, in \appname, post, follow or unfollow commands can lead to
 object moves.  Follow and unfollow commands can involve at most two
 partitions, while posts may require object moves from many partitions.
@@ -142,13 +146,13 @@ partitions, while posts may require object moves from many partitions.
 %as an efficient single-partition command.
 
 
-\subsection{Alternative systems}
+\subsection{Alternative system}
 
-Throughout our evaluation, we compare \dynastar{} to two alternative
-systems: S-SMR~\cite{bezerra2014ssmr} and DS-SMR~\cite{hoang2016}. For performing our experiments, we used the
-implementations of the two systems that are available in public
-repositories.\footnote{https://bitbucket.org/kdubezerra/eyrie\\ \mbox{\hspace{5mm}https://bitbucket.org/usi-dslab/ds-smr}} 
-S-SMR provides static partitioning. In our experiments, we manually optimize the partitioning with knowledge about the workload.
+Throughout our evaluation, we compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr}, available in a public repository.\footnote{https://bitbucket.org/kdubezerra/eyrie}
+S-SMR has been shown to scale performance with the number of partitions under a variety of workloads.
+It differs from \dynastar{} in two important aspects:
+multi-partition commands are executed by all involved partitions, after the partitions exchange needed state for the execution of the command and S-SMR supports static state partitioning.
+In our experiments, we manually optimize S-SMR's partitioning with knowledge about the workload.
 In the experiments, we refer to this system and configuration as S-SMR*.
 %Since
 %all three systems (S-SMR, DS-SMR, and \dynastar) provide a common
