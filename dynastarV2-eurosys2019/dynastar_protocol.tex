@@ -103,6 +103,8 @@ When the oracle delivers a request, it distinguishes between two cases (Task 1 i
 \item If the command reads and writes existing variables, the oracle first checks that all such variables exist.
 If the variables exist and they are all in a single partition, the oracle multicasts the command to that partition for execution.
 If the variables are distributed in multiple partitions, the oracle deterministically determines the destination partition, and atomically multicasts a command to the involved partitions so that all variables are gathered at the destination partition.
+The oracle chooses as the destination partition the partition that contains most of the variables needed by the command.
+(In case of a tie, one partition is chosen deterministically, among those that contain most variables.)
 Once the destination partition has received all variables needed by the command, it executes the command and returns the variables to their source partition.
 
 %In either case, oracle returns a prophecy back to the client with the destination partition.

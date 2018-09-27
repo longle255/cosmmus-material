@@ -120,26 +120,59 @@ Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than
 % multiple partitions. Each client operates synchronously,
 % waiting for a response from the storage (i.e., in a closed loop).
 
-\begin{figure}[ht]
-  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-dynastar}
-  \caption{Dynamic partitioning with DynaStar.}
-  \label{fig:4p1p_varying_partition_size}
-\end{figure}
+%\begin{figure}[ht]
+%  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-dynastar}
+%  \caption{Dynamic partitioning with DynaStar.}
+%  \label{fig:4p1p_varying_partition_size}
+%\end{figure}
+%
+%\begin{figure}[ht]
+%  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-ssmr}
+%  \caption{Static partitioning with {S-SMR*}}
+%  \label{fig:4p1p_varying_partition_size}
+%\end{figure}
 
-\begin{figure}[ht]
-  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-ssmr}
-  \caption{Static partitioning with {S-SMR*}}
-  \label{fig:4p1p_varying_partition_size}
-\end{figure}
-
-\begin{figure*}[ht!]
-	\includegraphics{figures/experiments/social-network-tp-lat/social-network-tp-lat}
-	\caption{Throughput and latency for different partition numbers. 
-  Throughput is in thousands of commands per second (kcps). 
-  Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
-	\label{fig:varying_edge_cut}
+\begin{figure*}[h!]
+  \centering
+  \begin{subfigure}{.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-celeb-dynastar.pdf}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-celeb-ssmr.pdf}
+    \caption{}
+  \end{subfigure}
+  \caption{Some text in here}%
+  \label{fig:socialcelebrity}
 \end{figure*}
 
+\begin{figure*}[h!]
+  \centering
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/timeline.png}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/timeline.png}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/mix.png}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/mix.png}
+%    \caption{}
+  \end{subfigure}
+  \caption{Some text in here}%
+  \label{fig:socialscalability}
+\end{figure*}
 
 
 
@@ -195,11 +228,11 @@ On the one hand, additional partitions improve performance as there are more res
 On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
 We evaluate the performance of \dynastar, \dssmr\ and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
 
-\begin{figure}[ht]
-	\includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-ideal-partition/social-network-ideal-partition}
-	\caption{Performance scalability with social network.}
-	\label{fig:4p1p_varying_partition_size}
-\end{figure}
+%\begin{figure}[ht]
+%	\includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-ideal-partition/social-network-ideal-partition}
+%	\caption{Performance scalability with social network.}
+%	\label{fig:4p1p_varying_partition_size}
+%\end{figure}
 
 Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and optimized \ssmr throughput scale up to ten partitions, after which performance decreases. \dssmr\ throughput decreases gradually as we increase partitions, since the chance that objects are spread between partitions also increases.
 % For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
@@ -208,25 +241,6 @@ Notice that only post operations are subject to this tradeoff since they may inv
 The most common operation in social networks is the request to read a user timeline. This is a single-partition
 command in our application and as a consequence it scales linearly with the number of partitions.
 
-
-\begin{figure*}[h!]
-  \centering
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-dynamic/social-network-dynamic}
-    \caption{\dynastar versus DS-SMR}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-dynamic/social-network-dynamic-structure}
-    \caption{The creation of a social network graph}
-  \end{subfigure}
-    \caption{Performance under dynamic workload (four partitions and 10\% of edge cuts).}
-	\label{fig:dynamic_load_tput}
-\end{figure*}
-
-% We can draw similar results about the latency of the three strategies (Figure~\ref{fig:varying_edge_cut}, graphs on the bottom).
-% The large number of move operations in DS-SMR with social graphs that cannot be perfectly partitioned result in increased latency.
 
 \paragraph*{Performance under dynamic workloads.}
 

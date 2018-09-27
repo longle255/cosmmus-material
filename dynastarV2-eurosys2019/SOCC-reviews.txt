@@ -1,20 +1,28 @@
 
 PRESENTATION
--How do you choose the host partition where the command is executed?
 -How often does the oracle re-partition the data? What factors determine it?
--What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
--The design is very high-level and does not detail how the partitioning works.
--The oracle keeps track of the dependencies, but how are the dependencies used to plan a new partition? 
--How exactly does the new partitioning scheme balance between placing dependent objects in the same partition and balancing the load over all partitions? 
 -How frequently should partitioning happen and who should trigger the partition on which occasions? 
+	> some application-specific policy at the oracle; e.g., high percentage of multi-part commands during some interval
+-What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
+	> optimize first multi-partition commands, then load with unbalanced factor (20% in our case)
+-The design is very high-level and does not detail how the partitioning works.
+	> check original review
+-The oracle keeps track of the dependencies, but how are the dependencies used to plan a new partition? 
+	> graph is fed into METIS; explain it better
+-How exactly does the new partitioning scheme balance between placing dependent objects in the same partition and balancing the load over all partitions? 
+	> add table for experiment with 4 partitions
 -Invalidation of the workload graph on the client side is mentioned but no protocol is described for invalidations. 
--Also, how are client failures handled. For e.g., if an invalidation is not received by a failed client.
+	> currently, client invalidates whole cache upon finding a wrong cached entry
+
+[DONE]-How do you choose the host partition where the command is executed
+	> choose the partition that contains most needed objects
 [DONE]-The base communication means is an atomic multicast, which can be a source of overhead, but it is not clear whether this is implemented. 
 [DONE]-why are so many separate invocations of a-multicast required here?
 [DONE]-The implementation section, however, doesn't talk about how atomic multicast has been implemented. 
 [DONE]-Section 4 is more appropriate as a appendix section 
 [DONE]-I'm not sure what the footnote on page 2 really means ("We assume the existence of an atomic multicast oracle"). 
 [DONE]-Why even define r-multicast if it is used only for interactions between just two processes (Fig 1)?
+[SKIP]-Also, how are client failures handled. For e.g., if an invalidation is not received by a failed client.
 
 PERFORMANCE
 -sluggish 10KB TPC transactions per second, and absolutely no sign of improved speed as the number of partitions (nodes) increases
