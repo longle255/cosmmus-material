@@ -5,8 +5,6 @@ PRESENTATION
 	> some application-specific policy at the oracle; e.g., high percentage of multi-part commands during some interval
 -What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
 	> optimize first multi-partition commands, then load with unbalanced factor (20% in our case)
--The design is very high-level and does not detail how the partitioning works.
-	> check original review
 -The oracle keeps track of the dependencies, but how are the dependencies used to plan a new partition? 
 	> graph is fed into METIS; explain it better
 -How exactly does the new partitioning scheme balance between placing dependent objects in the same partition and balancing the load over all partitions? 
