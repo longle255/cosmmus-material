@@ -29,7 +29,7 @@ had the same resources as every other partition: 2 replicas and 3 acceptors
 %number of partitions increases, and performance as the size and complexity of the graph grows.
 The experiments seek to answer the following questions:
 \begin{itemize}
-\item \emph{What is the impact of repartitioning on a static workload and on a dynamic workload?}
+\item \emph{What is the impact of repartitioning on a workload?}
 \item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
 \item \emph{How does \dynastar performance compare to other approaches?} 
 \item \emph{How does \dynastar perform under dynamic workloads?}
@@ -49,7 +49,7 @@ In the experiments in this section, we deploy as many partitions as the number o
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-repartitioning/tpcc-repartitioning}
+    \includegraphics[width=\columnwidth]{figures/eurosys/tpcc-detail-dynastar}
   \caption{Repartitioning on \dynastar}
   \label{fig:tpcc_repartitioning}
 \end{figure}
@@ -79,7 +79,7 @@ can be found in a local partition, which considerably increases performance and 
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-scaling-tp-lat/tpcc-scaling-tp-lat}
+    \includegraphics[width=\columnwidth]{figures/eurosys/tpcc-scaling-tp-lat.pdf}
   \caption{Performance scalability with TPC-C.}
   \label{fig:tpcc_scaling}
 \end{figure}
@@ -104,15 +104,14 @@ processes on Twitter throughout the discovery of a new particle with the feature
 Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 milion edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
+We have simulated clients, each client issues a sequence of commands.  
+For each command, the client selects a random node as the poster with Zipfian access pattern, with Zipf 
+parameter $\rho$ = 0.99.
+We focused on two type of commands: timeline commands and mix commands (85\% timeline and 15\% post). 
+Each client operates synchronously, waiting for a response from the storage (i.e., in a closed loop).
 
 % \paragraph*{Command generation.}
 % %
-% As a workload for the social graph, we have simulated clients,
-% and each client issues a sequence of post
-% commands.  For each command, the client selects a random node as
-% the poster.  We focused on post commands, since they may access
-% multiple partitions. Each client operates synchronously,
-% waiting for a response from the storage (i.e., in a closed loop).
 
 %\begin{figure}[ht]
 %  \includegraphics[width=0.95\columnwidth]{figures/eurosys/chirper-celeb-dynastar}
@@ -133,12 +132,12 @@ Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than
     \includegraphics[width=\textwidth]{./figures/eurosys/chirper-celeb-dynastar.pdf}
     \caption{}
   \end{subfigure}
-  \begin{subfigure}{.47\textwidth}
+  \begin{subfigure}{.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{./figures/eurosys/chirper-celeb-ssmr.pdf}
     \caption{}
   \end{subfigure}
-  \caption{Some text in here}%
+  \caption{The impact of repartitioning of a dynamic workload in \dynastar~(a) and \ssmr without repartitioning (b) }%
   \label{fig:socialcelebrity}
 \end{figure*}
 
@@ -146,25 +145,27 @@ Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than
   \centering
   \begin{subfigure}{.4\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./figures/eurosys/timeline.png}
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-compare-timeline-tp.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{.4\textwidth}
+  \begin{subfigure}{.38\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./figures/eurosys/timeline.png}
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-compare-mix-tp.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{.4\textwidth}
+  \begin{subfigure}{.39\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./figures/eurosys/mix.png}
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-compare-timeline-lat.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{.4\textwidth}
+  \begin{subfigure}{.38\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./figures/eurosys/mix.png}
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-compare-mix-lat.pdf}
 %    \caption{}
   \end{subfigure}
-  \caption{Some text in here}%
+  \caption{Throughput and latency for different partition numbers. 
+  Throughput is in thousands of commands per second (kcps). 
+  Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:socialscalability}
 \end{figure*}
 
@@ -321,8 +322,8 @@ suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
 
 \begin{figure}[ht]
-	\includegraphics[width=\columnwidth]{figures/experiments/social-network-oracle-load/social-network-oracle-load}
-  \caption{CPU load in the oracle (5\% of edge cuts).}
+	\includegraphics[width=\columnwidth]{figures/eurosys/chirper-oracle-load.pdf}
+  \caption{Throughput at the oracle (social network).}
 	\label{fig:cpu_oracle}
 \end{figure}
 
