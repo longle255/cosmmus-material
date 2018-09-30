@@ -3,15 +3,15 @@ PRESENTATION
 -How often does the oracle re-partition the data? What factors determine it?
 -How frequently should partitioning happen and who should trigger the partition on which occasions? 
 	> some application-specific policy at the oracle; e.g., high percentage of multi-part commands during some interval
--What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
-	> optimize first multi-partition commands, then load with unbalanced factor (20% in our case)
 -The oracle keeps track of the dependencies, but how are the dependencies used to plan a new partition? 
 	> graph is fed into METIS; explain it better
--How exactly does the new partitioning scheme balance between placing dependent objects in the same partition and balancing the load over all partitions? 
-	> add table for experiment with 4 partitions
 -Invalidation of the workload graph on the client side is mentioned but no protocol is described for invalidations. 
 	> currently, client invalidates whole cache upon finding a wrong cached entry
 
+[DONE]-How exactly does the new partitioning scheme balance between placing dependent objects in the same partition and balancing the load over all partitions? 
+	> add table for experiment with 4 partitions
+[DONE]-What objective function are you optimizing for when the METIS graph partitioning algorithm is run?
+	> optimize first multi-partition commands, then load with unbalanced factor (20% in our case)
 [DONE]-How do you choose the host partition where the command is executed
 	> choose the partition that contains most needed objects
 [DONE]-The base communication means is an atomic multicast, which can be a source of overhead, but it is not clear whether this is implemented. 
