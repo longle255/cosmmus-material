@@ -92,7 +92,7 @@ Figure ~\ref{fig:tpcc_scaling} shows the peak throughput of \dynastar as we vary
 number of partitions. 
 Notice that we increase the state size as we add partitions (i.e., there is one warehouse per partition).
 The result shows that \dynastar is capable of applying
-a partitioning scheme that leads scalable performance.
+a partitioning scheme that leads to scalable performance.
 
 
 \subsection{Social network}
@@ -104,12 +104,12 @@ processes on Twitter throughout the discovery of a new particle with the feature
 Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 milion edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
-We evaluate the performance of \dynastar and \ssmr with the dataset mentioned above. With \ssmr, we used
-METIS to partition the data in advance, e.g. \ssmr started with optimized partitioning. \dynastar started with
-the random locations of the objects. We have simulated clients, each client issues a sequence of commands.  
+We evaluate the performance of \dynastar and S-SMR* with the dataset mentioned above. With S-SMR*, we used
+METIS to partition the data in advance, e.g. S-SMR* started with optimized partitioning. \dynastar started with
+the random locations of the objects. We have simulated clients, where each client issues a sequence of commands.  
 For each command, the client selects a random node as the active user with Zipfian access pattern ($\rho$ = 0.95).
-We focused on two type of commands: timeline commands and mix commands (85\% timeline and 15\% post). 
-Each client operates synchronously, waiting for a response from the storage (i.e., in a closed loop).
+We focused on two types of workloads: timeline only commands and mix commands (85\% timeline and 15\% post). 
+Each client operates in a closed loop, that is, the client issues a command and then waits from the response to submit the next command.
 
 % \paragraph*{Command generation.}
 % %
@@ -138,7 +138,7 @@ Each client operates synchronously, waiting for a response from the storage (i.e
     \includegraphics[width=\textwidth]{./figures/eurosys/chirper-celeb-ssmr.pdf}
     \caption{}
   \end{subfigure}
-  \caption{The impact of repartitioning of a dynamic workload in \dynastar~(a) and \ssmr without repartitioning (b) }%
+  \caption{The impact of repartitioning of a dynamic workload in \dynastar~(a) and \ssmr without repartitioning (b).}%
   \label{fig:socialcelebrity}
 \end{figure*}
 
@@ -208,7 +208,7 @@ Figure~\ref{fig:socialscalability} shows the peak throughput and latency for $\a
  partitions of the fixed graph for the social networks.
 
 All techniques perform similarly in the experiment with timeline command. This happens because no moves occur in
-\dynastar, and no synchronization among partitions is necessary for \ssmr in this case. 
+\dynastar, and no synchronization among partitions is necessary for S-SMR* in this case. 
 Consequently, all two schemes scale remarkably well, and
 the difference in throughput between each technique is due to the implementation of each one.
 %Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
