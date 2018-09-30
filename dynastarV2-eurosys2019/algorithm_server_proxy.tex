@@ -50,7 +50,7 @@
 	% \INDENT
 		\IF{$\ppm$ is $\pqm$}
 			\STATE $vars \leftarrow partitioning(\pqm) \setminus v:v \in \ppm$
-			\IF {$\forall v \in var, \ppm_i \in partitioning: \exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
+			\IF {$\forall v \in var, \ppm_i \in partitioning:$ \\ \hfill $\exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
 				\STATE apply $partitioning$
 			\ENDIF
 		\ELSE 
