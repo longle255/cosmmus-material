@@ -29,7 +29,7 @@ had the same resources as every other partition: 2 replicas and 3 acceptors
 %number of partitions increases, and performance as the size and complexity of the graph grows.
 The experiments seek to answer the following questions:
 \begin{itemize}
-\item \emph{What is the impact of repartitioning on a workload?}
+\item \emph{What is the impact of repartitioning on a real dataset?}
 \item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
 \item \emph{How does \dynastar performance compare to other approaches?} 
 \item \emph{How does \dynastar perform under dynamic workloads?}
@@ -56,19 +56,19 @@ In the experiments in this section, we deploy as many partitions as the number o
 
 \paragraph{The impact of graph repartitioning.}
 In order to assess the impact of state partitioning on performance, we ran the TPC-C benchmark on an un-partitioned database.  Figure ~\ref{fig:tpcc_repartitioning} 
-shows the performance of \dynastar with 8 warehouses and 8 partitions.
+shows the performance of \dynastar with 4 warehouses and 4 partitions.
 At the first part of the experiment, all the variables are randomly distributed across all partitions.
 As a result, almost every transaction accesses all partitions. Thus every transaction 
 required coordination between partitions, and objects were constantly moving back and forth. 
 %In addition, transactions from different clients were blocked by the others, 
 %made the time it took for executing one transaction remarkably high.
-This can be observed in the first 45 seconds of the experiment depicted in Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few transactions executed per second), high latency (i.e., several seconds), and a high percentage of cross-partition transactions.
+This can be observed in the first 50 seconds of the experiment depicted in Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few transactions executed per second), high latency (i.e., several seconds), and a high percentage of cross-partition transactions.
 
 %In addition to that, when a partition takes part in an execution of a transaction, 
 %if another command access variables that are being accesses by the ongoing command will 
 % be blocked until the previous command finish
 
-After 45 seconds, the oracle computed a new partitioning based on previously executed transactions and instructed the partitions to apply the new partitioning.
+After 50 seconds, the oracle computed a new partitioning based on previously executed transactions and instructed the partitions to apply the new partitioning.
 When the partitions delivered the partitioning request, they exchanged objects to achieve the new partitioning.
 % During this process, servers didn't execute any other transactions, thus the throughput decreased 
 % to 0, and the average latency was not applicable. 
@@ -104,9 +104,10 @@ processes on Twitter throughout the discovery of a new particle with the feature
 Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 milion edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
-We have simulated clients, each client issues a sequence of commands.  
-For each command, the client selects a random node as the poster with Zipfian access pattern, with Zipf 
-parameter $\rho$ = 0.99.
+We evaluate the performance of \dynastar and \ssmr with the dataset mentioned above. With \ssmr, we used
+METIS to partition the data in advance, e.g. \ssmr started with optimized partitioning. \dynastar started with
+the random locations of the objects. We have simulated clients, each client issues a sequence of commands.  
+For each command, the client selects a random node as the active user with Zipfian access pattern ($\rho$ = 0.95).
 We focused on two type of commands: timeline commands and mix commands (85\% timeline and 15\% post). 
 Each client operates synchronously, waiting for a response from the storage (i.e., in a closed loop).
 
@@ -199,17 +200,16 @@ Partition & Tput & M-part commands per sec & Exchanged objects per sec \\ \hline
 % %As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
 
 
-\paragraph*{\dynastar vs. alternative techniques.}
+\paragraph*{\dynastar vs. alternative technique.}
 \label{sec:evaluation:results}
 
-Figure~\ref{fig:varying_edge_cut} shows the peak throughput and latency for $\approx$75\% of peak throughput (average and 95-th percentile) of the three techniques, 
-as we vary the number of partitions for social networks with different percentages of edge cuts.
+Figure~\ref{fig:socialscalability} shows the peak throughput and latency for $\approx$75\% of peak throughput
+ (average and 95-th percentile) of the evaluated techniques on different workloads, as we vary the number of 
+ partitions of the fixed graph for the social networks.
 
-All three techniques perform similarly when there are no cross-partition commands after
-the graph is perfectly partitioned. This happens because no more moves occur in
-\dynastar or \dssmr, and no synchronization among partitions is
-necessary for \ssmr in this case. 
-Consequently, all three schemes scale remarkably well, and
+All techniques perform similarly in the experiment with timeline command. This happens because no moves occur in
+\dynastar, and no synchronization among partitions is necessary for \ssmr in this case. 
+Consequently, all two schemes scale remarkably well, and
 the difference in throughput between each technique is due to the implementation of each one.
 %Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
 %As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges 
@@ -217,77 +217,66 @@ the difference in throughput between each technique is due to the implementation
 %DS-SMR (decentralized dynamic scheme) about 80 seconds to converge.
 %This means that \dynastar can react to workload changes more rapidly than DS-SMR.
 
-With social networks with edge cut percentage greater than zero \dssmr\ performance decreases significantly.  
-This happens because in such cases, objects in \dssmr\ are constantly being moved back and forth between partitions 
-without converging to a stable configuration.
-%(see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
-In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts. 
+
+% With social networks with edge cut percentage greater than zero \dssmr\ performance decreases significantly.  
+% This happens because in such cases, objects in \dssmr\ are constantly being moved back and forth between partitions 
+% without converging to a stable configuration.
+% %(see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). 
+% In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts. 
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
-
-
-\paragraph*{The ideal number of partitions.}
-\label{sec:evaluation:results}
-
-While in the previous section we considered executions with a fixed percentage of edge cuts.
-%, as we increased the number of partitions 
-%(by adjusting the social graph clustering coefficient),
-We now consider a fixed social network graph and vary the number of partitions.
-Increasing the number of partitions with a fixed graph introduces a tradeoff.
-On the one hand, additional partitions improve performance as there are more resources to execute posts.
+In the experiment with mix workload, in which there were 15\% of post commands, we see that the throughput still scales with the number of partitions in experiments with up to 8 partitions. While increasing the number of partitions to 16 with that fixed graph starts introducing a tradeoff. 
+On the one hand, additional partitions improves performance as there are more resources to execute the commands.
 On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
-We evaluate the performance of \dynastar, \dssmr\ and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
 
-%\begin{figure}[ht]
-%	\includegraphics[width=0.95\columnwidth]{figures/experiments/social-network-ideal-partition/social-network-ideal-partition}
-%	\caption{Performance scalability with social network.}
-%	\label{fig:4p1p_varying_partition_size}
-%\end{figure}
-
-Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and optimized \ssmr throughput scale up to ten partitions, after which performance decreases. \dssmr\ throughput decreases gradually as we increase partitions, since the chance that objects are spread between partitions also increases.
-% For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
-% 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
 The most common operation in social networks is the request to read a user timeline. This is a single-partition
 command in our application and as a consequence it scales linearly with the number of partitions.
 
 
+% \paragraph*{The ideal number of partitions.}
+% \label{sec:evaluation:results}
+
+% While in the previous section we considered executions with a fixed percentage of edge cuts.
+% %, as we increased the number of partitions 
+% %(by adjusting the social graph clustering coefficient),
+% We now consider a fixed social network graph and vary the number of partitions.
+% Increasing the number of partitions with a fixed graph introduces a tradeoff.
+% On the one hand, additional partitions improve performance as there are more resources to execute posts.
+% On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
+% We evaluate the performance of \dynastar, \dssmr\ and \ssmr with an optimized partitioning.% when subject to this tradeoff. 
+
+% Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and optimized \ssmr throughput scale up to ten partitions, after which performance decreases. \dssmr\ throughput decreases gradually as we increase partitions, since the chance that objects are spread between partitions also increases.
+% % For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively 
+% % 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
+% Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
+% The most common operation in social networks is the request to read a user timeline. This is a single-partition
+% command in our application and as a consequence it scales linearly with the number of partitions.
+
+
 \paragraph*{Performance under dynamic workloads.}
 
-Figure~\ref{fig:dynamic_load_tput} (left) depicts performance of an evolving social network.  
-We started the system with an empty graph. Then clients
-continuously create users and connections between them during the experiment
-by executing the follow command.
-The rate at which users and connections are created is shown in Figure~\ref{fig:dynamic_load_tput} (right).
-The oracle monitors changes in the
-graph's structure and was configured to trigger a repartitioning after receiving a number of hints
-%(object creating and connecting)
-from the partitions.
-%after all users were in the system and after 300 seconds into the execution.
-%when the number of changes exceed a threshold.  
-%When the repartitioning took place, the partitioning became better and helped the throughput increase.
-%We also show the behavior of DS-SMR.
-When the repartitioning takes place, around 122 seconds into the execution, the previously random user mapping got a better location from the oracle.
-After the repartitioning, the objects are moved to a better partition.
-The partitioning became better and thus the throughput increased.
-We also show the behavior of DS-SMR.
-When few connections are in the system, most of the posts are single-partition commands, but as connections are added, moves are needed to execute posts and performance decreases quickly.
+Figure~\ref{fig:socialcelebrity} depicts performance of \dynastar and \ssmr of an evolving social network.  
+We started the system with the original network from Higg dataset. After 200 seconds, we started simulating 
+the change in the social network, which is one user became a celebrity. That users posted more frequently, and 
+other users started following that celebrity. 
 
-%\begin{figure}[ht]
-%	\includegraphics{figures/experiments/dynamicload-tp-move-4p}
-%	\caption{Adding nodes and repartitioning dynamically}
-%	\label{fig:dynamic_load_tput}
-%\end{figure}
-%\begin{figure}[ht]
-%	\includegraphics{figures/experiments/dynamicload-graph-structure}
-%	\caption{Changes in dynamic workloads}
-%	\label{fig:dynamic_load_changes}
-%\end{figure}
+At the begin of the experiment, \dynastar performance was not as good as \ssmr (e.g. lower throughput, higher number of
+percentage of global commands, and higher number of objects that was being exchanged), because \ssmr started with an optimized
+partitioning, while \dynastar started with a random partitioning. 
+After 50 seconds, \dynastar triggered repartitioning process which moved everything to their optimized location. This helped
+reducing the percentage of global commands to 10\%, and thus increased the throughput. After the repartitioning, \dynastar got better
+throughput than \ssmr with the optimized partitioning.
+After 200 seconds, the network started to change its structure, as many users started to follow a celebrity, and created more edges
+between nodes in the graph. Both \dynastar and \ssmr suffered from the change, as the rate of global command increased, and the throughput
+decreased. However when the repartitioning takes place in \dynastar, around 300 seconds into the execution, the previously user mapping
+got a better location from the oracle, which adapted the changes. After the repartitioning, the objects are moved to a better partition.
+The partitioning became better and thus the throughput increased.
+
 
 \subsection{The performance of the oracle}
 
-\dynastar differs from \dssmr\ in the sense that it uses an oracle
-that maintains a global view of the workload graph. The oracle allows
+\dynastar  uses an oracle that maintains a global view of the workload graph. The oracle allows
 \dynastar to make better choices about data movement, resulting in an overally
 better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
@@ -311,12 +300,14 @@ linearly in both memory and computation time on graphs of up to 10 million verti
 	\label{fig:metis_size_time}
 \end{figure}
 
-The second experiment evaluates the oracle in terms of CPU load over
-time, for varying numbers of partitions. The results are shown in
-Figure~\ref{fig:cpu_oracle}. The load is higher in the
-beginning of the experiment, when the clients had not yet cached the
-requests and the oracle was busy moving the states. However, the load diminishes rapidly, and remains relatively
-low over time. This is because access to the oracle is necessary only
+The second experiment evaluates the oracle in terms of the number of queries sent to the oracle over
+time, for varying numbers of partitions. The experiment results was measured when the system was running stable, 
+and the clients had cache all requests.  The results are shown in
+Figure~\ref{fig:cpu_oracle}. The number of queries processed to the oracle is zero at the 
+beginning of the experiment, as the clients has cached the location of all objects.
+After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
+Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
+However, the load diminishes rapidly and gradually reduce to zero. This is because access to the oracle is necessary only
 when clients have an invalid cache or when a repartition happens. These experiments
 suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
