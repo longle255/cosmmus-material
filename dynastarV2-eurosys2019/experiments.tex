@@ -170,6 +170,33 @@ Each client operates in a closed loop, that is, the client issues a command and 
   \label{fig:socialscalability}
 \end{figure*}
 
+
+\begin{figure*}[h!]
+  \centering
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-latency-cdf-2p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-latency-cdf-4p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-latency-cdf-8p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./figures/eurosys/chirper-latency-cdf-16p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \caption{Cumulative distribution function (CDF) of latency for mix workloads on different partitioning configurations.}
+  \label{fig:socialscdf}
+\end{figure*}
+
 \begin{table}[htp]
 \caption{Average load at each partition at the peak throughput}
 \begin{adjustbox}{max width=\columnwidth}
