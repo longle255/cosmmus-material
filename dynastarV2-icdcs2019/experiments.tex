@@ -22,19 +22,19 @@ had the same resources as every other partition: 2 replicas and 3 acceptors
 (in total five nodes per partition).
 
 
-\subsection{Methodology and goals}
-\label{sec:evaluation:methodology}
+% \subsection{Methodology and goals}
+% \label{sec:evaluation:methodology}
 
-%In order to show the scalability of our approach we tested the performance as the 
-%number of partitions increases, and performance as the size and complexity of the graph grows.
-The experiments seek to answer the following questions:
-\begin{itemize}
-\item \emph{What is the impact of repartitioning on a real dataset?}
-\item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
-\item \emph{How does \dynastar performance compare to other approaches?} 
-\item \emph{How does \dynastar perform under dynamic workloads?}
-\item \emph{What is the performance of the oracle?}
-\end{itemize}
+% %In order to show the scalability of our approach we tested the performance as the 
+% %number of partitions increases, and performance as the size and complexity of the graph grows.
+% The experiments seek to answer the following questions:
+% \begin{itemize}
+% \item \emph{What is the impact of repartitioning on a real dataset?}
+% \item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
+% \item \emph{How does \dynastar performance compare to other approaches?} 
+% \item \emph{How does \dynastar perform under dynamic workloads?}
+% \item \emph{What is the performance of the oracle?}
+% \end{itemize}
 
 \paragraph*{Performance metrics.}
 %
@@ -319,25 +319,25 @@ better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, or a single point of failure. 
 To cope with failures, the oracle is implemented as a replicated partition. 
-We conducted two experiments to evaluate if the \dynastar oracle is a bottleneck to
+We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck to
 system performance. The results show that the load on the oracle is
 low, suggesting that \dynastar scales well.
 
 
-The first experiment assesses the scalability of the METIS algorithm only.
-We measured the time to compute the partitioning solution, and
-the memory usage of the algorithms for increasingly large graphs. 
-The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
-linearly in both memory and computation time on graphs of up to 10 million vertices.
+% The first experiment assesses the scalability of the METIS algorithm only.
+% We measured the time to compute the partitioning solution, and
+% the memory usage of the algorithms for increasingly large graphs. 
+% The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
+% linearly in both memory and computation time on graphs of up to 10 million vertices.
 
-\begin{figure}[ht!]
-  \centering
-    \includegraphics[width=\columnwidth]{figures/metis_size_time}
-	\caption{METIS processor and memory usage.}
-	\label{fig:metis_size_time}
-\end{figure}
+% \begin{figure}[ht!]
+%   \centering
+%     \includegraphics[width=\columnwidth]{figures/metis_size_time}
+% 	\caption{METIS processor and memory usage.}
+% 	\label{fig:metis_size_time}
+% \end{figure}
 
-The second experiment evaluates the oracle in terms of the number of queries sent to the oracle over
+The experiment evaluates the oracle in terms of the number of queries sent to the oracle over
 time, for varying numbers of partitions. The experiment results was measured when the system was running stable, 
 and the clients had cache all requests.  The results are shown in
 Figure~\ref{fig:cpu_oracle}. The number of queries processed to the oracle is zero at the 
