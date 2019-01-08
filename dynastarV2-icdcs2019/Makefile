@@ -4,7 +4,7 @@ EMBED     = ./embed_fonts.sh
 PDFOUT    = main
 INPUTS    = main.tex
 
-default: $(PDFOUT)
+default: $(PDFOUT) clean
 
 $(PDFOUT): $(INPUTS)
 	$(LATEX) $(PDFOUT) && $(BIBTEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(EMBED) $(PDFOUT)

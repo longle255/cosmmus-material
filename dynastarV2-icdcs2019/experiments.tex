@@ -49,7 +49,7 @@ In the experiments in this section, we deploy as many partitions as the number o
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-detail-dynastar}
+    \includegraphics[width=0.8\columnwidth]{figures/experiments/tpcc-detail-dynastar}
   \caption{Repartitioning on \dynastar; throughput (top), objects exchanged between partitions (middle), 
   and percentage of multi-partition commands (bottom).}
   \label{fig:tpcc_repartitioning}
@@ -84,7 +84,7 @@ can be found in a local partition, which considerably increases performance and 
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=\columnwidth]{figures/experiments/tpcc-scaling-tp-lat.pdf}
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/tpcc-scaling-tp-lat.pdf}
   \caption{Performance scalability with TPC-C.}
   \label{fig:tpcc_scaling}
 \end{figure}
@@ -109,7 +109,7 @@ of news on Twitter after the discovery of a new particle with the features of th
 Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 million edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
-We evaluate the performance of \dynastar and S-SMR* with the dataset mentioned above. With S-SMR*, we used
+We evaluate the performance of \dynastar and other techniques with the dataset mentioned above. With S-SMR*, we used
 METIS to partition the data in advance. Thus, S-SMR* started with an optimized partitioning. \dynastar started with
 random location of the objects. Each client issues a sequence of commands.  
 For each command, the client selects a random node as the active user with Zipfian access pattern ($\rho$ = 0.95).
@@ -125,93 +125,56 @@ Each client operates in a closed loop, that is, the client issues a command and 
 %  \label{fig:4p1p_varying_partition_size}
 %\end{figure}
 %
-%\begin{figure}[ht]
-%  \includegraphics[width=0.95\columnwidth]{figures/experiments/chirper-celeb-ssmr}
-%  \caption{Static partitioning with {S-SMR*}}
-%  \label{fig:4p1p_varying_partition_size}
-%\end{figure}
-
-
-\begin{figure*}[h!]
-  \centering
-  \begin{subfigure}{.4\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./figures/experiments/chirper-compare-timeline-tp.pdf}
-%    \caption{}
-  \end{subfigure}
-  \begin{subfigure}{.38\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./figures/experiments/chirper-compare-mix-tp.pdf}
-%    \caption{}
-  \end{subfigure}
-  \begin{subfigure}{.39\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./figures/experiments/chirper-compare-timeline-lat.pdf}
-%    \caption{}
-  \end{subfigure}
-  \begin{subfigure}{.38\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./figures/experiments/chirper-compare-mix-lat.pdf}
-%    \caption{}
-  \end{subfigure}
-  \caption{Throughput and latency for different partition numbers. 
+\begin{figure}[ht]
+ \includegraphics[width=0.99\columnwidth]{figures/experiments/chirper-compare-full}
+ \caption{Throughput and latency for different partition numbers. 
   Throughput is in thousands of commands per second (kcps). 
   Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:socialscalability}
-\end{figure*}
+\end{figure}
 
-
-% \begin{figure*}[h!]
+% \begin{figure*}[h]
 %   \centering
-%   \begin{subfigure}{\columnwidth}
-%     \centering
-%     \includegraphics[width=\textwidth]{./figures/experiments/chirper-latency-cdf-2p.pdf}
-% %    \caption{}
+%   \begin{subfigure}{0.95\columnwidth}
+%     \begin{subfigure}{.45\columnwidth}
+%       \centering
+%       \includegraphics[width=\columnwidth]{./figures/experiments/chirper-compare-timeline-tp.pdf}
+%     \end{subfigure}
+%     % \hfill %%
+%     \begin{subfigure}{.45\columnwidth}
+%       \centering
+%       \includegraphics[width=\columnwidth]{./figures/experiments/chirper-compare-mix-tp.pdf}
+%     \end{subfigure}
 %   \end{subfigure}
-%   \begin{subfigure}{\columnwidth}
-%     \centering
-%     \includegraphics[width=\textwidth]{./figures/experiments/chirper-latency-cdf-4p.pdf}
-% %    \caption{}
+%   \vfill %%
+%   \begin{subfigure}{0.95\columnwidth}
+%     \begin{subfigure}{.45\columnwidth}
+%       \centering
+%       \includegraphics[width=\columnwidth]{./figures/experiments/chirper-compare-timeline-lat.pdf}
+%     \end{subfigure}
+%     \hfill %%
+%     \begin{subfigure}{.45\columnwidth}
+%       \centering
+%       \includegraphics[width=\columnwidth]{./figures/experiments/chirper-compare-mix-lat.pdf}
+%     \end{subfigure}
 %   \end{subfigure}
-%   \begin{subfigure}{\columnwidth}
-%     \centering
-%     \includegraphics[width=\textwidth]{./figures/experiments/chirper-latency-cdf-8p.pdf}
-% %    \caption{}
-%   \end{subfigure}
-%   \begin{subfigure}{\columnwidth}
-%     \centering
-%     \includegraphics[width=\textwidth]{./figures/experiments/chirper-latency-cdf-16p.pdf}
-% %    \caption{}
-%   \end{subfigure}
-%   \caption{Cumulative distribution function (CDF) of latency for mix workloads on different partitioning configurations.}
-%   \label{fig:socialcdf}
+%   \caption{Throughput and latency for different partition numbers. 
+%   Throughput is in thousands of commands per second (kcps). 
+%   Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
+%   \label{fig:socialscalability}
 % \end{figure*}
 
 
-
-% \paragraph*{Operational parameters.}
-% %
-% With post commands, the frequency of single-partition
-% vs. multi-partition commands depends on the number of partitions, the
-% geometry of the social graph, and the technique used to partition the
-% data. We ran experiments with 2 to 8 partitions.  To vary the
-% geometry, we generated graphs with varying percentages of edge-cuts as
-% computed by METIS on a static graph. Our experiments used graphs with
-% 0\%, 1\%, 5\% and 10\% of edge cuts. We configured METIS to keep the size of 
-% the most unbalanced partition up to 30\% more than the average partition size.
-% %As already mentioned, we compared three strategies: \ssmr{}, \dssmr, and \dynastar.
-
-
-\paragraph*{\dynastar vs. alternative technique.}
+\paragraph*{\dynastar vs. alternative techniques.}
 \label{sec:evaluation:results}
 
 Figure~\ref{fig:socialscalability} shows the peak throughput and latency for approximately 75\% of peak throughput
  (average and 95-th percentile) of the evaluated techniques on different workloads, as we vary the number of 
  partitions of the fixed graph for the social networks.
 
-Both techniques perform similarly in the experiment with timeline commands. This happens because no moves occur in
-\dynastar, and no synchronization among partitions is necessary for S-SMR* in this case. 
-Consequently, the two schemes scale remarkably well, and
+All three techniques perform similarly in the experiment with timeline commands. This happens because no moves occur in
+\dynastar or \dssmr{}, and no synchronization among partitions is necessary for S-SMR* in this case. 
+Consequently, all three schemes scale remarkably well, and
 the difference in throughput between each technique is due to the implementation of each one.
 %Although \dynastar and DS-SMR have comparable performance, they differ in an important way. 
 %As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges 
@@ -227,9 +190,15 @@ the difference in throughput between each technique is due to the implementation
 % In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts. 
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
-In the experiment with mix workload, we see that the throughput still scales with the number of partitions in experiments with up to 8 partitions. While increasing the number of partitions to 16 with that fixed graph starts introducing a tradeoff. 
+In the experiment with mix workload, we see that \dssmr{} performance decreases significantly.
+This happens because in such cases, objects in \dssmr{} are constantly being moved back and forth 
+between partitions without converging to a stable configuration.
+In contrast, for \dynastar and S-SMR* with an optimized partitioning, the throughput still scales with 
+the number of partitions in experiments with up to 8 partitions. 
+While increasing the number of partitions to 16 with that fixed graph starts introducing a tradeoff. 
 On the one hand, additional partitions should improve performance as there are more resources to execute the commands.
-On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
+On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance 
+as there are additional operations involving multiple partitions.
 
 Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
 The most common operation in social networks is the request to read a user timeline. This is a single-partition
@@ -340,7 +309,7 @@ low, suggesting that \dynastar scales well.
 The experiment evaluates the oracle in terms of the number of queries sent to the oracle over
 time, for varying numbers of partitions. The experiment results was measured when the system was running stable, 
 and the clients had cache all requests.  The results are shown in
-Figure~\ref{fig:cpu_oracle}. The number of queries processed to the oracle is zero at the 
+Figure~\ref{fig:socialcelebrity}. The number of queries processed to the oracle is zero at the 
 beginning of the experiment, as the clients has cached the location of all objects.
 After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
 Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
@@ -349,9 +318,9 @@ when clients have an invalid cache or when a repartition happens. These experime
 suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
 
-\begin{figure}[ht]
-	\includegraphics[width=\columnwidth]{figures/experiments/chirper-oracle-load.pdf}
-  \caption{Throughput at the oracle (social network).}
-	\label{fig:cpu_oracle}
-\end{figure}
+% \begin{figure}[ht]
+% 	\includegraphics[width=\columnwidth]{figures/experiments/chirper-oracle-load.pdf}
+%   \caption{Throughput at the oracle (social network).}
+% 	\label{fig:cpu_oracle}
+% \end{figure}
 
