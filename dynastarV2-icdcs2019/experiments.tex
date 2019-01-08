@@ -288,9 +288,18 @@ better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, or a single point of failure. 
 To cope with failures, the oracle is implemented as a replicated partition. 
-We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck to
-system performance. The results show that the load on the oracle is
-low, suggesting that \dynastar scales well.
+The results in Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a bottleneck.
+The number of queries processed to the oracle is zero at the 
+beginning of the experiment, as the clients has cached the location of all objects.
+After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
+Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
+However, the load diminishes rapidly and gradually reduce. This is because access to the oracle is necessary only
+when clients have an invalid cache or when a repartition happens
+
+
+% We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck to
+% system performance. The results show that the load on the oracle is
+% low, suggesting that \dynastar scales well.
 
 
 % The first experiment assesses the scalability of the METIS algorithm only.
@@ -306,16 +315,16 @@ low, suggesting that \dynastar scales well.
 % 	\label{fig:metis_size_time}
 % \end{figure}
 
-The experiment evaluates the oracle in terms of the number of queries sent to the oracle over
-time, for varying numbers of partitions. The experiment results was measured when the system was running stable, 
-and the clients had cache all requests.  The results are shown in
-Figure~\ref{fig:socialcelebrity}. The number of queries processed to the oracle is zero at the 
-beginning of the experiment, as the clients has cached the location of all objects.
-After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
-Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
-However, the load diminishes rapidly and gradually reduce to zero. This is because access to the oracle is necessary only
-when clients have an invalid cache or when a repartition happens. These experiments
-suggest that the oracle would not become a bottleneck.% for reasonably large
+% The experiment evaluates the oracle in terms of the number of queries sent to the oracle over
+% time, for varying numbers of partitions. The experiment results was measured when the system was running stable, 
+% and the clients had cache all requests.  The results are shown in
+% Figure~\ref{fig:socialcelebrity}. The number of queries processed to the oracle is zero at the 
+% beginning of the experiment, as the clients has cached the location of all objects.
+% After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
+% Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
+% However, the load diminishes rapidly and gradually reduce to zero. This is because access to the oracle is necessary only
+% when clients have an invalid cache or when a repartition happens. These experiments
+% suggest that the oracle would not become a bottleneck.% for reasonably large
 %deployments.
 
 % \begin{figure}[ht]
