@@ -6,29 +6,33 @@
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(C)$}}
 	\STATE $\omega \leftarrow vars(C)$
 	\COMMENT{variables accessed by $C$}
-	\IF[\textbf{Task 1a}]{$\forall v \in \omega : v \in \ppm$}
+	\IF[\textbf{Task 1a}]{$\omega \subseteq \ppm$}
 		\STATE execute command $C$
 		\STATE send response to the client
 	\ELSE[\textbf{Task 1b}]
 		\STATE $dests \leftarrow \parts(\omega)$
 		\COMMENT{get all involved partition}			
-		\STATE $\ppm_d \leftarrow target(dest, C)$
+		\STATE $\ppm_d \leftarrow target(dests, C)$
 		\COMMENT{$\ppm_d$ $\in dest$ will execute $C$}
+		\STATE $\ppm_s \leftarrow dests \setminus \ppm_d$
+		\COMMENT{$\ppm_s$ $\in dests$ will send variables}
 
 		\IF[$\ppm$ is the target partition:] {$\ppm = \ppm_d$}
 			\STATE wait until $\forall v \in \omega \setminus \ppm: \exists \langle vars, C \rangle \in rcvd\_msgs :v \in vars$
+			% \STATE wait until $\omega \setminus \ppm \subseteq \bigcup \{ vars | \langle vars, C \rangle \in rcvd\_msgs \}$
 			\COMMENT{wait for needed variables}
 			\STATE execute command $C$
 			\STATE send response to the client
-			\STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\forall x \in \pqm$: \\
-				\hfill send $(\langle v:v \in \pqm \rangle, C)$ to $x$
+			% \STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\forall x \in \pqm$: \\
+			\STATE \rmcast$(\ppm_i \in \ppm_s, \langle vars, C\rangle)$
 			\COMMENT{return the variables}		
 		\ELSE[if $\ppm$ is not the target partition:]
 			\STATE $vars \leftarrow \omega \cap \ppm$
 			\COMMENT{all needed variables in $\ppm$}
 			\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
-			\COMMENT{send variables to destination}
-			\STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
+			\COMMENT{send variables}
+			% \STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
+			\STATE wait until $\langle vars, C \rangle \in rcvd\_msgs$
 		\ENDIF		
 	\ENDIF
 \ENDINDENT
@@ -36,7 +40,7 @@
 \vspace{1.0mm}
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm, create(v))$}}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\langle\ppm, create(v)\rangle)$}}
 	\STATE $\forall x \in oracle$: send $(\langle signal, C \rangle )$ to $x$
 	\COMMENT{exchange signal}
 	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$

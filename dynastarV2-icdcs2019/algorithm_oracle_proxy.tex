@@ -15,8 +15,8 @@
 			% \COMMENT{...determine $v$'s partition}
 			\STATE $prophecy \leftarrow \ppm$
 			\COMMENT{prepare client's response}
-			\STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
-			\STATE \amcast$(alldest, (\ppm,create(v)))$
+			% \STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
+			\STATE \amcast$(\{oracle, \ppm\}, (\ppm,create(v)))$
 %					\COMMENT{send command to partition}
 		\ENDIF
 	\ENDINDENT
@@ -40,10 +40,10 @@
 \ENDINDENT
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\ppm_v,create(v))$}}
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\langle\ppm_v,create(v)\rangle)$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 %	\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
-	\STATE $\forall x \in \ppm_v$: send $(\langle signal, C \rangle )$ to $x$
+	\STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, C \rangle)$
 	\COMMENT{exchange signal...}
 	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
 	\COMMENT{...to coordinate}
@@ -61,6 +61,7 @@
 \vspace{1.0mm}
 \INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
 	\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
+	% \STATE $dests \leftarrow \{ \ppm : \ppm \cap vars \neq \varnothing \}$
 	\STATE return $dests$
 \ENDINDENT
 
@@ -71,8 +72,8 @@
 	\STATE $inc(changes)$
 	\IF {$changes \geq threshold$}
 		\STATE $partitioning  \leftarrow$ compute $\ip_1, ..., \ip_m$ from $G_W$
-		\STATE $alldest \leftarrow \{oracle\} \cup all partitions$
-		\STATE \amcast$(alldest, (partitioning))$
+		% \STATE $alldest \leftarrow \{oracle\} \cup all partitions$
+		\STATE \amcast$(\{oracle, all\_partitions\}, (partitioning))$
 	\ENDIF
 \ENDINDENT
 
