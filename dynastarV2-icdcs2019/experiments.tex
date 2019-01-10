@@ -45,7 +45,8 @@ had the same resources as every other partition: 2 replicas and 3 Paxos acceptor
 
 In the experiments in this section, we deploy as many partitions as the number of warehouses.
 
-\paragraph{The impact of graph repartitioning}
+%\paragraph*{The impact of graph repartitioning}
+\subsubsection{The impact of graph repartitioning}
 In order to assess the impact of state partitioning on performance, we ran the TPC-C benchmark on an 
 un-partitioned database.  Figure ~\ref{fig:tpcc_repartitioning} 
 shows the performance of \dynastar with 8 warehouses and 8 partitions.
@@ -69,19 +70,19 @@ When the partitions delivered the partitioning request, they exchanged objects t
 % During this process, servers didn't execute any other transactions, thus the throughput decreased 
 % to 0, and the average latency was not applicable. 
 It takes about 10 seconds for partitions to reach the new partitioning.
-However, during the repartitioning servers continue to execute transactions.
+However, during the repartitioning, servers continue to execute transactions.
 After the state is relocated, most objects involved in a transaction
 can be found in a local partition, which considerably increases performance and reduces latency. 
 
 \begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\columnwidth]{figures/experiments/tpcc-detail-dynastar}
-  \caption{Repartitioning on \dynastar; throughput (top), objects exchanged between partitions (middle), 
+  \caption{Repartitioning in \dynastar; throughput (top), objects exchanged between partitions (middle), 
   and percentage of multi-partition commands (bottom).}
   \label{fig:tpcc_repartitioning}
 \end{figure}
 
-\paragraph*{Scalability}
+\subsubsection{Scalability}
 In order to show how \dynastar scales out, we varied the number of partitions from 1 to 128 partitions. 
 %We also added warehouses while adding partitions to demonstrate using 
 %\dynastar to grow an application by adding more hardware. 
@@ -95,7 +96,7 @@ a partitioning scheme that leads to scalable performance.
 \begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\columnwidth]{figures/experiments/tpcc-scaling-tp-lat.pdf}
-  \caption{Performance scalability with TPC-C.}
+  \caption{Performance scalability with TPC-C. Throughput (in thousands of transactions per second, ktps) and latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:tpcc_scaling}
 \end{figure}
 
@@ -126,7 +127,7 @@ Each client operates in a closed loop, that is, the client issues a command and 
 %
 \begin{figure}[ht]
  \includegraphics[width=0.99\columnwidth]{figures/experiments/chirper-compare-full}
- \caption{Throughput (in thousands of commands per second, kcps) and latency for different partitions. 
+ \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. 
   Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:socialscalability}
 \end{figure}
@@ -163,14 +164,14 @@ Each client operates in a closed loop, that is, the client issues a command and 
 % \end{figure*}
 
 
-\paragraph*{\dynastar vs. alternative techniques}
+\subsubsection{\dynastar vs. other techniques}
 \label{sec:evaluation:results}
 
 Figure~\ref{fig:socialscalability} shows the peak throughput and latency for approximately 75\% of peak throughput
- (average and 95-th percentile) of the evaluated techniques on different workloads, as we vary the number of 
+ (average and 95-th percentile) of the evaluated techniques as we vary the number of 
  partitions of the fixed graph for the social networks.
 
-All three techniques perform similarly in the experiment with timeline commands. This happens because no moves occur in
+In the experiment with timeline commands, all three techniques perform similarly. This happens because no moves occur in
 \dynastar or \dssmr{}, and no synchronization among partitions is necessary for S-SMR* in this case. 
 Consequently, all three schemes scale remarkably well, and
 the difference in throughput between each technique is due to the implementation of each one.
@@ -188,13 +189,13 @@ the difference in throughput between each technique is due to the implementation
 % In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts. 
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
-In the experiment with mix workload, we see that \dssmr{} performance decreases significantly.
-This happens because in such cases, objects in \dssmr{} are constantly being moved back and forth 
+In the experiment with the mix workload, we see that \dssmr{} performance decreases significantly.
+This happens because in such cases, objects in \dssmr{} are constantly moving back and forth 
 between partitions without converging to a stable configuration.
-In contrast, for \dynastar and S-SMR* with an optimized partitioning, the throughput still scales with 
+In contrast, for \dynastar and S-SMR*, the throughput scales with 
 the number of partitions in experiments with up to 8 partitions. 
-While increasing the number of partitions to 16 with that fixed graph starts introducing a tradeoff. 
-On the one hand, additional partitions should improve performance as there are more resources to execute the commands.
+Increasing the number of partitions to 16 with the fixed graph reveals a tradeoff:
+On the one hand, additional partitions should improve performance as there are more resources to execute commands.
 On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance 
 as there are additional operations involving multiple partitions.
 
@@ -225,9 +226,9 @@ command in our application and as a consequence it scales linearly with the numb
 % command in our application and as a consequence it scales linearly with the number of partitions.
 
 
-\paragraph*{Performance under dynamic workloads}
+\subsubsection{Performance under dynamic workloads}
 
-Figure~\ref{fig:socialcelebrity} depicts performance of \dynastar and S-SMR* of an evolving social network.  
+Figure~\ref{fig:socialcelebrity} depicts the performance of \dynastar and S-SMR* with an evolving social network.  
 We started the system with the original network from Higg dataset. After 200 seconds, we introduced a new celebrity user in the workload.
 The celebrity user posted more frequently, and 
 other users started following the celebrity. 
@@ -244,7 +245,7 @@ other users started following the celebrity.
     \includegraphics[width=\textwidth]{./figures/experiments/chirper-celeb-ssmr.pdf}
     \caption{}
   \end{subfigure}
-  \caption{The impact of repartitioning of a dynamic workload in \dynastar~(a) and \ssmr without repartitioning (b).}%
+  \caption{Repartitioning a dynamic workload with \dynastar~(a) and \ssmr* without repartitioning (b).}%
   \label{fig:socialcelebrity}
 \end{figure*}
 
@@ -252,8 +253,7 @@ At the beginning of the experiment, \dynastar performance was not as good as S-S
 percentage of multi-partition commands, and higher number of exchanged objects), because S-SMR* started with an optimized
 partitioning, while \dynastar started with a random partitioning. 
 After 50 seconds, \dynastar triggered the repartitioning process, which led to an optimized location of data. Repartitioning helped
-reduce the percentage of multi-partition commands to 10\%, and thus increased the throughput. After the repartitioning, \dynastar got better
-throughput than S-SMR* with the optimized partitioning.
+reduce the percentage of multi-partition commands to 10\%, and thus increased the throughput. After the repartitioning, \dynastar outperforms S-SMR* with the optimized partitioning.
 After 200 seconds, the network started to change its structure, as many users started to follow a celebrity, and created more edges
 between nodes in the graph. Both \dynastar and S-SMR suffered from the change, as the rate of multi-partition command increased, and the throughput
 decreased. However, when the repartitioning takes place in \dynastar, around 300 seconds into the execution, the previously user mapping
@@ -288,8 +288,8 @@ in case the component becomes a bottleneck, or a single point of failure.
 To cope with failures, the oracle is implemented as a replicated partition. 
 The results in Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a bottleneck.
 The number of queries processed to the oracle is zero at the 
-beginning of the experiment, as the clients has cached the location of all objects.
-After 80 second, the repartitioning was triggered, making all cached data on clients invalid.
+beginning of the experiment, as the clients have cached the location of all objects.
+After 80 seconds, the repartitioning was triggered, making all cached data on clients invalid.
 Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
 However, the load diminishes rapidly and gradually reduce. This is because access to the oracle is necessary only
 when clients have an invalid cache or when a repartition happens
