@@ -1,5 +1,16 @@
 %!TEX root =  main.tex
-\subsection{Correctness}
+
+\section*{Correctness criterion}
+\label{sec:correctcrit}
+
+DynaStar ensures linearizable executions.  An execution is
+\emph{linearizable} if there is a way to reorder the client commands
+in a sequence that (i)~respects the semantics of the commands, as
+defined in their sequential specifications, and (ii)~respects the
+real-time precedence of commands.
+
+
+\section*{Correctness proof}
 \label{sec:correctness}
 
 \newcommand{\tsc}{\ensuremath{t^{cli}_{start}}}

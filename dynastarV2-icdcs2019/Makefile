@@ -10,5 +10,5 @@ $(PDFOUT): $(INPUTS)
 	$(LATEX) $(PDFOUT) && $(BIBTEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(LATEX) $(PDFOUT) && $(EMBED) $(PDFOUT)
 
 clean:
-	for EXT in blg aux log bbl blg out idx lot lof toc synctex.gz; do rm -f *.$${EXT} */*.$${EXT} */*/*.$${EXT} $(PDFOUT).pdf ; done
+	for EXT in blg aux log bbl blg out idx lot lof toc synctex.gz fls fdb_latexmk; do rm -f *.$${EXT} */*.$${EXT} */*/*.$${EXT} $(PDFOUT).pdf ; done
 
