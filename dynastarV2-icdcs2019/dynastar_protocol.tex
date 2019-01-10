@@ -24,17 +24,19 @@
 %%a partition executes a command right after it has gathered all variables it needs.
 %Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
 
-\subsection{Overview}
 
 \dynastar defines a dynamic mapping of application variables to partitions.\footnote{Applications may also define other granularity of data when mapping application state to partitions. For example, in our social network application (\S\ref{sec:imp:\appname}), each user (together with the information associated with the user) is mapped to a partition; in our TPC-C implementation (\S\ref{sec:imp:tpcc}), every district in a warehouse is mapped to a partition.}
 Such a mapping is managed by a partitioning oracle, which is handled as a replicated partition.
 %The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
-To simplify the discussion, we initially assume that every command involves the oracle.
+To simplify the discussion, in \S\ref{sec:overview}--\ref{sec:detailed} we initially assume that every command involves the oracle.
 In \S\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
 % REMOVE THIS?
 %State is then temporarily moved on demand to the destination partition where the command will be executed.
 %After the command is executed, updated variables are moved back to their source partition to keep the optimized partitioning.
+
+\subsection{Overview}
+\label{sec:overview}
 
 Clients submit commands to the oracle and wait for the reply. 
 \dynastar\ supports three types of commands:
@@ -73,15 +75,15 @@ the partitions exchange variables and update their state accordingly.
 \label{sec:detailed}
 
 Algorithms~\ref{alg:client_proxy}, \ref{alg:oracle_proxy}, and \ref{alg:server_proxy} describe the client, oracle, and server processes, respectively. 
-For brevity, we omit the delete command since the coordination involved in the create and delete commands are analogous. 
+We omit the delete command since the coordination involved in the create and delete commands are analogous. 
 A proof of correctness for the protocol is available as additional material.\footnote{https://github.com/dynastar2018/DynaStar/blob/master/appendix-correctness.pdf}
 
 
-\subsubsection{The client process} 
+%\subsubsection{The client process} 
 
-To execute a command, the client atomically multicasts the command to the oracle (Algorithm 1).
-The oracle replies with a prophecy, which may already tell the client that the command cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
-If the command can be executed, the client receives a prophecy containing the partition where the command will be executed. The client then waits for the result of the execution of the command.
+To execute a command $C$, the client atomically multicasts $C$ to the oracle (Algorithm 1).
+The oracle replies with a prophecy, which may already tell the client that $C$ cannot be executed (e.g., it needs a variable that does not exist, it tries to create a variable that already exists).
+If $C$ can be executed, the client receives a prophecy containing the partition where $C$ will be executed. The client then waits for the result of the execution of $C$.
 
 
 % The client must retry the command if the partition cannot execute the command.
@@ -89,7 +91,7 @@ If the command can be executed, the client receives a prophecy containing the pa
 %To ensure that a command is eventually executed, after retrying a few times, the client falls back to using \ssmr{}, multicasting the command to all partitions (and the oracle, in case of a create or delete command).
 
 
-\subsubsection{The oracle} 
+%\subsubsection{The oracle} 
 
 When the oracle delivers a request, it distinguishes between two cases (Task 1 in Algorithm~\ref{alg:oracle_proxy}).
 \begin{itemize}
@@ -132,12 +134,12 @@ To determine the destination partition of a set of variables, as part of a move,
 % the current location of variables and 
 the last computed partitioning.
 
-\subsubsection{The server process} 
+%\subsubsection{The server process} 
 
-When a server delivers a command $C$, it first checks if it has all variables needed by the command. If the server has all such variables, it executes the command and sends the response back to the client (Tasks 1a and 2 in Algorithm~\ref{alg:server_proxy}).
-If not all the variables needed by the command are in that partition, the server runs a deterministic function to determine the destination partition to execute the command (Task 1b). The function uses as input the variables needed by the command and the command itself.
-In this case, each server that is in the multicast group of the command $C$ but is not the destination partition sends all the needed variables stored locally to the destination partition and waits to receive them back. 
-The destination partition waits for a message from other partitions. Once all variables needed are available, the destination partition executes the command $C$, sends the response back to the client, and returns the variables to their source.
+When a server delivers a command $C$, it first checks if it has all variables needed by $C$. If the server has all such variables, it executes $C$ and sends the response back to the client (Tasks 1a and 2 in Algorithm~\ref{alg:server_proxy}).
+If not all the variables needed by $C$ are in that partition, the server runs a deterministic function to determine the destination partition to execute $C$ (Task 1b). The function uses as input the variables needed by $C$ and $C$ itself.
+In this case, each server that is in the multicast group of $C$ but is not the destination partition sends all the needed variables stored locally to the destination partition and waits to receive them back. 
+The destination partition waits for a message from other partitions. Once all variables needed are available, the destination partition executes the $C$, sends the response back to the client, and returns the variables to their source.
 Periodically, the servers deliver a new partitioning plan from the oracle (Task 3). Each server will send the variables to the designated partition, as in the plan, and wait for variables from other partitions. Once a server receives all variables, it updates its location map accordingly.
 %When a server delivers a message to create a variable (and similarly to delete an existing variable), it coordinates with the oracle (Task 3).
 %The exchange of signals between the partition where the variable will be created and the oracle ensures that interleaved executions between create and delete commands will not lead to violations of linearizability (i.e., this is essentially the execution of a multi-partition command involving the oracle and a partition~\cite{bezerra2014ssmr}).

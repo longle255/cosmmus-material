@@ -1,9 +1,9 @@
 %!TEX root =  main.tex
 \section{Introduction}
 
-State machine replication (SMR) is a fundamental technique for building fault-tolerant systems and services. 
-With SMR, state is replicated on a set of servers and each replica deterministically executes the same sequence of client commands in order to maintain consistency~\cite{Lam78,Sch90}. 
-State machine replication provides configurable fault tolerance (i.e., by setting the number of replicas) but limited performance since all replicas must execute all commands.
+State machine replication (SMR) is a fundamental technique for building fault-tolerant services. 
+With SMR, state is replicated on a set of servers and each replica deterministically executes the same sequence of client commands to maintain consistency~\cite{Lam78,Sch90}. 
+SMR provides configurable fault tolerance (i.e., by setting the number of replicas) but limited performance since all replicas must execute all commands.
 %
 In order to provide both configurable fault tolerance and scalable performance, some recent proposals have extended state machine replication with sharding (e.g., \cite{Aguilera:2007, bezerra2014ssmr,corbett2013spanner,Glendenning:2011kj,
   bli16edcc}).
@@ -12,7 +12,7 @@ Commands that access state in a single partition are handled as in classic state
 Different techniques have been proposed to handle commands that access state in multiple partitions, but inherently multi-partition commands are more expensive than single-partition commands.
 This happens due to overhead from ordering and coordinating commands across partitions to ensure strong consistency.
 Moreover, if data is not distributed carefully, then load imbalances can nullify the benefits of partitioning. 
-Consequently, the achilles heel of scalable state machine replication lies on the partitioning of the service state.
+Consequently, the Achilles heel of scalable state machine replication lies on the partitioning of the service state.
 An ideal partitioning scheme is one that would both (i) allow commands to be executed at a single partition only, and (ii) evenly distribute data so that load is balanced among partitions.
 Under such conditions, performance will scale with the number of partitions.
 
@@ -28,7 +28,7 @@ In this paper, we introduce \dynastar, a new approach to scalable state machine 
 \dynastar differs from previous solutions in that it supports \emph{dynamic} state partitioning.
 This means that data can be relocated from one partition to another to optimize performance.
 Moreover, data relocation is done on-the-fly, with minimal service disruption.
-As a result, \dynastar does not require any a priori information about the workload and can adapt to workload variations.
+\dynastar does not require any a priori information about the workload and can adapt to workload variations.
 To achieve this design, \dynastar maintains a
 location oracle with a global view of the application state.  The oracle minimizes the
 number of state relocations by monitoring the workload, and
@@ -56,17 +56,19 @@ We implemented \dynastar and compared its performance to
 alternative schemes, including an idealized approach that knows the workload ahead of time.
 Although this scheme is not achievable in practice, it provides an interesting baseline to compare against.
 \dynastar's performance rivals that of the idealized scheme, while having no a priori knowledge of the workload.
-In most workloads of interest, \dynastar largely outperforms existing dynamic schemes.
-We also show that the location oracle never becomes a bottleneck in our experiments and can handle workload graphs with millions of vertices.
+%In most workloads of interest, 
+We show that \dynastar largely outperforms existing dynamic schemes under two representative workloads, the TPC-C benchmark and a social network service.
+We also show that the location oracle never becomes a bottleneck.
+% in our experiments and can handle workload graphs with millions of vertices.
 
-The paper makes the following contributions:
-\begin{itemize}
-\item It introduces \dynastar and discusses its implementation. 
-\item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
-\item It presents a detailed experimental evaluation of \dynastar using the TPC-C benchmark and a social network service.
+%The paper makes the following contributions:
+%\begin{itemize}
+%\item It introduces \dynastar and discusses its implementation. 
+%\item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
+%\item It presents a detailed experimental evaluation of \dynastar using the TPC-C benchmark and a social network service.
 
 %including real social network graphs with half a million users and 14 million edges.
-\end{itemize}
+%\end{itemize}
 
 The rest of the paper is structured as follows.
 Section~\ref{sec:sysmodel} presents the system model.

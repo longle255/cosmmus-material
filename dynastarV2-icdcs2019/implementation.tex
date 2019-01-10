@@ -23,7 +23,7 @@ Application designers who use \dynastar
  \begin{itemize}
  \item[--] \emph{PRObject}: provides a common interface for replicated data items.
  \item[--] \emph{PartitionStateMachine}: encapsulates the logic of the server
-   proxy. Note that the server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
+   proxy. The server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
    handles all communication between partitions and the oracle transparently.
  \item[--] \emph{OracleStateMachine}: computes the mapping of objects to partitions.
 Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a partitioning based on the workload graph.
@@ -32,7 +32,7 @@ We configured METIS to allow a 20\% unbalance among partitions.
  \end{itemize}
 
  We note one important implementation detail.  The oracle is
- multi-threaded, and can service requests while computing a new
+ multi-threaded: it can serve requests while computing a new
  partitioning concurrently. To ensure that all replicas start using
  the new partitioning consistently, the oracle identifies each
  partitioning with a unique id.  When an oracle replica finishes a
@@ -101,18 +101,18 @@ We configured METIS to allow a 20\% unbalance among partitions.
 
 %On average, 10\% of transactions are distributed transactions. 
 
-The TPC-C benchmark is an industry standard for evaluating the performance of OLTP systems.
+TPC-C is an industry standard for evaluating the performance of OLTP systems.
 It has 9 tables and five transaction types that simulate a warehouse-centric 
 order processing application: \emph{New-Order} (45\% of transactions in the workload), \emph{Payment} (43\%), \emph{Delivery}
 (4\%), \emph{Order-Status} (4\%) and \emph{Stock-Level} (4\%).
 %The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.
-We implemented a Java version of the TPC-C benchmark that runs on top of \dynastar. 
+We implemented a Java version of TPC-C that runs on top of \dynastar. 
 Each row in TPC-C tables is an object in \dynastar. The oracle models the workload at the granularity of districts,
 thus each district or warehouse is a node in the graph. If a transaction accesses a district 
 and a warehouse, the oracle will create an edge between that district and the warehouse.
 The objects (e.g., customers, orders) that belong to a district 
 are considered part of district. However, if a transaction requires
-objects from multiple district, only those objects will be moved on demand, rather than
+objects from multiple districts, only those objects will be moved on demand, rather than
 the whole district.
 %A transaction is a set of commands that access those variables, implemented 
 %as server procedures. 
@@ -120,14 +120,14 @@ the whole district.
 \subsection{\appname\ social network service}
 \label{sec:imp:\appname}
 
-For the purposes of micro benchmark, we have developed a Twitter-like
-social network service using the \dynastar{} library.  In our social
+We have also developed a Twitter-like
+social network service using \dynastar{}.  In our social
 network, users can follow, unfollow, post, or read other users' tweets
 according to whom the user is following. Like Twitter, users are
 constrained to posting 140-character messages.
 
 Each user in the social network corresponds to a node in a graph. If
-one user follows another, then a directed edge is created from the
+one user follows another, a directed edge is created from the
 follower to the followee. Each user has an associated \emph{timeline},
 which is a sequence of post messages from the people that the user
 follows. Thus, when a user issues a post command, it results in
@@ -150,10 +150,10 @@ partitions, while posts may require object moves from many partitions.
 
 \subsection{Alternative system}
 
-Throughout our evaluation, we compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr} and DS-SMR~\cite{hoang2016}, available in public repositories.\footnote{https://bitbucket.org/kdubezerra/eyrie,https://bitbucket.org/usi-dslab/ds-smr}
-S-SMR has been shown to scale performance with the number of partitions under a variety of workloads.
+We compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr} and DS-SMR~\cite{hoang2016}, publicly available.\footnote{https://bitbucket.org/kdubezerra/eyrie,https://bitbucket.org/usi-dslab/ds-smr}
+S-SMR scales performance with the number of partitions under a variety of workloads.
 It differs from \dynastar{} in two important aspects:
-multi-partition commands are executed by all involved partitions, after the partitions exchange needed state for the execution of the command and S-SMR supports static state partitioning.
+multi-partition commands are executed by all involved partitions, after the partitions exchange needed state for the execution of the command, and S-SMR supports static state partitioning.
 In our experiments, we manually optimize S-SMR's partitioning with knowledge about the workload.
 In the experiments, we refer to this system and configuration as S-SMR*.
 %Since
