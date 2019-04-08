@@ -33,7 +33,7 @@ However, \dssmr{} implements repartitioning in a very simple way that does not p
 \dynastar\ improves on \dssmr\ by employing well-known graph partitioning techniques to decide where each variable should be.
 Moreover, \dynastar\ dillutes the cost of repartitioning by moving variables on-demand, that is, only when they are accessed by some command.
 
-Graph partitioning is an interesting problem with many proposed solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient}.
+Graph partitioning is an interesting problem with many proposed solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.
 In this work, we do not introduce a new graph partitioning solution, but instead we use a well-known one (METIS~\cite{Abou-Rjeili:2006}) to partition the state of a service implemented with state machine replication.
 Similarly to \dynastar{}, Schism~\cite{curino2010sch} and Clay~\cite{SerafiniTEPAS16} also use graph-based partitioning to decide where to place data items in a transactional database.
 In either case, not much detail is given about how to handle repartitioning dynamically without violating consistency.

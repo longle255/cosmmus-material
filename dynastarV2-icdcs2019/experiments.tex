@@ -70,7 +70,7 @@ When the partitions delivered the partitioning request, they exchanged objects t
 % During this process, servers didn't execute any other transactions, thus the throughput decreased 
 % to 0, and the average latency was not applicable. 
 It takes about 10 seconds for partitions to reach the new partitioning.
-However, during the repartitioning, servers continue to execute transactions.
+However, during the repartitioning, transactions which access objects that are not being relocated will continue to process.
 After the state is relocated, most objects involved in a transaction
 can be found in a local partition, which considerably increases performance and reduces latency. 
 

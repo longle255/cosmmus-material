@@ -1,73 +1,80 @@
 %!TEX root =  main.tex
 \section{\dynastar}
+%\section{Optimized dynamic state partitioning with \dynastar}
 \label{sec:dynastar}
 
-%%In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
-%\subsection{Key insights}
-%
-%\dynastar optimizes state partitioning based on the workload and relocates application state on-the-fly, without service disruption.
-%\begin{itemize}
-%\item \emph{Optimized state partitioning.}
-%\dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges dependencies between variables.
-%An edge connects two variables in the graph if a command accesses both of them.
-%A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
-%The oracle periodically computes a partitioning of the workload graph and propagates the partitioning to the various partitions.
-%
-%\item \emph{On-the-fly relocation of service state.}
-%Based on the partitioning computed by the oracle, servers determine the best partition to execute a multi-partition command.
-%State is then temporarily moved on demand to the destination partition where the command will be executed.
-%After the command is executed, updated variables are moved back to their source partition to keep the optimized partitioning.
-%When the oracle computes a new partitioning of the data, state is relocated (i.e., variables moved from one partition to another) to reflect the new optimized partitioning. 
-%\end{itemize}
+%In this section, we overview \dynastar's key ideas, present the protocol in detail, discuss some performance optimizations, and argue about \dynastar's correctness.
+\subsection{Key insights}
+
+\dynastar optimizes state partitioning based on the workload and relocates application state on-the-fly, without service disruption.
+\begin{itemize}
+\item \emph{Optimized state partitioning.}
+\dynastar models a service workload as a graph $G = (V, E)$, where vertices represent state variables and edges dependencies between variables.
+An edge connects two variables in the graph if a command accesses both of them.
+A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
+The oracle periodically computes a partitioning of the workload graph and propagates the partitioning to the various partitions.
+
+\item \emph{On-the-fly relocation of service state.}
+Based on the partitioning computed by the oracle, servers determine the best partition to execute a multi-partition command.
+State is then temporarily moved on demand to the destination partition where the command will be executed.
+After the command is executed, updated variables are moved back to their source partition to keep the optimized partitioning.
+When the oracle computes a new partitioning of the data, state is relocated (i.e., variables moved from one partition to another) to reflect the new optimized partitioning. 
+\end{itemize}
 
 %In \dynastar a move request is multicast together with the command that triggered the request.
 %%a partition executes a command right after it has gathered all variables it needs.
 %Therefore, differently from DS-SMR, \dynastar ensures termination without resorting to expensive mechanisms (i.e., S-SMR).
 
 \subsection{Overview}
+%\subsection{State partitioning as a graph problem}
 
-\dynastar defines a dynamic mapping of application variables to partitions.\footnote{Applications may also define other granularity of data when mapping application state to partitions. For example, in our social network application (\S\ref{sec:imp:\appname}), each user (together with the information associated with the user) is mapped to a partition; in our TPC-C implementation (\S\ref{sec:imp:tpcc}), every district in a warehouse is mapped to a partition.}
+
+
+\dynastar defines a dynamic mapping of variables to partitions (i.e., each variable is mapped to a partition).
 Such a mapping is managed by a partitioning oracle, which is handled as a replicated partition.
 %The oracle allows the mapping of variables to partitions to be retrieved or changed during execution.
 To simplify the discussion, we initially assume that every command involves the oracle.
 In \S\ref{sec:optm}, we explain how clients can use a cache to avoid the oracle in the execution of most commands.
 
-% REMOVE THIS?
-%State is then temporarily moved on demand to the destination partition where the command will be executed.
-%After the command is executed, updated variables are moved back to their source partition to keep the optimized partitioning.
-
-Clients submit commands to the oracle and wait for the reply. 
 \dynastar\ supports three types of commands:
 $create(v)$ creates a new variable $v$ and initially maps it to a partition defined by the oracle;
 $access(\omega)$ is an application command that reads and modifies variables in set $\omega \subseteq \vvm$; and
 $delete(v)$ removes $v$ from the service state.
+% resulting in $part(v) = \emptyset$,
+% $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition $\ppm_d$,
+% and $consult(C)$ asks the oracle which variables are accessed by command $C$, and which partition contains each of them.
+
+% The other possible values for a prophecy are $ok$ and $nok$, which mean that command can and cannot be executed, respectively (more details in Section~\ref{sec:algorithm}).
+%If $v$ is not part of the service state (i.e., it was deleted or never created), the prophecy will contain~$\langle v, \emptyset \rangle$.
+
+% explain which partitions deliver each partitioning command:
+% how are access, consult, create, move and delete implemented?
+
+%Once the oracle is in place, 
+Clients submit commands to the oracle and wait for the reply. 
 The reply from the oracle is called a $prophecy$, and usually 
 consists of a set of tuples $\langle v, \ppm \rangle$, meaning 
-$v \in \ppm$, and a target partition $\ppm_d$ on which the command 
+$v \in \ppm$, and a target partition $\ppm_d$ on which the commands 
 will be executed. The $prophecy$ could also tell the clients 
 if a command cannot be executed (e.g., it accesses 
 variables that do not exist). If the command can be executed, 
-the client waits for the reply from the target partition.
+the clients wait for the reply from the target partition.
 
 If a command $C$ accesses variables in $\omega$ on a single partition, 
-the oracle multicasts $C$ to that partition for execution. If the command 
+the oracle forwards $C$ to that partition for execution. If the command 
 accesses variables on multiple partitions, the oracle multicasts a 
 $global(\omega,\ppm_d, C)$ command to the involved partitions to gather 
-all variables in $\omega$ to the target partition $\ppm_d$. After having all 
+all variables in $\omega$ to one target partition. After having all 
 required variables, the target partition executes command $C$, 
 sends the reply to the client, and returns the variables to their source. 
+Moving variables back to their source partitions improves the hit ratio of client caches (described in \S\ref{sec:optm}).
 
 The oracle also collects hints from clients and partitions to 
-build up a workload graph and monitors the changes in the graph. 
-%\dynastar models a service workload as a graph $G = (V, E)$, where 
-In the workload graph, vertices represent state variables and edges dependencies between variables.
-An edge connects two variables in the graph if a command accesses both of them.
-%A location oracle builds the workload graph based on feedback from the clients or partitions, as commands are executed.
-Periodically, the oracle computes a new optimized partitioning and sends the partitioning plan to all partitions. 
-Upon delivering the new partitioning, 
+build up the workload graph and monitors the changes in the graph. 
+Periodically, the oracle computes a new optimized partitioning and sends the 
+partitioning plan to all partitions. Upon delivering the new partitioning, 
 the partitions exchange variables and update their state accordingly.
 \dynastar relocates variables without blocking the execution of commands.
-
 
 \subsection{The detailed protocol}
 \label{sec:detailed}

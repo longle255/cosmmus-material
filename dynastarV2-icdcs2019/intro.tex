@@ -43,9 +43,8 @@ the needed variables to the chosen partition. Of course, when relocating a varia
 is faced with a choice of which partition to use as a destination.
 \dynastar chooses the partition for relocation (i.e., one that
 would minimize the number of state relocations) by partitioning the
-workload graph.
-% using the METIS partitioner.
-%Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
+workload graph using the METIS partitioner.
+Although METIS does not necessarily produce the best possible partitioning of the workload graph, it offers a good compromise between performance and partitioning quality.
 
 To tolerate failures, \dynastar implements the oracle as a regular partition, replicated in a set of nodes.
 To ensure that the oracle does not become a performance bottleneck, clients cache location information.
@@ -61,14 +60,14 @@ We show that \dynastar largely outperforms existing dynamic schemes under two re
 We also show that the location oracle never becomes a bottleneck.
 % in our experiments and can handle workload graphs with millions of vertices.
 
-%The paper makes the following contributions:
-%\begin{itemize}
-%\item It introduces \dynastar and discusses its implementation. 
-%\item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
-%\item It presents a detailed experimental evaluation of \dynastar using the TPC-C benchmark and a social network service.
+The paper makes the following contributions:
+\begin{itemize}
+\item It introduces \dynastar and discusses its implementation. 
+\item It evaluates different partitioning schemes for state machine replication under a variety of conditions.
+\item It presents a detailed experimental evaluation of \dynastar using the TPC-C benchmark and a social network service.
 
-%including real social network graphs with half a million users and 14 million edges.
-%\end{itemize}
+including real social network graphs with half a million users and 14 million edges.
+\end{itemize}
 
 The rest of the paper is structured as follows.
 Section~\ref{sec:sysmodel} presents the system model.

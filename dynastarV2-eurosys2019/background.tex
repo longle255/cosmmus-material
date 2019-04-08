@@ -7,13 +7,9 @@ More precisely, the service state \vvt\ is composed of $k$ partitions, $\ppm_1, 
 (For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that $s \in \ssm_i$.)
 Commands that access a single partition are executed as in classical state machine replication~\cite{Lam78,Sch90}: 
 replicas of the concerned partition use a consensus protocol to agree on the execution order of commands and each replica executes the commands independently. 
-%Commands that access multiple partitions require replicas in the accessed partition to coordinate to ensure consistency.
-%
-%Existing protocols differ in (a) how to handle multi-partition commands and (b) whether state partitioning is static or dynamic.
-%
-%There are three approaches to handling multi-partition commands.
-Different approaches to multi-partition commands have been proposed in the literature.
+Existing protocols differ in (a) how to handle multi-partition commands and (b) whether state partitioning is static or dynamic.
 
+There are three approaches to handling multi-partition commands.
 Some protocols assume a workload that can be ``perfectly partitioned,'' that is, there is a way to shard the service state that avoids multi-partition commands \cite{hoang2016,Nogueira17}.
 Since commands are essentially single-partition, if the load is balanced across partitions then performance scales with the number of partitions.
 
@@ -29,7 +25,7 @@ If the system does not support dynamic partitioning of state, then partitions ca
 With dynamic partitioning of state, either $x$ can be moved to the partition that contains $y$ or vice-versa, and the command is executed at a single partition \cite{hoang2016}.
 
 \dynastar supports dynamic partitioning of state.
-It does not require the workloads to be perfectly partitioned and does not impose restrictions on state partitioning.
-Moreover, \dynastar implements multi-partition commands differently from previous proposals.
+It neither assumes that workloads can be perfectly partitioned nor imposes restrictions on state partitioning.
+\dynastar implements multi-partition commands differently from previous proposals.
 In \dynastar, one chosen partition first ``borrows'' the needed variables from the other partitions and then executes the command locally.
 

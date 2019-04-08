@@ -44,9 +44,9 @@
 \INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\langle\ppm_v,create(v)\rangle)$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 %	\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
-	\STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, C \rangle)$
+	\STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, create(v) \rangle)$
 	\COMMENT{exchange signal...}
-	\STATE wait until $\langle signal, C \rangle \in rcvd\_msgs$
+	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
 	\COMMENT{...to coordinate}
 	\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
 % \STATE send $ok$ to the client
@@ -54,7 +54,7 @@
 
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} receive $( \langle val, C \rangle )$}}
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} r-deliver $( \langle val, C \rangle )$}}
 %\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
 	\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
 \ENDINDENT

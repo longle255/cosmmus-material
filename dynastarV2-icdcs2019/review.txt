@@ -1,0 +1,116 @@
+----------------------- REVIEW 1 ---------------------
+
+# The oracle needs to maintain a data structure with information about every variable in the system and their relations when called in commands. How large is this data structure? If variables have small, this can create a huge problem because I would imagine that the system would need the double of the storage space -- half to store the variables and the other half for the data structure. This aspect needs to be much better explained and justified in the paper, as otherwise it can make the solution impractical for many application scenarios.
+>>> Oracle stores object ids, their partitions, and edges between objects. The size of the data structure depends on the granularity of the graph.
+In the social network experiment, each user is an object in the graph. In TPC-C experiment, each district (and all elements belongs to that district) is an object.
+We have this as an footnote in the paper, I'll bring it to the main text.
+
+- when the partitioning is being applied (see alg 2 and 3), what happens to the requests of the users? Do they continue to be executed?
+>>> The partitioning could be triggered in many ways: the number of changes to the graph exceeds some thresholds, or at some time interval.
+When the partitioning is taking places, those requests of users which access objects that are not being move will continue to be executed.
+In the experiment, most of the objects was moved during the partitioning, that makes the throughput drop to near 0.
+
+- can the client issue several commands simultaneously?
+>>> yes client can send multiple asynchronous requests, callback for each request will be triggered when server response.
+
+# The algorithms 2 and 3 need to be fully and carefully revised. A few examples of problems:
+
+- according to the system model, a reliable broadcast is delivered to the destinations with a r-deliver() operation. Both algorithms perform r-mcast() operations, but there is no r-deliver(). Therefore, something is missing in the algorithms (I assume that the receive() operation is for the normal reliable one-to-one communication)
+>>> I updated the text, changed receive() to r-deliver().
+
+- the signal part (line 19-22 of alg 2) needs to be better explained in the text and revised in the algorithms. Line 20 of alg 2: a r-mcast() is performed for each x; x is a server and not a partition; therefore, since this is a point-to-point communication, why use a multicast?.      
+>>> The reviewer misunderstood this part. I think the text is correct. 
+$forall x in P_v$: rmcast$(x, <signal, C>)$ => each x is a partition belongs to the set of partitions P_v, so multicast is needed.
+
+- Line 20 of alg 2: the message being sent is <signal, C>, but C is not available in this part of the code. So, how is it created?
+>>> C is the create command that the oracle has delivered referred in the line #19 of alg 2.
+
+- target() function appears twice, once in alg 2 and another in alg 3; partition() function appears in alg 2 but does not appear in alg 3, although it is called in line 8. Is target() the same in alg 3 and in alg 2? Maybe these shared functions could be presented separately.
+>>> Yes we may need to have a shared functions section to not repeat those functions. I'll update the text
+
+- the protocol supports a few well-defined operations, such as create() and read(). The performance of these operations is not the same, as for example create() cannot be cached and requires communication with the oracle, which is much slower. Therefore, the mix of operations executed by the benchmarks plays a fundamental role in the results. The paper **must** present this mix for the TPC-C and social network benchmarks. Otherwise, the reader will have a hard time understanding the performance results and mistrust the overall conclusions.
+>>> The comment is true about the performance aspect of create() and read(). However TPC-C benchmark itself does include the create() command. ~45% of workload in TPCC is New-Order transactions which include the creation of new order object. 
+
+- the paper highlights the scalability results for the TPC benchmark with a separate subsection and fig 3. Something similar **must** also occur for the social network, with the timeline and mixed workloads. I imagine that the results for the mix workload will be less nice because of what is shown in fig 4, but at least the reader will get a better understanding of the pros and cons of the solution.
+>>> With TPCC, the workload is different for each partitioning configurations in a way that the workload produces 15% of global command for every configuration.
+For social network, if we use the same Twitter graph for different number of partitions, the rate of global commands will be difference, produce difference performance (that was shown in Fig.4). We only have synthetic workload for Social network for this scalability experiment that produce the same number of edge-cut and global commands, but these synthetic workloads were not appreciated in other last submissions.
+
+- The text related to fig 2 says that during repartitioning, the servers continue to execute transactions. However, if one looks at the first graph of fig 2, in the grey bar (which I assume that corresponds to the repartitioning operation), the throughput goes to zero. I would assume that this means that the system becomes idle while the operation completes, which contradicts the text. 
+>>> All the experiment started with random location for all objects. Thus when repartitioning happens, most of objects changed their locations. If a command access those objects during the repartitioning, it has to wait until the moving is done. If we can have an incremental partitioning algorithm that could minimize the number of objects moved in the repartitioning, Dynastar would greatly benefit from that. However I would consider it as an orthogonal problem.
+
+The graphs need to indicate the units of the axes. For example, fig 2 does not have the units for the x-axis, and kcps is not explained.
+>>> I'll update the graph.
+
+----------------------- REVIEW 2 ---------------------
+
+- Despite refering to those works in the introduction and the related work, the paper fails to compare/relate the techniques mentioned in the many past papers on dynamic resharding of data to minimise distributed transactions (Clay, Hstore, Avoiding 2PC at Sigmod 2016, Clay .
+>>> We have those works in the related works, but this reviewer was asking about the performance comparison. We don't have this for now
+
+- The paper makes no mention of the consistency semantics  of concurrent operations (how do you ensure that the mapping is consistent, and that operations that touch multiple partitions get executed consistently). For instance, what if a client  has a cached entry that a variable does not exist, while another client creates it at the oracle? What if two operations execute. I'm sure you address these types of scenarios, but you don't describe how.
+>>> We have the correctness proof for linearizability on https://github.com/dynastar2019/DynaStar/blob/master/appendix-correctness.pdf. 
+If a client had an invalid cache entry for an object and sent request to wrong partition, that server could just simply ask the client to retry the command by querying oracle in advance.
+
+- Do you assume that the commands are known *before* you execute a transaction? This seems to be necessary for you to "request all the state" as the "output" partition seems to be a deterministic function of the variables accessed. How do you deal with transactions of the form x = read(a); y = read(x), where the key that you read next is dependent on what you read previously? 
+>> DynaStar requires all objects that are accessed by the command must be known in advance. However Dynastar also provide a workaround for this problem.
+In the case of dependent access, a partition 1 which contain (x and a) can first execute x = read(a). Then when it try to execute y = read(x) and y is not available on P1, that partition could send a response to client to ask the client to retry, with (y) in the variable set this time. So in the retry the client can include the partition that contain (y) in the retry.
+
+- TPC-C's new-order transaction requires a dependent read (on the order id field), how do you deal with this transaction (given that you implement TPC-C in your evaluation)
+>>> In TPC-C new-order transaction, all objects that will be read/write could be extracted in advance. The reviewer might want to mention Order-status transaction, in which the order object need to be read first, then order-line objects will be retrieve based on id of this order object. There is only 4% order-status transaction in TPC-C workload, and 99% of the time the order-line objects could be found in the same partition of the order object. The remaining 1% of order-status transaction requires read object from a remote partition, which result in a retry.
+
+- Why do you necessarily choose the partition that contains most of the variables accessed? Why not do this as function of the cost of transferring the state (if objects are of very different sizes for instance), or the current load of the database? Why do you not take this into consideration either when doing the graph partitioning?
+>>> Choosing the partition that contains most of the variables accessed is to minimize the number of move commands, given that the client have to choose the destination partition with limited information of those objects from the cache.Take into account the size of object might require the involve of oracle in oracle to keep track of the object size. I'm not sure this is a good idea.
+
+- Nit: Can you specify the ping time between machines?
+>>> Ping is 0.09 ms or 90 us.
+- Nit: In Figure 2, do you mean ktrxs/sec or kops/sec? 
+>>> Yes, it should be ktrxs/sec
+
+- Baseline: given your choice of benchmark, I would really like to see a comparison against a system like H-Store, Tapir, or CockroachDB rather than S-SMR.
+>>> we don't have these results for now. 
+
+- In Figure 2, could you please provide some more detail as to why the throughput is so bursty. Does this correspond to a distributed transaction occurring?
+>>> Yes. In TPC-C there is around 7-8% of commands are global.
+
+- How do you model inserts in TPC-C (into the new order table and the history table). Do you model them as create? Could you comment on how expensive an operation that is (as you can't cache the data and need to involve the oracle)
+>>> Yes, an insert is modeled as a create(), which include the Partition where the object is created, and the Oracle. However with our TPC-C experiment, oracle is not involved in the insert of new-order transaction, due to the granularity at district level.
+
+- TPC-C has a fairly easy partitioning scheme (by warehouse), which allows transactions to execute almost exclusively locally. The remaining 10% of transactions, that still have to be executed distributed then access completely random warehouses (so no partitioning could be "smart). It's then unclear to me why your system performs better than S-Smart. My understanding is that S-SMR requires every replica involved in a distributed transaction to execute the full transaction, whereas you only require the destination partition to do so. Are you then hitting a CPU bottleneck with S-SMR?
+>>> In terms of computation, all involved partitions in S-SMR have to execute the transaction, while only one partition in DynaStar has to execute that tx.
+In addition, S-SMR requires (n!) exchanged messages for signaling/exchanging data, while DynaStar requires 2(n-1) messages for exchanging objects.
+
+- Given that this seems to be your headline graph,
+I think that you really need to provide more detail. For instance, a graph that'd be interesting to see is TPC-C without distributed transactions. At that point, the partitioning is "perfect" (one warehouse per shard). What do you see the performance looking like? 
+>> If there is no distributed transaction, we would expect a linear increase of the performance
+
+- What makes DS-SMR less likely to converge than your system? Could you provide more detail?
+>>> I think a proof would be more convince
+----------------------- REVIEW 3 ---------------------
+
+Your extensions resemble the data-flow execution model, proposed by Maurice Herlihy and then expanded by various groups (look at "Transaction Execution Models in Partially Replicated Transactional Memory: The Case for Data-Flow and Control-Flow") where data migrate towards transactions requesting it.
+M2Paxos implements a similar scheme where leases are used instead of partitions owning objects. The only (big) difference is that M2Paxos assumes full replications. I believe Authors should discuss similarities.
+>>> I'll read those papers to add to our related works
+
+- How about clients latency? If I understood well, if a command requires data to be sent from different partitions, since this message will be sent with atomic multicast, it needs to wait for all other commands before objects will be migrated. This should increase client latency and not just that, it will also trigger additional latency to update other clients' local cache. Plots show reasonable degradation but I would like to see a latency breakdown to capture exactly what is happening.
+>>> It's true that client's command latency is affected by atomic multicast, and the migration of the object. However this will not invalid the cache on other clients, since the object is returned to its original location after the command is executed. 
+Anyway it's true that the tail latency is high due to the existing of global commands for the reason above.
+
+There is an issue with the evaluation settings in Figure 3. You test TPC-C with the max throughput you can get, which changes the client threads per datapoint. This is find but I would like to see a discussion about the actual number of threads used by each competitor. Since competitors might use different software architectures, they might deploy a different number of threads. Therefore, once fixed the capability of one server, then the saturation might be reached at different configurations on different competitors and  it might not mean that the solution is performing slower but that more cores would have been needed to perform faster. I'm sure authors understand the concern and even a simple discussion would help reader understand.
+>>> In TPC-C benchmark of other works, they also stated that they use different number of clients to saturate the system, without explicitly telling the exact number of clients. Anyway in this kind of experiment, we want to show the scalability of DynaStar on TPC-C, now to compare the absolute value of the performance with others.
+
+- In Section II.B you say you assume asynchronous system but then you deploy consensus, which requires a partially synchronous system. I understand the foot note in page 2 but I see the two statements a but contradictory. 
+>>> I'm not sure how to fix this, should we change to partially synchronous system?
+
+- There are many existing solutions presented in data-centric systems to compose partitions. Some of them are: Hyflow, "Automated Data Partitioning for Highly Scalable and Strongly Consistent Transactions". Authors might consider the inclusion of some of them in the related work.
+>>> I'll read this paper to add to our related works
+
+- You assume no a priori knowledge but there is a number of elements you discuss in your paper that are not easy to guess. For example, selecting the data granularity as in the footnote in page 3; in TPC-C deciding which object and relation to migrate (end of Section V.C); user hint, what are they? 
+>>> By default, every element need to be replicated of the application should be considered as an object of Dynastar, and included in the graph. However, it's up to application designer to decide the granularity of the graph. Hints are commands submitted by clients
+
+- Page 4, when you mention Task 2, Task 3 and so on, please indicate that they refer to Algorithm 2 and 3.
+>>> I'll update the text
+
+- I'm surprised you can populate TPC-C with 8Gb per server. How many district/customers/items per warehouse do you use?
+>>> each server only contained 1 warehouse. We followed the TPC-C instruction: 10 district/warehouse, 3000 customers/district, 100k items/district.
+
+- I missed why you didn't run DS-SMR on TPC-C.
+>>> DS-SMR codebase can't handle this workload. Even if it could it would give bad results.

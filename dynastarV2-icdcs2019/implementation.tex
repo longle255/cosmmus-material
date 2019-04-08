@@ -105,7 +105,7 @@ TPC-C is an industry standard for evaluating the performance of OLTP systems.
 It has 9 tables and five transaction types that simulate a warehouse-centric 
 order processing application: \emph{New-Order} (45\% of transactions in the workload), \emph{Payment} (43\%), \emph{Delivery}
 (4\%), \emph{Order-Status} (4\%) and \emph{Stock-Level} (4\%).
-%The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.
+The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.
 We implemented a Java version of TPC-C that runs on top of \dynastar. 
 Each row in TPC-C tables is an object in \dynastar. The oracle models the workload at the granularity of districts,
 thus each district or warehouse is a node in the graph. If a transaction accesses a district 
