@@ -1,4 +1,4 @@
-\documentclass[svgnames,sigplan,10pt]{IEEEtran}
+\documentclass[10pt, conference, compsocconf]{IEEEtran}
 
 \usepackage{times}
 \usepackage{fullpage}
@@ -68,6 +68,8 @@
 
 \newcommand{\red}[1]{\textit{\textcolor{red}{#1}}}
 
+\hyphenation{op-tical net-works semi-conduc-tor}
+
 % do not change these values
 \baselineskip 12pt
 \textheight 9in
@@ -81,8 +83,9 @@
 
 \title{\dynastar: Optimized Dynamic Partitioning for\\ Scalable State Machine Replication}
 \author{Long Hoang Le$^1$, Enrique Fynn$^1$, Mojtaba Eslahi-Kelorazi$^1$, Robert Soul\'{e}$^1$ and Fernando Pedone$^1$ \\
-\small {\em  $^1$Universit\`{a} della Svizzera italiana (USI), Switzerland} \\ [2mm]
-\small Submission type: Research
+\small {\em  $^1$Universit\`{a} della Svizzera italiana (USI)} \\ [2mm]
+\small {\em Lugano, Switzerland} \\ [2mm]
+% \small Submission type: Research
 }
 \date{}
 \maketitle
@@ -93,6 +96,11 @@
   \input{abstract}
 \end{abstract}
 
+\begin{IEEEkeywords}
+  state machine replication; multi partition command; state partitioning   
+\end{IEEEkeywords}
+
+  
 \input{intro}
 \input{model}
 \input{background}

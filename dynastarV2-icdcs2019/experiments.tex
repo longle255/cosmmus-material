@@ -70,13 +70,13 @@ When the partitions delivered the partitioning request, they exchanged objects t
 % During this process, servers didn't execute any other transactions, thus the throughput decreased 
 % to 0, and the average latency was not applicable. 
 It takes about 10 seconds for partitions to reach the new partitioning.
-However, during the repartitioning, transactions which access objects that are not being relocated will continue to process.
+\lle{During the repartitioning, transactions which access objects that are not being relocated will continue to process.}
 After the state is relocated, most objects involved in a transaction
 can be found in a local partition, which considerably increases performance and reduces latency. 
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\columnwidth]{figures/experiments/tpcc-detail-dynastar}
+    \includegraphics[width=0.9\columnwidth]{figures/experiments/tpcc-detail-dynastar}
   \caption{Repartitioning in \dynastar; throughput (top), objects exchanged between partitions (middle), 
   and percentage of multi-partition commands (bottom).}
   \label{fig:tpcc_repartitioning}
@@ -95,7 +95,7 @@ a partitioning scheme that leads to scalable performance.
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\columnwidth]{figures/experiments/tpcc-scaling-tp-lat.pdf}
+    \includegraphics[width=0.9\columnwidth]{figures/experiments/tpcc-scaling-tp-lat.pdf}
   \caption{Performance scalability with TPC-C. Throughput (in thousands of transactions per second, ktps) and latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:tpcc_scaling}
 \end{figure}
@@ -125,13 +125,29 @@ Each client operates in a closed loop, that is, the client issues a command and 
 %  \label{fig:4p1p_varying_partition_size}
 %\end{figure}
 %
-\begin{figure}[ht]
- \includegraphics[width=0.99\columnwidth]{figures/experiments/chirper-compare-full}
- \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. 
+% \begin{figure}[ht]
+%  \includegraphics[width=0.99\columnwidth]{figures/experiments/chirper-compare-full}
+%  \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. 
+%   Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
+%   \label{fig:socialscalability}
+% \end{figure}
+
+\begin{figure*}[h!]
+  \centering
+  \begin{subfigure}{.35\textwidth}
+    % \centering
+    \includegraphics[width=\textwidth]{figures/experiments/chirper-compare-timeline}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.35\textwidth}
+    % \centering
+    \includegraphics[width=\textwidth]{figures/experiments/chirper-compare-mix}
+    \caption{}
+  \end{subfigure}
+  \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. 
   Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:socialscalability}
-\end{figure}
-
+\end{figure*}
 % \begin{figure*}[h]
 %   \centering
 %   \begin{subfigure}{0.95\columnwidth}
@@ -190,8 +206,12 @@ the difference in throughput between each technique is due to the implementation
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
 In the experiment with the mix workload, we see that \dssmr{} performance decreases significantly.
-This happens because in such cases, objects in \dssmr{} are constantly moving back and forth 
-between partitions without converging to a stable configuration.
+\lle{This happens because objects in \dssmr{} will only converge if there is a perfect way to 
+partition the data, that is, data items can be grouped such 
+that eventually no command accesses objects across partitions. In the mix workload experiments, 
+objects in \dssmr{} are constantly moving back and forth between partition 
+without converging to a stable configuration}
+
 In contrast, for \dynastar and S-SMR*, the throughput scales with 
 the number of partitions in experiments with up to 8 partitions. 
 Increasing the number of partitions to 16 with the fixed graph reveals a tradeoff:
@@ -235,12 +255,12 @@ other users started following the celebrity.
 
 \begin{figure*}[h!]
   \centering
-  \begin{subfigure}{.42\textwidth}
+  \begin{subfigure}{.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{./figures/experiments/chirper-celeb-dynastar.pdf}
     \caption{}
   \end{subfigure}
-  \begin{subfigure}{.42\textwidth}
+  \begin{subfigure}{.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{./figures/experiments/chirper-celeb-ssmr.pdf}
     \caption{}
@@ -286,6 +306,13 @@ better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, or a single point of failure. 
 To cope with failures, the oracle is implemented as a replicated partition. 
+\lle{The oracle keeps a mapping of objects to partitions and the relations between objects. 
+The size of the mapping depends on the complexity and the granularity of the graph. 
+In the social network dataset, where each user is modelled as an object in the workload graph, 
+The graphs takes 1.5 GBs of the oracle's memory.
+In the TPC-C experiments, only district and warehouse objects are presented in the workload graph, 
+the oracle only need 1 MB of memory to store the graph for each warehouse.
+}
 The results in Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a bottleneck.
 The number of queries processed to the oracle is zero at the 
 beginning of the experiment, as the clients have cached the location of all objects.

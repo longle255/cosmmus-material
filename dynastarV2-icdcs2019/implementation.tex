@@ -22,13 +22,18 @@ Application designers who use \dynastar
  to implement a replicated service must extend three key classes:
  \begin{itemize}
  \item[--] \emph{PRObject}: provides a common interface for replicated data items.
+ \item[--] \emph{ProxyClient}: \lle{provides the communication between application client and server, while encapsulating all 
+ complex logic of handling caches or retried requests. The proxy client also allows sending multiple asynchronous requests, and delivering corresponding response to each request.}
  \item[--] \emph{PartitionStateMachine}: encapsulates the logic of the server
    proxy. The server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
    handles all communication between partitions and the oracle transparently.
  \item[--] \emph{OracleStateMachine}: computes the mapping of objects to partitions.
+\lle{Application designer can configure the oracle to trigger repartitioning in different ways: based on the number of changes to the graph, or based on some interval of time.}
 Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a partitioning based on the workload graph.
 While partitioning a graph, METIS aims to reduce the number of multi-partition commands (edge-cuts) while trying to keep the various partitions balanced. 
 We configured METIS to allow a 20\% unbalance among partitions. 
+\lle {However, METIS needs to repartition graphs from scratch every time a change is
+introduced in the graph or the number of partitions, which could result in having \dynastar relocating the whole graph. \cite{SerafiniTEPAS16}. The other techniques that related to incremental graph partitioning are orthogonal to our paradigm, so they can be used to further improve \dynastar performance}
  \end{itemize}
 
  We note one important implementation detail.  The oracle is
@@ -102,10 +107,16 @@ We configured METIS to allow a 20\% unbalance among partitions.
 %On average, 10\% of transactions are distributed transactions. 
 
 TPC-C is an industry standard for evaluating the performance of OLTP systems.
-It has 9 tables and five transaction types that simulate a warehouse-centric 
+\lle{
+The TPC-C workload depicts the activity of a wholesale supplier company.
+The company has of a number of distributed sales districts and
+associated warehouses. Each warehouse has 10 districts.
+Each district services 3,000 customers. Each warehouse maintains a stock of 100,000 items.
+The TPC-C database consists of 9 tables and five transaction types that simulate a warehouse-centric 
 order processing application: \emph{New-Order} (45\% of transactions in the workload), \emph{Payment} (43\%), \emph{Delivery}
 (4\%), \emph{Order-Status} (4\%) and \emph{Stock-Level} (4\%).
-The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.
+}
+\lle{The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.}
 We implemented a Java version of TPC-C that runs on top of \dynastar. 
 Each row in TPC-C tables is an object in \dynastar. The oracle models the workload at the granularity of districts,
 thus each district or warehouse is a node in the graph. If a transaction accesses a district 

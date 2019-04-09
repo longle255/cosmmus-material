@@ -60,13 +60,6 @@
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
-	\STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
-	% \STATE $dests \leftarrow \{ \ppm : \ppm \cap vars \neq \varnothing \}$
-	\STATE return $dests$
-\ENDINDENT
-
-	\vspace{1.0mm}
 
 \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 	\STATE update $G_W$ with $(V_h,E_h)$
@@ -83,13 +76,6 @@
 \INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{partitioning})$}}
 	\STATE apply $partitioning$
 \ENDINDENT
-
-\vspace{1.0mm}
-
-\INDENT{\colorbox{\coloralgo}{\textbf{function} target$(\ppm, C)$}}
-	\STATE $\ppm_d \leftarrow$ deterministicly compute partition to execute\\ \hspace{8mm} command $C$ from $\forall \ppm_i \in \ppm$
-	\STATE return $\ppm_d$
-\ENDINDENT	
 
 \vspace{1.5mm}
 
