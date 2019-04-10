@@ -7,7 +7,7 @@ In this section, we detail the system model, define multicast, and state our cor
 
 \subsection{Processes and communication}
 
-We consider a distributed system consisting of an unbounded set of
+We consider a message-passing distributed system consisting of an unbounded set of
 client processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of
 server processes (replicas) $\ssm = \{s_1, ..., s_n\}$.  Set $\ssm$ is
 divided into disjoint groups of servers $\ssm_0, ..., \ssm_k$.
@@ -15,20 +15,23 @@ Processes are either \emph{correct}, if they never fail, or
 \emph{faulty}, otherwise.  In either case, processes do not experience
 arbitrary behavior (i.e., no Byzantine failures).
 
-Processes communicate by message passing, using either one-to-one or
-one-to-many communication.  The system is asynchronous: there is no
-bound on message delay or on relative process speed.  One-to-one
-communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
+The system is partially synchronous~\cite{DLS88}, that is, it is initially asynchronous and eventually it becomes synchronous. 
+The time when the system becomes synchronous is called the Global Stabilization Time (GST) and it is unknown to the processes.
+Before GST, there are no bounds on the time it takes for messages to be transmitted and actions to be executed. 
+After GST, such bounds exist but are unknown. 
+
+Processes communicate using either one-to-one or one-to-many communication.  
+%The system is asynchronous: there is no bound on message delay or on relative process speed.  
+One-to-one communication uses primitives $send(p,m)$ and $receive(m)$, where $m$
 is a message and $p$ is the process $m$ is addressed to.  If sender
 and receiver are correct, then every message sent is eventually
 received.
 %
 One-to-many communication relies on reliable multicast and atomic
-multicast,\footnote{Solving atomic multicast requires additional
-  assumptions~\cite{CT96,FLP85}. In the following, we simply assume
-  the existence of an atomic multicast oracle.} defined in
-\S\ref{sec:rmcast} and \S\ref{sec:amcast}, respectively.
-
+multicast, defined in \S\ref{sec:rmcast} and \S\ref{sec:amcast}, respectively.
+%\footnote{Solving atomic multicast requires additional
+%  assumptions~\cite{CT96,FLP85}. In the following, we simply assume
+%  the existence of an atomic multicast oracle.}
 
 \subsection{Reliable multicast}
 \label{sec:rmcast}

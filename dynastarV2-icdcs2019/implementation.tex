@@ -4,7 +4,7 @@
 
 \subsection{Atomic multicast}
 
-Our \dynastar prototype uses the BaseCast atomic multicast protocol described in \cite{Coelho:2017} and available as open source.\footnote{https://bitbucket.org/paulo\_coelho/libmcast}
+Our \dynastar prototype uses the BaseCast atomic multicast protocol \cite{Coelho:2017}, available as open source.\footnote{https://bitbucket.org/paulo\_coelho/libmcast}
 Each group of servers in BaseCast executes an instance of Multi-Paxos.\footnote{http://libpaxos.sourceforge.net/paxos\_projects.php\#libpaxos3}
 Groups coordinate to ensure that commands multicast to multiple groups are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
 %Commands multicast to multiple groups coordinate to ensure that commands are consistently ordered (as defined by the atomic multicast properties \S\ref{sec:amcast}).
@@ -22,13 +22,13 @@ Application designers who use \dynastar
  to implement a replicated service must extend three key classes:
  \begin{itemize}
  \item[--] \emph{PRObject}: provides a common interface for replicated data items.
- \item[--] \emph{ProxyClient}: \lle{provides the communication between application client and server, while encapsulating all 
- complex logic of handling caches or retried requests. The proxy client also allows sending multiple asynchronous requests, and delivering corresponding response to each request.}
+ \item[--] \emph{ProxyClient}: provides the communication between application client and server, while encapsulating all 
+ complex logic of handling caches or retried requests. The proxy client also allows sending multiple asynchronous requests, and delivering corresponding response to each request.
  \item[--] \emph{PartitionStateMachine}: encapsulates the logic of the server
    proxy. The server logic is written without knowledge of the actual partitioning scheme. The \dynastar library
    handles all communication between partitions and the oracle transparently.
  \item[--] \emph{OracleStateMachine}: computes the mapping of objects to partitions.
-\lle{Application designer can configure the oracle to trigger repartitioning in different ways: based on the number of changes to the graph, or based on some interval of time.}
+The oracle can be configured to trigger repartitioning in different ways: based on the number of changes to the graph, or based on some interval of time.
 Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a partitioning based on the workload graph.
 While partitioning a graph, METIS aims to reduce the number of multi-partition commands (edge-cuts) while trying to keep the various partitions balanced. 
 We configured METIS to allow a 20\% unbalance among partitions. 
