@@ -70,7 +70,7 @@ When the partitions delivered the partitioning request, they exchanged objects t
 % During this process, servers didn't execute any other transactions, thus the throughput decreased 
 % to 0, and the average latency was not applicable. 
 It takes about 10 seconds for partitions to reach the new partitioning.
-\lle{During the repartitioning, transactions which access objects that are not being relocated will continue to process.}
+During the repartitioning, transactions which access objects that are not being relocated will continue to process.
 After the state is relocated, most objects involved in a transaction
 can be found in a local partition, which considerably increases performance and reduces latency. 
 
@@ -206,11 +206,11 @@ the difference in throughput between each technique is due to the implementation
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
 In the experiment with the mix workload, we see that \dssmr{} performance decreases significantly.
-\lle{This happens because objects in \dssmr{} will only converge if there is a perfect way to 
+This happens because objects in \dssmr{} will only converge if there is a perfect way to 
 partition the data, that is, data items can be grouped such 
 that eventually no command accesses objects across partitions. In the mix workload experiments, 
 objects in \dssmr{} are constantly moving back and forth between partition 
-without converging to a stable configuration}
+without converging to a stable configuration.
 
 In contrast, for \dynastar and S-SMR*, the throughput scales with 
 the number of partitions in experiments with up to 8 partitions. 
@@ -265,7 +265,7 @@ other users started following the celebrity.
     \includegraphics[width=\textwidth]{./figures/experiments/chirper-celeb-ssmr.pdf}
     \caption{}
   \end{subfigure}
-  \caption{Repartitioning a dynamic workload with \dynastar~(a) and \ssmr* without repartitioning (b).}%
+  \caption{Repartitioning a dynamic workload with \dynastar~(a) and S-SMR* without repartitioning (b).}%
   \label{fig:socialcelebrity}
 \end{figure*}
 
@@ -301,18 +301,19 @@ got a better location from the oracle, which adapted the changes. After the repa
 \subsection{The performance of the oracle}
 
 \dynastar  uses an oracle that maintains a global view of the workload graph. The oracle allows
-\dynastar to make better choices about data movement, resulting in an overally
+\dynastar to make better choices about data movement, resulting in overall
 better throughput and lower latency. However, introducing a centralized
 component in a distributed system is always a cause for some skepticism,
 in case the component becomes a bottleneck, or a single point of failure. 
 To cope with failures, the oracle is implemented as a replicated partition. 
-\lle{The oracle keeps a mapping of objects to partitions and the relations between objects. 
+
+The oracle keeps a mapping of objects to partitions and the relations between objects. 
 The size of the mapping depends on the complexity and the granularity of the graph. 
-In the social network dataset, where each user is modelled as an object in the workload graph, 
-The graphs takes 1.5 GBs of the oracle's memory.
-In the TPC-C experiments, only district and warehouse objects are presented in the workload graph, 
-the oracle only need 1 MB of memory to store the graph for each warehouse.
-}
+In the social network dataset, where each user is modeled as an object in the workload graph, 
+the graph uses 1.5 GB of the oracle's memory.
+In the TPC-C experiments, only district and warehouse objects are in the workload graph;
+thus, the oracle only needs 1 MB of memory to store the graph for each warehouse.
+
 The results in Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a bottleneck.
 The number of queries processed to the oracle is zero at the 
 beginning of the experiment, as the clients have cached the location of all objects.

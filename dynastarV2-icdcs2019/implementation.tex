@@ -32,8 +32,12 @@ The oracle can be configured to trigger repartitioning in different ways: based 
 Our default implementation uses METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a partitioning based on the workload graph.
 While partitioning a graph, METIS aims to reduce the number of multi-partition commands (edge-cuts) while trying to keep the various partitions balanced. 
 We configured METIS to allow a 20\% unbalance among partitions. 
-\lle {However, METIS needs to repartition graphs from scratch every time a change is
-introduced in the graph or the number of partitions, which could result in having \dynastar relocating the whole graph. \cite{SerafiniTEPAS16}. The other techniques that related to incremental graph partitioning are orthogonal to our paradigm, so they can be used to further improve \dynastar performance}
+METIS repartitions a graph without considering previous partitions.
+Consequently, \dynastar may need to relocate a large number of objects upon a repartitioning.
+Other partitioning techniques could be used to introduce incremental graph partitioning \cite{SerafiniTEPAS16}.
+%
+%\lle {However, METIS needs to repartition graphs from scratch every time a change is
+%introduced in the graph or the number of partitions, which could result in having \dynastar relocating the whole graph. \cite{SerafiniTEPAS16}. The other techniques that related to incremental graph partitioning are orthogonal to our paradigm, so they can be used to further improve \dynastar performance}
  \end{itemize}
 
  We note one important implementation detail.  The oracle is
@@ -107,24 +111,24 @@ introduced in the graph or the number of partitions, which could result in havin
 %On average, 10\% of transactions are distributed transactions. 
 
 TPC-C is an industry standard for evaluating the performance of OLTP systems.
-\lle{
-The TPC-C workload depicts the activity of a wholesale supplier company.
+TPC-C implements a wholesale supplier company.
 The company has of a number of distributed sales districts and
 associated warehouses. Each warehouse has 10 districts.
 Each district services 3,000 customers. Each warehouse maintains a stock of 100,000 items.
 The TPC-C database consists of 9 tables and five transaction types that simulate a warehouse-centric 
 order processing application: \emph{New-Order} (45\% of transactions in the workload), \emph{Payment} (43\%), \emph{Delivery}
 (4\%), \emph{Order-Status} (4\%) and \emph{Stock-Level} (4\%).
-}
-\lle{The ITEM table is replicated to all servers, considering that the ITEM table is not updated in this benchmark.}
+
 We implemented a Java version of TPC-C that runs on top of \dynastar. 
 Each row in TPC-C tables is an object in \dynastar. The oracle models the workload at the granularity of districts,
-thus each district or warehouse is a node in the graph. If a transaction accesses a district 
+thus each district and warehouse is a node in the graph. If a transaction accesses a district 
 and a warehouse, the oracle will create an edge between that district and the warehouse.
 The objects (e.g., customers, orders) that belong to a district 
 are considered part of district. However, if a transaction requires
 objects from multiple districts, only those objects will be moved on demand, rather than
 the whole district.
+The ITEM table is replicated in all servers, since it is not updated in the benchmark.
+
 %A transaction is a set of commands that access those variables, implemented 
 %as server procedures. 
 
@@ -161,7 +165,7 @@ partitions, while posts may require object moves from many partitions.
 
 \subsection{Alternative system}
 
-We compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr} and DS-SMR~\cite{hoang2016}, publicly available.\footnote{https://bitbucket.org/kdubezerra/eyrie,https://bitbucket.org/usi-dslab/ds-smr}
+We compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr} and DS-SMR~\cite{hoang2016}, publicly available.\footnote{https://bitbucket.org/kdubezerra/eyrie\\ https://bitbucket.org/usi-dslab/ds-smr}
 S-SMR scales performance with the number of partitions under a variety of workloads.
 It differs from \dynastar{} in two important aspects:
 multi-partition commands are executed by all involved partitions, after the partitions exchange needed state for the execution of the command, and S-SMR supports static state partitioning.
