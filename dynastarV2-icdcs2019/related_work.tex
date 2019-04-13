@@ -6,14 +6,14 @@ State machine replication~\cite{Kapritsos:2012um, kotla2004htbft, Lam78, santos2
 %Deterministic execution is usually ensured by having every replica execute commands sequentially.
 Since consistent ordering is fundamental for SMR, some authors proposed to optimize the ordering and propagation of commands.
 % (i.e., the atomic broadcast layer of the system).
-For instance, \cite{kapritsos2010scalable} proposes to divide the ordering of commands between different clusters: each cluster orders only some requests, and then forwards the partial order to every server replica, which then merges the partial orders deterministically into a single total order that is consistent across the system.
-In~\cite{biely2012spaxos}, Paxos~\cite{Lamport:1998ea} is used to order commands, but it is implemented in a way that avoids overloading the leader process, which would turn it into a bottleneck.
+For instance, Kapritsos and Junqueira~\cite{kapritsos2010scalable} propose to divide the ordering of commands between different clusters: each cluster orders only some requests, and then forwards the partial order to every server replica, which then merges the partial orders deterministically into a single total order that is consistent across the system.
+In S-Paxos~\cite{biely2012spaxos}, Paxos~\cite{Lamport:1998ea} is used to order commands, but it is implemented in a way that avoids overloading the leader process, which would turn it into a bottleneck.
 
 Multi-threaded execution is a potential source of non-determinism, depending on how threads are scheduled to be executed in the operating system.
 Some works attempted to circumvent this problems and come up with a multi-threaded, yet deterministic implementation of SMR.
-In \cite{santos2013htsmr}, the authors propose to parallelize the receipt and dispatching of commands, while executing commands sequentially.
-In \cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently and still produce a deterministic outcome (e.g., read-only commands).
-In \cite{Kapritsos:2012um}, commands are tentatively executed in parallel.
+In \cite{santos2013htsmr}, Santos and Schiper propose to parallelize the receipt and dispatching of commands, while executing commands sequentially.
+In CBASE~\cite{kotla2004htbft}, application semantics is used to determine which commands can be executed concurrently and still produce a deterministic outcome (e.g., read-only commands).
+In Eve~\cite{Kapritsos:2012um}, commands are tentatively executed in parallel.
 After the parallel execution, replicas verify whether they reached a consistent state; if not, commands are rolled back and re-executed sequentially.
 
 Many database replication schemes aim at achieving high throughput by relaxing consistency, that is, they do not ensure linearizability.
@@ -23,8 +23,8 @@ Database systems usually ensure serializability \cite{BHG87} or snapshot isolati
 For some applications, these consistency levels may be enough, allowing the system to scale better, but services that require linearizability cannot be implemented with such techniques.
 
 Efforts to make linearizable systems scalable have been made in the past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, hoang2016, Marandi:2011dj}.
-In \cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
-In \cite{Marandi:2011dj}, variant of SMR is proposed in which data items are partitioned but commands have to be totally ordered.
+In Scatter~\cite{Glendenning2011}, the authors propose a scalable key-value store based on DHTs, ensuring linearizability, but only for requests that access the same key. 
+In the work of Marandi et al~\cite{Marandi:2011dj}, variant of SMR is proposed in which data items are partitioned but commands have to be totally ordered.
 Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and, to ensure strong consistency across partitions, clocks are assumed to be synchronized.
 Although the authors say that Spanner works well with GPS and atomic clocks, if clocks become out of synch beyond tolerated bounds, correctness is not guaranteed.
 $M^2Paxos$~\cite{7579738} proposes a scheme where leases are used instead of partitions owning objects, but assumes full state replication.

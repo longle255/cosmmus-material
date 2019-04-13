@@ -20,7 +20,7 @@ To guarantee that servers deliver the same sequence of commands, SMR can be impl
 
 \subsection{Scaling State Machine Replication}
 
-Despite its simple execution model, classic SMR does not scale: adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. 
+Despite its simple execution model, classic SMR does not scale; adding resources (e.g., replicas) will not translate into sustainable improvements in throughput. 
 Several approaches have been proposed to address SMR's scalability limitations.
 In all proposed protocols, the idea is to shard the service's state and replicate each shard.
 More precisely, the service state \vvt\ is composed of $k$ partitions, $\ppm_1, ..., \ppm_k$, where each partition $\ppm_i$ is assigned to server group $\ssm_i$. 
