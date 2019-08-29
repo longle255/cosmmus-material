@@ -1,0 +1,133 @@
+\begin{algorithm}[h!]
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\INIT
+	\STATE $ts \leftarrow 0$
+	\COMMENT{P's logical clock}
+	\STATE $pending \leftarrow \emptyset$
+	\COMMENT{set of message to be ordered}
+	\STATE $ordered \leftarrow \emptyset$
+	\COMMENT{set of message already ordered, to be delivered}
+	\STATE $pending_{ts} \leftarrow \emptyset$
+	\COMMENT{set of pending timestamps}
+	\STATE $c_\omega \leftarrow 0$
+	\COMMENT{P's write counter}
+	\STATE $c_r \leftarrow 0$
+	\COMMENT{P's read counter}
+	\STATE $\buffer \leftarrow NULL$
+	\COMMENT{P's local buffer}
+	\vspace{2.0mm}
+\ENDINIT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{to enqueue message m	:}}
+	\FORALL {$p \in G \mid \forall G \in  m.dest$}
+		\TRIGGER {$ \langle rdma, \WRITE \mid p, [m] \rangle$}
+		\COMMENT{remote-write m to memory of all processes belong to all involved groups}
+	\ENDFOR
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{leader process $P_L$ of group $G$}}
+	\UPON[on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
+		\STATE $dest \leftarrow \{\forall p \mid p \in G\} \cup \{\forall p \in G_i \mid G_i \in m.dest\}$
+		\COMMENT{set of all processes in G and all leaders of involved groups}
+		\STATE $ts \leftarrow ts + 1$
+		\COMMENT{increase local timestamp}
+		\STATE $c_\omega \leftarrow c_\omega + 1$
+		\COMMENT{increase write counter}
+		\FORALL {$p \in dest$}
+			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_L, ts, c_\omega] \rangle$}
+			\COMMENT{remote-write $P_l$'s timestamp with order $c_\omega$ to all process $\in dest$ set}
+		\ENDFOR
+	\ENDUPON
+	\vspace{2.0mm}
+
+	\UPON[on receive timestamp $ts_l$ of a leader $P_l$ in local buffer]{$\langle \buffer, \READ \mid [P_l, ts_l, c] \rangle$}
+		\STATE $c_\omega \leftarrow c_\omega + 1$
+		\COMMENT{increase write counter}
+		\FORALL {$p \in G$}
+			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_l, ts, c_\omega] \rangle$}
+			\COMMENT{propagate $P_l$'s timestamp $ts_l$ and write counter $c_\omega$ to all process $\in dest$ set}
+		\ENDFOR
+		% \STATE $\forall p \in G: \rwrite(p, ts_l, c_\omega)$
+		% \COMMENT{propagate $P_l$'s timestamp $ts_l$ and write counter $c$ to all process $\in dest$ set}
+		\STATE $ts \leftarrow max(ts, ts_l)$
+	\ENDUPON
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{any process $P$ of group $G$}}
+	\UPON[on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
+		% \STATE do $\READ(ts, L)$
+		\STATE $pending \leftarrow pending \cup \{m\}$
+		\COMMENT{include m in pending messages set}
+		% \COMMENT{polling timestamp of leader of its own group}
+	\ENDUPON
+	\vspace{2.0mm}
+
+	\UPON[on receive timestamp $ts_l$ for message $m$ in local buffer]{$\langle \buffer, \READ \mid [ts_l, c_w, m] \rangle$}
+		\STATE $ts \leftarrow max(ts, ts_l)$
+		\COMMENT{Lamport’s rule to update logical clocks}
+		\FORALL {$p \in m.dest$}
+			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P, ack] \rangle$}
+			\COMMENT{remote-write P's ack to memory of all involved processes}
+		\ENDFOR
+		% \STATE $\rwrite(p \mid p \in dest, ack)$
+		\STATE $pending_{ts} \leftarrow pending_{ts} \cap \{\langle ts_l, c_w, m \rangle\}$
+		\COMMENT{include $\langle ts_l, c_w, m \rangle$ in pending timestamps set}
+		\vspace{1.0mm}
+
+		\WHILE{$\exists \langle ts_l, c_w, m\rangle \in pending_{ts} : c_w = c_r + 1$}
+			\STATE $pending_{ts} \leftarrow pending_{ts}$ \textbackslash $\{\langle ts_l, c_w, m\rangle\}$
+			\COMMENT{remove $\langle ts_l, c_w, m \rangle$ from pending set}
+			\STATE  $c_r = c_r + 1$
+			\COMMENT{increase read counter}
+		\ENDWHILE
+
+		\WHILE[]{$\exists m \in pending : isFulfilled(m) = true$}
+			\STATE $t \leftarrow max(ts_i)$
+			\COMMENT{$t$ is the largest timestamp between all timestamps $ts_i$ populated by all leaders}
+			\STATE $pending \leftarrow pending$ \textbackslash $\{m\}$
+			\COMMENT{remove $m$ from pending set}
+			\STATE $ordered \leftarrow ordered \cup \langle m, t \rangle$
+			\COMMENT{include $\langle m, t \rangle$ in ordered set}
+		\ENDWHILE
+
+		% \WHILE {$\exists \langle m,t \rangle \in ordered : t < min(\forall t_i \in pending) \wedge \newline
+		% 		\hspace*{11.7em} t < min(\forall t_i \in ordered)$:}
+		\WHILE {$\exists \langle m,t \rangle \in ordered : t < min(\forall t_i \in pending) \wedge t < min(\forall t_i \in ordered)$:}
+			\STATE $ordered \leftarrow ordered$ \textbackslash $\{m\}$
+			\STATE deliver $m$
+		\ENDWHILE
+	\ENDUPON
+\ENDINDENT
+\vspace{4.0mm}
+
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} \rwrite$(dest, data\dots)$}}
+% 	\STATE rdma-write $[data\dots]$ to $dest$'s shared buffer
+% \ENDINDENT
+% \vspace{2.0mm}
+
+% \INDENT{\colorbox{\coloralgo}{\textbf{function} \READ$(data\dots)$}}
+% \STATE atomic-read $[data\dots]$ from local buffer
+% \ENDINDENT
+% \vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{\textbf{function} isFulfilled$(m)$}}
+	\IF[m receives ts of all involved groups and acks from majority processes]{$\forall G \mid G \in m.dst \wedge \newline
+	\hspace*{3.5em} ts_G \neq 0 \wedge \newline
+	\hspace*{3.5em} \langle ts_G, m \rangle \notin pending_{ts} \wedge \newline
+	\hspace*{3.5em} $ receive acks for $ts_G$ from majority:}
+		\RETURN true
+	\ELSE
+		\RETURN false
+	\ENDIF
+\ENDINDENT
+
+\caption{RDMA Scalable Message Queue}
+\label{alg:client_proxy}
+\end{distribalgo}
+\end{algorithm}

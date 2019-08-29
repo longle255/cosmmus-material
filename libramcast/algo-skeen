@@ -1,0 +1,61 @@
+Sample message
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ id=967 ║ len=8 ║ ts=-1 ║ gCount=3 ║ AAAA ║ 0 │ 1 │ 2 ║ 140640117457892 │ 139988154810292 │ 139659992388260 ║ -1 │ -1 │ -1  ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+Initialization
+      TS ← 0
+      Pending ← ∅
+      Ordered ← ∅
+      freeSpace ← ∅
+
+- to a-mcast(m):
+      r-write(m, addr-of-m-on-P_i | ∀P_i ∈ m.dst) to all P_i ∈ m.dst
+
+when l-read(m):
+      TS ← TS + 1
+      r-write(TS) to P_i's timestamp location in m on all P_i ∈ m.dst
+      add (m.id) to Pending
+
+when Pending <> ∅
+      if ∃m | m.id ∈ Pending and ∀q ∈ m.dst | m.TS_q <> -1
+            ts ← max(m.TS)
+            remove (m.id) from Pending
+            add (ts, m.id) to Ordered
+      if ∃(ts, m.id) ∈ Ordered | min(ts, m.TS_q ∈ Pending) = ts and
+                                  min(ts, ts ∈ Ordered) = ts
+            remove (ts, m.id) from Ordered
+            do-deliver (m)
+
+
+function do-deliver(m)
+  deliver(m)
+  if m.address = headPointer
+    move headPointer(m.length)
+    while ∃(m.address, m.length) ∈ freeSpace | m.address = headPointer
+      move headPointer(m.length)
+    r-write(new head) to client's copy of remote head
+  else
+    add (m.address, m.length) to freeSpace
+
+
+{mbal, bal, val}
+Initialization
+      bal = 0
+      val = NAV
+      mbal = 1
+
+on receive message m
+    mbal ← mbal + 1
+    accepted ← {}
+
+      for every replicas
+            R_i writes {mbal_i, bal_i, val_i} to R_i memory block
+            ∀j <> i, j ∈ R
+                  R_i reads {mbal_j, bal_j, val_j} from R_j block
+                  if R_i.mbal_i < R_j.mbal_j
+                        abort
+
+      If phase 1
+
+Each replica
