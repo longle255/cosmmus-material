@@ -192,6 +192,52 @@ Sending inline'd data is an implementation extension that isn't defined in any R
 + If the WR sends data, the local memory buffers content shouldn't be changed since one doesn't know when the RDMA device will stop reading from it (one exception is inline data)
 + If the WR reads data, the local memory buffers content shouldn't be read since one doesn't know when the RDMA device will stop writing new content to it
 
+```
+sequenceDiagram
+    participant CPU1
+    participant RNIC1
+    participant RNIC2
+    participant CPU2
+
+rect rgb(255,0, 255, 0.1)
+     Note over RNIC1, RNIC2: READ, RELIABLE
+    CPU1 -->> RNIC1: new SendRequest(SR)
+    RNIC1 ->> RNIC2: RDMA Data Package
+    RNIC2 -->> +CPU2: DMA
+    CPU2 -->> -RNIC2:
+    RNIC2 ->> RNIC1: RDMA ACK
+    RNIC1 -->> CPU1: CompletionEvent (CE)
+end
+
+rect rgb(0,0, 255, 0.1)
+     Note over RNIC1, RNIC2: WRITE, RELIABLE, SIGNALED
+    CPU1 -->> RNIC1: new SendRequest(SR)
+    RNIC1 -->> +CPU1: DMA
+    CPU1 -->> -RNIC1:
+    RNIC1 ->> RNIC2: RDMA Data Package
+    RNIC2 -->> CPU2: DMA
+    RNIC2 ->> RNIC1: RDMA ACK
+    RNIC1 -->> CPU1: CompletionEvent (CE)
+end
+
+rect rgb(0,255, 155, 0.1)
+    Note over RNIC1, RNIC2: WRITE, INLINED, UC, UNSIGNALED
+    CPU1 -->> RNIC1: new SendRequest(SR)
+    RNIC1 ->> RNIC2: RDMA Data Package
+    RNIC2 -->> CPU2: DMA
+end
+
+rect rgb(0,0, 155, 0.1)
+    Note over RNIC1, RNIC2: WRITE, INLINED, RC, UNSIGNALED
+    CPU1 -->> RNIC1: new SendRequest(SR)
+    RNIC1 ->> RNIC2: RDMA Data Package
+    RNIC2 -->> CPU2: DMA
+    RNIC2 ->> RNIC1: RDMA ACK
+end
+```
+
+[Graph](https://mermaidjs.github.io/mermaid-live-editor/#/view/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gICAgcGFydGljaXBhbnQgQ1BVMVxuICAgIHBhcnRpY2lwYW50IFJOSUMxXG4gICAgcGFydGljaXBhbnQgUk5JQzJcbiAgICBwYXJ0aWNpcGFudCBDUFUyXG5cbnJlY3QgcmdiKDI1NSwwLCAyNTUsIDAuMSlcbiAgICAgTm90ZSBvdmVyIFJOSUMxLCBSTklDMjogUkVBRCwgUkVMSUFCTEVcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiArQ1BVMjogRE1BXG4gICAgQ1BVMiAtLT4-IC1STklDMjogXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50IChDRSlcbmVuZFxuXG5yZWN0IHJnYigwLDAsIDI1NSwgMC4xKVxuICAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBXUklURSwgUkVMSUFCTEUsIFNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLS0-PiArQ1BVMTogRE1BXG4gICAgQ1BVMSAtLT4-IC1STklDMTogXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gQ1BVMjogRE1BXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50IChDRSlcbmVuZFxuXG5yZWN0IHJnYigwLDI1NSwgMTU1LCAwLjEpXG4gICAgTm90ZSBvdmVyIFJOSUMxLCBSTklDMjogV1JJVEUsIElOTElORUQsIFVDLCBVTlNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gQ1BVMjogRE1BXG5lbmRcblxucmVjdCByZ2IoMCwwLCAxNTUsIDAuMSlcbiAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBXUklURSwgSU5MSU5FRCwgUkMsIFVOU0lHTkFMRURcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiBDUFUyOiBETUFcbiAgICBSTklDMiAtPj4gUk5JQzE6IFJETUEgQUNLXG5lbmQiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9fQ)
+
 ## Messages sent
 
 V1
@@ -227,3 +273,48 @@ follower  =   0       +     0             +     g*p-1
 Sending to the followers is Phase 2a of Paxos; sending to all other leaders is for them to advance their local clocks, and not propose anything with a smaller timestamp
 + Step 3: leader wait for all timestamps to be available, and propagate them at once, that makes (p-1) writes.
 Followers only send acks to all other processes (g*p-1).
+
+
+## Leader Election
+
+### Leader selection
+
+Leader election is implemented using Apache ZooKeeper, a co-ordination service.
+
+![](https://pocket-image-cache.com//filters:no_upscale()/http%3A%2F%2Fwww.allprogrammingtutorials.com%2Fimages%2Fleader-election-algorithm.png)
+
+To summarize, each of the node will create a ephemeral and sequential znode at start up under "/election" persistent znode. Since znode created by process is sequential, ZooKeeper will add a unique sequence number to its name. Once this is done, process will fetch all the child znodes of "/election" znode and look for child znode having smallest sequence number. If the smallest sequence number child znode is same as znode created by this process, then current process will declare itself leader by printing the message "I am new leader".
+
+However, if the process znode does not have smallest sequence number, it will set a watch on the znode having sequence number just smaller than its process znode. E.g. if current process znode is "p_0000234" and other process znodes are "p_0000123", "p_0000129", "p_0000223", "p_0000235", "p_0000245" then current process znode will be setting the watch on znode with path "p_0000223".
+
+As soon as the watched ephemeral znode is removed by ZooKeeper due to process being shutdown, current process gets a watchevent notification. Thereafter, current process again fetches the child znodes of "/election" and repeat the steps of checking whether it is leader.
+
+http://www.allprogrammingtutorials.com/tutorials/leader-election-using-apache-zookeeper.php
+
+### Leader election & failure handling
+
+- The selected leader inits only one round of Phase 1 paxos, by sending 1A message with its ballot number.
+- Leader needs to include its ballot number when write its timestamp.
+- Follower only ack timestamps that have ballot number >= the largest ballot number that it knows
+- When a leader fails, new leader is selected => increase its ballot number => send 1A message
+
+- **How could a process know the leader of another group???**
+  => When leader sends 1A, it should includes all processes.
+    => Followers sends 1B, also for all processes.
+
+So these value will be includes in the write of leader:
+- ballot number => follower will not accept ts with lower ballott
+- timestamp  => the value to be decided => not related to paxos
+- write counter => instance number
+
+Message structure need to be updated
+
+```
+╔════════╦════════╦════════════════╦═════════════╦═════════════╦═══════════════════════════════════════════════════════════════════════╦════════════╦════════════════════════════════════════════════╦═══════════════════════════════════════════════╗
+║ id=962 ║ len=6  ║ gCount=2       ║ AAA         ║ 0    │ 1    ║ 140665081851888 │ 140501671660992 │ 139704552803616 │ 139799176205904 ║     68     ║   1   |   4   |   0    ║   0   |   4   |   0   ║     0     │     0     │     0     │     0     ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬════════════════════════════════════════════════╬═══════════════════════════════════════════════╣
+║   4    ║   4    ║     2          ║    6        ║    2 * 2    ║                               8 * 2 * 2                               ║      4     ║                     (4+4+4) * 2                ║                  2 * r * n                    ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬════════════════════════════════════════════════╬═══════════════════════════════════════════════╣
+║  id    ║ length ║ groupCount (n) ║ message (m) ║ g[0] │ g[1] ║ offset[0][0]    │ offset[0][1]    │ offset[1][0]    │ offset[1][1]    ║ lengthCheck║ ts[0] | cw[0] | bl[0] ║ ts[1] | cw[1] | bl[1]  ║ ack[0][0] │ ack[0][1] │ ack[1][0] │ ack[1][1] ║
+╚════════╩════════╩════════════════╩═════════════╩═════════════╩═══════════════════════════════════════════════════════════════════════╩═════════════════════════════════════════════════════════════╩═══════════════════════════════════════════════╝
+```
