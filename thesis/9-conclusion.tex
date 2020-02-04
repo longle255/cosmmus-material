@@ -1,0 +1,35 @@
+\chapter[Conclusion]{Conclusion}
+
+
+We have proposed here \dynastar, a novel state-machine replication approach that
+allows state-machine replication to scale by dynamically adapting to the
+workload, while still ensuring strong consistency. This is a work in progress,
+though, and thus needs to be further elaborated. For this purpose, a few points
+need to be addressed:
+
+\begin{itemize}
+
+    \item[i)]\emph{Decentralized partitioning:}
+    Even though defining optimized partitioning by using a centralized oracle
+    shows its advantages over the decentralized approach, the oracle is still
+    prone to becoming a bottleneck as the workload becomes bigger or less
+    clustered, since it has to handle more queries from clients. A decentralized
+    graph partitioning approach could help solve this problem.
+
+    \item[ii)]\emph{Reconfiguring partitions:}
+    In \dynastar, we considered a fixed number of partitions. Changing the
+    number of partitions in a \dynastar\ deployment while the system is running,
+    is not a trivial problem to solve efficiently. Ideally \dynastar\ could
+    allow application's state to shrink or expand to fit into a partitioning
+    configuration with more or less partitions, in order to add or remove a
+    partition dynamically.
+
+\end{itemize}
+
+Furthermore, \dynastar currently requires clients to explicitly send specific
+commands to create workload graph (e.g., creating vertices or edges between
+vertices). We plan to create a development environment, in the form of a
+programming library, that allows the application designer to focus on the
+application logic, rather than on graph partitioning and remote execution
+details. The creation of the graph, handling of state partitioning and
+distributed execution of commands will be handled internally by the library.

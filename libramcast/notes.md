@@ -318,3 +318,19 @@ Message structure need to be updated
 ║  id    ║ length ║ groupCount (n) ║ message (m) ║ g[0] │ g[1] ║ offset[0][0]    │ offset[0][1]    │ offset[1][0]    │ offset[1][1]    ║ lengthCheck║ ts[0] | cw[0] | bl[0] ║ ts[1] | cw[1] | bl[1]  ║ ack[0][0] │ ack[0][1] │ ack[1][0] │ ack[1][1] ║
 ╚════════╩════════╩════════════════╩═════════════╩═════════════╩═══════════════════════════════════════════════════════════════════════╩═════════════════════════════════════════════════════════════╩═══════════════════════════════════════════════╝
 ```
+
+
+
+
+
+Use RDMA Write with immediate, which will consume the Receive Request in the receiver side and generate a Work Completion.
+=> need to post recv request on receiver side before receiving write
+
+
+
+### Leader syncing
+
+client sends synced request => wait for reply => no holes
+
+otherwise => holes in the shared buffer.
+

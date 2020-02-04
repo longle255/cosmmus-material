@@ -1,5 +1,5 @@
 %!TEX root =  main.tex
-\begin{algorithm}[h!]
+\begin{algorithm*}
 \footnotesize
 
 \begin{distribalgo}[1]
@@ -15,18 +15,20 @@
 	\COMMENT{set of pending slots for timestamps}
 	\STATE $pending_{ack} \leftarrow \emptyset$
 	\COMMENT{set of pending slots for acknowledgements}
-	\STATE $c_\omega \leftarrow 0$
-	\COMMENT{P's write counter}
-	\STATE $c_r \leftarrow 0$
-	\COMMENT{P's read counter}
+	\STATE $bal \leftarrow 0$
+	\COMMENT{ballot number}
+	\STATE $seq \leftarrow 0$
+	\COMMENT{sequence number}
+	\STATE $curSeq \leftarrow 0$
+	\COMMENT{P's current sequence number}
 	\STATE $\buffer \leftarrow NULL$
 	\COMMENT{P's local buffer}
 	\vspace{2.0mm}
 \ENDINIT
 \vspace{2.0mm}
 
-\INDENT{\colorbox{\coloralgo}{to enqueue message m	:}}
-	\FORALL {$p \in G \mid \forall G \in  m.dest$}
+\INDENT{\colorbox{\coloralgo}{to a-mcast message m	:}}
+	\FORALL[\textbf{Task 1}] {$p \in G \mid \forall G \in  m.dest$}
 		\TRIGGER {$ \langle rdma, \WRITE \mid p, [m] \rangle$}
 		\COMMENT{remote-write m to memory of all processes belong to all involved groups}
 	\ENDFOR
@@ -34,36 +36,34 @@
 \vspace{2.0mm}
 
 \INDENT{\colorbox{\coloralgo}{leader process $P_L$ of group $G$}}
-	\UPON[on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
+	\UPON[\textbf{Task 2} on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
 		\STATE $dest \leftarrow \{\forall p \mid p \in G\} \cup \{\forall p \in G_i \mid G_i \in m.dest \wedge p.isLeader\}$
 		\COMMENT{set of all processes in G and all leaders of involved groups}
 		\STATE $ts \leftarrow ts + 1$
 		\COMMENT{increase local timestamp}
-		\STATE $c_\omega \leftarrow c_\omega + 1$
-		\COMMENT{increase write counter}
+		\STATE $seq \leftarrow seq + 1$
+		\COMMENT{increase sequence number}
 		\FORALL {$p \in dest$}
-			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_L, ts, c_\omega] \rangle$}
-			\COMMENT{remote-write $P_l$'s timestamp with order $c_\omega$ to all process $\in dest$ set}
+			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_L, bal, seq, ts] \rangle$}
+			\COMMENT{remote-write $P_l$'s timestamp with ballot $bal$ and sequence $seq$ to all process $\in dest$ set}
 		\ENDFOR
 	\ENDUPON
 	\vspace{2.0mm}
 
-	\UPON[on receive timestamp $ts_l$ of a leader $P_l$ in local buffer]{$\langle \buffer, \READ \mid [P_l, ts_l, c] \rangle$}
-		\STATE $c_\omega \leftarrow c_\omega + 1$
-		\COMMENT{increase write counter}
+	\UPON[\textbf{Task 3} on receive timestamp $ts_l$ of a leader $P_l$ in local buffer]{$\langle \buffer, \READ \mid [P_l, bal_l, seq_l, ts_l] \rangle$}
+		\STATE $seq \leftarrow seq + 1$
+		\COMMENT{increase sequence number}
 		\FORALL {$p \in G$}
-			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_l, ts, c_\omega] \rangle$}
-			\COMMENT{propagate $P_l$'s timestamp $ts_l$ and write counter $c_\omega$ to all process $\in dest$ set}
+			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P_l, bal, seq, ts_l] \rangle$}
+			\COMMENT{propagate $P_l$'s timestamp $ts_l$ with its ballot and sequence number $seq$ to all process $\in dest$ set}
 		\ENDFOR
-		% \STATE $\forall p \in G: \rwrite(p, ts_l, c_\omega)$
-		% \COMMENT{propagate $P_l$'s timestamp $ts_l$ and write counter $c$ to all process $\in dest$ set}
 		\STATE $ts \leftarrow max(ts, ts_l)$
 	\ENDUPON
 \ENDINDENT
 \vspace{2.0mm}
 
 \INDENT{\colorbox{\coloralgo}{any process $P$ of group $G$}}
-	\UPON[on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
+	\UPON[\textbf{Task 4} on receive message $m$ in local buffer]{$\langle \buffer, \READ \mid m \rangle$}
 		% \STATE do $\READ(ts, L)$
 		\STATE $pending \leftarrow pending \cup \{m\}$
 		\COMMENT{include m in pending messages set}
@@ -73,25 +73,25 @@
 	\vspace{2.0mm}
 
 	\WHEN{true}
-		\IF{$ \exists \langle m_{id}, G \rangle \in pending_{ack} : ts_G \neq 0 $} 
+		\IF[\textbf{Task 5} ]{$ \exists \langle m_{id}, G \rangle \in pending_{ack} : ts_G \neq 0 $}
 			\STATE $ts \leftarrow max(ts, ts_G)$
             		\COMMENT{Lamport’s rule to update logical clocks}
             		\FORALL {$p \in m.dest$}
             			\TRIGGER {$ \langle rdma, \WRITE \mid p, [P, ack] \rangle$}
             			\COMMENT{remote-write P's ack to memory of all involved processes}
             		\ENDFOR
-		
+
 			\STATE $pending_{ack} \leftarrow pending_{ack}$ \textbackslash $\{ \langle m_{id}, G \rangle \}$
             		\STATE $pending_{ts} \leftarrow pending_{ts} \cup \{ \langle m_{id}, G, c_w \rangle \}$
             		\COMMENT{include $\langle ts_l, c_w, m \rangle$ in pending timestamps set}
-		
-			\WHILE{$\exists \langle m_{id}, G, c_w \rangle \in pending_{ts} : c_w = c_r + 1$}
+
+			\WHILE{$\exists \langle m_{id}, G, c_w \rangle \in pending_{ts} : c_w = curSeq + 1$}
             			\STATE $pending_{ts} \leftarrow pending_{ts}$ \textbackslash $\{\langle m_{id}, G \rangle\}$
             			\COMMENT{remove $\langle m_{id}, G \rangle$ from ts pending set}
-            			\STATE  $c_r = c_r + 1$
-            			\COMMENT{increase read counter}
+            			\STATE  $curSeq = curSeq + 1$
+            			\COMMENT{increase current sequence number}
             		\ENDWHILE
-            
+
             		\WHILE[]{$\exists m \in pending : isFulfilled(m) = true$}
             			\STATE $t \leftarrow max(ts_i)$
             			\COMMENT{$t$ is the largest timestamp between all timestamps $ts_i$ populated by all leaders}
@@ -100,7 +100,7 @@
             			\STATE $ordered \leftarrow ordered \cup \langle m, t \rangle$
             			\COMMENT{include $\langle m, t \rangle$ in ordered set}
             		\ENDWHILE
-            
+
             		% \WHILE {$\exists \langle m,t \rangle \in ordered : t < min(\forall t_i \in pending) \wedge \newline
             		% 		\hspace*{11.7em} t < min(\forall t_i \in ordered)$:}
             		\WHILE {$\exists \langle m,t \rangle \in ordered : t < min(\forall t_i \in pending) \wedge t < min(\forall t_i \in ordered)$:}
@@ -133,7 +133,7 @@
 	\ENDIF
 \ENDINDENT
 
-\caption{RDMA Scalable Message Queue}
-\label{alg:client_proxy}
+\caption{Normal case execution}
+\label{alg:normal_case}
 \end{distribalgo}
-\end{algorithm}
+\end{algorithm*}

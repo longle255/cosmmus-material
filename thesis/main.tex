@@ -1,0 +1,98 @@
+\documentclass[]{usiinfthesis}
+
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage[noend]{distribalgo}
+\usepackage{fixme}
+\usepackage{xspace}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{automata}
+\usepackage{listings}
+\usepackage{subcaption}
+
+
+\usepackage{listings}
+
+%change 'sl' to 'bf' for bold, or 'normalfont' for no special
+%formatting
+\captionsetup{labelfont={sl,sf}}
+
+\lstdefinelanguage{algebra}
+{morekeywords={import,sort,constructors,observers,transformers,axioms,if,
+else,end},
+sensitive=false,
+morecomment=[l]{//s},
+}
+
+\title{Scaling State Machine Replication} %compulsory
+% \subtitle{Subtitle: Reinventing the World} %optional
+\author{Long Hoang Le} %compulsory
+\advisor{Fernando Pedone} %compulsory
+%\coadvisor{Co-Advisor} %optional
+\Day{Yesterday} %compulsory
+\Month{September} %compulsory
+\Year{2009} %compulsory, put only the year
+\place{Lugano} %compulsory
+\programDirector{The PhD program Director \emph{pro tempore}} %compulsory
+
+
+\committee{%
+  \committeeMember{Langheinrich Marc}{Universit\`a della Svizzera Italiana, Switzerland}
+  \committeeMember{Soulé Robert}{Universit\`a della Svizzera Italiana, Switzerland}
+  \committeeMember{Correia Miguel}{Universidade de Lisboa, Portugal}
+  \committeeMember{Guerraoui Rachid}{École polytechnique fédérale de Lausanne, Switzerland}
+  \committeeMember{Wojciechowski Paweł}{Poznań University of Technology, Poland}
+}
+
+\dedication{To my beloved} %optional
+\openepigraph{Someone said \dots}{Someone} %optional
+
+\include{0-settings}
+
+% \makeindex %optional, also comment out \theindex at the end
+
+\begin{document}
+
+\maketitle %generates the titlepage, this is FIXED
+
+\frontmatter %generates the frontmatter, this is FIXED
+
+\include{1-abstract}
+
+\include{2-acknowledgements}
+
+\include{3-preface}
+
+\tableofcontents
+\listoffigures %optional
+\listoftables %optional
+
+\mainmatter
+
+\include{4-introduction}
+
+\include{5-systemmodel}
+
+\include{6-motivation}
+
+\include{7-dynamic-partitioning}
+
+\include{8-optimized-partitioning}
+
+\include{9-conclusion}
+
+\include{10-appendix-correctness}
+
+\backmatter
+
+% \bibliographystyle{plainnat}
+\bibliographystyle{dcu}
+\bibliography{references}
+
+\cleardoublepage
+% \theindex %optional, use only if you have an index, must use
+	  %\makeindex in the preamble
+
+\end{document}

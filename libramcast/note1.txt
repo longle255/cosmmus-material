@@ -1,0 +1,106 @@
+Step 1: 170k
+adding Step 2: 70k
+adding Step 3 (full protocol): 24k
+
+
+Step 1: 186k
+Step 2: 136k
+Step 3: 39k
+
+Step 3: 66k
+
+
+
+            step 1  step 2        step 3         reset
+leader   =  g * p + (g-1)+(p-1) + (p-1)(g-1)+g*p-1  + 1
+follower =  g * p + 0           + g*p-1        + 1
+
+
+
+Improvement
+  Write:
+    - Inlining data for step 2 & 3
+    - Selective signaling
+
+
+Read:
+  - 2 ways communication
+  - Failed read
+      - ACK is not available -> retry
+      - ACK was cleaned before the read
+
+
+pipelength < recvQueueSize < cqSize
+1 < 2 < 8
+
+If ibv_post_send() itself fails that means that either:
+The Send Queue is full (i.e. all of the Work Requests in the Send Queue are outstanding)
+or
+The posted Send Request is illegal:
+* too many scatter/gather elements
+* too much inline data (if inline data is used)
+* wrong opcode
+
+
+
+
+A leader might fail when
+  1 - BEFORE receiving STEP 1 msg
+  2 - AFTER receiving STEP 1 msg
+
+  3 - BEFORE sending timestamp (STEP 2)
+  4 - DURING sending timestamp (partially done)
+  5 - AFTER sending timestamp
+
+  6 - BEFORE receiving timestamp from other leader
+  7 - AFTER receiving timestamp from other leader
+
+  8 - BEFORE propagating timestamp to followers
+  9 - DURING propagating timestamp to followers
+  10 - AFTER propagating timestamp to followers
+
+  11 - BEFORE receiving acks
+  12 - DURING receiving acks
+  13 - AFTER receiving acks
+
+  -  (1)/(2)/(3)/(4) => new msg without timestamp => DROP
+  -  (4)/(5)/(6)/(7)/(8)/(9) => msg with timestamp that has smaller ballot number => DROP
+  -  (10)(11)(12)(13) => DELIVER
+
+
+What does new leader see
+  -  msg without timestamp (1)/(2)/(3)/(4) => SEND 2A
+  -  msg with timestamp that has smaller ballot number (4)/(5)/(6)/(7)/(8)/(9) => DROP
+  -  msg with enough ts & acks (10)(11)(12)(13) => DELIVER
+  -  msg with not enough acks (9)
+  -  msg with acks from followers of other groups, without TS of that group: this could be the case that the old leader failed AFTER receiving TS, but BEFORE propagating it => the new leader will not see the TS, but sees the acks from other followers
+
+
+Case 1:
+- Msg without any ts or ack
+    ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+    ║ id ║ len ║ gCount ║ (msg) ║ 0 │ 1 ║ a00 │ a01 │ a02 │ a10 │ a11 │ a12 ║ crc ║ 0/0/0 │ 0/0/0 ║ 0 │ 0 │ 0 │ 0 │ 0 │ 0  ║
+    ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+  + message has just finished written by client => can continue => SEND 2A
+  + old leader failed AFTER receiving TS, but BEFORE propagating it
+    => the new leader will not see the TS, but sees the acks from other followers
+
+
+New leader send 1A
+Followers:
+  - Of the same group => send 1B
+  - Of different group => rewrite
+
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ id ║ len ║ gCount ║ (msg) ║ 0 │ 1 ║ a00 │ a01 │ a02 │ a10 │ a11 │ a12 ║ crc ║ 0/0/0 │ 0/0/0 ║ 0 │ 0 │ 0 │ 0 │ 0 │ 0  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ id ║ len ║ gCount ║ (msg) ║ 0 │ 1 ║ a00 │ a01 │ a02 │ a10 │ a11 │ a12 ║ crc ║ 0/0/0 │ 1/1/1 ║ 0 │ 0 │ 0 │ 1 │ 1 │ 1  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ id ║ len ║ gCount ║ (msg) ║ 0 │ 1 ║ a00 │ a01 │ a02 │ a10 │ a11 │ a12 ║ crc ║ 0/0/0 │ 0/0/0 ║ 0 │ 0 │ 0 │ 1 │ 1 │ 1  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
