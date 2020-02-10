@@ -108,10 +108,17 @@ then revokes access of the old leader, and send a reply to the new leader with
 its current sequence number
 
 Finally, once the new leader receives reply from majority processes, it must
-ensure all remote logs are up-to-date with its own. This could be done as
-following:
+ensure all remote logs are up-to-date with its own. If the sequence number of
+leader is smaller than follower, the leader should know that for missing
+instances, it can read the agreed timestamps from followers.
 
-if the sequence number of leader is bigger than follower, the follower can do a
-\rread of missing timestamps from leader's memory.
-if the sequence number of leader is smaller than follower,
+With the pending instances (the instances in the pending list without
+timestamps, or has not received majority of acks), leader can just rewrite new
+timestamp value with its new ballot number. In this case leader issues a RDMA
+WRITE-WITH-IMM which triggers a completion event at the receivers side.
 
+
+
+% not necessary
+% if the sequence number of leader is bigger than follower, the follower can do a
+% \rread of missing timestamps from leader's memory.
