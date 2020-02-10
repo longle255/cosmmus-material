@@ -1,0 +1,47 @@
+\begin{algorithm}[t!]
+\small
+
+\begin{distribalgo}[1]
+
+\vspace{1.0mm}
+
+\INDENT{To issue a command $C$, the client proxy does:}
+
+\vspace{1.0mm}
+
+    \INDENT{\textbf{do}}
+        \STATE \amcast$($oracle, $consult(C))$
+        \STATE wait for $prophecy$
+        \IF{$prophecy \in \{ok, nok\}$}
+            \STATE $reply \leftarrow prophecy$
+        \ELSE
+            \STATE $C.dests \leftarrow \{\ppm : \exists \langle v, \ppm \rangle \in prophecy \}$
+            \IF{$C$ is an $access(\omega)$ command and $|C.dests| > 1$}
+                \STATE let $\ppm_d$ be one of the partitions in $C.dests$
+                \label{algline:client:partition}
+                \FOR{each $v \in \omega$}
+                    \STATE // \textit{move $v$ to partition $\ppm_d$}
+                    \STATE let $\ppm_s$ be $\ppm : \langle v, \ppm \rangle \in prophecy$
+                    \IF{$\ppm_s \neq \ppm_d$}
+                        \STATE $C_{move} \leftarrow move(v,\ppm_s,\ppm_d)$
+                        \STATE $C_{move}.dests \leftarrow \{$oracle$,\ppm_s,\ppm_d\}$    
+                        \STATE \amcast$(C_{move}.dests$, $C_{move})$
+                    \ENDIF
+                \ENDFOR
+                \STATE $C.dests \leftarrow \{ \ppm_d \}$
+            \ENDIF
+            \IF{$C$ is $create$ or $delete$}
+                \STATE $C.dests \leftarrow dests \cup \{oracle\}$
+            \ENDIF
+            \STATE \amcast$(C.dests$, $C)$
+            \STATE wait for $reply$
+        \ENDIF
+    \ENDINDENT
+    \STATE{\textbf{while} $reply = retry$ // \textit{after many retries, fall back to \ssmr}}
+    \STATE return $reply$ to the application client
+\ENDINDENT
+
+\caption{\dssmr\ Client Proxy}
+\label{alg:client_proxy}
+\end{distribalgo}
+\end{algorithm}

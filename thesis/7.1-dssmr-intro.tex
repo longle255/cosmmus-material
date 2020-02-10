@@ -1,0 +1,93 @@
+
+An inherent problem of traditional SMR is that it is not scalable: any replica
+added to the system will deliver all requests, so throughput is not increased.
+Scalable SMR addresses this issue in two ways: (i) by partitioning the
+application state, while allowing every command to access (read/write) any
+combination of partitions and (ii) using caching to reduce the communication
+across partitions, while keeping the execution linearizable.
+
+On the downside of this approach, as the number of multi-partition commands
+increases, performance of \ssmr\ becomes worse, as partitions must communicate.
+One way to reduce the number of multi-partition commands is by dynamically
+changing the partitioning, putting variables that are usually accessed together
+in the same partition. However, the partitioning oracle of \ssmr\ relies on a
+static mapping of variables to partitions. One advantage of this implementation
+is that all clients and servers can have their own local oracle, which always
+returns a correct set of partitions for every query. Such a static mapping has
+the major limitation of not allowing the service to dynamically adapt to
+different access patterns. Any state reorganization requires system shutdown and
+manual intervention.
+
+Given these issues, it is crucial that highly available partitioned systems be
+able to dynamically adapt to the workload. In this chapter, we present
+\dssmrlong\ (\dssmr), a technique that allows a partitioned SMR system to
+reconfigure its data placement on-the-fly. \dssmr\ achieves dynamic data
+reconfiguration without sacrificing scalability or violating the properties of
+classical SMR. These requirements introduce significant challenges. Since state
+variables may change location, clients must find the current location of
+variables. The scalability requirement rules out the use of a centralized oracle
+that clients can consult to find out the partitions a command must be multicast
+to. Even if clients can determine the current location of the variables needed
+to execute a command, by the time the command is delivered at the involved
+partitions one or more variables may have changed their location. Although the
+client can retry the command with the new locations, how to guarantee that the
+command will succeed in the second attempt? In classical SMR, every command
+invoked by a non-faulty client always succeeds. \dssmr\ should provide similar
+guarantees.
+
+\dssmr\ was designed to exploit workload locality. Our scheme benefits from
+simple manifestations of locality, such as commands that repeatedly access the
+same state variables, and more complex manifestations, such as structural
+locality in social network applications, where users with common interests have
+a higher probability of being interconnected in the social graph. Focusing on
+locality allows us to adopt a simple but effective approach to state
+reconfiguration: whenever a command requires data from multiple partitions, the
+variables involved are moved to a single partition and the command is executed
+against this partition. To reduce the chances of skewed load among partitions,
+the destination partition is chosen randomly. Although \dssmr\ could use more
+sophisticated forms of partitioning, formulated as an optimization problem
+(e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that
+it does not need any prior information about the workload and is not
+computationally expensive.
+
+To track object locations without compromising scalability, in addition to a
+centralized oracle that contains accurate information about the location of
+state variables, each client caches previous consults to the oracle. As a
+result, the oracle is only contacted the first time a client accesses a variable
+or after a variable changes its partition. Under the assumption of locality, we
+expect that most queries to the oracle will be accurately resolved by the
+client's cache. To ensure that commands always succeed, despite concurrent
+relocations, after attempting to execute a command a few times unsuccessfully,
+\dssmr\ retries the command using \ssmr{}'s execution atomicity and involving
+all partitions. Doing so increases the cost to execute the command but
+guarantees that relocations will not interfere with the execution of the
+command.
+
+We have fully implemented \dssmr\ as the \dssmrlibname{} Java library, and we
+performed a number of experiments using \dssmrappname{}, a social network
+application built with \dssmrlibname{}. We compared the performance of \dssmr\
+to \ssmr\ using different workloads. With a mixed workload that combines various
+operations issued in a social network application, \dssmr\ reached 74~kcps
+(thousands of commands per second), against less than 33~kcps achieved by
+\ssmr{}, improving by a factor of over 2.2. Moreover, \dssmr's performance
+scales with the number of partitions under all workloads.
+
+The following contributions are presented in this chapter:
+(1) It introduces \dssmr\ and discusses some performance optimizations, including
+the caching technique.
+(2) It details \dssmrlibname{}, a Java library to simplify the design of services based
+on \dssmr{}.
+(3) It describes \dssmrappname{} to demonstrate how \dssmrlibname{} can be used to implement
+a scalable social network service.
+(4) It presents a detailed experimental evaluation of \dssmrappname{}, deploying it with
+\ssmr\ and \dssmr{} in order to compare the performance of the two replication
+techniques.
+
+The remainder of this chapter is organized as follows.
+Section \ref{sec:dssmr-idea} gives an overview of \dssmr\.
+Section \ref{sec:dssmr-detail} explains the algorithm in detail.
+Section \ref{sec:dssmr-optm} proposes some performance optimizations.
+Section \ref{sec:dssmr-correctness} argues about the correctness of the algorithm.
+Section \ref{sec:dssmr-implementation} details the implementation of \dssmrlibname\.
+Section \ref{sec:dssmr-experiments} reports on the performance of \dssmrlibname and \dssmrappname
+Section \ref{sec:dssmr-conclusion} concludes the chapter.

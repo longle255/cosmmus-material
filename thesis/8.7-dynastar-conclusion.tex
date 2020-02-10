@@ -1,0 +1,14 @@
+\section{Conclusion}
+\label{sec:dynastar-conclusion}
+
+In this chapter we present \dynastar, a partitioning strategy for scalable state
+machine replication. \dynastar is inspired by DS-SMR, a decentralized dynamic
+scheme of \dssmr. Differently from DS-SMR, however, \dynastar performs well in
+all workloads evaluated. When the state can be perfectly partitioned, \dynastar
+converges more quickly than DS-SMR; when partitioning cannot avoid
+cross-partition commands, it largely outperforms DS-SMR. The key insights of
+\dynastar are to build a workload graph on-the-fly and use an optimized
+partitioning of the workload graph, computed with an online graph partitioner,
+to decide how to efficiently move state variables. The chapter describes how one
+can turn this conceptually simple idea into a system that sports performance
+close to an optimized (but impractical) scalable system.

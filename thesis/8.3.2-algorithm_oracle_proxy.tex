@@ -1,0 +1,97 @@
+\begin{algorithm}[t!]
+%\small
+\footnotesize
+
+\begin{distribalgo}[1]
+
+%\vspace{1.0mm}
+
+\INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
+	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+		\IF[if $v$ already exists...]{$\parts(\{v\}) \neq \bot$}
+			\STATE $prophecy \leftarrow nok$
+			\COMMENT{...notify client}
+		\ELSE[if $v$ doesn't exist...]
+			\STATE $\ppm \leftarrow$ choose $v$'s partition
+			% \COMMENT{...determine $v$'s partition}
+			\STATE $prophecy \leftarrow \ppm$
+			\COMMENT{prepare client's response}
+			% \STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
+			\STATE \amcast$(\{oracle, \ppm\}, (\ppm,create(v)))$
+%					\COMMENT{send command to partition}
+		\ENDIF
+	\ENDINDENT
+
+	\INDENT{\textbf{case} $C$ is any command, but $create(v)$:}
+		\STATE $\omega \leftarrow vars(C)$
+		\COMMENT{variables accessed by $C$}
+		\IF[if $v$ $\neg$exists:]{$\exists v \in \omega : \parts(\{v\}) = \bot$}
+			\STATE $prophecy \leftarrow nok$
+			\COMMENT{tell the client}
+		\ELSE[if all vars in $\omega$ exist]
+			\STATE $dests \leftarrow \parts(\omega)$
+			\COMMENT{get all partition involved}
+			\STATE $\ppm_d \leftarrow target(dests, C)$
+			\COMMENT{$\ppm_d$ will excecute $C$}
+			\STATE \amcast$(dests, C)$
+			\STATE $prophecy \leftarrow \ppm_d$
+		\ENDIF
+	\ENDINDENT
+	\STATE send $prophecy$ to the client
+\ENDINDENT
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\langle\ppm_v,create(v)\rangle)$}}
+%	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
+%	\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
+	\STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, create(v) \rangle)$
+	\COMMENT{exchange signal...}
+	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
+	\COMMENT{...to coordinate}
+	\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
+% \STATE send $ok$ to the client
+\ENDINDENT
+
+
+\vspace{1.0mm}
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} r-deliver $( \langle val, C \rangle )$}}
+%\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \rmdel$( \langle val, C \rangle )$}}
+	\STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+\ENDINDENT
+
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
+	\STATE update $G_W$ with $(V_h,E_h)$
+	\STATE $inc(changes)$
+	\IF {$changes \geq threshold$}
+		\STATE $partitioning  \leftarrow$ compute $\ip_1, ..., \ip_m$ from $G_W$
+		% \STATE $alldest \leftarrow \{oracle\} \cup all partitions$
+		\STATE \amcast$(\{oracle, all\_partitions\}, (partitioning))$
+	\ENDIF
+\ENDINDENT
+
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{partitioning})$}}
+	\STATE apply $partitioning$
+\ENDINDENT
+
+\vspace{1.5mm}
+
+\textbf{Algorithm variables:}
+
+\vspace{1mm}
+
+$G_W$: the set of all variable and their locations
+
+$partitioning$: the partition configuration of $G_W$
+
+
+\caption{Oracle}
+\label{alg:oracle_proxy}
+\end{distribalgo}
+\end{algorithm}
+
+
+

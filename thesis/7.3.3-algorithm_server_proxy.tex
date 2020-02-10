@@ -1,0 +1,76 @@
+\begin{algorithm}[t!]
+\small
+
+\begin{distribalgo}[1]
+
+\vspace{1.0mm}
+
+\INDENT{To execute a command $C$, the server proxy in partition $\ppm$ does:}
+
+    \vspace{1.0mm}
+    
+    \INDENT{\textbf{when} \rmdel$( \langle val, C \rangle )$}
+        \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
+    \ENDINDENT
+
+    \vspace{1.0mm}
+
+    \INDENT{\textbf{when} \amdel$(C)$}
+
+    \vspace{1.0mm}
+
+        \IF{\underline{$C$ is an $access(\omega)$ command}}
+            \IF{$\exists v \in \omega : v \not\in \ppm$}
+                \STATE reply with $retry$
+            \ELSE
+                \STATE have the command executed by the application server
+                \STATE send the reply to the client
+            \ENDIF
+        
+
+        \vspace{1.0mm}
+    
+        \ELSIF{\underline{$C$ is a $move(v,\ppm_s,\ppm_d)$ command}}
+            \IF{$\ppm = \ppm_s$}
+                \IF{$v \in \ppm$}
+                    \STATE \rmcast$(\ppm_d$,$\langle v, C \rangle)$
+                    \STATE $\ppm \leftarrow \ppm \setminus \{v\}$
+                \ELSE
+                    \STATE \rmcast$(\ppm_d$,$\langle null, C \rangle)$
+                \ENDIF
+            \ELSE
+                \STATE wait until $\exists val : \langle val, C \rangle \in rcvd\_msgs$
+                \IF{$val \neq null$}
+                    \STATE $v \leftarrow val$
+                    \STATE $\ppm \leftarrow \ppm \cup \{v\}$
+                \ENDIF
+            \ENDIF
+        
+        \vspace{1.0mm}
+    
+        \ELSIF{\underline{$C$ is a $create(v)$ command}}
+            \STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
+            \IF{$val = ok$}
+                \STATE $\ppm \leftarrow \ppm \cup \{v\}$
+%                \STATE reply with $success$
+%            \ELSE
+%                \STATE reply with $retry$
+            \ENDIF
+        
+        \vspace{1.0mm}
+        
+        \ELSIF{\underline{$C$ is a $delete(v)$ command}}
+            \IF{$v \in \ppm$}
+                \STATE $\ppm \leftarrow \ppm \setminus \{v\}$
+%                \STATE reply with $success$
+%            \ELSE
+%                \STATE reply with $retry$
+            \ENDIF
+        \ENDIF
+    \ENDINDENT
+\ENDINDENT
+
+\caption{\dssmr\ Server Proxy}
+\label{alg:server_proxy}
+\end{distribalgo}
+\end{algorithm}

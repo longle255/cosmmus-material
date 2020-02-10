@@ -1,28 +1,17 @@
-%!TEX root =  main.tex
-\appendix %optional, use only if you have an appendix
-
-\chapter{Correctness proof}
-\label{sec:correctness}
-
-\newcommand{\tsc}{\ensuremath{t^{cli}_{start}}}
-\newcommand{\tec}{\ensuremath{t^{cli}_{end}}}
-\newcommand{\tes}{\ensuremath{t^{srv}_{end}}}
-\newcommand{\tss}{\ensuremath{t^{srv}_{start}}}
-
 \section{Correctness criterion}
-\label{sec:correctcrit}
+\label{sec:dynastar-correctcrit}
 
 Our consistency criterion is linearizability.  A system is \emph{linearizable}
 if there is a way to reorder the client commands in a sequence that (i)~respects
 the semantics of the commands, as defined in their sequential specifications,
 and (ii)~respects the real-time precedence of commands~\cite{Attiya04}.
 
-\section{Correctness proof}
+\subsection{Correctness proof}
 To prove that \dynastar ensures linearizability, we must show that for any
 execution $\sigma$ of the system, there is a total order $\pi$ on client
 commands that (i)~respects the semantics of the commands, as defined in their
 sequential specifications, and (ii)~respects the real-time precedence of
-commands~(\S\ref{sec:correctcrit}).
+commands~(\S\ref{sec:dynastar-correctcrit}).
 %
 Let $\pi$ be a total order of operations in $\sigma$ that respects $<$, the
 order atomic multicast induces on commands.

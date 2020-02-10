@@ -1,0 +1,53 @@
+%!TEX root =  main.tex
+\section{\dynastar}
+\label{sec:dynastar-algo}
+
+\dynastar defines a dynamic mapping of application variables to partitions.
+Application programmers may also define other granularity of data when mapping
+application state to partitions. For example, in our social network application
+(\S\ref{sec:imp:\dynastarappname}), each user (together with the information associated
+with the user) is mapped to a partition; in our TPC-C implementation
+(\S\ref{sec:imp:tpcc}), every district in a warehouse is mapped to a partition.
+Such a mapping is managed by a partitioning oracle, which is handled as a
+replicated partition. The oracle allows the mapping of variables to partitions
+to be retrieved or changed during execution. To simplify the discussion, in
+\S\ref{sec:dynastar-overview}--\ref{sec:dynastar-detailed} we initially assume
+that every command involves the oracle. In \S\ref{sec:optm}, we explain how
+clients can use a cache to avoid the oracle in the execution of most commands.
+
+\subsection{Overview}
+\label{sec:dynastar-overview}
+
+Clients submit commands to the oracle and wait for the reply. \dynastar\
+supports three types of commands: $create(v)$ creates a new variable $v$ and
+initially maps it to a partition defined by the oracle; $access(\omega)$ is an
+application command that reads and modifies variables in set $\omega \subseteq
+\vvm$; and $delete(v)$ removes $v$ from the service state. The reply from the
+oracle is called a $prophecy$, and usually consists of a set of tuples $\langle
+v, \ppm \rangle$, meaning $v \in \ppm$, and a target partition $\ppm_d$ on which
+the command will be executed. The $prophecy$ could also tell the clients if a
+command cannot be executed (e.g., it accesses variables that do not exist). If
+the command can be executed, the client waits for the reply from the target
+partition.
+
+If a command $C$ accesses variables in $\omega$ on a single partition, the
+oracle multicasts $C$ to that partition for execution. If the command accesses
+variables on multiple partitions, the oracle multicasts a $global(\omega,\ppm_d,
+C)$ command to the involved partitions to gather all variables in $\omega$ to
+the target partition $\ppm_d$. After having all required variables, the target
+partition executes command $C$, sends the reply to the client, and returns the
+variables to their source.
+
+The oracle also collects hints from clients and partitions to build up a
+workload graph and monitors the changes in the graph.
+%\dynastar models a service workload as a graph $G = (V, E)$, where
+In the workload graph, vertices represent state variables and edges dependencies
+between variables. An edge connects two variables in the graph if a command
+accesses both of them.
+%A location oracle builds the workload graph based on feedback from the clients
+%or partitions, as commands are executed.
+Periodically, the oracle computes a new optimized partitioning and sends the
+partitioning plan to all partitions. Upon delivering the new partitioning, the
+partitions exchange variables and update their state accordingly. \dynastar
+relocates variables without blocking the execution of commands.
+

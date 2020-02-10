@@ -1,0 +1,114 @@
+\subsection{Detailed algorithm}
+\label{sec:dssmr-detail}
+
+
+When issuing a command, the application simply forwards the command to the
+client proxy and waits for the reply. Consulting the oracle and multicasting the
+command to different partitions is done internally by the proxy at the client.
+Algorithms~\ref{alg:client_proxy}, \ref{alg:server_proxy}, and
+\ref{alg:oracle_proxy} describe in detail how the \dssmr\ proxy works
+respectively at client, server and oracle processes. Every server proxy at a
+server in $\ssm_i$ has only partial knowledge of the partitioning: it knows only
+which variables belong to $\ppm_i$. The oracle proxy has knowledge of every
+$\ppm \in \Psi$. To maintain such a global knowledge, the oracle must \amdel{}
+every command that creates, moves, or deletes variables. (In
+Section~\ref{sec:dssmr-optm}, we introduce a caching mechanism to prevent the oracle
+from becoming a performance bottleneck.)
+
+\input{7.3.1-algorithm_client_proxy}
+
+\textbf{The client proxy.} To execute a command $C$, the proxy first consults
+the oracle. The oracle knows all state variables and which partition contains
+each of them. Because of this, the oracle may already tell the client whether
+the command can be executed or not. Such is the case of the $access(\omega)$
+command: if there is a variable $v \in \omega$ that the command tries to read or
+write and $v$ does not exist, the oracle already tells the client that the
+command cannot be executed, by sending $nok$ as the prophecy. A $nok$ prophecy
+is also returned for a $create(v)$ command when $v$ already exists. For a
+$delete(v)$ command when $v$ already does not exist, an $ok$ prophecy is
+returned. If the command can be executed, the client proxy receives a prophecy
+containing a pair $\langle v, \ppm \rangle$, for every variable $v$ created,
+accessed or deleted by the command. If the prophecy regarding an
+$access(\omega)$ command contains multiple partitions, the client proxy chooses
+one of them, $\ppm_d$, and tries to move all variables in $\omega$ to $\ppm_d$.
+Then, the command $C$ itself is multicast to $\ppm_d$. As discussed in
+Section~\ref{sec:dssmr-idea}, there is no guarantee that an interleave of
+commands will not happen, even if the client waits for the replies to the move
+commands. For this reason, and to save time, the client proxy multicasts all
+move commands at once. Commands that change the partitioning (i.e., create and
+delete) are also multicast to the oracle. If the reply received to the command
+is $retry$, the procedure restarts: the proxy consults the oracle again,
+possibly moves variables across partitions, and multicasts $C$ to the
+appropriate partitions once more. After reaching a given threshold of retries
+for $C$, the proxy falls back to \ssmr{}, multicasting $C$ to all partitions
+(and the oracle, in case $C$ is a create or delete command), which ensures the
+command's termination.
+
+\input{7.3.3-algorithm_server_proxy}
+
+\textbf{The server proxy.} Upon delivery, access commands are intercepted by the
+\dssmr\ proxy before they are executed by the application server. In \dssmr{},
+every access command is executed in a single partition. If a server proxy in
+partition $\ppm$ intercepts an $access(\omega)$ command that accesses a variable
+$v \in \omega$ that does not belong to $\ppm$, it means that the variable is in
+some other partition, or it does not exist. Either way, the client should retry
+with a different set of partitions, if the variable does exist. To execute a
+$delete(v)$ command, the server proxy at partition $\ppm$ simply removes $v$
+from partition $\ppm$, in case $v \in \ppm$. In case $v \not\in \ppm$, it might
+be that the variable exists but belongs to some other partition $\ppm'$. Since
+only the oracle and the servers at $\ppm'$ have this knowledge, it is the oracle
+who replies to delete commands.
+
+\dssmr\ server and oracle proxies coordinate to execute commands that create or
+move variables. Such coordination is done by means of \rmcast{}. When a
+$create(v)$ command is delivered at $\ppm$, the server proxy waits for a message
+from the oracle, telling whether the variable can be created or not, to be
+\rmdel{}ed. Such a message from the oracle is necessary because $v$ might not
+belong to $\ppm$, but it might belong to some other partition $\ppm'$ that
+servers of $\ppm$ have no knowledge of. If the create command can be executed,
+the oracle can already reply to the client with a positive acknowledgement,
+saving time. This can be done because atomic multicast guarantees that all
+non-faulty servers at $\ppm$ will eventually deliver and execute the command. As
+for move commands, each $move(v,\ppm_s,\ppm_d)$ command consists of moving
+variable $v$ from a source partition $\ppm_s$ to a destination partition
+$\ppm_d$. If the server's partition $\ppm$ is the source partition (i.e., $\ppm$
+= $\ppm_s$), the server proxy checks whether $v$ belongs to $\ppm$. If $v \in
+\ppm$, the proxy \rmcast{}s $\langle v, C \rangle$ to $\ppm_d$, so that servers
+at the destination partition know the most recent value of $v$; $C$ is sent
+along with $v$ to inform which move command that message is related to. If $v
+\not\in \ppm$, a $\langle null, C \rangle$ message is \rmcast\ to $\ppm_d$,
+informing $\ppm_d$ that the move command cannot be executed.
+
+\input{7.3.2-algorithm_oracle_proxy}
+
+\textbf{The oracle proxy.} One of the purposes of the oracle proxy is to make
+prophecies regarding the location of state variables. Such prophecies are used
+by client proxies to multicast commands to the right partitions. A prophecy
+regarding an $access(\omega)$ command contains, for each $v \in \omega$, a pair
+$\langle v, \ppm \rangle$, meaning that $v \in \ppm$. If any of the variables in
+$\omega$ does not exist, the prophecy already tells the client that the command
+cannot be executed (with a $nok$ value). For a $create(v)$ command, the prophecy
+tells where $v$ should be created, based on rules defined by the application, if
+$v$ does not exist. If $v$ already exists, the prophecy will contain $nok$, so
+that the client knows that the create command cannot be executed. The prophecy
+regarding a $delete(v)$ command contains the partition that contains $v$, or
+$ok$, in case $v$ was already deleted or never~existed.
+
+Besides dispensing prophecies, the oracle is responsible for executing create,
+move, and delete commands, coordinating with server proxies when necessary, and
+replying directly to clients in some cases. For each $move(v,\ppm_s,\ppm_d)$
+command, the oracle checks whether $v$ in fact belongs to the source partition
+$\ppm_s$. If that is the case, the command is executed, moving $v$ to $\ppm_d$.
+Each $create(v)$ command is multicast to the oracle and to a partition $\ppm$.
+If $v$ already exists, the oracle tells $\ppm$ that the command cannot be
+executed, by \rmcast{}ing $nok$ to $\ppm$. The oracle also sends $nok$ to the
+client as reply, meaning that $v$ already exists. If $v$ does not exist, the
+oracle tells $\ppm$ that the command can be executed, by \rmcast{}ing $ok$ to
+$\ppm$. It also tells the client that the command succeeded with an $ok$ reply.
+Finally, each $delete(v)$ command is multicast to the oracle and to a partition
+$\ppm$, where the client proxy assumed $v$ to be located. If $v$ belongs to
+$\ppm$, or $v$ does not exist, the oracle tells the client that the delete
+command succeeded. Otherwise, that is, if $v$ exists, but $delete(v)$ was
+multicast to the wrong partition, the oracle tells the client to retry.
+
+
