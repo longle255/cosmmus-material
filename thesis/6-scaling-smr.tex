@@ -1,0 +1,232 @@
+\chapter[Scaling State Machine Replication]{Scaling State Machine Replication}
+
+Scalability, which is the ability to increase performance of a system by
+upgrading existing resources (scale up) or aggregating additional resources to
+the existing ones (scale out), is fundamental to meeting the performance
+requirements of modern services. Unfortunately, classical SMR does not scale:
+adding resources (e.g., replicas) will not translate into the improvement of
+performance, in terms of throughput. This happens for a couple reasons. First,
+the underlying communication protocol needed to ensure ordered message delivery
+may not scale itself (i.e., a communication bottleneck). Second, every replica
+must execute the same sequence of command to reach the same state (i.e., an
+execution bottleneck).
+
+Several approaches have been proposed to address SMR's scalability limitations.
+To cope with communication overhead, some proposals have suggested to spread the
+load of ordering commands among multiple processes (e.g.,
+\cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single
+process to determine the order of commands (e.g.,
+\cite{Lamport:1998ea}).%\fxnote[draft]{remove inapplicable reference}
+
+Two directions of research have been suggested to overcome execution
+bottlenecks. One approach (scaling up) is to take advantage of multiple cores to
+execute commands concurrently without sacrificing consistency
+\cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Another approach
+(scaling out) is to partition the service's state and replicate each partition
+(e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In this chapter, we review the
+second category, which is be basic of our work.
+
+\section{Partitioning application state}
+
+Modern distributed systems typically scale performance by partitioning
+application state and tolerate failures by replicating each partition. Clients
+submit commands for execution to one or more partitions. Within a partition,
+replicas coordinate by means of a consensus protocol (e.g., Paxos~\cite{Lam98}).
+To coordinate the execution of multi-partition commands, replicated partitions
+rely on some distributed coordination protocol (e.g., two-phase locking
+\cite{corbett2013spanner}, optimistic concurrency control \cite{Chang:2008},
+atomic multicast \cite{bezerra2014ssmr}).
+
+In principle, increasing the number of partitions should result in increased
+system performance. However, if the execution of commands involves multiple
+partitions, then performance can actually decrease, due to overhead from
+ordering and coordinating commands across partitions to ensure strong
+consistency. Different techniques have been proposed to handle commands that
+access state in multiple partitions, but inherently multi-partition commands are
+more expensive than single-partition commands. Moreover, if data is not
+distributed carefully, then load imbalances can nullify the benefits of
+partitioning. Thus, an ideal partitioning scheme is one that would both (i)
+allow commands to be executed at a single partition only, and (ii) evenly
+distribute data so that load is balanced among partitions. We refer to workloads
+that can be partitioned in a way that satisfies these two properties as
+exhibiting \emph{strong locality}. Conversely, workloads that cannot avoid
+multi-partition commands with balanced load among partitions exhibit \emph{weak
+locality}.
+
+Broadly speaking, there are two classes of techniques for partitioning:
+\emph{static} and \emph{dynamic}. \emph{Static} techniques choose an immutable
+assignment of application state variables to partitions prior to executing
+commands. This techniques requires a good understanding about the workload to
+avoids load imbalances and favors single-partition commands.  Moreover, many
+online applications experience variations in demand. These happen for a number
+of reasons. In social networks, for example, some users may experience a surge
+increase in their number of followers (e.g., new ``celebrities"); workload
+demand may shift along the hours of the day and the days of the week; and
+unexpected (e.g., a video that goes viral) or planned events (e.g., a new
+company starts trading in the stock exchange) may lead to exceptional periods
+when requests increase significantly higher than in normal periods. These
+challenges perhaps explain why most approaches that extend SMR with state
+partitioning delegate the task of partitioning the service state to the
+application designer. \emph{Dynamic} techniques address the limitations of static
+techniques by adapting the partitioning scheme as workloads change. For example,
+a dynamic technique can move data ``on demand'' to maximize the number of single
+partition user commands, while avoiding imbalances in the load of the
+partitions.
+The major challenge in designing a dynamic scheme is determining how the system
+selects the partition to which to move data.
+
+\subsection{Static state partitioning with S-SMR}
+\label{sec:ssmr}
+
+In this section, we describe \ssmr\, an extension to SMR that under certain
+workloads allows performance to grow proportionally to the number of replicas.
+\ssmr\ partitions the service state and replicates each partition. It relies on
+an atomic multicast primitive to consistently order commands within and across
+partitions. In addition, \ssmr\ assumes a static workload partitioning. Any
+state reorganization requires system shutdown and manual intervention.
+
+In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
+partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
+$\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
+server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
+``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
+S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
+each command.
+
+% \footnote{The oracle returns a set with the partitions accessed
+% by the command, but this set does not need to be minimal; it may contain all
+% partitions in the worst case, when the partitions accessed by the command cannot
+% be determined before the command is executed.
+
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/ssmr}
+  \end{minipage}
+  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+  \label{fig:ssmr}
+\end{figure*}
+
+To execute a command, the client multicasts the command to the appropriate
+partitions, as determined by the oracle. Commands that access a single partition
+are executed as in classical SMR: replicas of the concerned partition agree on
+the execution order and each replica executes the command independently. In the
+case of a multi-partition command, replicas of the involved partitions deliver
+the command and then may need to exchange state in order to execute the command
+since some partitions may not have all the values read in the command. This
+mechanism allows commands to execute seamlessly despite the partitioned state.
+
+S-SMR improves on classical SMR by allowing replicated systems to scale, while
+ensuring linearizability. Under workloads with multi-partition commands,
+however, it has limited performance, in terms of latency and throughput
+scalability. Such decreased performance when executing multi-partition commands
+is due to partitions (i) exchanging state variables and (ii) synchronizing by
+exchanging signals. Thus, the performance of \ssmr\ is particularly
+sensitive to the way the service state is partitioned.
+
+One way to reduce the number of multi-partition commands is by dynamically
+changing the partitioning, putting variables that are usually accessed together
+in the same partition. However, the partitioning oracle of \ssmr\ relies on a
+static mapping of variables to partitions. One advantage of this implementation
+is that all clients and servers can have their own local oracle, which always
+returns a correct set of partitions for every query. Such a static mapping has
+the major limitation of not allowing the service to dynamically adapt to
+different access patterns.
+
+\subsection{Two phases locking and two phases commit with Google Spanner}
+
+Google Spanner~\cite{corbett2013spanner} was designed to be a highly-scalable
+distributed relational database. Spanner consists of multiple \emph{zones}, each
+of which is a deployment of Bigtable servers. A zone uses one \emph{zonemaster}
+to assign data to one hundred to several thousand sets of Paxos-based state
+machines (so called \emph{spanservers}). Clients in Spanner use \emph{location
+proxy} of each zone to locate the spanservers assigned to serve their data.
+Although not detailed in the paper, Spanner allows data to be re-sharded across
+\emph{spanservers} or \emph{zones} data centers to balance loads and in response
+to failures by \emph{placement driver}. Periodically, \emph{placement driver}
+communicates with spanservers tor re-arrange data. During these transfers,
+clients can still execute transactions (including updates) on the database.
+Figure~\ref{fig:spanner} shows an execution of a single transactions that
+requires multiple round of coordination in Spanner.
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=0.6\linewidth]{figures/spanner}
+  \end{minipage}
+  \caption{Coordination required in multi-partition transaction in Spanner}
+  \label{fig:spanner}
+\end{figure*}
+
+\section{Workload graph partitioning}
+
+%\ssmr\ performs better as the number of multi-partition commands decreases.
+
+
+
+
+% Static techniques choose an immutable assignment of application state variables
+% to partitions prior to executing commands. Dynamic techniques address the
+% limitations of static techniques by adapting the partitioning scheme as
+% workloads change. For example, a dynamic technique can move data ``on demand''
+% to maximize the number of single partition user commands, while avoiding
+% imbalances in the load of the partitions.
+% %Typically, this is implemented by moving data ``on demand'' to a single
+% %partition which executes a user command.
+% The major challenge in designing a dynamic scheme is determining how the system
+% selects the partition to which to move data.
+
+
+% Figure~\ref{fig:motivation} shows the result of a motivating experiment that
+% compares two representative systems, one of each class. In the experiment, we
+% measured the throughput and number of state moves over time with two different
+% workloads: one with strong locality and one with weak locality. The workloads
+% are inspired by the social network Twitter, in which the network is modeled as a
+% graph, and users can ``post'' messages. The social graph was generated using a
+% Zipfian distribution, where the Zipf parameter was adjusted to alter the
+% locality.  For brevity, we postpone the details of the experimental setup until
+% Section~\ref{sec:experiments}.
+
+
+% Static techniques choose an immutable assignment of application state variables
+% to partitions prior to executing commands. As an example of a static approach
+% for use in the experiment, we modified the S-SMR system~\cite{bezerra2014ssmr}
+% to use the static METIS~\cite{Abou-Rjeili:2006} partitioning algorithm.  The
+% METIS algorithm is optimized to minimize edge-cuts when partitioning a static
+% social graph. In the workload with strong locality, METIS partitions the social
+% graph such that all posts are single partition; in the workload with weak
+% locality, although most commands are single partition, a small fraction of posts
+% involves multiple partitions. The throughput is less for the weak locality
+% workload due to the more expensive execution of multi-partition posts.
+% %since the static scheme incurs overhead when accessing multiple partitions to
+% %execute commands.
+% For workloads that do not change the graph structure and exhibit strong
+% locality, the results for optimized S-SMR in Figure~\ref{fig:motivation} show a
+% theoretical maximum throughput.  Of course, these results are not achievable in
+% practice, since for real workloads, the graph would change over time (e.g., in
+% social networks users join and leave the system, connections are created and
+% removed).
+
+
+% Dynamic techniques address the limitations of static techniques by adapting the
+% partitioning scheme as workloads change. For example, a dynamic technique can
+% move data ``on demand'' to maximize the number of single partition user
+% commands, while avoiding imbalances in the load of the partitions.
+% %Typically, this is implemented by moving data ``on demand'' to a single
+% %partition which executes a user command.
+% The major challenge in designing a dynamic scheme is determining how the system
+% selects the partition to which to move data.
+% %
+% The second system in Figure~\ref{fig:motivation} evaluates DS-SMR, a dynamic
+% partitioning strategy implemented by  Le et al.~\cite{hoang2016}. This system
+% selects partitions randomly, which allows for a completely decentralized
+% implementation, in which partitions make only local choices about data movement.
+% We refer to this approach as \emph{decentralized dynamic}.  As
+% Figure~\ref{fig:motivation} shows, the decentralized dynamic approach works well
+% for data with strong locality, but is unstable for workloads with weak locality,
+% since data is constantly moved from one partition to another.
+
+
+
+% \subsection{Scalable state-machine replication}
