@@ -21,16 +21,16 @@ In the context of SMR, this would mean that single-partition commands are strong
 Another solution is to provide strong consistency guarantees for both single- and multi-partition commands, at the cost of a more complex execution path for commands that involve multiple partitions.
 \ssmrlong\ (\ssmr)~\cite{bezerra2014ssmr} is a solution in this category.
 \ssmr\ partitions the service state and replicates each partition.
-It relies on an atomic multicast primitive to consistently order commands within and across partitions. 
+It relies on an atomic multicast primitive to consistently order commands within and across partitions.
 Single-partition commands are multicast to their concerned partition and executed just like in classical SMR.
 Multi-partition commands are multicast to all involved partitions; to prevent command interleaves that violate strong consistency, \ssmr\ implements execution atomicity.
 With execution atomicity, partitions coordinate during the execution of multi-partition commands.
 Unsurprisingly, multi-partition commands are more expensive than single-partition commands, and thus, the performance of \ssmr\ is particularly sensitive to the way the service state is partitioned.
 
-Determining a partitioning of the state that avoids load imbalances and favors single-partition commands normally requires a good understanding about the workload. 
+Determining a partitioning of the state that avoids load imbalances and favors single-partition commands normally requires a good understanding about the workload.
 Even if enough information is available, finding a good partitioning is a complex optimization problem~\cite{curino2010sch,taft2014est}.
-Moreover, many online applications experience variations in demand. 
-These happen for a number of reasons. 
+Moreover, many online applications experience variations in demand.
+These happen for a number of reasons.
 In social networks, some users may experience a surge increase in their number of followers (e.g., new ``celebrities");
 workload demand may shift along the hours of the day and the days of the week; and unexpected (e.g., a video that goes viral) or planned events (e.g., a new company starts trading in the stock exchange) may lead to exceptional periods when requests increase significantly higher than in normal periods.
 \ssmr\ assumes a static workload partitioning.
@@ -56,7 +56,7 @@ Although \dssmr\ could use more sophisticated forms of partitioning, formulated 
 To track object locations without compromising scalability, in addition to a centralized oracle that contains accurate information about the location of state variables, each client caches previous consults to the oracle.
 As a result, the oracle is only contacted the first time a client accesses a variable or after a variable changes its partition.
 Under the assumption of locality, we expect that most queries to the oracle will be accurately resolved by the client's cache.
-To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, \dssmr\ retries the command using \ssmr{}'s execution atomicity and involving all partitions. 
+To ensure that commands always succeed, despite concurrent relocations, after attempting to execute a command a few times unsuccessfully, \dssmr\ retries the command using \ssmr{}'s execution atomicity and involving all partitions.
 Doing so increases the cost to execute the command but guarantees that relocations will not interfere with the execution of the command.
 
 We have fully implemented \dssmr\ as the \libname{} Java library, and we performed a number of experiments using \appname{}, a social network application built with \libname{}.
@@ -67,7 +67,7 @@ Moreover, \dssmr's performance scales with the number of partitions under all wo
 %With a weak-locality workload, \dssmr\ reached XX~kcps, against YY~kcps of \ssmr{}.
 
 The paper makes the following contributions:
-(1) It introduces \dssmr\ and discusses some performance optimizations, including the caching technique. 
+(1) It introduces \dssmr\ and discusses some performance optimizations, including the caching technique.
 (2) It details \libname{}, a Java library to simplify the design of services based on \dssmr{}.
 (3) It describes \appname{} to demonstrate how \libname{} can be used to implement a scalable social network service.
 (4) It presents a detailed experimental evaluation of \appname{}, deploying it with \ssmr\ and \dssmr{} in order to compare the performance of the two replication techniques.

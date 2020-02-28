@@ -205,23 +205,27 @@ the difference in throughput between each technique is due to the implementation
 % In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts.
 %With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
 
-In the experiment with the mix workload, we see that \dssmr{} performance decreases significantly.
-This happens because objects in \dssmr{} will only converge if there is a perfect way to
-partition the data, that is, data items can be grouped such
-that eventually no command accesses objects across partitions. In the mix workload experiments,
-objects in \dssmr{} are constantly moving back and forth between partition
-without converging to a stable configuration.
+In the experiment with the mix workload, we see that \dssmr{} performance
+decreases significantly. This happens because objects in \dssmr{} will only
+converge if there is a perfect way to partition the data, that is, data items
+can be grouped such that eventually no command accesses objects across
+partitions. In the mix workload experiments, objects in \dssmr{} are constantly
+moving back and forth between partition without converging to a stable
+configuration.
 
-In contrast, for \dynastar and S-SMR*, the throughput scales with
-the number of partitions in experiments with up to 8 partitions.
-Increasing the number of partitions to 16 with the fixed graph reveals a tradeoff:
-On the one hand, additional partitions should improve performance as there are more resources to execute commands.
-On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance
-as there are additional operations involving multiple partitions.
+In contrast, for \dynastar and S-SMR*, the throughput scales with the number of
+partitions in experiments with up to 8 partitions. Increasing the number of
+partitions to 16 with the fixed graph reveals a tradeoff: On the one hand,
+additional partitions should improve performance as there are more resources to
+execute commands. On the other hand, the number of edge cuts increases with the
+number of partitions, which hurts performance as there are additional operations
+involving multiple partitions.
 
-Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
-The most common operation in social networks is the request to read a user timeline. This is a single-partition
-command in our application and as a consequence it scales linearly with the number of partitions.
+Notice that only post operations are subject to this tradeoff since they may
+involve multiple partitions. The most common operation in social networks is the
+request to read a user timeline. This is a single-partition command in our
+application and as a consequence it scales linearly with the number of
+partitions.
 
 % Figure~\ref{fig:socialcdf} shows the cumulative distribution functions (CDFs) of latency for the mix workload of \dynastar and S-SMR* on different configurations. The results suggest that S-SMR* achieves lower latency than \dynastar for 80\% of the load. This is expected, as for multi-partition commands, partitions in \dynastar have to send additional data to return objects to their original location after command execution .
 
@@ -269,15 +273,57 @@ other users started following the celebrity.
   \label{fig:socialcelebrity}
 \end{figure*}
 
-At the beginning of the experiment, \dynastar performance was not as good as S-SMR* (i.e., lower throughput, higher number of
-percentage of multi-partition commands, and higher number of exchanged objects), because S-SMR* started with an optimized
-partitioning, while \dynastar started with a random partitioning.
-After 50 seconds, \dynastar triggered the repartitioning process, which led to an optimized location of data. Repartitioning helped
-reduce the percentage of multi-partition commands to 10\%, and thus increased the throughput. After the repartitioning, \dynastar outperforms S-SMR* with the optimized partitioning.
-After 200 seconds, the network started to change its structure, as many users started to follow a celebrity, and created more edges
-between nodes in the graph. Both \dynastar and S-SMR suffered from the change, as the rate of multi-partition command increased, and the throughput
-decreased. However, when the repartitioning takes place in \dynastar, around 300 seconds into the execution, the previously user mapping
-got a better location from the oracle, which adapted the changes. After the repartitioning, the objects are moved to a better partition, with a resulting increase in throughput.
+At the beginning of the experiment, \dynastar performance was not as good as
+S-SMR* (i.e., lower throughput, higher number of percentage of multi-partition
+commands, and higher number of exchanged objects), because S-SMR* started with
+an optimized partitioning, while \dynastar started with a random partitioning.
+After 50 seconds, \dynastar triggered the repartitioning process, which led to
+an optimized location of data. Repartitioning helped reduce the percentage of
+multi-partition commands to 10\%, and thus increased the throughput. After the
+repartitioning, \dynastar outperforms S-SMR* with the optimized partitioning.
+After 200 seconds, the network started to change its structure, as many users
+started to follow a celebrity, and created more edges between nodes in the
+graph. Both \dynastar and S-SMR suffered from the change, as the rate of
+multi-partition command increased, and the throughput decreased. However, when
+the repartitioning takes place in \dynastar, around 300 seconds into the
+execution, the previously user mapping got a better location from the oracle,
+which adapted the changes. After the repartitioning, the objects are moved to a
+better partition, with a resulting increase in throughput.
+
+Figure~\ref{fig:socialcdf} shows the cumulative distribution functions (CDFs) of
+latency for the mix workload of \dynastar and S-SMR* on different
+configurations. The results suggest that S-SMR* achieves lower latency than
+\dynastar for 80\% of the load. This is expected, as for multi-partition
+commands, partitions in \dynastar have to send additional data to return objects
+to their original location after command execution .
+
+\begin{figure*}[h!]
+  \centering
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-2p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-4p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-8p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-16p.pdf}
+%    \caption{}
+  \end{subfigure}
+  \caption{Cumulative distribution function (CDF) of latency for mix workloads on different partitioning configurations.}
+  \label{fig:socialcdf}
+\end{figure*}
+
+
 
 % Table ~\ref{table:socialsnapshot} shows the throughput of each partition when the system reached the maximum throughput at the second of 180. Although the objects were evenly distributed among partitions, there was still a skew in the load of the system, e.g., partition 1 and 2 served more commands than the other partitions. This happened because of the skew in the access pattern: some users were more active and posted more than the others, thus the requests that sent to their servers are more than to other servers.
 

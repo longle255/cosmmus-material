@@ -5,62 +5,120 @@ In this chapter, we present the system model, introduce two variations of a
 multicast communication primitive, and define our correctness criterion (i.e.,
 linearizability).
 
-\section{Processes and communication}
+\section{System model}
 
-We consider a distributed system consisting of an unbounded set of client
-processes $\ccm = \{c_1, c_2, ...\}$ and a bounded set of server processes
-(replicas) $\ssm = \{s_1, ..., s_n\}$.  Set $\ssm$ is divided into disjoint
-groups of servers $\ssm_0, ..., \ssm_k$. Processes are either \emph{correct}, if
-they never fail, or \emph{faulty}, otherwise.  In either case, processes do not
-experience arbitrary behavior (i.e., no Byzantine failures).
+\begin{itemize}
+  \item \textbf{Processes and communication.} We consider a distributed system
+  consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$
+  and a bounded set of server processes (replicas) $\ssm = \{s_1, ..., s_n\}$.
+  Set $\ssm$ is divided into disjoint groups of servers $\ssm_0, ..., \ssm_k$.
+  Processes communicate by message passing, using either one-to-one or
+  one-to-many communication. One-to-one communication uses primitives
+  $send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process
+  $m$ is addressed to. If sender and receiver are correct, then every message
+  sent is eventually received. One-to-many communication relies on reliable
+  multicast and atomic multicast, defined in \S\ref{sec:rmcast} and
+  \S\ref{sec:amcast}, respectively.
+  \item \textbf{Failure model.} We assume the \emph{crash} failure model.
+  Processes are either \emph{correct}, if they never fail, or \emph{faulty},
+  otherwise. In either case, processes do not experience arbitrary behavior
+  (i.e., no Byzantine failures).
+  \item \textbf{Synchrony model.} Consensus cannot be solved deterministically
+  in an asynchronous system with faults, as established by the FLP
+  impossibility result~\cite{FLP85}. So we consider a system that is
+  \emph{partially synchronous}~\cite{DLS88}: it is initially asynchronous and
+  eventually becomes synchronous. When the system is asynchronous, there are no
+  bounds on the time it takes for messages to be transmitted and actions to be
+  executed; when the system  is synchronous, such bounds exist but are unknown
+  to the processes. The partially synchronous assumption allows consensus, a
+  fundamental problem at the core of replication~\cite{Lam98,Sch90}, to be
+  implemented under realistic conditions~\cite{FLP85,Lam98}.
+\end{itemize}
 
-Processes communicate by message passing, using either one-to-one or one-to-many
-communication.  The system is asynchronous: there is no bound on message delay
-or on relative process speed.  One-to-one communication uses primitives
-$send(p,m)$ and $receive(m)$, where $m$ is a message and $p$ is the process $m$
-is addressed to.  If sender and receiver are correct, then every message sent is
-eventually received. One-to-many communication relies on reliable multicast and
-atomic multicast.\footnote{Solving atomic multicast requires additional
-assumptions~\cite{CT96,FLP85}. In the following, we simply assume the existence
-of an atomic multicast oracle.} % defined in sections~\ref{sec:rmcast} and
-\ref{sec:amcast}, respectively.
+\subsection{Reliable multicast}
+\label{sec:rmcast}
 
-
-\subsection{Reliable multicast} \label{sec:rmcast}
-
-To reliably multicast a message $m$ to a set of groups $\gamma$, processes use
+Reliable broadcast provides stronger properties than regular broadcast, by
+ensuring that a message is either delivered to all processes or to none. To
+reliably multicast a message $m$ to a set of groups $\gamma$, processes use
 primitive \rmcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
-with \rmdel$(m)$.  Reliable multicast has the following properties: (i)~If a
-correct process \rmcast{}s $m$, then every correct process in $\gamma$ \rmdel{}s
-$m$ \emph{(validity)}. (ii)~If a correct process \rmdel{}s $m$, then every
-correct process in $\gamma$ \rmdel{}s $m$ \emph{(agreement)}. (iii)~For any
-message $m$, every process $p$ in $\gamma$ \rmdel{}s $m$ at most once, and only
-if some process has \rmcast{} $m$ to $\gamma$ previously \emph{(integrity)}.
+with \rmdel$(m)$.  Reliable multicast has the following properties:
 
-\subsection{Atomic multicast} \label{sec:amcast}
+\begin{itemize}
 
-To atomically multicast a message $m$ to a set of groups $\gamma$, processes use
-primitive \amcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
-with \amdel$(m)$.  We define delivery order $<$ as follows: $m < m'$ iff there
-exists a process that delivers $m$ before $m'$. Atomic multicast ensures the
-following properties: (i)~If a correct process \amcast{}s $m$, every correct
-process in a group in $\gamma$ \amdel{}s $m$ \emph{(validity)}. (ii)~If a
-process \amdel{}s $m$, then every correct process in a group in $\gamma$
-\amdel{}s $m$ \emph{(uniform agreement)}. (iii)~For any message $m$, every
-process \amdel{}s $m$ at most once, and only if some process has \amcast{} $m$
-previously \emph{(integrity)}. (iv)~If a process \amcast{}s $m$ and then $m'$,
-then no process \amdel{}s $m'$ before $m$ \emph{(fifo order)}. (v)~The delivery
-order is acyclic \emph{(atomic order)}. (vi)~For any messages $m$ and $m'$ and
-any processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \}
-\subseteq \gamma$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$
-delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$ \emph{(prefix order)}.
-Atomic broadcast is a special case of atomic multicast in which there is a
-single group of processes.
+    \item[--] If a correct process \rmcast{}s $m$, then every correct process in
+      $\gamma$ \rmdel{}s $m$ \emph{(validity)}.
+
+    \item[--] If a correct process \rmdel{}s $m$, then every correct process in
+      $\gamma$ eventually \rmdel{}s $m$ \emph{(agreement)}.
+
+    \item[--] For any message $m$, every process $p$ in $\gamma$ \rmdel{}s $m$
+      at most once, and only if some process has \rmcast{} $m$ to $\gamma$
+      previously \emph{(integrity)}.
+
+\end{itemize}
+
+\subsection{Atomic multicast}
+\label{sec:amcast}
+Atomic broadcast, also referred to as total order broadcast, is an extension of
+reliable broadcast that ensures that messages are delivered by all processes in
+the same order. To atomically multicast a message $m$ to a set of groups
+$\gamma$, processes use primitive \amcast$(\gamma, m)$.  Message $m$ is
+delivered at the destinations with \amdel$(m)$.  We define delivery order $<$ as
+follows: $m < m'$ iff there exists a process that delivers $m$ before $m'$.
+
+Atomic multicast ensures the following properties:
+
+\begin{itemize}
+
+    \item[--] If a correct process \amcast{}s $m$, every correct process in a
+      group in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
+
+    \item[--] If a process \amdel{}s $m$, then every correct process in a group
+      in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
+
+    \item[--] For any message $m$, every process \amdel{}s $m$ at most once, and
+      only if some process has \amcast{} $m$ previously \emph{(integrity)}.
+
+    \item[--] If a process \amcast{}s $m$ and then $m'$, then no process
+    \amdel{}s $m'$ before $m$ \emph{(fifo order)}.
+
+    \item[--] The delivery order is acyclic \emph{(atomic order)}.
+
+    \item[--] For any messages $m$ and $m'$ and any processes $p$ and $q$ such
+      that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq \gamma$, if $p$
+      delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before
+      $m$ or $q$ delivers $m$ before $m'$ \emph{(prefix order)}.
+
+\end{itemize}
+
+Atomic broadcast is a special case of atomic multicast in which there
+is a single group of processes.
 
 \section{Consensus}
-\lipsum[1-2]
+Consensus is a fundamental problem of distributed computing. The problem is
+related to replication and appears when implementing atomic broadcast, group
+membership, or similar services. Given a set of servers proposing values, it is
+the problem of deciding on one value among the servers. Uniform consensus
+algorithm  is defined by the primitives \emph{propose(v)} and \emph{decide(v)},
+where \emph{v} is an arbitrary value. Any uniform consensus must satisfy the
+following three properties:
+\begin{itemize}
+
+  \item[--] If a process decides \emph{v}, then \emph{v} was previously
+  proposed by some process \emph{(uniform integrity)}.
+
+  \item[--] If one or more correct processes propose a value then eventually
+  some value is decided by all correct processes \emph{(termination)}.
+
+  \item[--] No two processes decide different values \emph{(uniform agreement)}.
+
+\end{itemize}
 
 \section{Linearizability}
+\lipsum[1-2]
+
+\section{Replication}
 \lipsum[1-2]
 
 \section{State-machine replication}

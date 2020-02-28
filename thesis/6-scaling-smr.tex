@@ -1,15 +1,98 @@
-\chapter[Scaling State Machine Replication]{Scaling State Machine Replication}
+\chapter[Replication and Scalability]{Replication and Scalability}
 
-Scalability, which is the ability to increase performance of a system by
-upgrading existing resources (scale up) or aggregating additional resources to
-the existing ones (scale out), is fundamental to meeting the performance
-requirements of modern services. Unfortunately, classical SMR does not scale:
-adding resources (e.g., replicas) will not translate into the improvement of
-performance, in terms of throughput. This happens for a couple reasons. First,
-the underlying communication protocol needed to ensure ordered message delivery
-may not scale itself (i.e., a communication bottleneck). Second, every replica
-must execute the same sequence of command to reach the same state (i.e., an
-execution bottleneck).
+
+Enterprises of all sizes are embracing rapid modernization of user-facing
+applications as part of their broader digital transformation strategy. The
+distributed infrastructure that such applications rely on suddenly needs to
+support much larger data sizes and transaction volumes. Scalability, which is
+the ability to increase performance of a system by upgrading existing resources
+(scale up) or aggregating additional resources to the existing ones (scale out),
+is fundamental to meeting the performance requirements of modern services.
+
+Partitioning (or sharding in database context) is a technique to make different
+sets of machines do different work in order to achieve scalability. In
+distributed systems, State Machine Replication is used to provide
+fault-tolerance by running the same code and database on replicated machines.
+But Replication only improves fault-tolerance on the cost of more machines.
+Partitioning allows us to distribute different jobs/data to different sets of
+machines. Most trivially, it can be done by allocating different key ranges to
+different replicated groups in a Key/Value data store.
+
+\section{Scalability in distributed database system}
+
+Sharding is a database architecture pattern related to horizontal partitioning —
+the practice of separating one table’s rows into multiple different tables,
+known as partitions. Each partition has the same schema and columns, but also
+entirely different rows. Likewise, the data held in each is unique and
+independent of the data held in other partitions. Sharding involves breaking up
+one’s data into two or more smaller chunks, called logical shards. The logical
+shards are then distributed across separate database nodes, referred to as
+physical shards, which can hold multiple logical shards. Despite this, the data
+held within all the shards collectively represent an entire logical dataset.
+
+Google Spanner~\cite{corbett2013spanner} was designed to be a highly-scalable
+distributed relational database. Spanner consists of multiple \emph{zones}, each
+of which is a deployment of Bigtable servers. A zone uses one \emph{zonemaster}
+to assign data to one hundred to several thousand sets of Paxos-based state
+machines (so called \emph{spanservers}).
+% Clients in Spanner use \emph{location
+% proxy} of each zone to locate the spanservers assigned to serve their data.
+The steps to process a multi-partition transaction are the following. First, a
+client communicates with a proxy location to determine which groups maintain the
+data touched by the transaction. Second, the client retrieves this data from the
+groups, acquiring locks for them. Next, the client executes its transaction
+locally, chooses one of the groups involved in the transaction as a coordinator
+group C, and sends the result and the id of C to all groups involved in the
+transaction. Finally, group C coordinates a two-phase commit with the other
+groups for committing the transaction
+
+Although not detailed in the paper, Spanner allows data to be re-sharded across
+\emph{spanservers} or \emph{zones} data centers to balance loads and in response
+to failures by \emph{placement driver}. Periodically, \emph{placement driver}
+communicates with spanservers to re-arrange data. During these transfers,
+clients can still execute transactions (including updates) on the database.
+Figure~\ref{fig:spanner} shows an execution of a single transactions that
+requires multiple round of coordination in Spanner.
+
+Distributed operators appear in execution plans with a distributed union variant
+on top of one or more local distributed union variants. A distributed union
+variant performs the remote distribution of subplans. A local distributed union
+variant is on top of each of the scans performed for the query, as shown in the
+execution plan in Figure~\ref{fig:spanner-plan}. The local distributed union
+variants ensure stable query execution when restarts occur for dynamically
+changing split boundaries.Whenever possible, a distributed union variant has a
+split predicate that results in split pruning, meaning the remote servers
+execute subplans on only the splits that satisfy the predicate. This improves
+both latency and overall query performance.
+
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=0.6\linewidth]{figures/spanner-execution}
+  \end{minipage}
+  \caption{Coordination required in multi-partition transaction in Spanner}
+  \label{fig:spanner}
+\end{figure*}
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=0.6\linewidth]{figures/spanner-distributed-query}
+  \end{minipage}
+  \caption{Execution plan of a distributed query in Spanner}
+  \label{fig:spanner-plan}
+\end{figure*}
+
+
+\section{Scaling state machine replication}
+
+The classical SMR does not scale: adding resources (e.g., replicas) will not
+translate into the improvement of performance, in terms of throughput. This
+happens for a couple reasons. First, the underlying communication protocol
+needed to ensure ordered message delivery may not scale itself (i.e., a
+communication bottleneck). Second, every replica must execute the same sequence
+of command to reach the same state (i.e., an execution bottleneck).
 
 Several approaches have been proposed to address SMR's scalability limitations.
 To cope with communication overhead, some proposals have suggested to spread the
@@ -26,7 +109,7 @@ execute commands concurrently without sacrificing consistency
 (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). In this chapter, we review the
 second category, which is be basic of our work.
 
-\section{Partitioning application state}
+\subsection{Partitioning application state}
 
 Modern distributed systems typically scale performance by partitioning
 application state and tolerate failures by replicating each partition. Clients
@@ -54,26 +137,61 @@ multi-partition commands with balanced load among partitions exhibit \emph{weak
 locality}.
 
 Broadly speaking, there are two classes of techniques for partitioning:
-\emph{static} and \emph{dynamic}. \emph{Static} techniques choose an immutable
-assignment of application state variables to partitions prior to executing
-commands. This techniques requires a good understanding about the workload to
-avoids load imbalances and favors single-partition commands.  Moreover, many
-online applications experience variations in demand. These happen for a number
-of reasons. In social networks, for example, some users may experience a surge
-increase in their number of followers (e.g., new ``celebrities"); workload
-demand may shift along the hours of the day and the days of the week; and
-unexpected (e.g., a video that goes viral) or planned events (e.g., a new
-company starts trading in the stock exchange) may lead to exceptional periods
-when requests increase significantly higher than in normal periods. These
-challenges perhaps explain why most approaches that extend SMR with state
-partitioning delegate the task of partitioning the service state to the
-application designer. \emph{Dynamic} techniques address the limitations of static
-techniques by adapting the partitioning scheme as workloads change. For example,
-a dynamic technique can move data ``on demand'' to maximize the number of single
-partition user commands, while avoiding imbalances in the load of the
-partitions.
-The major challenge in designing a dynamic scheme is determining how the system
-selects the partition to which to move data.
+\emph{static} and \emph{dynamic}. Figure~\ref{fig:motivation} shows the result
+of a motivating experiment that compares two representative systems, one of each
+class. In the experiment, we measured the throughput and number of state moves
+over time with two different workloads: one with strong locality and one with
+weak locality. The workloads are inspired by the social network Twitter, in
+which the network is modeled as a graph, and users can ``post'' messages. The
+social graph was generated using a Zipfian distribution, where the Zipf
+parameter was adjusted to alter the locality.  For brevity, we postpone the
+details of the experimental setup until Section~\ref{sec:dynastar-experiments}.
+\emph{Static} techniques choose an immutable assignment of application state
+variables to partitions prior to executing commands. This techniques requires a
+good understanding about the workload to avoids load imbalances and favors
+single-partition commands.  Moreover, many online applications experience
+variations in demand. These happen for a number of reasons. In social networks,
+for example, some users may experience a surge increase in their number of
+followers (e.g., new ``celebrities"); workload demand may shift along the hours
+of the day and the days of the week; and unexpected (e.g., a video that goes
+viral) or planned events (e.g., a new company starts trading in the stock
+exchange) may lead to exceptional periods when requests increase significantly
+higher than in normal periods. These challenges perhaps explain why most
+approaches that extend SMR with state partitioning delegate the task of
+partitioning the service state to the application designer. \emph{Dynamic}
+techniques address the limitations of static techniques by adapting the
+partitioning scheme as workloads change. For example, a dynamic technique can
+move data ``on demand'' to maximize the number of single partition user
+commands, while avoiding imbalances in the load of the partitions. The major
+challenge in designing a dynamic scheme is determining how the system selects
+the partition to which to move data.
+
+
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-strong-locality}
+    \caption{Throughput with strong locality}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-weak-locality}
+    \caption{Throughput with weak locality}
+  \end{subfigure} \\
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-strong-locality}
+  \caption{Number of move commands with strong locality}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-weak-locality}
+    \caption{Number of move commands with weak locality}
+  \end{subfigure}
+  \caption{\dynastar, S-SMR* (i.e., optimized S-SMR) and DS-SMR under strong and weak locality, 4 partitions.}
+  \label{fig:motivation}
+\end{figure*}
 
 \subsection{Static state partitioning with S-SMR}
 \label{sec:ssmr}
@@ -134,32 +252,7 @@ returns a correct set of partitions for every query. Such a static mapping has
 the major limitation of not allowing the service to dynamically adapt to
 different access patterns.
 
-\subsection{Two phases locking and two phases commit with Google Spanner}
-
-Google Spanner~\cite{corbett2013spanner} was designed to be a highly-scalable
-distributed relational database. Spanner consists of multiple \emph{zones}, each
-of which is a deployment of Bigtable servers. A zone uses one \emph{zonemaster}
-to assign data to one hundred to several thousand sets of Paxos-based state
-machines (so called \emph{spanservers}). Clients in Spanner use \emph{location
-proxy} of each zone to locate the spanservers assigned to serve their data.
-Although not detailed in the paper, Spanner allows data to be re-sharded across
-\emph{spanservers} or \emph{zones} data centers to balance loads and in response
-to failures by \emph{placement driver}. Periodically, \emph{placement driver}
-communicates with spanservers tor re-arrange data. During these transfers,
-clients can still execute transactions (including updates) on the database.
-Figure~\ref{fig:spanner} shows an execution of a single transactions that
-requires multiple round of coordination in Spanner.
-
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=0.6\linewidth]{figures/spanner}
-  \end{minipage}
-  \caption{Coordination required in multi-partition transaction in Spanner}
-  \label{fig:spanner}
-\end{figure*}
-
-\section{Graph partitioning}
+\subsection{Dynamic state partitioning}
 
 %\ssmr\ performs better as the number of multi-partition commands decreases.
 

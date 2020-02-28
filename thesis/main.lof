@@ -1,18 +1,21 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)\relax }}{11}{figure.caption.10}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Coordination required in multi-partition transaction in Spanner\relax }}{13}{figure.caption.11}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Coordination required in multi-partition transaction in Spanner\relax }}{15}{figure.caption.10}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Execution plan of a distributed query in Spanner\relax }}{15}{figure.caption.11}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces \unhbox \voidb@x \hbox {DynaStar}\xspace , S-SMR* (i.e., optimized S-SMR) and DS-SMR under strong and weak locality, 4 partitions.\relax }}{18}{figure.caption.12}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)\relax }}{19}{figure.caption.13}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Consulting the oracle and issuing a command are done in multiple calls to atomic-multicast.\relax }}{18}{figure.caption.12}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces The architecture of Dynamic Scalable State Machine Replication{}.\relax }}{19}{figure.caption.13}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Each client proxy in \unhbox \voidb@x \hbox {DS-SMR}\ maintains a cache in order to avoid consulting the oracle. White boxes represent actions of the client proxy.\relax }}{24}{figure.caption.14}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Results of Chirper\ running with \unhbox \voidb@x \hbox {S-SMR}\xspace \ and \unhbox \voidb@x \hbox {DS-SMR}{}. Throughput is shown in thousands of commands per second (kcps).\relax }}{29}{figure.caption.15}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Consulting the oracle and issuing a command are done in multiple calls to atomic-multicast.\relax }}{24}{figure.caption.14}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces The architecture of Dynamic Scalable State Machine Replication{}.\relax }}{25}{figure.caption.15}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Each client proxy in \unhbox \voidb@x \hbox {DS-SMR}\ maintains a cache in order to avoid consulting the oracle. White boxes represent actions of the client proxy.\relax }}{30}{figure.caption.16}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Results of Chirper\ running with \unhbox \voidb@x \hbox {S-SMR}\xspace \ and \unhbox \voidb@x \hbox {DS-SMR}{}. Throughput is shown in thousands of commands per second (kcps).\relax }}{35}{figure.caption.17}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Execution of a create (C1) and a write without client cache (C2) and with client cache (C3) in \unhbox \voidb@x \hbox {DynaStar}\xspace .\relax }}{37}{figure.caption.18}
-\contentsline {figure}{\numberline {5.2}{\ignorespaces Repartitioning in \unhbox \voidb@x \hbox {DynaStar}\xspace ; throughput (top), objects exchanged between partitions (middle), and percentage of multi-partition commands (bottom).\relax }}{47}{figure.caption.21}
-\contentsline {figure}{\numberline {5.3}{\ignorespaces Performance scalability with TPC-C. Throughput (in thousands of transactions per second, ktps) and latency for $\approx $75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).\relax }}{48}{figure.caption.23}
-\contentsline {figure}{\numberline {5.4}{\ignorespaces Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. Latency for $\approx $75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).\relax }}{48}{figure.caption.24}
-\contentsline {figure}{\numberline {5.5}{\ignorespaces Repartitioning a dynamic workload with \unhbox \voidb@x \hbox {DynaStar}\xspace \nobreakspace {}(a) and S-SMR* without repartitioning (b).\relax }}{50}{figure.caption.27}
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Execution of a create (C1) and a write without client cache (C2) and with client cache (C3) in \unhbox \voidb@x \hbox {DynaStar}\xspace .\relax }}{43}{figure.caption.20}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Repartitioning in \unhbox \voidb@x \hbox {DynaStar}\xspace ; throughput (top), objects exchanged between partitions (middle), and percentage of multi-partition commands (bottom).\relax }}{53}{figure.caption.23}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Performance scalability with TPC-C. Throughput (in thousands of transactions per second, ktps) and latency for $\approx $75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).\relax }}{54}{figure.caption.25}
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions. Latency for $\approx $75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).\relax }}{54}{figure.caption.26}
+\contentsline {figure}{\numberline {5.5}{\ignorespaces Repartitioning a dynamic workload with \unhbox \voidb@x \hbox {DynaStar}\xspace \nobreakspace {}(a) and S-SMR* without repartitioning (b).\relax }}{56}{figure.caption.29}
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Cumulative distribution function (CDF) of latency for mix workloads on different partitioning configurations.\relax }}{57}{figure.caption.30}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

@@ -1,0 +1,45 @@
+https://blog.yugabyte.com/google-spanner-vs-calvin-global-consistency-at-scale/
+https://blog.yugabyte.com/how-data-sharding-works-in-a-distributed-sql-database/
+
+http://dbmsmusings.blogspot.com/2017/04/distributed-consistency-at-scale.html
+http://dbmsmusings.blogspot.com/2018/09/newsql-database-systems-are-failing-to.html
+
+
+http://dbmsmusings.blogspot.com/2011/12/replication-and-latency-consistency.html
+
+
+DUR https://link.springer.com/chapter/10.1007/978-3-319-05119-2_14
+
+
+http://muratbuffalo.blogspot.com/2013/07/spanner-googles-globally-distributed_4.html
+http://www.cs.umd.edu/~bengfort/scientific-reading/spanner/
+https://wp.sigmod.org/?p=2153
+
+https://www.usenix.org/system/files/conference/atc12/atc12-final118.pdf
+
+https://www.digitalocean.com/community/tutorials/understanding-database-sharding
+https://medium.com/@jeeyoungk/how-sharding-works-b4dec46b3f6
+https://www.usenix.org/system/files/conference/nsdi16/nsdi16-paper-shalita.pdf
+https://www.ssrg.ece.vt.edu/papers/systor14.pdf
+
+
+partitioning
+scheduling/ordering
+execution
+
+
+partitioned system(shared)
+
+                  application logic
+
+                    client     |   server
+                    --------------------
+order->execution    spanner    |    smr
+execution->order    sdur       |
+
+if at client -> need to syncronize -> lock
+
+if smr => different way, psmr
+
+
+
