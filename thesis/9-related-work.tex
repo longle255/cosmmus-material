@@ -44,7 +44,7 @@ to scale better, but services that require linearizability cannot be implemented
 with such techniques.
 
 Efforts to make linearizable systems scalable have been made in the
-past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, hoang2016,
+past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, le2016dssmr,
 Marandi:2011dj}. In Scatter~\cite{Glendenning2011}, the authors propose a
 scalable key-value store based on DHTs, ensuring linearizability, but only for
 requests that access the same key. In the work of Marandi et
@@ -58,7 +58,7 @@ correctness is not guaranteed. $M^2Paxos$~\cite{7579738} proposes a scheme where
 leases are used instead of partitions owning objects, but assumes full state
 replication. \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across
 partitions without any assumption about clock synchronization, but relies on a
-static partitioning of the state. \dssmr{}~\cite{hoang2016} extends \ssmr\ by
+static partitioning of the state. \dssmr{}~\cite{le2016dssmr} extends \ssmr\ by
 allowing state variables to migrate across partitions in order to reduce
 multi-partition commands. However, \dssmr{} implements repartitioning in a very
 simple way that does not perform very well in scenarios where the state cannot

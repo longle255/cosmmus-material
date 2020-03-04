@@ -14,6 +14,9 @@
 \usepackage{listings}
 \usepackage{subcaption}
 \usepackage{natbib}
+\usepackage{bibentry}
+\usepackage[T1]{fontenc}
+% \usepackage[utf8]{inputenc}
 
 
 \usepackage{listings}
@@ -49,8 +52,14 @@ morecomment=[l]{//s},
   \committeeMember{Wojciechowski Paweł}{Poznań University of Technology, Poland}
 }
 
-\dedication{To my beloved} %optional
-\openepigraph{Someone said \dots}{Someone} %optional
+% \DeclareUnicodeCharacter{01B0}{ư}
+% \DeclareUnicodeCharacter{01A1}{ơ}
+% \newcommand{\uw}{ư}
+% \newcommand{\ow}{ơ}
+% \dedication{To Nam Phương}
+\dedication{To Nam Phuong}
+
+\openepigraph{Research is what I'm doing when I don't know what I'm doing.}{Wernher von Braun} %optional
 
 \include{0-settings}
 
@@ -68,6 +77,7 @@ morecomment=[l]{//s},
 
 \include{3-preface}
 
+\listoffixmes
 \tableofcontents
 \listoffigures %optional
 \listoftables %optional
@@ -93,9 +103,9 @@ morecomment=[l]{//s},
 \backmatter
 
 % \bibliographystyle{plainnat}
-\bibliographystyle{dcu}
+% \bibliographystyle{dcu}
+\bibliographystyle{plain}
 \bibliography{references}
-
 \cleardoublepage
 % \theindex %optional, use only if you have an index, must use
 	  %\makeindex in the preamble

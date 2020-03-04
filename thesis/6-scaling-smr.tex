@@ -1,22 +1,54 @@
-\chapter[Replication and Scalability]{Replication and Scalability}
+\chapter[Scaling Partitioned Replicated System]{Scaling Partitioned Replicated System}
+
+Today's online services of all size enterprises must meet strict availability
+and performance requirements, as part of their broader digital transformation
+strategy. In order to meet the strict availability requirements, those online
+services must be replicated. State machine replication is a fundamentally
+powerful building block that enables the implementation of highly available
+distributed services by replication. State machine replication achieves strong
+consistency (i.e., linearizability) by regulating how client commands are
+propagated to and executed by the replicas: every non-faulty replica must
+receive and execute every command deterministically and in the same order. If
+all replicas have to execute the same sequence of commands, the system can not
+scale. Increasing the number of replicas results in bounded improvements in
+performance.
+
+Scalable performance can be achieved with state partitioning. Partitioning (also
+known as \emph{sharding}) is a technique that divides the state of a service in
+multiple partitions so that most commands access one partition only and are
+equally distributed among partitions. Partitioning replicated state machine can
+lead to highly scalable and available systems, however, introduce daunting
+challenges. Most services cannot be ``perfectly partitioned", that is, the
+service state cannot be divided in a way that commands access one partition
+only. Therefore, a partitioning scheme must cope with multi-partition commands.
+
+There are two general solutions to handle multi-partition commands in terms of
+consistency guarantees. One solution, known as \textbf{weak consistency}, is to
+weaken the guarantees of commands that involve multiple partitions (e.g.,
+\cite{facebookTAO}). In the context of SMR, this would mean that requests access
+data within single partition (single-partition commands) are strongly consistent
+(i.e., linearizable), while concurrent requests accessing multiple partitions
+(multi-partition commands) may lead to inconsistencies. This approach relaxes
+the consistency guarantees and makes systems less exposed to impossibility
+results \cite{FLP85, diskpaxos}, but makes the effects of data partitioning and
+replication visible to the application. To lower the chance of potential
+conflicts, data access patterns can be considered when partitioning data (e.g.,
+objects often accessed together can be co-located in the same partition). But
+these optimizations require prior knowledge about the workload, and are often
+performed offline \cite{facebookTAO}
+
+The other solution, known as \textbf{strong consistency}, is to
+provide strong consistency guarantees for both single- and multi-partition
+commands, at the cost of a more complex execution path for commands that involve
+multiple partitions.
 
 
-Enterprises of all sizes are embracing rapid modernization of user-facing
-applications as part of their broader digital transformation strategy. The
-distributed infrastructure that such applications rely on suddenly needs to
-support much larger data sizes and transaction volumes. Scalability, which is
-the ability to increase performance of a system by upgrading existing resources
-(scale up) or aggregating additional resources to the existing ones (scale out),
-is fundamental to meeting the performance requirements of modern services.
+In the scope of this thesis, we only focus on the second
+category, that is replicated state machine systems that provide strong
+consistency.
 
-Partitioning (or sharding in database context) is a technique to make different
-sets of machines do different work in order to achieve scalability. In
-distributed systems, State Machine Replication is used to provide
-fault-tolerance by running the same code and database on replicated machines.
-But Replication only improves fault-tolerance on the cost of more machines.
-Partitioning allows us to distribute different jobs/data to different sets of
-machines. Most trivially, it can be done by allocating different key ranges to
-different replicated groups in a Key/Value data store.
+Essentially, in a distributed system, there are two different ways to handle commands:
+
 
 \section{Scalability in distributed database system}
 
@@ -312,7 +344,7 @@ different access patterns.
 % selects the partition to which to move data.
 % %
 % The second system in Figure~\ref{fig:motivation} evaluates DS-SMR, a dynamic
-% partitioning strategy implemented by  Le et al.~\cite{hoang2016}. This system
+% partitioning strategy implemented by  Le et al.~\cite{le2016dssmr}. This system
 % selects partitions randomly, which allows for a completely decentralized
 % implementation, in which partitions make only local choices about data movement.
 % We refer to this approach as \emph{decentralized dynamic}.  As

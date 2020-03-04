@@ -1,14 +1,14 @@
 % -----------------------------------------------------------------------------
 % LaTeX class for the doctoral dissertation at the Faculty of
 % Informatics of University of Lugano
-% 
+%
 % Domenico Bianculli <domenico.bianculli@lu.unisi.ch>
 % Jochen Wuttke <wuttkej@lu.unisi.ch>
 %
 % -----------------------------------------------------------------------------
 %%
 %% This file is 'USIINFthesis.cls'
-%% 
+%%
 %% It may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version.
@@ -65,9 +65,9 @@
 \DeclareOption{mscthesis}{\setboolean{@mscthesis}{true}}
 
 %%%
-\DeclareOption*{% 
-\PassOptionsToClass{\CurrentOption}{book}% 
-} 
+\DeclareOption*{%
+\PassOptionsToClass{\CurrentOption}{book}%
+}
 %%% execution of options
 \ExecuteOptions{hyper}
 \ProcessOptions \relax
@@ -163,7 +163,7 @@
     {\Large {\bf\sffamily \@author}}
     \vfill
     \vfill
-    
+
     {under the supervision of}\\[2mm]
     \ifthenelse{\boolean{@coadvisor}}{{\large {\@advisor\ and \@coadvisor}}\\}
     {{\large {\@advisor}}\\}
@@ -213,9 +213,9 @@ date of the approved research program.\\[18mm]
 
 
   \hfill \begin{minipage}{6cm}
-    
+
     \rule{6cm}{0.2mm}
-    
+
     \@author
 
     \@place, \@dateaccepted\ \@month\ \@year
@@ -229,9 +229,9 @@ date of the approved research program.\\[18mm]
   \@mainmatterfalse
   \pagenumbering{Roman}
     \clearpage
-    
+
     \thispagestyle{empty}
-    
+
     \mbox{ }
 
     \ifthenelse{\boolean{@crn}}{\@crnotice}{}
@@ -271,7 +271,7 @@ date of the approved research program.\\[18mm]
       \vfill
     \fi
     \end{center}
-    
+
     \clearpage
     }
   \@authdecl
@@ -309,13 +309,13 @@ date of the approved research program.\\[18mm]
       \fancyhead[LO, LE]{\sf \thepage}
       }
     \fancyfoot{}
- 
+
   \newcounter{oldpage}
   \setcounter{oldpage}{\value{page}}
   \pagenumbering{roman}
   \setcounter{page}{\value{oldpage}}
 } %%% end frontmatter
-  
+
 
 %%% abstract
 \newenvironment{abstract}[1][Abstract]{%
