@@ -5,19 +5,20 @@
 In this section, we report results from two benchmarks: TPC-C and
 \dynastarappname{} social networking service described in the previous section.
 Our experiments show that \dynastar{} is able to rapidly adapt to changing
-workloads, while achieving throughputs and latencies far better than the existing
-state-of-the-art approaches to state machine replication partitioning.
+workloads, while achieving throughputs and latencies far better than the
+existing state-of-the-art approaches to state machine replication partitioning.
 
 
 \subsection{Experimental environment}
 \label{sec:dynastar-evaluation:setup}
 
-We conducted all experiments on Amazon EC2 T2 large instances (nodes). Each node has 8 GB of RAM,
-two virtual cores and is equipped with an Amazon EBS standard SSD with a maximal bandwidth 10000 IOPS.
-All nodes ran Ubuntu Server 16.04 LTS 64 and had the OpenJDK Runtime Environment~8 with the
-\mbox{64-Bit} Server VM (build 25.45-b02). In all experiments, the oracle
-had the same resources as every other partition: 2 replicas and 3 Paxos acceptors
-(in total five nodes per partition).
+We conducted all experiments on Amazon EC2 T2 large instances (nodes). Each node
+has 8 GB of RAM, two virtual cores and is equipped with an Amazon EBS standard
+SSD with a maximal bandwidth 10000 IOPS. All nodes ran Ubuntu Server 16.04 LTS
+64 and had the OpenJDK Runtime Environment~8 with the \mbox{64-Bit} Server VM
+(build 25.45-b02). In all experiments, the oracle had the same resources as
+every other partition: 2 replicas and 3 Paxos acceptors (in total five nodes per
+partition).
 
 
 % \subsection{Methodology and goals}
@@ -43,36 +44,40 @@ had the same resources as every other partition: 2 replicas and 3 Paxos acceptor
 \subsection{TPC-C benchmark}
 \label{sec:dynastar-evaluation:tpc-c}
 
-In the experiments in this section, we deploy as many partitions as the number of warehouses.
+In the experiments in this section, we deploy as many partitions as the number
+of warehouses.
 
 %\paragraph*{The impact of graph repartitioning}
 \subsubsection{The impact of graph repartitioning}
-In order to assess the impact of state partitioning on performance, we ran the TPC-C benchmark on an
-un-partitioned database.  Figure ~\ref{fig:tpcc_repartitioning}
-shows the performance of \dynastar with 8 warehouses and 8 partitions.
-At the first part of the experiment, all the variables are randomly distributed across all partitions.
-As a result, almost every transaction accesses all partitions. Thus every transaction
-required coordination between partitions, and objects were constantly moving back and forth.
+In order to assess the impact of state partitioning on performance, we ran the
+TPC-C benchmark on an un-partitioned database.  Figure
+~\ref{fig:tpcc_repartitioning} shows the performance of \dynastar with 8
+warehouses and 8 partitions. At the first part of the experiment, all the
+variables are randomly distributed across all partitions. As a result, almost
+every transaction accesses all partitions. Thus every transaction required
+coordination between partitions, and objects were constantly moving back and
+forth.
 %In addition, transactions from different clients were blocked by the others,
 %made the time it took for executing one transaction remarkably high.
-This can be observed in the first 50 seconds of the experiment depicted in Figure
-~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few transactions executed per second),
-high latency (i.e., up to several seconds), and a high percentage of cross-partition transactions.
+This can be observed in the first 50 seconds of the experiment depicted in
+Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few transactions
+executed per second), high latency (i.e., up to several seconds), and a high
+percentage of cross-partition transactions.
 
 
 %In addition to that, when a partition takes part in an execution of a transaction,
 %if another command access variables that are being accesses by the ongoing command will
 % be blocked until the previous command finish
 
-After 50 seconds, the oracle computed a new partitioning based on previously executed transactions
-and instructed the partitions to apply the new partitioning.
-When the partitions delivered the partitioning request, they exchanged objects to achieve the new partitioning.
-% During this process, servers didn't execute any other transactions, thus the throughput decreased
-% to 0, and the average latency was not applicable.
-It takes about 10 seconds for partitions to reach the new partitioning.
-During the repartitioning, transactions which access objects that are not being relocated will continue to process.
-After the state is relocated, most objects involved in a transaction
-can be found in a local partition, which considerably increases performance and reduces latency.
+After 50 seconds, the oracle computed a new partitioning based on previously
+executed transactions and instructed the partitions to apply the new
+partitioning. When the partitions delivered the partitioning request, they
+exchanged objects to achieve the new partitioning. It takes about 10 seconds for
+partitions to reach the new partitioning. During the repartitioning,
+transactions which access objects that are not being relocated will continue to
+process. After the state is relocated, most objects involved in a transaction
+can be found in a local partition, which considerably increases performance and
+reduces latency.
 
 \begin{figure}[ht!]
   \centering
@@ -83,14 +88,12 @@ can be found in a local partition, which considerably increases performance and 
 \end{figure}
 
 \subsubsection{Scalability}
-In order to show how \dynastar scales out, we varied the number of partitions from 1 to 128 partitions.
-%We also added warehouses while adding partitions to demonstrate using
-%\dynastar to grow an application by adding more hardware.
-We used sufficient clients to  saturate the throughput of the system in each experiment.
-Figure ~\ref{fig:tpcc_scaling} shows the peak throughput of \dynastar and S-SMR* as we vary the
-number of partitions.
-Notice that we increase the state size as we add partitions (i.e., there is one warehouse per partition).
-The result shows that \dynastar is capable of applying
+In order to show how \dynastar scales out, we varied the number of partitions
+from 1 to 128 partitions. We used sufficient clients to  saturate the throughput
+of the system in each experiment. Figure ~\ref{fig:tpcc_scaling} shows the peak
+throughput of \dynastar and S-SMR* as we vary the number of partitions. Notice
+that we increase the state size as we add partitions (i.e., there is one
+warehouse per partition). The result shows that \dynastar is capable of applying
 a partitioning scheme that leads to scalable performance.
 
 \begin{figure}[ht!]
@@ -103,10 +106,11 @@ a partitioning scheme that leads to scalable performance.
 \subsection{Social network}
 
 %\paragraph*{Workloads.}
-We used the Higgs Twitter dataset~\cite{snapnets} as the social graph in the experiments.
-The graph is a subset of the Twitter network that was built based on the monitoring of the spreading
-of news on Twitter after the discovery of a new particle with the features of the elusive
-Higgs boson on 4th July 2012. The dataset consists of 456631 nodes and more than 14 million edges.
+We used the Higgs Twitter dataset~\cite{snapnets} as the social graph in the
+experiments. The graph is a subset of the Twitter network that was built based
+on the monitoring of the spreading of news on Twitter after the discovery of a
+new particle with the features of the elusive Higgs boson on 4th July 2012. The
+dataset consists of 456631 nodes and more than 14 million edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
 We evaluate the performance of \dynastar and other techniques. With S-SMR*, we used
@@ -290,7 +294,7 @@ execution, the previously user mapping got a better location from the oracle,
 which adapted the changes. After the repartitioning, the objects are moved to a
 better partition, with a resulting increase in throughput.
 
-Figure~\ref{fig:socialcdf} shows the cumulative distribution functions (CDFs) of
+Figure~\ref{fig:dynastar-socialcdf} shows the cumulative distribution functions (CDFs) of
 latency for the mix workload of \dynastar and S-SMR* on different
 configurations. The results suggest that S-SMR* achieves lower latency than
 \dynastar for 80\% of the load. This is expected, as for multi-partition
@@ -299,109 +303,99 @@ to their original location after command execution .
 
 \begin{figure*}[h!]
   \centering
-  \begin{subfigure}{\columnwidth}
+  \begin{subfigure}{0.48\columnwidth}
     \centering
-    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-2p.pdf}
+    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-2p.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{\columnwidth}
+  \begin{subfigure}{0.48\columnwidth}
     \centering
-    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-4p.pdf}
+    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-4p.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{\columnwidth}
+  \begin{subfigure}{0.48\columnwidth}
     \centering
-    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-8p.pdf}
+    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-8p.pdf}
 %    \caption{}
   \end{subfigure}
-  \begin{subfigure}{\columnwidth}
+  \begin{subfigure}{0.48\columnwidth}
     \centering
-    \includegraphics[width=0.5\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-16p.pdf}
+    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-latency-cdf-16p.pdf}
 %    \caption{}
   \end{subfigure}
   \caption{Cumulative distribution function (CDF) of latency for mix workloads on different partitioning configurations.}
-  \label{fig:socialcdf}
+  \label{fig:dynastar-socialcdf}
 \end{figure*}
 
 
+Table ~\ref{table:dynastar-socialsnapshot} shows the throughput of each
+partition when the system reached the maximum throughput at the second of 180.
+Although the objects were evenly distributed among partitions, there was still a
+skew in the load of the system, e.g., partition 1 and 2 served more commands
+than the other partitions. This happened because of the skew in the access
+pattern: some users were more active and posted more than the others, thus the
+requests that sent to their servers are more than to other servers.
 
-% Table ~\ref{table:socialsnapshot} shows the throughput of each partition when the system reached the maximum throughput at the second of 180. Although the objects were evenly distributed among partitions, there was still a skew in the load of the system, e.g., partition 1 and 2 served more commands than the other partitions. This happened because of the skew in the access pattern: some users were more active and posted more than the others, thus the requests that sent to their servers are more than to other servers.
-
-% \begin{table}[htp]
-% \caption{Average load at partitions at peak throughput.}
-% \begin{adjustbox}{max width=\columnwidth}
-% \vspace{10mm}
-% \begin{tabular}{|c|c|c|c|}
-% \hline
-% Partition & Tput & M-part commands per sec & Exchanged objects per sec \\ \hline
-% 1         & 12766      & 887                      & 3907              \\ \hline
-% 2         & 11790      & 643                      & 3036              \\ \hline
-% 3         & 6775       & 440                      & 1503              \\ \hline
-% 4         & 6458       & 400                      & 1490              \\ \hline
-% \end{tabular}
-% \label{table:socialsnapshot}
-% \vspace{10mm}
-% \end{adjustbox}
-% \end{table}
+\begin{table}[htp]
+\caption{Average load at partitions at peak throughput.}
+\label{table:dynastar-socialsnapshot}
+\begin{adjustbox}{max width=\columnwidth}
+\vspace{10mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Partition & Tput & M-part commands per sec & Exchanged objects per sec \\ \hline
+1         & 12766      & 887                      & 3907              \\ \hline
+2         & 11790      & 643                      & 3036              \\ \hline
+3         & 6775       & 440                      & 1503              \\ \hline
+4         & 6458       & 400                      & 1490              \\ \hline
+\end{tabular}
+\vspace{10mm}
+\end{adjustbox}
+\end{table}
 
 \subsection{The performance of the oracle}
 
-\dynastar  uses an oracle that maintains a global view of the workload graph. The oracle allows
-\dynastar to make better choices about data movement, resulting in overall
-better throughput and lower latency. However, introducing a centralized
-component in a distributed system is always a cause for some skepticism,
-in case the component becomes a bottleneck, or a single point of failure.
-To cope with failures, the oracle is implemented as a replicated partition.
+\dynastar  uses an oracle that maintains a global view of the workload graph.
+The oracle allows \dynastar to make better choices about data movement,
+resulting in overall better throughput and lower latency. However, introducing a
+centralized component in a distributed system is always a cause for some
+skepticism, in case the component becomes a bottleneck, or a single point of
+failure. To cope with failures, the oracle is implemented as a replicated
+partition.
 
-The oracle keeps a mapping of objects to partitions and the relations between objects.
-The size of the mapping depends on the complexity and the granularity of the graph.
-In the social network dataset, where each user is modeled as an object in the workload graph,
-the graph uses 1.5 GB of the oracle's memory.
-In the TPC-C experiments, only district and warehouse objects are in the workload graph;
-thus, the oracle only needs 1 MB of memory to store the graph for each warehouse.
+The oracle keeps a mapping of objects to partitions and the relations between
+objects. The size of the mapping depends on the complexity and the granularity
+of the graph. In the social network dataset, where each user is modeled as an
+object in the workload graph, the graph uses 1.5 GB of the oracle's memory. In
+the TPC-C experiments, only district and warehouse objects are in the workload
+graph; thus, the oracle only needs 1 MB of memory to store the graph for each
+warehouse.
 
-The results in Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a bottleneck.
-The number of queries processed to the oracle is zero at the
-beginning of the experiment, as the clients have cached the location of all objects.
-After 80 seconds, the repartitioning was triggered, making all cached data on clients invalid.
-Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
-However, the load diminishes rapidly and gradually reduce. This is because access to the oracle is necessary only
-when clients have an invalid cache or when a repartition happens
+We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck
+to system performance. The results show that the load on the oracle is low,
+suggesting that \dynastar scales well.The first experiment assesses the
+scalability of the METIS algorithm only. We measured the time to compute the
+partitioning solution, and the memory usage of the algorithms for increasingly
+large graphs. The results, depicted in Figure~\ref{fig:metis_size_time}, show
+that METIS scales linearly in both memory and computation time on graphs of up
+to 10 million vertices.
 
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\columnwidth]{./figures/experiments/dynastar/metis_size_time}
+	\caption{METIS processor and memory usage.}
+	\label{fig:metis_size_time}
+\end{figure}
 
-% We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck to
-% system performance. The results show that the load on the oracle is
-% low, suggesting that \dynastar scales well.
+The second experiment evaluates the oracle in terms of the number of queries
+sent to the oracle over time. The results shown in the bottom chart in the
+Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a
+bottleneck. The number of queries processed to the oracle is zero at the
+beginning of the experiment, as the clients have cached the location of all
+objects. After 80 seconds, the repartitioning was triggered, making all cached
+data on clients invalid. Thus the throughput of queries at the oracle increases,
+when clients started asking for new location of variables. However, the load
+diminishes rapidly and gradually reduce. This is because access to the oracle is
+necessary only when clients have an invalid cache or when a repartition happens
 
-
-% The first experiment assesses the scalability of the METIS algorithm only.
-% We measured the time to compute the partitioning solution, and
-% the memory usage of the algorithms for increasingly large graphs.
-% The results, depicted in Figure~\ref{fig:metis_size_time}, show that METIS scales
-% linearly in both memory and computation time on graphs of up to 10 million vertices.
-
-% \begin{figure}[ht!]
-%   \centering
-%     \includegraphics[width=\columnwidth]{figures/metis_size_time}
-% 	\caption{METIS processor and memory usage.}
-% 	\label{fig:metis_size_time}
-% \end{figure}
-
-% The experiment evaluates the oracle in terms of the number of queries sent to the oracle over
-% time, for varying numbers of partitions. The experiment results was measured when the system was running stable,
-% and the clients had cache all requests.  The results are shown in
-% Figure~\ref{fig:socialcelebrity}. The number of queries processed to the oracle is zero at the
-% beginning of the experiment, as the clients has cached the location of all objects.
-% After 80 second, the repartitioning was triggers, made all the cache on clients invalid.
-% Thus the throughput of queries at the oracle increases, when clients started asking for new location of variables.
-% However, the load diminishes rapidly and gradually reduce to zero. This is because access to the oracle is necessary only
-% when clients have an invalid cache or when a repartition happens. These experiments
-% suggest that the oracle would not become a bottleneck.% for reasonably large
-%deployments.
-
-% \begin{figure}[ht]
-% 	\includegraphics[width=\columnwidth]{figures/experiments/dynastar/chirper-oracle-load.pdf}
-%   \caption{Throughput at the oracle (social network).}
-% 	\label{fig:cpu_oracle}
-% \end{figure}
 

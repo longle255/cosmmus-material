@@ -52,13 +52,13 @@ chosen based on an attribute of the objects passed to the method.
 
 The client proxy is implemented in class Client, which handles all communication
 of the application client with the partitioned service. The client proxy
-provides methods sendCreate(Command, CallbackHandler), sendAccess(Command,
-CallbackHandler), and sendDelete(Command, CallbackHandler). The client proxy's
-default behavior is to keep retrying commands (and fallback to \ssmr\ in case of
-too many retries) and only call back the application client when the command has
+provides methods \emph{sendCreate(Command, Callback)}, \emph{sendAccess(Command,
+Callback)}, and \emph{sendDelete(Command, Callback)}. The client proxy's default
+behavior is to keep retrying commands (and fallback to \ssmr\ in case of too
+many retries) and only call back the application client when the command has
 been successfully executed. However, the developer can change this behavior by
-overriding the error() method of CallbackHandler. The error() method is called
-when a $retry$ reply is received.
+overriding the error() method of Callback. The error() method is called when a
+$retry$ reply is received.
 
 % i don't understand what the application can actually change with the error()
 % method

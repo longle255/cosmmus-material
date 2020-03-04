@@ -47,7 +47,8 @@ In the scope of this thesis, we only focus on the second
 category, that is replicated state machine systems that provide strong
 consistency.
 
-Essentially, in a distributed system, there are two different ways to handle commands:
+Essentially, in a distributed system, there are two different ways to handle
+commands:
 
 
 \section{Scalability in distributed database system}
@@ -61,7 +62,7 @@ one’s data into two or more smaller chunks, called logical shards. The logical
 shards are then distributed across separate database nodes, referred to as
 physical shards, which can hold multiple logical shards. Despite this, the data
 held within all the shards collectively represent an entire logical dataset.
-
+ç
 Google Spanner~\cite{corbett2013spanner} was designed to be a highly-scalable
 distributed relational database. Spanner consists of multiple \emph{zones}, each
 of which is a deployment of Bigtable servers. A zone uses one \emph{zonemaster}
@@ -92,7 +93,7 @@ variant performs the remote distribution of subplans. A local distributed union
 variant is on top of each of the scans performed for the query, as shown in the
 execution plan in Figure~\ref{fig:spanner-plan}. The local distributed union
 variants ensure stable query execution when restarts occur for dynamically
-changing split boundaries.Whenever possible, a distributed union variant has a
+changing split boundaries. Whenever possible, a distributed union variant has a
 split predicate that results in split pruning, meaning the remote servers
 execute subplans on only the splits that satisfy the predicate. This improves
 both latency and overall query performance.
@@ -131,7 +132,7 @@ To cope with communication overhead, some proposals have suggested to spread the
 load of ordering commands among multiple processes (e.g.,
 \cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single
 process to determine the order of commands (e.g.,
-\cite{Lamport:1998ea}).%\fxnote[draft]{remove inapplicable reference}
+\cite{Lam98}).%\fxnote[draft]{remove inapplicable reference}
 
 Two directions of research have been suggested to overcome execution
 bottlenecks. One approach (scaling up) is to take advantage of multiple cores to

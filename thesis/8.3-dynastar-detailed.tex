@@ -1,13 +1,16 @@
 \subsection{The detailed protocol}
 \label{sec:dynastar-detailed}
 
+
+\input{8.3.1-algorithm_client_proxy}
+\input{8.3.2-algorithm_oracle_proxy}
+\input{8.3.3-algorithm_server_proxy}
+\input{8.3.4-algorithm_shared}
+
 Algorithms~\ref{alg:client_proxy}, \ref{alg:oracle_proxy}, and
 \ref{alg:server_proxy} describe the client, oracle, and server processes,
 respectively. We omit the delete command since the coordination involved in the
 create and delete commands are analogous.
-%A proof of correctness for the protocol is available as additional
-%material.\footnote{https://github.com/dynastar2019/DynaStar/blob/master/appendix-correctness.pdf}
-
 
 \subsubsection{The client process}
 
@@ -53,11 +56,6 @@ variables to their source partition.
 %destination partition.
 \end{itemize}
 
-
-\input{8.3.1-algorithm_client_proxy}
-\input{8.3.2-algorithm_oracle_proxy}
-\input{8.3.3-algorithm_server_proxy}
-\input{8.3.4-algorithm_shared}
 
 \begin{figure*}
 \begin{minipage}[b]{1\linewidth} % A minipage that covers the whole width of the

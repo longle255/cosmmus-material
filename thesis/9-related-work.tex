@@ -2,7 +2,7 @@
 \chapter[Related works]{Related works}
 \label{sec:rw}
 
-State machine replication~\cite{Kapritsos:2012um, kotla2004htbft, Lam78,
+State machine replication~\cite{Kapritsos:2012um, Kotla:2004ep, Lam78,
 santos2013htsmr, Sch90} provides strong consistency guarantees, which come from
 total order and deterministic execution of commands.
 %Deterministic execution is usually ensured by having every replica execute
@@ -15,7 +15,7 @@ divide the ordering of commands between different clusters: each cluster orders
 only some requests, and then forwards the partial order to every server replica,
 which then merges the partial orders deterministically into a single total order
 that is consistent across the system. In S-Paxos~\cite{biely2012spaxos},
-Paxos~\cite{Lamport:1998ea} is used to order commands, but it is implemented in
+Paxos~\cite{Lam98} is used to order commands, but it is implemented in
 a way that avoids overloading the leader process, which would turn it into a
 bottleneck.
 
@@ -24,7 +24,7 @@ how threads are scheduled to be executed in the operating system. Some works
 attempted to circumvent this problems and come up with a multi-threaded, yet
 deterministic implementation of SMR. In \cite{santos2013htsmr}, Santos and
 Schiper propose to parallelize the receipt and dispatching of commands, while
-executing commands sequentially. In CBASE~\cite{kotla2004htbft}, application
+executing commands sequentially. In CBASE~\cite{Kotla:2004ep}, application
 semantics is used to determine which commands can be executed concurrently and
 still produce a deterministic outcome (e.g., read-only commands). In
 Eve~\cite{Kapritsos:2012um}, commands are tentatively executed in parallel.
@@ -44,8 +44,8 @@ to scale better, but services that require linearizability cannot be implemented
 with such techniques.
 
 Efforts to make linearizable systems scalable have been made in the
-past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning2011, le2016dssmr,
-Marandi:2011dj}. In Scatter~\cite{Glendenning2011}, the authors propose a
+past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning:2011kj, le2016dssmr,
+Marandi:2011dj}. In Scatter~\cite{Glendenning:2011kj}, the authors propose a
 scalable key-value store based on DHTs, ensuring linearizability, but only for
 requests that access the same key. In the work of Marandi et
 al~\cite{Marandi:2011dj}, variant of SMR is proposed in which data items are

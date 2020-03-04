@@ -47,16 +47,15 @@ cached entries become invalid (i.e., because a variable changed location).
 \dynastar copes with commands addressed to wrong partitions by telling clients
 to retry a command.
 
-We implemented \dynastar and compared its performance to alternative schemes,
+We implemented \dynastar and compared its performance to other schemes,
 including an idealized approach that knows the workload ahead of time. Although
 this scheme is not achievable in practice, it provides an interesting baseline
 to compare against. \dynastar's performance rivals that of the idealized scheme,
-while having no a priori knowledge of the workload.
-%In most workloads of interest,
-We show that \dynastar largely outperforms existing dynamic schemes under two
-representative workloads, the TPC-C benchmark and a social network service. We
-also show that the location oracle never becomes a bottleneck.
-% in our experiments and can handle workload graphs with millions of vertices.
+while having no a priori knowledge of the workload. We show that \dynastar
+largely outperforms existing dynamic schemes under two representative workloads,
+the TPC-C benchmark and a social network service. We also show that the location
+oracle never becomes a bottleneck and can handle workload graphs with millions
+of vertices.
 
 In summary, this chapter makes the following contributions:
 \begin{itemize}
@@ -70,9 +69,8 @@ network graph that contains half a million users and 14 million edges.
 
 
 The rest of the chapter is structured as follows.
-Section~\ref{sec:dynastar-dynastar} introduces \dynastar and describes the technique in detail.
-Section~\ref{sec:dynastar-implementation} overviews our prototype.
+Section~\ref{sec:dynastar-algo} introduces \dynastar and describes the technique in detail.
+Section~\ref{sec:dynastar-detailed} overviews our prototype.
 Section~\ref{sec:dynastar-experiments} reports on the results of our experiments.
-Section~\ref{sec:dynastar-rw} surveys related work and
 Section~\ref{sec:dynastar-conclusion} concludes the chapter.
 
