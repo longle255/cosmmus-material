@@ -2,16 +2,15 @@
 
 Today's online services of all size enterprises must meet strict availability
 and performance requirements, as part of their broader digital transformation
-strategy. In order to meet the strict availability requirements, those online
-services must be replicated. State machine replication is a fundamentally
-powerful building block that enables the implementation of highly available
-distributed services by replication. State machine replication achieves strong
-consistency (i.e., linearizability) by regulating how client commands are
-propagated to and executed by the replicas: every non-faulty replica must
-receive and execute every command deterministically and in the same order. If
-all replicas have to execute the same sequence of commands, the system can not
-scale. Increasing the number of replicas results in bounded improvements in
-performance.
+strategy. In order to meet the availability requirements, those online services
+must be replicated. State machine replication is a fundamentally powerful
+building block that enables the implementation of highly available distributed
+services by replication. State machine replication achieves strong consistency
+(i.e., linearizability) by regulating how client commands are propagated to and
+executed by the replicas: every non-faulty replica must receive and execute
+every command deterministically and in the same order. If all replicas have to
+execute the same sequence of commands, the system can not scale. Increasing the
+number of replicas results in bounded improvements in performance.
 
 Scalable performance can be achieved with state partitioning. Partitioning (also
 known as \emph{sharding}) is a technique that divides the state of a service in
@@ -37,11 +36,13 @@ objects often accessed together can be co-located in the same partition). But
 these optimizations require prior knowledge about the workload, and are often
 performed offline \cite{facebookTAO}
 
-The other solution, known as \textbf{strong consistency}, is to
-provide strong consistency guarantees for both single- and multi-partition
-commands, at the cost of a more complex execution path for commands that involve
-multiple partitions.
-
+The other solution, known as \textbf{strong consistency}, is to provide strong
+consistency guarantees for both single- and multi-partition commands, at the
+cost of a more complex execution path for commands that involve multiple
+partitions. Some proposals totally order requests before their execution, as in
+state machine replication, or execute requests first and then totally
+order the validation of their execution, as in deferred update replication
+\cite{pedone:smrdb}.
 
 In the scope of this thesis, we only focus on the second
 category, that is replicated state machine systems that provide strong
@@ -99,23 +100,23 @@ execute subplans on only the splits that satisfy the predicate. This improves
 both latency and overall query performance.
 
 
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=0.6\linewidth]{figures/spanner-execution}
-  \end{minipage}
-  \caption{Coordination required in multi-partition transaction in Spanner}
-  \label{fig:spanner}
-\end{figure*}
+% \begin{figure*}
+%   \begin{minipage}[b]{1.0\linewidth}
+%   \centering
+%         \includegraphics[width=0.6\linewidth]{figures/spanner-execution}
+%   \end{minipage}
+%   \caption{Coordination required in multi-partition transaction in Spanner}
+%   \label{fig:spanner}
+% \end{figure*}
 
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=0.6\linewidth]{figures/spanner-distributed-query}
-  \end{minipage}
-  \caption{Execution plan of a distributed query in Spanner}
-  \label{fig:spanner-plan}
-\end{figure*}
+% \begin{figure*}
+%   \begin{minipage}[b]{1.0\linewidth}
+%   \centering
+%         \includegraphics[width=0.6\linewidth]{figures/spanner-distributed-query}
+%   \end{minipage}
+%   \caption{Execution plan of a distributed query in Spanner}
+%   \label{fig:spanner-plan}
+% \end{figure*}
 
 
 \section{Scaling state machine replication}

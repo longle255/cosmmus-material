@@ -1,17 +1,17 @@
-\section{Correctness criterion}
-\label{sec:dynastar-correctcrit}
+\subsection{Correctness}
+\label{sec:dynastar-correctness}
 
 Our consistency criterion is linearizability.  A system is \emph{linearizable}
 if there is a way to reorder the client commands in a sequence that (i)~respects
 the semantics of the commands, as defined in their sequential specifications,
 and (ii)~respects the real-time precedence of commands~\cite{Attiya04}.
 
-\subsection{Correctness proof}
+\subsubsection{Correctness proof}
 To prove that \dynastar ensures linearizability, we must show that for any
 execution $\sigma$ of the system, there is a total order $\pi$ on client
 commands that (i)~respects the semantics of the commands, as defined in their
 sequential specifications, and (ii)~respects the real-time precedence of
-commands~(\S\ref{sec:dynastar-correctcrit}).
+commands~(\S\ref{sec:dynastar-correctness}).
 %
 Let $\pi$ be a total order of operations in $\sigma$ that respects $<$, the
 order atomic multicast induces on commands.

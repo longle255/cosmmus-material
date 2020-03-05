@@ -1,0 +1,22 @@
+\subsection{Performance optimizations}
+\label{sec:dynastar-optm}
+
+In the algorithm presented in the previous section, clients always need to
+involve the oracle, and the oracle dispatches every command to the partitions
+for execution. Obviously, if every command involves the oracle, the system is
+unlikely to scale, as the oracle will likely become a bottleneck. To address
+this issue, clients are equipped with a location cache. Before submitting a
+command to the oracle, the client checks its location cache. If the cache
+contains the partition of the variables needed by the command, the client can
+atomically multicast the command to the involved partition and thereby avoid
+contacting the oracle.
+
+The client still needs to contact the oracle in one of these situations: (a)~the
+cache contains outdated information; or (b)~the command is a create, in
+which case it must involve the oracle, as explained before. If the cache contains
+outdated information, it may address a partition that does not have the
+information of all the variables accessed by the command. In this case, the
+addressed partition tells the client to retry the command. The client then
+contacts the oracle and updates its cache with the oracle's response. Although
+outdated cache information results in execution overhead, it is expected to
+happen rarely since repartitioning is not frequent.

@@ -205,3 +205,26 @@ only. As a consequence, partitioned systems must cope with multi-partition
 commands. In the next chapter, we review some approaches in the second category,
 which include Scalable State Machine Replication (\ssmr) \cite{bezerra2014ssmr},
 Google Spanner \cite{corbett2013spanner}, and some other techniques.
+
+
+\section{Graph partitioning problem}
+
+Graphs could represent all kinds of information.  A weighted (directed) graph
+\emph{graph} $G$ consists of a set of nodes $V$ and a set of edges $E \subset V
+\times V$ to represent relations between the nodes, as well as two cost
+functions. One function assigns weights to the nodes $c : V \rightarrow R_{>0}$
+and a second function $\omega : E \rightarrow R$ assigns costs to the edges. In
+the social network example, the workload could be modeled as a weighted graph,
+the users are represented by nodes and the connections/relations between those
+users by the edges between nodes.
+
+All graphs contain subgraphs. A subgraph is a graph whose node and edge set are
+subsets of another graph. An edge that connects vertices of two different
+subgraph is called \emph{crossing edge}. \textbf{Graph partitioning} is a
+fundamental problem of finding a specified number of distinct subsets of the set
+of vertices of a graph (subgraph). \emph{balance} is the constraint that
+requires that all subgraph have about equal size. \emph{Total edge cut} is the
+number of crossing edges those subgraphs. Intuitively, good partitioning is the
+one that minimizes the total edges connecting subgraphs, while maintaining the
+balance among partitions. This is generally considered to be a NP-hard problem
+\cite{10.1006/jpdc.1997.1404}

@@ -131,6 +131,9 @@ archives/
 *.snm
 *.toc
 *.vrb
+*.lox
+*.lof
+*.lot
 
 dynamic-ssmr/dsn-presentation/DS-SMR-v2.key
 dynastar/figures/experiments/latency-cdf-all-2p.pdf

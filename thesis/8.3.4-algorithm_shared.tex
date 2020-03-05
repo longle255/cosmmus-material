@@ -1,30 +1,30 @@
 \begin{algorithm}[h!]
   %\small
   \footnotesize
-  
-  \begin{distribalgo}[1]  
+
+  \begin{distribalgo}[1]
   \INDENT{\colorbox{\coloralgo}{\textbf{function} target$(\ppm, C)$}}
-    \STATE $\ppm_d \leftarrow$ deterministicly compute partition to execute\\ \hspace{8mm} command $C$ from $\forall \ppm_i \in \ppm$
+    \STATE $\ppm_d \leftarrow$ deterministically compute partition to execute\\ \hspace{8mm} command $C$ from $\forall \ppm_i \in \ppm$
     \STATE return $\ppm_d$
-  \ENDINDENT	
-  
-  
+  \ENDINDENT
+
+
   \vspace{1.0mm}
   \INDENT{\colorbox{\coloralgo}{\textbf{function} \parts$(vars)$}}
     \STATE $dests \leftarrow \{ \ppm : \exists v \in vars \cap \ppm \}$
     \COMMENT{get all involved partitions}
     \STATE return $dests$
   \ENDINDENT
-  
+
   \vspace{1.5mm}
-  
+
   % \vspace{1.0mm}
   % \INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}
   % 	\STATE $e \leftarrow \{u, v: u,v \in vars, u \neq v\}$
   % 	\STATE \rmcast(oracle, $e$)
   % \ENDINDENT
-  
+
   \caption{Shared functions of the oracle and servers $\ppm$}
-  \label{alg:share_algo}
+  \label{alg:dynastar-share_algo}
   \end{distribalgo}
   \end{algorithm}

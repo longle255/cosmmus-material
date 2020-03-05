@@ -26,6 +26,27 @@
   year    = {2012}
 }
 
+@article{kernighan1970efficient,
+  title   = {An efficient heuristic procedure for partitioning graphs},
+  author  = {Kernighan, Brian W and Lin, Shen},
+  journal = {Bell system technical journal},
+  year    = {1970}
+}
+
+@article{7004087,
+  author   = {A. {Turcu} and R. {Palmieri} and B. {Ravindran} and S. {Hirve}},
+  journal  = {IEEE Transactions on Parallel and Distributed Systems},
+  title    = {Automated Data Partitioning for Highly Scalable and Strongly Consistent Transactions},
+  year     = {2016},
+  volume   = {27},
+  number   = {1},
+  pages    = {106-118},
+  keywords = {concurrency control;transaction processing;automated data partitioning;transactional processing system;weak consistency model;strong consistency;fine-grained partition;concurrency control;independent transaction;optimal partitioning scheme;partitioning process;transactional primitive;routing transaction;Routing;Distributed databases;Data models;Scalability;Programming;Computer languages;Synchronization;Distributed databases;code generation;concurrent programming;Distributed databases;code generation;concurrent programming},
+  doi      = {10.1109/TPDS.2015.2388448},
+  issn     = {1045-9219},
+  month    = {Jan}
+}
+
 @article{Chang:2008,
   author  = {Chang, Fay and Dean, Jeffrey and Ghemawat, Sanjay and Hsieh, Wilson C. and Wallach, Deborah A. and Burrows, Mike and Chandra, Tushar and Fikes, Andrew and Gruber, Robert E.},
   journal = {ACM Trans. Comput. Syst.},
@@ -42,6 +63,21 @@
   booktitle = {OSDI},
   title     = {Boxwood: Abstractions As the Foundation for Storage Infrastructure},
   year      = {2004}
+}
+
+@article{SerafiniTEPAS16,
+  author  = {Marco Serafini and
+               Rebecca Taft and
+               Aaron J. Elmore and
+               Andrew Pavlo and
+               Ashraf Aboulnaga and
+               Michael Stonebraker},
+  title   = {Clay: Fine-Grained Adaptive Partitioning for General Database Schemas},
+  journal = {{PVLDB}},
+  volume  = {10},
+  number  = {4},
+  pages   = {445--456},
+  year    = {2016}
 }
 
 @book{BHG87,
@@ -156,12 +192,26 @@
   year    = {2014}
 }
 
+@inproceedings{Coelho:2017,
+  author    = {P. Coelho and N. Schiper and F. Pedone},
+  title     = {Fast Atomic Multicast},
+  booktitle = {DSN},
+  year      = {2017}
+}
+
 @misc{disruption:google,
   author       = {Stephen Shankland},
   howpublished = {\url{https://www.cnet.com/news/google-spotlights-data-center-inner-workings/}},
   note         = {[Online; Accessed: 2020-02-20]},
   title        = {Google spotlights data center inner workings},
   year         = {2018}
+}
+
+@article{hendrickson2000graph,
+  author  = {Bruce Hendrickson and Tamara Kolda},
+  title   = {Graph partitioning models for parallel computing},
+  journal = {Parallel Computing},
+  year    = {2000}
 }
 
 @article{holme-kim,
@@ -242,6 +292,20 @@
   volume     = {12},
   year       = {1990},
   bdsk-url-1 = {https://doi.org/10.1145/78969.78972}
+}
+
+@inproceedings{7579738,
+  author    = {S. {Peluso} and A. {Turcu} and R. {Palmieri} and G. {Losa} and B. {Ravindran}},
+  booktitle = {2016 46th Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN)},
+  title     = {Making Fast Consensus Generally Faster},
+  year      = {2016},
+  volume    = {},
+  number    = {},
+  pages     = {156-167},
+  keywords  = {data handling;delays;parallel algorithms;resource allocation;fast consensus;multileader consensus protocol;generalized consensus specification;latency;load balancing;parallelism;dependency relation tracking;M2PAXOS;communication delay;workload locality;command dependency;partitioned data access;TPC-C workload;Delays;Proposals;Protocols;Computer crashes;Interference;Algorithm design and analysis;Load management;generalized consensus;state machine replication},
+  doi       = {10.1109/DSN.2016.23},
+  issn      = {2158-3927},
+  month     = {June}
 }
 
 @article{Mencius,
@@ -417,6 +481,13 @@
   year         = {2011}
 }
 
+@inproceedings{quamar2013sword,
+  author    = {Quamar, Abdul and Kumar, K. Ashwin and Deshpande, Amol},
+  title     = {SWORD: Scalable Workload-aware Data Placement for Transactional Workloads},
+  booktitle = {EDBT},
+  year      = {2013}
+}
+
 @inproceedings{facebookTAO,
   author    = {Bronson, Nathan and Amsden, Zach and Cabrera, George and Chakka, Prasad and Dimov, Peter and Ding, Hui and Ferris, Jack and Giardullo, Anthony and Kulkarni, Sachin and Li, Harry and others},
   booktitle = {USENIX ATC},
@@ -464,6 +535,7 @@
   year    = {2013}
 }
 
+
 @article{Lam78,
   author  = {L. Lamport},
   journal = {Communications of the ACM},
@@ -473,6 +545,7 @@
   volume  = {21},
   year    = {1978}
 }
+
 
 @article{DSU04,
   author  = {Xavier D{\'e}fago and Andr{\'e} Schiper and P{\'e}ter Urb{\'a}n},
@@ -500,4 +573,67 @@
   number      = {MSR-TR-2010-151},
   title       = {Virtually Synchronous Methodology for Dynamic Service Replication},
   year        = {2010}
+}
+
+@article{10.1006/jpdc.1997.1404,
+author = {Karypis, George and Kumar, Vipin},
+title = {Multilevelk-Way Partitioning Scheme for Irregular Graphs},
+year = {1998},
+issue_date = {January 1998},
+publisher = {Academic Press, Inc.},
+address = {USA},
+volume = {48},
+number = {1},
+issn = {0743-7315},
+url = {https://doi.org/10.1006/jpdc.1997.1404},
+doi = {10.1006/jpdc.1997.1404},
+journal = {J. Parallel Distrib. Comput.},
+month = jan,
+pages = {96–129},
+numpages = {34},
+keywords = {parallel sparse matrix algorithms., Kernighan-Lin heuristic, graph partitioning, spectral partitioning methods, multilevel partitioning methods}
+}
+
+
+@article{pedone:smrdb,
+	Author = {Pedone, Fernando and Guerraoui, Rachid and Schiper, Andr{\'e}},
+	Doi = {10.1023/A:1022887812188},
+	Journal = {Distributed and Parallel Databases},
+	Month = {07},
+	Title = {The Database State Machine Approach},
+	Volume = {14},
+	Year = {2003},
+	Bdsk-Url-1 = {https://doi.org/10.1023/A:1022887812188},
+  }
+
+
+@inproceedings{paxoslive,
+author = {Chandra, Tushar D. and Griesemer, Robert and Redstone, Joshua},
+title = {Paxos Made Live: An Engineering Perspective},
+year = {2007},
+isbn = {9781595936165},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1281100.1281103},
+doi = {10.1145/1281100.1281103},
+booktitle = {Proceedings of the Twenty-Sixth Annual ACM Symposium on Principles of Distributed Computing},
+pages = {398–407},
+numpages = {10},
+keywords = {experiences, fault-tolerance, implementation, Paxos},
+location = {Portland, Oregon, USA},
+series = {PODC ’07}
+}
+
+
+@inproceedings {184040,
+author = {Diego Ongaro and John Ousterhout},
+title = {In Search of an Understandable Consensus Algorithm},
+booktitle = {2014 {USENIX} Annual Technical Conference ({USENIX} {ATC} 14)},
+year = {2014},
+isbn = {978-1-931971-10-2},
+address = {Philadelphia, PA},
+pages = {305--319},
+url = {https://www.usenix.org/conference/atc14/technical-sessions/presentation/ongaro},
+publisher = {{USENIX} Association},
+month = jun,
 }

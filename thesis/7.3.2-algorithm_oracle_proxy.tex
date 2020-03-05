@@ -1,4 +1,4 @@
-\begin{algorithm}[t!]
+\begin{algorithm}[ht]
 \small
 
 \begin{distribalgo}[1]
@@ -7,11 +7,11 @@
 
 \INDENT{To execute a command $C$, the oracle proxy does:}
 
-    \vspace{1.5mm}
+    % \vspace{1.5mm}
 
     \INDENT{\textbf{when} \amdel$(C)$}
 
-    \vspace{1.5mm}
+    % \vspace{1.5mm}
 
         \IF{\underline{$C$ is a $consult(C_c)$ command}}
             \STATE $prophecy \leftarrow \emptyset$
@@ -39,9 +39,9 @@
                 \ELSE
                     \STATE $prophecy \leftarrow \{\langle v, \ppm \rangle \} : v \in \ppm$
                 \ENDIF
-                
+
             \ENDIF
-            
+
             \STATE send $prophecy$ to the client
 
         \vspace{1.5mm}
@@ -53,7 +53,7 @@
             \ENDIF
 
         \vspace{1.0mm}
-    
+
         \ELSIF{\underline{$C$ is a $create(v)$ command}}
             \STATE let $\ppm_c$ be $\ppm : \{\ppm\} = C.dests \setminus \{$oracle$\}$
             \IF{$\nexists \ppm \in \Psi : v \in \ppm$}
@@ -63,9 +63,9 @@
             \ENDIF
             \STATE \rmcast$(\ppm_c, \langle outcome, C \rangle )$
             \STATE send $outcome$ to the client
-        
+
         \vspace{1.0mm}
-        
+
         \ELSIF{\underline{$C$ is a $delete(v)$ command}}
             \STATE let $\ppm_d$ be $\ppm : \{\ppm\} = C.dests \setminus \{$oracle$\}$
             \IF{$\nexists \ppm \in \Psi: v \in \ppm$ or $v \in \ppm_d$}
@@ -73,8 +73,8 @@
             \ELSE
                 \STATE send $retry$ to the client
             \ENDIF
-            
-            
+
+
         \ENDIF
     \ENDINDENT
 \ENDINDENT

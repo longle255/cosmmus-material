@@ -2,34 +2,60 @@
 \chapter[Related works]{Related works}
 \label{sec:rw}
 
-State machine replication~\cite{Kapritsos:2012um, Kotla:2004ep, Lam78,
-santos2013htsmr, Sch90} provides strong consistency guarantees, which come from
-total order and deterministic execution of commands.
-%Deterministic execution is usually ensured by having every replica execute
-%commands sequentially.
-Since consistent ordering is fundamental for SMR, some authors proposed to
-optimize the ordering and propagation of commands.
-% (i.e., the atomic broadcast layer of the system).
-For instance, Kapritsos and Junqueira~\cite{kapritsos2010scalable} propose to
-divide the ordering of commands between different clusters: each cluster orders
-only some requests, and then forwards the partial order to every server replica,
-which then merges the partial orders deterministically into a single total order
-that is consistent across the system. In S-Paxos~\cite{biely2012spaxos},
-Paxos~\cite{Lam98} is used to order commands, but it is implemented in
-a way that avoids overloading the leader process, which would turn it into a
+In this chapter, we review related work on optimizing and scaling state machine
+replication, partitioning application state, and optimize graph partitioning.
+
+\paragraph{Consensus and state machine replication}
+State machine replication (SMR) was first introduced by Leslie Lamport as an
+example in ~\cite{Lam78}. Schneider \cite{Sch90} then gave a more systematic
+approach to the design and implementation of SMR protocols. Util now SMR have
+become a well-known approach to replication and has been extensively studied
+~\cite{Kapritsos:2012um, Kotla:2004ep, santos2013htsmr}. SMR provides strong
+consistency guarantees, which come from total order and deterministic execution
+of commands. Deterministic execution is usually ensured by having every replica
+execute commands sequentially. Traditional consensus based SMR repeatedly run
+multiple instances of a consensus protocol to allow replicas to reach an agreed
+order of commands. The best-known consensus algorithm is the Paxos protocol by
+Lamport \cite{Lam98}. Raft \cite{184040}, a Paxos alternative also
+implements consensus-based SMR, and it is suggested to be easier to understand
+(than Paxos) from an engineering point of view.
+
+\paragraph{Optimizing ordering protocol}
+
+Even though increasing the performance of state machine replication is
+non-trivial, different techniques have been proposed for achieving scalable
+systems, such as optimizing the propagation and ordering of commands. This
+allows the ordering layer (i.e., the underlying atomic broadcast algorithm) to
+be itself also scalable. For instance, Kapritsos and
+Junqueira~\cite{kapritsos2010scalable} propose to divide the ordering of
+commands between different clusters: each cluster orders only some requests, and
+then forwards the partial order to every server replica, which then merges the
+partial orders deterministically into a single total order that is consistent
+across the system. In S-Paxos~\cite{biely2012spaxos}, Paxos~\cite{Lam98} is used
+to order commands, but it is implemented in a way such that the task of ordering
+messages is evenly distributed among replicas, as opposed to having a leader
+process that performs more work than the others and may eventually become a
 bottleneck.
 
+\paragraph{Parallelizing execution of commands}
+
 Multi-threaded execution is a potential source of non-determinism, depending on
-how threads are scheduled to be executed in the operating system. Some works
-attempted to circumvent this problems and come up with a multi-threaded, yet
-deterministic implementation of SMR. In \cite{santos2013htsmr}, Santos and
-Schiper propose to parallelize the receipt and dispatching of commands, while
-executing commands sequentially. In CBASE~\cite{Kotla:2004ep}, application
-semantics is used to determine which commands can be executed concurrently and
-still produce a deterministic outcome (e.g., read-only commands). In
-Eve~\cite{Kapritsos:2012um}, commands are tentatively executed in parallel.
-After the parallel execution, replicas verify whether they reached a consistent
-state; if not, commands are rolled back and re-executed sequentially.
+how threads are scheduled to be executed in the operating system. However, some
+works have proposed multi-threaded implementations of state machine replication,
+circumventing the non-determinism caused by concurrency in some way. In
+\cite{santos2013htsmr}, for instance, the authors propose organizing each
+replica in multiple modules that perform different tasks concurrently, such as
+receiving messages, batching, and dispatching commands to be executed. The
+execution of commands is still sequential, but the replica performs all other
+tasks in parallel. In CBASE~\cite{Kotla:2004ep}, a parallelizer module uses
+application semantics to determine which commands can be executed concurrently
+without reducing determinism (e.g., read-only commands, which can be executed in
+any order relative to one another). In Eve~\cite{Kapritsos:2012um}, commands are
+tentatively executed in parallel. After the parallel execution, replicas verify
+whether they reached a consistent state; if not, commands are rolled back and
+re-executed sequentially.
+
+\paragraph{Weakening consistency guarantees}
 
 Many database replication schemes aim at achieving high throughput by relaxing
 consistency, that is, they do not ensure linearizability. In deferred-update
@@ -43,29 +69,35 @@ some applications, these consistency levels may be enough, allowing the system
 to scale better, but services that require linearizability cannot be implemented
 with such techniques.
 
-Efforts to make linearizable systems scalable have been made in the
-past~\cite{bezerra2014ssmr, corbett2013spanner, Glendenning:2011kj, le2016dssmr,
-Marandi:2011dj}. In Scatter~\cite{Glendenning:2011kj}, the authors propose a
-scalable key-value store based on DHTs, ensuring linearizability, but only for
-requests that access the same key. In the work of Marandi et
-al~\cite{Marandi:2011dj}, variant of SMR is proposed in which data items are
-partitioned but commands have to be totally ordered.
-Spanner~\cite{corbett2013spanner} uses a separate Paxos group per partition and,
-to ensure strong consistency across partitions, clocks are assumed to be
-synchronized. Although the authors say that Spanner works well with GPS and
-atomic clocks, if clocks become out of synch beyond tolerated bounds,
-correctness is not guaranteed. $M^2Paxos$~\cite{7579738} proposes a scheme where
-leases are used instead of partitions owning objects, but assumes full state
-replication. \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across
-partitions without any assumption about clock synchronization, but relies on a
-static partitioning of the state. \dssmr{}~\cite{le2016dssmr} extends \ssmr\ by
-allowing state variables to migrate across partitions in order to reduce
-multi-partition commands. However, \dssmr{} implements repartitioning in a very
-simple way that does not perform very well in scenarios where the state cannot
-be perfectly partitioned. \dynastar\ improves on \dssmr\ by employing well-known
-graph partitioning techniques to decide where each variable should be. Moreover,
-\dynastar\ dillutes the cost of repartitioning by moving variables on-demand,
+\paragraph{Partitioning application state}
+Partitioning the state of a replicated service is conceptually similar to
+partial replication of databases. Efforts to make linearizable systems scalable
+have been made in the past~\cite{bezerra2014ssmr, corbett2013spanner,
+Glendenning:2011kj, Marandi:2011dj}.  In Scatter~\cite{Glendenning:2011kj}, the
+authors propose a scalable key-value store based on DHTs, ensuring
+linearizability, but only for requests that access the same key. In the work of
+Marandi et al~\cite{Marandi:2011dj}, variant of SMR is proposed in which data
+items are partitioned but commands have to be totally ordered.
+Spanner~\cite{corbett2013spanner} is a leader-leased, Paxos based system that
+use TrueTime-accurate clock synchronization that require special hardwares to
+improve geo-distributed read performance. Spanner uses a separate Paxos group
+per partition and synchronized clocks to ensure strong consistency across
+partitions. Although the authors say that Spanner works well with GPS and atomic
+clocks, if clocks become out of synch beyond tolerated bounds, correctness is
+not guaranteed. $M^2Paxos$~\cite{7579738} proposes a scheme where leases are
+used instead of partitions owning objects, but assumes full state replication.
+\ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any
+assumption about clock synchronization, but relies on a static partitioning of
+the state. \dssmr{}~\cite{le2016dssmr} extends \ssmr\ by allowing state
+variables to migrate across partitions in order to reduce multi-partition
+commands. However, \dssmr{} implements repartitioning in a very simple way that
+does not perform very well in scenarios where the state cannot be perfectly
+partitioned. \dynastar\ improves on \dssmr\ by employing well-known graph
+partitioning techniques to decide where each variable should be. Moreover,
+\dynastar\ dilutes the cost of repartitioning by moving variables on-demand,
 that is, only when they are accessed by some command.
+
+\paragraph{Optimize graph partitioning}
 
 Graph partitioning is an interesting problem with many proposed
 solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.
@@ -79,9 +111,9 @@ handle repartitioning dynamically without violating consistency. Turcu et al.
 ~\cite{7004087} proposed a technique that reduces the amount of cross-partition
 commands and implements an advanced transaction routing.
 Sword~\cite{quamar2013sword} is another graph-based dynamic repartitioning
-technique. It uses a hypergraph partitioning algorithm to distribute rows of
+technique. It uses a hyper-graph partitioning algorithm to distribute rows of
 tables in a relational database across database shards. Sword does not ensure
-linearizability and it is not clear how it implements repartitions without
+linearizability and it is not clear how it implements repartitioning without
 violating consistency. E-Store~\cite{taft2014est} is yet another repartitioning
 proposal for transactional databases. It repartitions data according to access
 patterns from the workload. It strives to minimize the number of multi-partition
@@ -97,10 +129,11 @@ reconfigured during execution (e.g.,
 \cite{birman2010dsr,dustdar2007soc,guessoum2003dar}). For instance, a multicast
 layer based on Paxos can be reconfigured by adding or removing acceptors. These
 systems are dynamic in a way that is orthogonal to what \dynastar\ proposes.
-%\dynastar\ consists of allowing the \emph{state partitioning}, that is, which
-%state variables belong to which partition, to change dynamically. The greatest
-%challenge that is addressed by \dynastar\ is how to provide such a solution,
-%with a dynamic partitioning oracle, while ensuring a very strong level of
-%consistency (linearizability), as variables are created, deleted, and moved
-%across partitions, based on the access patterns of the workload.
+
+\dynastar\ consists of allowing the \emph{state partitioning}, that is, which
+state variables belong to which partition, to change dynamically. The greatest
+challenge that is addressed by \dynastar\ is how to provide such a solution,
+with a dynamic partitioning oracle, while ensuring a very strong level of
+consistency (linearizability), as variables are created, deleted, and moved
+across partitions, based on the access patterns of the workload.
 

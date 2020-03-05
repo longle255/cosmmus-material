@@ -1,6 +1,6 @@
-%!TEX root =  main.tex
 \section{\dynastar}
-\label{sec:dynastar-algo}
+\subsection{General idea}
+\label{sec:dynastar-idea}
 
 \dynastar defines a dynamic mapping of application variables to partitions.
 Application programmers may also define other granularity of data when mapping
@@ -11,24 +11,21 @@ with the user) is mapped to a partition; in our TPC-C implementation
 Such a mapping is managed by a partitioning oracle, which is handled as a
 replicated partition. The oracle allows the mapping of variables to partitions
 to be retrieved or changed during execution. To simplify the discussion, in
-\S\ref{sec:dynastar-overview}--\ref{sec:dynastar-detailed} we initially assume
-that every command involves the oracle. In \S\ref{sec:optm}, we explain how
+\S\ref{sec:dynastar-idea}--\ref{sec:dynastar-detailed} we initially assume
+that every command involves the oracle. In \S\ref{sec:dynastar-optm}, we explain how
 clients can use a cache to avoid the oracle in the execution of most commands.
 
-\subsection{Overview}
-\label{sec:dynastar-overview}
-
-Clients submit commands to the oracle and wait for the reply. \dynastar\
-supports three types of commands: $create(v)$ creates a new variable $v$ and
-initially maps it to a partition defined by the oracle; $access(\omega)$ is an
-application command that reads and modifies variables in set $\omega \subseteq
-\vvm$; and $delete(v)$ removes $v$ from the service state. The reply from the
-oracle is called a $prophecy$, and usually consists of a set of tuples $\langle
-v, \ppm \rangle$, meaning $v \in \ppm$, and a target partition $\ppm_d$ on which
-the command will be executed. The $prophecy$ could also tell the clients if a
-command cannot be executed (e.g., it accesses variables that do not exist). If
-the command can be executed, the client waits for the reply from the target
-partition.
+Clients in \dynastar submit commands to the oracle and wait for the reply.
+\dynastar\ supports three types of commands: $create(v)$ creates a new variable
+$v$ and initially maps it to a partition defined by the oracle; $access(\omega)$
+is an application command that reads and modifies variables in set $\omega
+\subseteq \vvm$; and $delete(v)$ removes $v$ from the service state. The reply
+from the oracle is called a $prophecy$, and usually consists of a set of tuples
+$\langle v, \ppm \rangle$, meaning $v \in \ppm$, and a target partition $\ppm_d$
+on which the command will be executed. The $prophecy$ could also tell the
+clients if a command cannot be executed (e.g., it accesses variables that do not
+exist). If the command can be executed, the client waits for the reply from the
+target partition.
 
 If a command $C$ accesses variables in $\omega$ on a single partition, the
 oracle multicasts $C$ to that partition for execution. If the command accesses

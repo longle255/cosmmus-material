@@ -1,4 +1,4 @@
-\begin{algorithm}[t!]
+\begin{algorithm}[h!]
 \small
 
 \begin{distribalgo}[1]
@@ -8,7 +8,7 @@
 \INDENT{To execute a command $C$, the server proxy in partition $\ppm$ does:}
 
     \vspace{1.0mm}
-    
+
     \INDENT{\textbf{when} \rmdel$( \langle val, C \rangle )$}
         \STATE $rcvd\_msgs \leftarrow rcvd\_msgs \cup \{\langle val, C \rangle\}$
     \ENDINDENT
@@ -26,10 +26,10 @@
                 \STATE have the command executed by the application server
                 \STATE send the reply to the client
             \ENDIF
-        
+
 
         \vspace{1.0mm}
-    
+
         \ELSIF{\underline{$C$ is a $move(v,\ppm_s,\ppm_d)$ command}}
             \IF{$\ppm = \ppm_s$}
                 \IF{$v \in \ppm$}
@@ -45,9 +45,9 @@
                     \STATE $\ppm \leftarrow \ppm \cup \{v\}$
                 \ENDIF
             \ENDIF
-        
+
         \vspace{1.0mm}
-    
+
         \ELSIF{\underline{$C$ is a $create(v)$ command}}
             \STATE wait until $\langle val, C \rangle \in rcvd\_msgs$
             \IF{$val = ok$}
@@ -56,9 +56,9 @@
 %            \ELSE
 %                \STATE reply with $retry$
             \ENDIF
-        
+
         \vspace{1.0mm}
-        
+
         \ELSIF{\underline{$C$ is a $delete(v)$ command}}
             \IF{$v \in \ppm$}
                 \STATE $\ppm \leftarrow \ppm \setminus \{v\}$

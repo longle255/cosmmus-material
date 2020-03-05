@@ -12,7 +12,7 @@
 		\STATE send response to the client
 	\ELSE[\textbf{Task 1b}]
 		\STATE $dests \leftarrow \parts(\omega)$
-		\COMMENT{get all involved partition}			
+		\COMMENT{get all involved partition}
 		\STATE $\ppm_d \leftarrow target(dests, C)$
 		\COMMENT{$\ppm_d$ $\in dest$ will execute $C$}
 		\STATE $\ppm_s \leftarrow dests \setminus \ppm_d$
@@ -26,7 +26,7 @@
 			\STATE send response to the client
 			% \STATE \textbf{for} each $\pqm \in \ppm_s$ \textbf{do} $\forall x \in \pqm$: \\
 			\STATE \rmcast$(\ppm_i \in \ppm_s, \langle vars, C\rangle)$
-			\COMMENT{return the variables}		
+			\COMMENT{return the variables}
 		\ELSE[if $\ppm$ is not the target partition:]
 			\STATE $vars \leftarrow \omega \cap \ppm$
 			\COMMENT{all needed variables in $\ppm$}
@@ -34,7 +34,7 @@
 			\COMMENT{send variables}
 			% \STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
 			\STATE wait until $\langle vars, C \rangle \in rcvd\_msgs$
-		\ENDIF		
+		\ENDIF
 	\ENDIF
 \ENDINDENT
 
@@ -52,14 +52,14 @@
 
 \vspace{1.0mm}
 \INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(partitioning)$}}
-	\STATE \textbf{for} each $\pqm \in \ppm_v \in partitioning$ \textbf{do} 
+	\STATE \textbf{for} each $\pqm \in \ppm_v \in partitioning$ \textbf{do}
 	% \INDENT
 		\IF{$\ppm$ is $\pqm$}
 			\STATE $vars \leftarrow partitioning(\pqm) \setminus v:v \in \ppm$
 			\IF {$\forall v \in var, \ppm_i \in partitioning:$ \\ \hfill $\exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
 				\STATE apply $partitioning$
 			\ENDIF
-		\ELSE 
+		\ELSE
 			% \rmcast$(\pqm, v:v \in \pqm, C)$
 			\STATE $vars \leftarrow partitioning(\pqm) \cap v:v \in \ppm$
 			\STATE $\forall\,x\!\in\!\pqm$: send$(\langle vars, \ppm \rangle )$ to $x$
@@ -89,6 +89,6 @@ $partitioning$: the partition configuration from the $oracle$
 % \ENDINDENT
 
 \caption{Server in partition $\ppm$}
-\label{alg:server_proxy}
+\label{alg:dynastar-server_proxy}
 \end{distribalgo}
 \end{algorithm}

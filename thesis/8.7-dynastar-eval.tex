@@ -1,4 +1,3 @@
-%!TEX root =  main.tex
 \section{Performance evaluation}
 \label{sec:dynastar-experiments}
 
@@ -21,25 +20,25 @@ every other partition: 2 replicas and 3 Paxos acceptors (in total five nodes per
 partition).
 
 
-% \subsection{Methodology and goals}
-% \label{sec:dynastar-evaluation:methodology}
+\subsection{Methodology and goals}
+\label{sec:dynastar-evaluation:methodology}
 
-% %In order to show the scalability of our approach we tested the performance as the
-% %number of partitions increases, and performance as the size and complexity of the graph grows.
-% The experiments seek to answer the following questions:
-% \begin{itemize}
-% \item \emph{What is the impact of repartitioning on a real dataset?}
-% \item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
-% \item \emph{How does \dynastar performance compare to other approaches?}
-% \item \emph{How does \dynastar perform under dynamic workloads?}
-% \item \emph{What is the performance of the oracle?}
-% \end{itemize}
+%In order to show the scalability of our approach we tested the performance as
+%the number of partitions increases, and performance as the size and complexity
+%of the graph grows.
+The experiments seek to answer the following questions:
+\begin{itemize}
+\item \emph{What is the impact of repartitioning on a real dataset?}
+\item \emph{How does partitioning affect performance when the workload grows with the number of partitions and when the workload has constant size?}
+\item \emph{How does \dynastar performance compare to other approaches?}
+\item \emph{How does \dynastar perform under dynamic workloads?}
+\item \emph{What is the performance of the oracle?}
+\end{itemize}
 
-%\paragraph*{Performance metrics.}
-%%
-%The latency was measured as the end-to-end time between issuing the
-%command, and receiving the response.  Throughput was measured as the
-%number of posts/second or transactions/second that the clients were able to send.
+\paragraph*{Performance metrics.}
+The latency was measured as the end-to-end time between issuing the command, and
+receiving the response.  Throughput was measured as the number of posts/second
+or transactions/second that the clients were able to send.
 
 \subsection{TPC-C benchmark}
 \label{sec:dynastar-evaluation:tpc-c}
@@ -47,7 +46,6 @@ partition).
 In the experiments in this section, we deploy as many partitions as the number
 of warehouses.
 
-%\paragraph*{The impact of graph repartitioning}
 \subsubsection{The impact of graph repartitioning}
 In order to assess the impact of state partitioning on performance, we ran the
 TPC-C benchmark on an un-partitioned database.  Figure
@@ -56,18 +54,10 @@ warehouses and 8 partitions. At the first part of the experiment, all the
 variables are randomly distributed across all partitions. As a result, almost
 every transaction accesses all partitions. Thus every transaction required
 coordination between partitions, and objects were constantly moving back and
-forth.
-%In addition, transactions from different clients were blocked by the others,
-%made the time it took for executing one transaction remarkably high.
-This can be observed in the first 50 seconds of the experiment depicted in
-Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few transactions
-executed per second), high latency (i.e., up to several seconds), and a high
-percentage of cross-partition transactions.
-
-
-%In addition to that, when a partition takes part in an execution of a transaction,
-%if another command access variables that are being accesses by the ongoing command will
-% be blocked until the previous command finish
+forth. This can be observed in the first 50 seconds of the experiment depicted
+in Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few
+transactions executed per second), high latency (i.e., up to several seconds),
+and a high percentage of cross-partition transactions.
 
 After 50 seconds, the oracle computed a new partitioning based on previously
 executed transactions and instructed the partitions to apply the new
@@ -113,30 +103,17 @@ new particle with the features of the elusive Higgs boson on 4th July 2012. The
 dataset consists of 456631 nodes and more than 14 million edges.
 %Graphs with 0\% of edge-cuts have \emph{strong locality}.
 
-We evaluate the performance of \dynastar and other techniques. With S-SMR*, we used
-METIS to partition the data in advance. Thus, S-SMR* started with an optimized partitioning. \dynastar started with
-random location of the objects. Each client issues a sequence of commands.
-For each command, the client selects a random node as the active user with Zipfian access pattern ($\rho$ = 0.95).
-We focused on two types of workloads: timeline only commands and mix commands (85\% timeline and 15\% post).
-Each client operates in a closed loop, that is, the client issues a command and then waits from the response to submit the next command.
+We evaluate the performance of \dynastar and other techniques. With S-SMR*, we
+used METIS to partition the data in advance. Thus, S-SMR* started with an
+optimized partitioning. \dynastar started with random location of the objects.
+Each client issues a sequence of commands. For each command, the client selects
+a random node as the active user with Zipfian access pattern ($\rho$ = 0.95). We
+focused on two types of workloads: timeline only commands and mix commands (85\%
+timeline and 15\% post). Each client operates in a closed loop, that is, the
+client issues a command and then waits from the response to submit the next
+command.
 
-% \paragraph*{Command generation.}
-% %
-
-%\begin{figure}[ht]
-%  \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/chirper-celeb-dynastar}
-%  \caption{Dynamic partitioning with DynaStar.}
-%  \label{fig:4p1p_varying_partition_size}
-%\end{figure}
-%
-% \begin{figure}[ht]
-%  \includegraphics[width=0.99\columnwidth]{figures/experiments/dynastar/chirper-compare-full}
-%  \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions.
-%   Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
-%   \label{fig:socialscalability}
-% \end{figure}
-
-\begin{figure*}[h!]
+\begin{figure*}[ht!]
   \centering
   \begin{subfigure}{.4\textwidth}
     % \centering
@@ -152,37 +129,6 @@ Each client operates in a closed loop, that is, the client issues a command and 
   Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:socialscalability}
 \end{figure*}
-% \begin{figure*}[h]
-%   \centering
-%   \begin{subfigure}{0.95\columnwidth}
-%     \begin{subfigure}{.45\columnwidth}
-%       \centering
-%       \includegraphics[width=\columnwidth]{./figures/experiments/dynastar/chirper-compare-timeline-tp.pdf}
-%     \end{subfigure}
-%     % \hfill %%
-%     \begin{subfigure}{.45\columnwidth}
-%       \centering
-%       \includegraphics[width=\columnwidth]{./figures/experiments/dynastar/chirper-compare-mix-tp.pdf}
-%     \end{subfigure}
-%   \end{subfigure}
-%   \vfill %%
-%   \begin{subfigure}{0.95\columnwidth}
-%     \begin{subfigure}{.45\columnwidth}
-%       \centering
-%       \includegraphics[width=\columnwidth]{./figures/experiments/dynastar/chirper-compare-timeline-lat.pdf}
-%     \end{subfigure}
-%     \hfill %%
-%     \begin{subfigure}{.45\columnwidth}
-%       \centering
-%       \includegraphics[width=\columnwidth]{./figures/experiments/dynastar/chirper-compare-mix-lat.pdf}
-%     \end{subfigure}
-%   \end{subfigure}
-%   \caption{Throughput and latency for different partition numbers.
-%   Throughput is in thousands of commands per second (kcps).
-%   Latency for $\approx$75\% peak throughput is in milliseconds (bars show average, whiskers show 95-th percentile).}
-%   \label{fig:socialscalability}
-% \end{figure*}
-
 
 \subsubsection{\dynastar vs. other techniques}
 \label{sec:dynastar-evaluation:results}
@@ -231,8 +177,6 @@ request to read a user timeline. This is a single-partition command in our
 application and as a consequence it scales linearly with the number of
 partitions.
 
-% Figure~\ref{fig:socialcdf} shows the cumulative distribution functions (CDFs) of latency for the mix workload of \dynastar and S-SMR* on different configurations. The results suggest that S-SMR* achieves lower latency than \dynastar for 80\% of the load. This is expected, as for multi-partition commands, partitions in \dynastar have to send additional data to return objects to their original location after command execution .
-
 
 % \paragraph*{The ideal number of partitions.}
 % \label{sec:dynastar-evaluation:results}
@@ -261,14 +205,14 @@ We started the system with the original network from Higg dataset. After 200 sec
 The celebrity user posted more frequently, and
 other users started following the celebrity.
 
-\begin{figure*}[h!]
+\begin{figure*}[ht!]
   \centering
-  \begin{subfigure}{.40\textwidth}
+  \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-celeb-dynastar.pdf}
     \caption{}
   \end{subfigure}
-  \begin{subfigure}{.40\textwidth}
+  \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-celeb-ssmr.pdf}
     \caption{}
@@ -301,7 +245,7 @@ configurations. The results suggest that S-SMR* achieves lower latency than
 commands, partitions in \dynastar have to send additional data to return objects
 to their original location after command execution .
 
-\begin{figure*}[h!]
+\begin{figure*}[ht!]
   \centering
   \begin{subfigure}{0.48\columnwidth}
     \centering
@@ -382,7 +326,7 @@ to 10 million vertices.
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\columnwidth]{./figures/experiments/dynastar/metis_size_time}
+    \includegraphics[width=0.7\columnwidth]{./figures/experiments/dynastar/metis_size_time}
 	\caption{METIS processor and memory usage.}
 	\label{fig:metis_size_time}
 \end{figure}
