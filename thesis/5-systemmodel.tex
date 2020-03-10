@@ -1,4 +1,4 @@
-\chapter[System Model and Definitions]{System Model and Definitions}
+\chapter[System model and definitions]{System model and definitions}
 \label{sec:sysmodel}
 
 In this chapter, we present the system model, introduce two variations of a
@@ -135,7 +135,7 @@ acknowledged by the system before another operation \emph{$o_2$} is proposed by
 some clients, then \emph{$o_1$} comes before \emph{$o_2$} in the equivalent
 serialization). Linearizability is a sub-case of strict serializability in which
 every operation reads or updates a single object. The advantage of
-linearizability is its "local" property: it is sufficient for a system to
+linearizability is its ``local'' property: it is sufficient for a system to
 linearize operations for each individual object to achieve global
 linearizability.
 
@@ -170,42 +170,19 @@ executed in \ex\ that respects (i)~the service's sequential specification and
 (ii)~the real-time precedence of commands. Command $C_1$ precedes command $C_2$
 in real-time if the response of $C_1$ occurs before the invocation of $C_2$.
 
-
-\section{Scaling state machine replication}
-
-State machine replication yields configurable availability but limited
-scalability. Adding resources (e.g., replicas) results in a service that
-tolerates more failures, but does not translate into sustainable improvements in
-throughput. This happens for a couple reasons. First, the underlying
-communication protocol needed to ensure ordered message delivery may not scale
-itself (i.e., a communication bottleneck). Second, every command must be
-executed sequentially by each replica (i.e., an execution bottleneck).
-
-Several approaches have been proposed to address SMR's scalability limitations.
-To cope with communication overhead, some proposals have suggested to spread the
-load of ordering commands among multiple processes (e.g.,
-\cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single
-process to determine the order of commands (e.g.,
-\cite{Lam98}).%\fxnote[draft]{remove inapplicable reference}
-
-Two directions of research have been suggested to overcome execution
-bottlenecks. One approach (scaling up) is to take advantage of multiple cores to
-execute commands concurrently without sacrificing consistency
-\cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Ideally, one
-could use a replication technique that supports parallelism (multithreading) to
-scale up a replicated service. But existing techniques have at least one
-sequential part in their execution. Another approach (scaling out) is to
-partition the service's state (also known as \emph{sharding}) and replicate each
-partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). The idea is to
-divide the state of a service in multiple partitions so that most commands
-access one partition only and are equally distributed among partitions.
-Unfortunately, most services cannot be “perfectly partitioned”, that is, the
-service state cannot be divided in a way that commands access one partition
-only. As a consequence, partitioned systems must cope with multi-partition
-commands. In the next chapter, we review some approaches in the second category,
-which include Scalable State Machine Replication (\ssmr) \cite{bezerra2014ssmr},
-Google Spanner \cite{corbett2013spanner}, and some other techniques.
-
+\section{Locality of workloads}
+\label{sysmodel:locality}
+In order to achieve better partitioning, it's necessary to exploit the locality
+of the workload. Locality is one of the long-known and much-exploited principle in
+computer science. Operating system and databases have been exploiting the
+locality for years \cite{locality:os}. In the scope of this thesis, we define
+the locality of a workloads is the behavior in the data accessing patterns
+produced by the application. The workloads are referred as \emph{strong
+locality} if that can be partitioned in a way that would both (i) allow commands
+to be executed at a single partition only, and (ii) evenly distribute data so
+that load is balanced among partitions. Conversely, workloads that cannot avoid
+multi-partition commands with balanced load among partitions exhibit \emph{weak
+locality}.
 
 \section{Graph partitioning problem}
 

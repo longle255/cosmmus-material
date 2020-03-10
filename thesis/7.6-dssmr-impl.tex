@@ -27,7 +27,7 @@ proxy. The application server class must extend the StateMachine class. To
 execute commands, the developer must provide an implementation for the method
 executeCommand(Command). The code for such a method is agnostic to the existence
 of partitions. In other words, it can be exactly the same as the code used to
-execute commands with classical state-machine replication (i.e., full
+execute commands with classical state machine replication (i.e., full
 replication). \dssmrlibname{} is responsible for handling all communication between
 partitions and oracle transparently. To start the server, method
 runStateMachine() is called. Method createObject() also needs to be implemented,
@@ -41,7 +41,7 @@ methods. Method extractObject(Command) returns the set of objects accessed by
 the command. It should be overridden by the application so that the client proxy
 can relocate all necessary objects to a destination partition before executing
 the application command.
-% didn't understand this: "in the case there are hidden objects in the command."
+% didn't understand this: ``in the case there are hidden objects in the command.''
 Method getTargetPartition(Set$\langle$Object$\rangle$) returns a particular
 partition to which objects should be moved, when they are not in the same
 partition yet, in order to execute an application command that accesses those

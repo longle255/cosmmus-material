@@ -2,17 +2,17 @@
 
 \section{Context and goal of the thesis}
 
-Moderns applications today deploy their service across a massive and
-continuously expanding infrastructure, in order to serve their users efficiently
+Moderns applications today deploy services across a massive and
+continuously expanding infrastructure, in order to serve users efficiently
 and reliably. With the wide availability of commodity hardware, failures in data
 centers are increasingly common and inevitable, even in well-established service
 providers \citep{disruption:google}. The causes of failures are varied. Machines
 fail individually due to power failures, hardware failures, or collectively due
-to human error \citep{disruption:amazon}, software bugs, or even extreme weather
+to human errors \citep{disruption:amazon}, software bugs, or even extreme weather
 events \citep{disruption:weather}. While confronting such failures, applications
 still need to offer uninterrupted service to their users. To this end,
 introducing fault tolerance through redundancy is critical for the availability
-and integrity of the application.
+and integrity of the applications.
 
 Redundancy by replication can increase both availability and scalability. By
 having several copies of the application running on multiple replicas, the
@@ -25,58 +25,58 @@ programmers an intuitive model for the effects of concurrent updates (i.e.,
 clients perform concurrent updates as there is a single copy of the application
 state), making it less likely that complex system behavior will result in bugs.
 
-State-machine replication is a well-known form of software replication, in
-particular of \emph{active replication} to building fault-tolerant services
-using commodity hardware. (e.g.,
+State machine replication is a well-known form of software replication, in
+particular of \emph{active replication} to build fault-tolerant services using
+commodity hardware (e.g.,
 \cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}). In essence,
 the idea is to model the application as a deterministic state machine whose
 state transitions consist of the execution of client requests \cite{Lam78,
-Sch90}. Then the service is fully replicated on several servers and
+Sch90}. Then, the service is fully replicated on several servers that
 deterministically execute every client command in every non-faulty server in the
 same order to reach the same results. State machine replication provides
 configurable fault tolerance in the sense that the system can be set to tolerate
 any number of faulty replicas. In terms of scalability, unfortunately, classic
 state machine replication does not scale. Increasing the number of replicas will
-not scale performance since each replica must execute every command. Thus the
+not scale performance since each replica must execute every command. Thus, the
 overall performance is limited by the throughput of a single replica.
 
-Conceptually, scalable performance can be achieved with state partitioning
-(e.g., \cite{facebookTAO, sciascia2012sdur, Aguilera:2007}). Ideally, if the
-service state can be divided such that commands access one partition only and
-are equally distributed among partitions, then system throughput (i.e., the
-number of commands that can be executed per time unit) will increase linearly
-with the number of partitions. Although promising, exploiting partitioning in
-SMR is challenging.
-First, most applications cannot be partitioned in such a way that commands
-always fall within a single partition. Therefore, a partitioning scheme must
-cope with multi-partition commands.
-Second, determining an efficient partitioning of the state that avoids load
-imbalances and favors single-partition commands normally is computationally
-expensive and requires an accurate characterization of the workload. Even if
-enough information is available, finding a good partitioning is a complex
-optimization problem~\cite{curino2010sch,taft2014est}.
-Third, many online applications experience variations in demand. These happen
-for a number of reasons. In social networks, some users may experience a surge
-increase in their number of followers (e.g., new ``celebrities"); workload
-demand may shift along the hours of the day and the days of the week, and
-unexpected (e.g., a video that goes viral) or planned events (e.g., a new
-company starts trading in the stock exchange) may lead to exceptional periods
-when requests increase significantly higher than in normal periods. %Thus, an
-ideal partitioning scheme should be able
+Conceptually, scalable performance can be achieved with state partitioning, also
+known as sharding (e.g., \cite{facebookTAO, sciascia2012sdur, Aguilera:2007}),
+which partitions the persistent state of the services across multiple servers.
+Ideally, if the service state (e.g., state variables) can be divided
+such that commands access one partition only and are equally distributed among
+partitions, then system throughput (i.e., the number of commands that can be
+executed per time unit) will increase linearly with the number of partitions.
+Although promising, exploiting partitioning in SMR is challenging. First, most
+applications cannot be partitioned in such a way that commands always fall
+within a single partition. Therefore, a partitioning scheme must cope with
+multi-partition commands. Second, determining an efficient partitioning of the
+state that avoids load imbalances and favors single-partition commands normally
+is computationally expensive and requires an accurate characterization of the
+workload. Even if enough information is available, finding a good partitioning
+is a complex optimization problem~\cite{curino2010sch,taft2014est}. Third, many
+online applications experience variations in demand. These happen for a number
+of reasons. In social networks, some users may experience a surge increase in
+their number of followers (e.g., new ``celebrities''); workload demand may shift
+along the hours of the day and the days of the week, and unexpected (e.g., a
+video that goes viral) or planned events (e.g., a new company starts trading in
+the stock exchange) may lead to exceptional periods when requests increase
+significantly higher than in normal periods. %Thus, an ideal partitioning scheme
+% should be able
 %to adapt to the changes in the workload dynamically without interruption of the
 %service.
 
 It is crucial that highly available partitioned systems be able to dynamically
-adapt to the workload, since many online applications experience variations in
-demand. We believe there should be a way to provide strong consistency in a
-scalable manner, that is, to create a linearizable, scalable and efficient
-replicated service. Throughout this thesis, we try to solve all problems
+adapt to the workload in an optimized way (e.g., minimize cross-partition
+communication). We believe there should be a way to provide strong consistency
+in a scalable manner, that is, to create a linearizable, scalable and efficient
+replicated service. Throughout this thesis, we aim to solve the problems
 mentioned above, while substantiating the following claim:
 
 \begin{quote}
-"It is possible to devise an approach that allow a fault-tolerant system to
+``It is possible to devise an approach that allows a fault-tolerant system to
 scale by dynamically adapting to the changes in the workload, while providing
-strong consistency, that is, ensuring linearizability"
+strong consistency, that is, ensuring linearizability''
 \end{quote}
 
 
@@ -94,7 +94,7 @@ intensive analysis of current approaches on scaling state machine replication.
 In this study we consider a set of techniques that...\fxnote{add description of
 the evaluation chapter}
 
-With the understanding of limitations of current approaches, we propose
+With the understanding of the limitations of current approaches, we propose
 \textbf{\dssmrlong}\ (\dssmr), a technique that allows a partitioned SMR system
 to reconfigure its data placement on-the-fly. \dssmr\ achieves dynamic data
 reconfiguration without sacrificing scalability or violating the properties of
@@ -104,13 +104,13 @@ variables. The scalability requirement rules out the use of a centralized oracle
 that clients can consult to find out the partitions a command must be multicast
 to. Even if clients can determine the current location of the variables needed
 to execute a command, by the time the command is delivered at the involved
-partitions one or more variables may have changed their location. Although the
+partitions, one or more variables may have changed their location. Although the
 client can retry the command with the new locations, how to guarantee that the
 command will succeed in the second attempt? In classical SMR, every command
 invoked by a non-faulty client always succeeds. \dssmr\ should provide similar
 guarantees. \dssmr\ was designed to exploit workload locality. This scheme
 benefits from simple manifestations of locality, such as commands that
-repeatedly access the same state variables, and more complex manifestations,
+repeatedly access the same state variables, and more complex cases,
 such as structural locality in social network applications, where users with
 common interests have a higher probability of being interconnected in the social
 graph. Focusing on locality allows us to adopt a simple but effective approach
@@ -132,21 +132,17 @@ randomly, which allows for a completely decentralized implementation, in which
 partitions make only local choices about data movement. We refer to this
 approach as \emph{decentralized partitioning}. This approach works well for data
 with \emph{strong locality}, but it is unstable for workloads with \emph{weak
-locality}\footnote{Workloads are refered as \emph{strong locality} if that can
-be partitioned in a way that would both (i) allow commands to be executed at a
-single partition only, and (ii) evenly distribute data so that load is balanced
-among partitions. Conversely, workloads that cannot avoid multi-partition
-commands with balanced load among partitions exhibit \emph{weak locality}.}.
-This happens because with weak locality, objects in \dssmr{} are constantly
-being moved back and forth between partitions without converging to a stable
-configuration.
+locality}\footnote{The definition of \emph{strong-} and \emph{weak-locality} is
+postponed until Section \ref{sysmodel:locality}.}. This happens because with
+weak locality, objects in \dssmr{} are constantly being moved back and forth
+between partitions without converging to a stable configuration.
 
-For this reason, we introduce the main contribution of this thesis, \textbf{\dynastar,
-Optimized Dynamic Partitioning for Scalable State Machine Replication}. Like the
-other approach, \dynastar does not require any a priori knowledge about the
-workload. However, \dynastar differs from the prior approach because it creates
-the workload graph on-the-fly and use graph partitioning techniques to
-efficiently relocate application state on-demand. In order to reach the
+For this reason, we introduce the main contribution of this thesis,
+\textbf{\dynastar, Optimized Dynamic Partitioning for Scalable State Machine
+Replication}. Like DS-SMR, \dynastar does not require any a priori knowledge
+about the workload. However, \dynastar differs from the prior approach because
+it creates the workload graph on-the-fly and use graph partitioning techniques
+to efficiently relocate application state on-demand. In order to reach the
 optimized partitioning,  \dynastar maintains a location oracle with a global
 view of the application state. The oracle minimizes the number of state
 relocations by monitoring the workload, and re-computing an optimized
@@ -154,10 +150,10 @@ partitioning on demand using a static partitioning algorithm. The oracle is also
 the first contact when a client submits a command, to discover the partitions on
 which state variables are stored. If the command accesses variables in multiple
 partitions, the oracle issues a move command to the partitions, re-locating
-variables to a single partition. Of course, when re-locating a variable, the
-oracle is faced with a choice of which partition to use as a destination.
-\dynastar chooses the partition for relocation (i.e., one that would minimize
-the number of state relocations) by partitioning the workload graph using the
+variables to a single partition. When re-locating a variable, the oracle is
+faced with a choice of which partition to use as a destination. \dynastar
+chooses the partition for relocation (i.e., one that would minimize the number
+of state relocations) by partitioning the workload graph using the
 METIS~\cite{Abou-Rjeili:2006} partitioner. To track object locations without
 compromising scalability, in addition to information about the location of state
 variables in the oracle, each client caches previous consults to the oracle. As
@@ -170,14 +166,13 @@ by the client's cache.
 \label{sec:structure}
 
 The rest of the thesis is organized as follows. Chapter 2 provides the
-background for the thesis, by describing the system model, defines the
-communication primitives used throughout this thesis. Chapter 3 studies the
-problem of scaling state machine replication from a mostly theoretical
-perspective. In Chapter 4 we discuss \dssmr, an dynamic partitioning scheme for
-\smr, explaining how it may achieve dynamic state reconfiguration while still
-maintaining strong consistency for \smr. In Chapter 5, we present \dynastar,
-which combines the dynamic repartitioning state technique and the centralized
-oracle to maintain a global view of workload and partition application state.
-Chapter 6 presents some related works on scaling state machine replication.
-Finally, Chapter 7 concludes this thesis and proposes future research
-directions.
+background for the thesis, by describing the system model and the communication
+primitives used throughout this thesis. Chapter 3 considers the general problems
+of scaling replicated systems. Chapter 4 discusses \dssmr, a dynamic
+partitioning scheme for \smr, explaining how it may achieve dynamic state
+reconfiguration while still maintaining strong consistency for \smr. Chapter 5
+presents \dynastar, which combines the dynamic repartitioning state technique
+and the centralized oracle to maintain a global view of workload and partition
+application state. Chapter 6 surveys related works on scaling state machine
+replication. Finally, Chapter 7 concludes this thesis and proposes future
+research directions.

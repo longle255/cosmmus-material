@@ -32,10 +32,10 @@ partitioned system(shared)
 
                   application logic
 
-                    client     |   server
+                    client       |   server
                     --------------------
-order->execution    spanner    |    smr
-execution->order    sdur       |
+order->execution                 |    smr, calvin
+execution->order    sdur,spanner |
 
 if at client -> need to syncronize -> lock
 

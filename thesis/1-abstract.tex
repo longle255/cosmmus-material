@@ -1,18 +1,28 @@
 \begin{abstract}
-  State machine replication (SMR) is a well-known technique that guarantees
-  strong consistency (i.e., linearizability) to online services. However, SMR
-  lacks scalability since every replica executes all commands, which limits the
-  overall performance by the throughput of a single replica, so adding servers
-  does not increase the maximum throughput. Scalable SMR (\ssmr) addresses this
-  problem by partitioning the service state, allowing commands to execute only
-  in some replicas and providing scalability while still ensuring
-  linearizability. One problem is that \ssmr only works with static partitioning
-  scheme, and quickly saturates when executing multi-partition commands, as
-  partitions must communicate. In this research, we propose \dynastar, a novel
-  approach to scaling SMR. \dynastar uses dynamically repartitioning state
-  technique, combined with a centralized oracle to maintain a global view of
-  workload and inform heuristics about data placement. Using this oracle,
-  \dynastar is able to adapt to workload changes over time, while also
-  minimizing the number of state changes. The preliminary results show that
-  \dynastar is a practical technique that achieves excellent throughput.
+  Today's online services must meet strict availability and performance
+  requirements. State machine replication (SMR), one of the most fundamental
+  approaches to increasing the availability of services without sacrificing
+  strong consistency, provides configurable availability but limited performance
+  scalability. The lacking of scalability of SMR dues to the fact that every
+  replica has to execute all commands, which limits the overall performance by the
+  throughput of a single replica, so adding servers does not increase the
+  maximum throughput. Scalable State Machine Replication (S-SMR) achieves
+  scalable performance by partitioning the service state and coordinating the
+  ordering and execution of commands. While S-SMR scales the performance of
+  single-partition commands with the number of deployed partitions, replica
+  coordination needed by multi-partition commands introduces an overhead in the
+  execution of multi-partition commands. In this thesis, we propose and
+  implement the following ideas: (i) Dynamic scalable state machine replication
+  (DS-SMR), (ii) Dynastar: Optimized partitioning for SMR. DS-SMR addresses the
+  problem of S-SMR by allowing repartitioning the service state dynamically,
+  based on the workload. Variables that are usually accessed together are moved
+  to the same partition, which significantly improves scalability. To provide
+  better partitioning for DS-SMR, we develop \dynastar, a novel approach to
+  scaling SMR. \dynastar also uses dynamically repartitioning state technique,
+  combined with a centralized oracle to maintain a global view of workload and
+  inform heuristics about data placement. Using this oracle, \dynastar is able
+  to adapt to workload changes over time, while also minimizing the number of
+  state changes. The performance evaluation using two benchmarks, a social
+  network based on real data and TPC-C, show that \dynastar is a practical
+  technique that achieves excellent throughput.
 \end{abstract}
