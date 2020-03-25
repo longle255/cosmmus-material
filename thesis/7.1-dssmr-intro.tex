@@ -7,11 +7,11 @@ combination of partitions and (ii) using caching to reduce the communication
 across partitions, while keeping the execution linearizable.
 
 On the downside of this approach, as the number of multi-partition commands
-increases, performance of \ssmr\ becomes worse, as partitions must communicate.
+increases, performance of \ssmr\ decreases, as partitions must communicate.
 One way to reduce the number of multi-partition commands is by dynamically
-changing the partitioning, putting variables that are usually accessed together
+changing the partitioning, placing variables that are usually accessed together
 in the same partition. However, the partitioning oracle of \ssmr\ relies on a
-static mapping of variables to partitions. One advantage of this implementation
+static mapping of variables to partitions. One advantage of this approach
 is that all clients and servers can have their own local oracle, which always
 returns a correct set of partitions for every query. Such a static mapping has
 the major limitation of not allowing the service to dynamically adapt to
@@ -25,15 +25,18 @@ reconfigure its data placement on-the-fly. \dssmr\ achieves dynamic data
 reconfiguration without sacrificing scalability or violating the properties of
 classical SMR. These requirements introduce significant challenges. Since state
 variables may change location, clients must find the current location of
-variables. The scalability requirement rules out the use of a centralized oracle
-that clients can consult to find out the partitions a command must be multicast
-to. Even if clients can determine the current location of the variables needed
-to execute a command, by the time the command is delivered at the involved
-partitions one or more variables may have changed their location. Although the
-client can retry the command with the new locations, how to guarantee that the
-command will succeed in the second attempt? In classical SMR, every command
-invoked by a non-faulty client always succeeds. \dssmr\ should provide similar
-guarantees.
+variables.
+% The scalability requirement rules out the use of a centralized oracle that
+% clients can consult to find out the partitions a command must be multicast to.
+If there exists a centralized oracle that clients can consult to find out the
+partitions a command must be multicast to, the system is still unlikely to
+scale, as the oracle will likely become a bottleneck. Even if clients can
+determine the current location of the variables needed to execute a command, by
+the time the command is delivered at the involved partitions, one or more
+variables may have changed their location. Although the client can retry the
+command with the new locations, how to guarantee that the command will succeed
+in the second attempt? In classical SMR, every command invoked by a non-faulty
+client always succeeds. \dssmr\ should provide similar guarantees.
 
 \dssmr\ was designed to exploit workload locality. Our scheme benefits from
 simple manifestations of locality, such as commands that repeatedly access the
@@ -43,7 +46,7 @@ a higher probability of being interconnected in the social graph. Focusing on
 locality allows us to adopt a simple but effective approach to state
 reconfiguration: whenever a command requires data from multiple partitions, the
 variables involved are moved to a single partition and the command is executed
-against this partition. To reduce the chances of skewed load among partitions,
+in this partition. To reduce the chances of skewed load among partitions,
 the destination partition is chosen randomly. Although \dssmr\ could use more
 sophisticated forms of partitioning, formulated as an optimization problem
 (e.g., \cite{curino2010sch,taft2014est}), our technique has the advantage that

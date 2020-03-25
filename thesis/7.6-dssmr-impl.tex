@@ -15,7 +15,7 @@ objects may be replicated in some partitions, not all). Therefore, when
 executing a command, a replica might not have local access to some of the
 objects involved in the execution of the command. The developer informs
 \dssmrlibname{} which object classes are partially replicated by extending the
-PRObject class. Each object of such class is stored either locally or remotely,
+PRObject class. Each object of such a class is stored either locally or remotely,
 but the application code is agnostic to that. All calls to methods of such
 objects are intercepted by \dssmrlibname{}, transparently to the developer.
 

@@ -7,6 +7,10 @@ linearizability).
 
 \section{System model}
 
+Unless mentioned otherwise, we make the following assumptions about processes,
+failure and synchrony models.
+
+
 \begin{itemize}
   \item \textbf{Processes and communication.} We consider a distributed system
   consisting of an unbounded set of client processes $\ccm = \{c_1, c_2, ...\}$
@@ -24,23 +28,23 @@ linearizability).
   otherwise. In either case, processes do not experience arbitrary behavior
   (i.e., no Byzantine failures).
   \item \textbf{Synchrony model.} Consensus cannot be solved deterministically
-  in an asynchronous system with faults, as established by the FLP
-  impossibility result~\cite{FLP85}. So we consider a system that is
-  \emph{partially synchronous}~\cite{DLS88}: it is initially asynchronous and
-  eventually becomes synchronous. When the system is asynchronous, there are no
-  bounds on the time it takes for messages to be transmitted and actions to be
-  executed; when the system  is synchronous, such bounds exist but are unknown
-  to the processes. The partially synchronous assumption allows consensus, a
-  fundamental problem at the core of replication~\cite{Lam98,Sch90}, to be
-  implemented under realistic conditions~\cite{FLP85,Lam98}.
+  in an asynchronous system with faults, as established by the FLP impossibility
+  result~\cite{FLP85}. So, we consider a system that is \emph{partially
+  synchronous}~\cite{DLS88}: it is initially asynchronous and eventually becomes
+  synchronous. When the system is asynchronous, there are no bounds on the time
+  it takes for messages to be transmitted and actions to be executed; when the
+  system  is synchronous, such bounds exist but are unknown to the processes.
+  The partially synchronous assumption allows consensus defined in
+  \S\ref{sec:consensus}, to be implemented under realistic
+  conditions~\cite{FLP85,Lam98}.
 \end{itemize}
 
 \subsection{Reliable multicast}
 \label{sec:rmcast}
 
 Reliable broadcast provides stronger properties than regular broadcast, by
-ensuring that a message is either delivered to all processes or to none. To
-reliably multicast a message $m$ to a set of groups $\gamma$, processes use
+ensuring that a message is either delivered to all correct processes or to none.
+To reliably multicast a message $m$ to a set of groups $\gamma$, processes use
 primitive \rmcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
 with \rmdel$(m)$.  Reliable multicast has the following properties:
 
@@ -61,27 +65,32 @@ with \rmdel$(m)$.  Reliable multicast has the following properties:
 \subsection{Atomic multicast}
 \label{sec:amcast}
 Atomic broadcast, also referred to as total order broadcast, is an extension of
-reliable broadcast that ensures that messages are delivered by all processes in
-the same order. To atomically multicast a message $m$ to a set of groups
-$\gamma$, processes use primitive \amcast$(\gamma, m)$.  Message $m$ is
-delivered at the destinations with \amdel$(m)$.  We define delivery order $<$ as
-follows: $m < m'$ iff there exists a process that delivers $m$ before $m'$.
+reliable broadcast that ensures that messages are delivered by all correct
+processes in the same order. Atomic multicast is a generalization of atomic
+broadcast, allows messages to be addressed to a subset of the processes in the
+system. Similarly to atomic broadcast, atomic multicast ensures that the
+destination processes of every message agree either to deliver or to not deliver
+the message, and no two process deliver any two messages in different order. To
+atomically multicast a message $m$ to a set of groups $\gamma$, processes use
+primitive \amcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
+with \amdel$(m)$.  We define delivery order $<$ as follows: $m < m'$ iff there
+exists a process that delivers $m$ before $m'$.
 
 Atomic multicast ensures the following properties:
 
 \begin{itemize}
 
-    \item[--] If a correct process \amcast{}s $m$, every correct process in a
-      group in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
+    \item[--] If a correct process \amcast{}s $m$ to group $\gamma$, every
+    correct process in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
 
-    \item[--] If a process \amdel{}s $m$, then every correct process in a group
-      in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
+    \item[--] If a process in $\gamma$ \amdel{}s $m$, then every correct process
+    in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
 
     \item[--] For any message $m$, every process \amdel{}s $m$ at most once, and
       only if some process has \amcast{} $m$ previously \emph{(integrity)}.
 
-    \item[--] If a process \amcast{}s $m$ and then $m'$, then no process
-    \amdel{}s $m'$ before $m$ \emph{(fifo order)}.
+    \item[--] If a process \amcast{}s $m$ and then $m'$ to group $\gamma$, then
+    no process in $\gamma$ \amdel{}s $m'$ before $m$ \emph{(fifo order)}.
 
     \item[--] The delivery order is acyclic \emph{(atomic order)}.
 
@@ -96,13 +105,14 @@ Atomic broadcast is a special case of atomic multicast in which there
 is a single group of processes.
 
 \section{Consensus}
-Consensus is a fundamental coordination problem of distributed computing. The
-problem is related to replication and appears when implementing atomic
-broadcast, group membership, or similar services. Given a set of servers
-proposing values, it is the problem of deciding on one value among the servers.
-Uniform consensus algorithm  is defined by the primitives \emph{propose(v)} and
-\emph{decide(v)}, where \emph{v} is an arbitrary value. Any uniform consensus
-must satisfy the following three properties:
+\label{sec:consensus}
+Consensus is a fundamental coordination problem of distributed computing
+\cite{Lam78, santos2013htsmr}. The problem is related to replication and appears
+when implementing atomic broadcast, group membership, or similar services. Given
+a set of servers proposing values, it is the problem of deciding on one value
+among the servers. The consensus problem is defined by the primitives
+\emph{propose(v)} and \emph{decide(v)}, where \emph{v} is an arbitrary value.
+Any uniform consensus must satisfy the following three properties:
 \begin{itemize}
 
   \item[--] If a process decides \emph{v}, then \emph{v} was previously
@@ -124,7 +134,7 @@ specifies the level in which operations can interleave in accessing the object.
 Informally, systems that provide strong consistency are easier to interact with,
 because they behave in an intuitive way: they behave as the system had only one
 copy of the object, and all operations modified and read that object atomically.
-In this thesis, we specifically focus on strong consistency problem.
+In this thesis, we specifically focus on strong consistency.
 
 Strong consistency commonly refers to the formal concept of either strict
 serializability or linearizability. A system is strictly serializable if the
@@ -138,6 +148,21 @@ every operation reads or updates a single object. The advantage of
 linearizability is its ``local'' property: it is sufficient for a system to
 linearize operations for each individual object to achieve global
 linearizability.
+
+Linearizability is defined with respect to a sequential
+specification. The \emph{sequential specification} of a service consists of a
+set of commands and a set of \emph{legal sequences of commands}, which define
+the behavior of the service when it is accessed sequentially. In a legal
+sequence of commands, every response to the invocation of a command immediately
+follows its invocation, with no other invocation or response in between them.
+For example, a sequence of operations for a read-write variable $v$ is legal if
+every read command returns the value of the most recent write command that
+precedes the read, if there is one, or the initial value, otherwise. An
+execution \ex\ is linearizable if there is some permutation of the commands
+executed in \ex\ that respects (i)~the service's sequential specification and
+(ii)~the real-time precedence of commands. Command $C_1$ precedes command $C_2$
+in real-time if the response of $C_1$ occurs before the invocation of $C_2$.
+
 
 \section{State machine replication}
 \label{sec:smr}
@@ -153,24 +178,74 @@ executed by every replica in a consistent order, despite the fact that different
 replicas might receive them in different orders. To guarantee that servers
 deliver the same sequence of commands, SMR can be implemented with atomic
 broadcast: commands are atomically broadcast to all servers and all correct
-servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}.
+servers deliver and execute the same sequence of commands \cite{BJ87b,DSU04}. In
+this thesis, we consider implementations of state machine replication that
+ensure linearizability.
 
-We consider implementations of state machine replication that ensure
-linearizability. Linearizability is defined with respect to a sequential
-specification. The \emph{sequential specification} of a service consists of a
-set of commands and a set of \emph{legal sequences of commands}, which define
-the behavior of the service when it is accessed sequentially. In a legal
-sequence of commands, every response to the invocation of a command immediately
-follows its invocation, with no other invocation or response in between them.
-For example, a sequence of operations for a read-write variable $v$ is legal if
-every read command returns the value of the most recent write command that
-precedes the read, if there is one, or the initial value, otherwise. An
-execution \ex\ is linearizable if there is some permutation of the commands
-executed in \ex\ that respects (i)~the service's sequential specification and
-(ii)~the real-time precedence of commands. Command $C_1$ precedes command $C_2$
-in real-time if the response of $C_1$ occurs before the invocation of $C_2$.
+\section{Scaling state machine replication}
+
+State machine replication yields configurable availability but limited
+scalability. Adding resources (i.e., replicas) results in a service that
+tolerates more failures, but does not translate into sustainable improvements in
+throughput. This happens for a couple reasons. First, the underlying
+communication protocol needed to ensure ordered message delivery may not scale
+itself (i.e., a communication bottleneck). Second, every command must be
+executed sequentially by each replica (i.e., an execution bottleneck).
+
+Several approaches have been proposed to address SMR's scalability limitations.
+To cope with communication overhead, some proposals have suggested to spread the
+load of ordering commands among multiple processes (e.g.,
+\cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single
+process to determine the order of commands (e.g.,
+\cite{Lam98}).%\fxnote[draft]{remove inapplicable reference}
+
+Two directions of research have been suggested to overcome execution
+bottlenecks. One approach (scaling up) is to take advantage of multiple cores to
+execute commands concurrently without sacrificing consistency
+\cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Ideally, one
+could use a replication technique that supports parallelism (multithreading) to
+scale up a replicated service. But existing techniques have at least one
+sequential part in their execution. Another approach (scaling out) is to
+partition the service's state (also known as \emph{sharding}) and replicate each
+partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). The idea is to
+divide the state of a service in multiple partitions so that most commands
+access one partition only and are equally distributed among partitions.
+Unfortunately, most services cannot be ''perfectly partitioned``, that is, the
+service state cannot be divided in a way that commands access one partition
+only. As a consequence, partitioned systems must cope with multi-partition
+commands. In the next chapter, we review some approaches in the second category,
+which include Scalable State Machine Replication (\ssmr) \cite{bezerra2014ssmr},
+Google Spanner \cite{corbett2013spanner}, and some other techniques.
+
+
+\section{Graph partitioning problem}
+
+In computer system, graphs are widely used to describe the dependencies of the
+data within a computation. All applications can model their data and/or workload
+using graph. For example, in a social network application, the workload could be
+modeled as a weighted graph, the users are represented by nodes and the
+connections/relations between those users by the edges between nodes. Once the
+workload is modeled as graph, \textbf{Graph partitioning} can be used to
+determine how to divide the work and data for efficient concurrent access or
+computation.
+
+A weighted (directed) graph \emph{graph} $G$ consists of a set of nodes $V$ and
+a set of edges $E \subset V \times V$ to represent relations between the nodes,
+as well as two cost functions. One function assigns weights to the nodes $c : V
+\rightarrow R_{>0}$ and a second function $\omega : E \rightarrow R$ assigns
+costs to the edges. All graphs contain subgraphs. A subgraph is a graph whose
+node and edge set are subsets of another graph. An edge that connects vertices
+of two different subgraph is called a \emph{crossing edge}. Graph partitioning
+is a fundamental problem of finding a specified number of distinct subsets of
+the set of vertices of a graph (subgraph). \emph{Balance} is the constraint that
+requires that all subgraph have about equal size. \emph{Total edge cut} is the
+number of crossing edges those subgraphs. Intuitively, a good partitioning is
+the one that minimizes the total edges connecting subgraphs, while maintaining
+the balance among partitions. This is generally considered to be a NP-hard
+problem \cite{10.1006/jpdc.1997.1404}
 
 \section{Locality of workloads}
+
 \label{sysmodel:locality}
 In order to achieve better partitioning, it's necessary to exploit the locality
 of the workload. Locality is one of the long-known and much-exploited principle in
@@ -183,25 +258,3 @@ to be executed at a single partition only, and (ii) evenly distribute data so
 that load is balanced among partitions. Conversely, workloads that cannot avoid
 multi-partition commands with balanced load among partitions exhibit \emph{weak
 locality}.
-
-\section{Graph partitioning problem}
-
-Graphs could represent all kinds of information.  A weighted (directed) graph
-\emph{graph} $G$ consists of a set of nodes $V$ and a set of edges $E \subset V
-\times V$ to represent relations between the nodes, as well as two cost
-functions. One function assigns weights to the nodes $c : V \rightarrow R_{>0}$
-and a second function $\omega : E \rightarrow R$ assigns costs to the edges. In
-the social network example, the workload could be modeled as a weighted graph,
-the users are represented by nodes and the connections/relations between those
-users by the edges between nodes.
-
-All graphs contain subgraphs. A subgraph is a graph whose node and edge set are
-subsets of another graph. An edge that connects vertices of two different
-subgraph is called \emph{crossing edge}. \textbf{Graph partitioning} is a
-fundamental problem of finding a specified number of distinct subsets of the set
-of vertices of a graph (subgraph). \emph{balance} is the constraint that
-requires that all subgraph have about equal size. \emph{Total edge cut} is the
-number of crossing edges those subgraphs. Intuitively, good partitioning is the
-one that minimizes the total edges connecting subgraphs, while maintaining the
-balance among partitions. This is generally considered to be a NP-hard problem
-\cite{10.1006/jpdc.1997.1404}

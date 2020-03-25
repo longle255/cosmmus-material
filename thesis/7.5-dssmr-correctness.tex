@@ -9,7 +9,7 @@ partition has at least one correct server. Given these constraints, the only
 thing that could prevent a command from terminating would be an execution that
 forced the client proxy to keep retrying a command. This problem is trivially
 solved by falling back to \ssmr\ after a predefined number of retries: at a
-certain point, the client proxy multicast the command to all server and oracle
+certain point, the client proxy multicasts the command to all server and oracle
 processes, which execute the command as in \ssmr{}, i.e., with coordination
 among all partitions and the oracle.
 

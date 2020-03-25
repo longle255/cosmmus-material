@@ -39,7 +39,7 @@ multi-partition commands.
 \centering
       \includegraphics[width=0.8\linewidth]{figures/dssmr-detail}
 \end{minipage}
-\caption{Consulting the oracle and issuing a command are done in multiple calls to atomic-multicast.}
+\caption{Consulting the oracle and issuing a command are done in multiple calls to atomic multicast.}
 \label{fig:dssmr-detail}
 \end{figure*}
 
@@ -77,7 +77,7 @@ described in the previous paragraph) are executed by the client proxy,
 transparently to the application. When the client proxy multicasts a
 partitioning-related command to multiple partitions and the oracle, partitions
 and oracle exchange signals to ensure linearizability, as mentioned in
-Section~\ref{sec:ssmr}. Every server and oracle process has its own \dssmr\
+Section~\ref{sec:ssmr}. Every server and oracle process has their own \dssmr\
 proxy as well. At each server, the proxy checks whether commands can be executed
 and manages the exchange of data and signals between processes. At the oracle,
 the service designer defines the application-dependent rules that must be

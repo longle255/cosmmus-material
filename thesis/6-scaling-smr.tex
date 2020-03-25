@@ -1,85 +1,162 @@
 \chapter[Scaling partitioned replicated system]{Scaling partitioned replicated system}
 
-Today's online services of all size enterprises must meet strict availability
-and performance requirements, as part of their broader digital transformation
-strategy. In order to meet the availability requirements, those online services
-must be replicated. State machine replication is a fundamentally powerful
-building block that enables the implementation of highly available distributed
-services by replication. State machine replication achieves strong consistency
-(i.e., linearizability) by regulating how client commands are propagated to and
+Replication is an area of interest that has been studied for more than three
+decades in traditional domains, such as database systems, file systems, and
+later in distributed object systems. However, ...
+In this chapter, we will discuss several approaches to scaling a replicated system.
+
+\section{Replication and partitioning}
+
+Replication refers to the technique of managing redundancy data on a set of
+servers (replicas) in a way to ensure that each replica of the service keeps a
+consistent state, given a set of consistency criteria. Replication of components
+or services is used in distributed systems to achieve higher availability and
+performance. Availability is the capability of the system continues to work,
+even in the presence of failures, as long as the number of failures is below a
+given tolerable limit. Performance refers to the response time and throughput of
+the system.
+
+Although there are many replication techniques \cite{Replication:book}, there
+remain two major classes of replication techniques that have become widely
+well-known to ensure this consistency: \emph{active replication} (state machine
+replication) and \emph{passive replication} (primary-backup).
+%Both replication techniques are useful since they have complementary qualities.
+In the \emph{passive replication} approach, the requests are sent to only one
+member of the replica group (the primary), which will execute the request and
+send the response to the client. Any modification to the primary's state is
+updated to other members of the group (the backups). If the primary fails, one
+of the backups takes over the service by becoming a new primary (Figure
+\ref{fig:replication:active}). On the other hand, in the \emph{active
+replication} approach, the requests of the client are sent to all members of a
+given group (replicas) in the same order. The replicas will then execute the
+requests as though they were the only member of the group, to reach the same
+state, and reply to the client. If a client sends a request to a group of $n$
+replicas (assuming no failures), then the client will receive n identical reply
+to the original request (Figure \ref{fig:replication:passive}). State machine
+replication is a fundamentally powerful building block of this approach that
+enables the implementation of highly available distributed services by
+replication. State machine replication achieves strong consistency (i.e.,
+linearizability) by regulating how client commands are propagated to and
 executed by the replicas: every non-faulty replica must receive and execute
-every command deterministically and in the same order. If all replicas have to
-execute the same sequence of commands, the system can not scale. Increasing the
-number of replicas results in bounded improvements in performance.
+every command deterministically and in the same order. There are also other
+replication schemes, such as chain replication \cite {chainreplication,
+chainreplication:byzantine} and multi-primary replication, which is commonly
+used for transactional databases that implement deferred-update replication
+\cite{sciascia2012sdur, Replication:book, chundi96dur}.
 
-Scalable performance can be achieved with state partitioning. Partitioning (also
-known as \emph{sharding}) is a technique that divides the state of a service in
-multiple partitions so that most commands access one partition only and are
-equally distributed among partitions. Partitioning replicated state machine can
-provide highly scalable and available systems, however, introduce daunting
-challenges. Most services cannot be ``perfectly partitioned'', that is, the
-service state cannot be divided in a way that commands access one partition
-only. Therefore, a partitioning scheme must cope with multi-partition commands.
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\columnwidth]{figures/replication-active}
+    \caption{Active replication}
+    \label{fig:replication:active}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\columnwidth]{figures/replication-passive}
+    \caption{Passive replication}
+    \label{fig:replication:passive}
+  \end{subfigure}
+  \caption{Replication techniques}
+  \label{fig:replication}
+\end{figure*}
 
-There are two general approaches to handle multi-partition commands in terms of
-consistency guarantees. One approach, known as \emph{weak consistency}, is to
-weaken the guarantees of commands that involve multiple partitions (e.g.,
-\cite{facebookTAO}). In the context of SMR, this would mean that requests access
-data within single partition (single-partition commands) are strongly consistent
-(i.e., linearizable), while concurrent requests accessing multiple partitions
-(multi-partition commands) may lead to inconsistencies. This approach relaxes
-the consistency guarantees and makes systems less exposed to impossibility
-results \cite{FLP85, diskpaxos}, but makes the effects of data partitioning and
-replication visible to the application. To lower the chance of potential
-conflicts, data access patterns can be considered when partitioning data (i.e.,
-objects often accessed together can be co-located in the same partition). But
-these optimizations require prior knowledge about the workload, and are often
-performed offline \cite{facebookTAO}
+Conceptually, replication can be categorized into two different categories:
+full- and partial replication. Full replication means that the whole state of
+the service is available on all replicas, while in partial replication, each
+replica only contains a subset of the state. For example, in a distributed
+database, full replication allows all rows of a table are available on all
+replicated nodes, while partial replication means some replicas contain only a
+subset of the rows. Intuitively, full replication often comes at a higher cost. If
+all replicas have to keep the whole same state, execute the same sequence of
+commands, the system can not scale. Increasing the number of replicas results in
+bounded improvements in performance. On the other hand, a partially replicated
+replica only stores a subset of the state and handles requests that involve that
+data, thus provide scalable performance.
 
-The other approach, known as \emph{strong consistency}, is to provide strong
-consistency guarantees for both single- and multi-partition commands and hide
-the complexity of data partitioning and replication from the application. The
-algorithms used to implement strong consistency comes with the cost of a more
-complex execution path for commands that involve multiple partitions. Some
-proposals in this category totally order requests before their execution, as in
-state machine replication, or execute requests first and then totally order the
-validation of their execution, as in distributed database systems with two-phase-commit.
+In other words, scalable performance can be achieved with state partitioning.
+Partitioning (also known as \emph{sharding}) is a technique that divides the
+state of a service in multiple partitions so that most commands access one
+partition only and are equally distributed among partitions. Partitioning
+replicated state machine can provide highly scalable and available systems;
+however, introduce daunting challenges. Most services cannot be ``perfectly
+partitioned''; that is, the service state cannot be divided in a way that
+commands access one partition only. Therefore, a partitioning protocol must cope
+with multi-partition commands.
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/replication-coordination}
+  \end{minipage}
+  \caption{Coordination in a partitioned replicated system}
+  \label{fig:replication:coordination}
+\end{figure*}
+
+In general, we can model abstraction for partitioned replication protocols by
+extending the five-phases functional model in \cite{pedone:replication}, to
+cover the coordination between components in a partitioned replicated system
+(see Figure \ref{fig:replication:coordination}). Those phases are:
+\begin{itemize}
+  \item \textit{Request (RE):} The client submits the request to the system.
+  \item \textit{Server coordination (SC):} The replica servers of all involved
+  partitions coordinate with each other to synchronize the execution of the
+  request (ordering of concurrent requests within an across involved partitions).
+  \item \textit{Execution (EX):} The replica servers execute the request.
+  \item \textit{Agreement coordination (AC):} The replica servers of all involved
+  partitions agree on the outcome of the execution.
+  \item \textit{Response (END):} The result of the request is sent back to the client.
+\end{itemize}
+
+The differences between different partitioned replicated systems come from the
+different approaches uses in each phase. In some cases, a phase could be omitted
+(e.g., when messages are ordered by an atomic multicast/broadcast primitive in
+the ordering phase (\emph{SC}), it is not necessary to run the agreement
+coordination (\emph{AC}) phase). In the next few sections, we briefly describe the
+performance scaling by partitioning of different replication models.
+%At the end of the chapter, we compare them based on their scalability
+%and consistency level provided.
 
 \section{Scaling distributed database systems}
 
 In database systems, scaling is often achieved by partitioning (usually referred
-as \emph{sharding}). Sharding is a way of dividing the dataset into
-horizontal fragmentation, known as partitions. Each partition essentially has
-the same schema and columns, but contains different subsets of the total data
-set. The partitions are then distributed across separate database servers,
-referred to as physical shards, which can hold multiple logical partitions.
-Those physical shards can be replicated to tolerate some certain degree of
-failures. Despite this, the data held within all the partitions collectively
-represent an entire logical dataset. To guarantee the consistency, a consensus
-protocol (e.g., Paxos or Raft) is used  to enforce consistency across multiple
-replicas of the data. Essentially, this protocol works as a majority voting
-mechanism. Any change to the dataset requires a majority of replicas to agree to
-the change. Google Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin}
-are two of the database solutions in this category. Both systems were designed
-to be a highly-scalable distributed relational database. The main difference
-between the two systems is that Calvin uses a single, global consensus protocol
-per database. Every transaction in Calvin participates in the same global
-protocol, while Spanner applies a separate consensus protocol per partition.
-
+as \emph{sharding}). Sharding is a way of dividing the dataset into horizontal
+fragmentation, known as partitions. Each partition essentially has the same
+schema and columns, but contains different subsets of the total data set. The
+partitions are then distributed across separate database servers, referred to as
+physical shards, which can hold multiple logical partitions. Those physical
+shards can be replicated to tolerate some certain degree of failures. Despite
+this, the data held within all the partitions collectively represent an entire
+logical dataset. To guarantee the consistency, a consensus protocol (e.g., Paxos
+or Raft) is used  to enforce consistency across multiple replicas of the data.
+Essentially, this protocol works as a majority voting mechanism. Any change to
+the dataset requires a majority of replicas to agree to the change. Google
+Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin} are two of the
+database solutions in this category. Both systems were designed to be a
+highly-scalable distributed relational database. The main difference between the
+two systems is that Calvin uses a single, global consensus protocol per
+database. Every transaction in Calvin participates in the same global protocol,
+while Spanner applies a separate consensus protocol per partition.
 
 
 \subsection{Google Spanner}
 
-Spanner consists of multiple \emph{zones}, each of which is a
-deployment of Bigtable servers. A zone uses one \emph{zonemaster} to assign data
-to one hundred to several thousand sets of partitions. Each partition is a set
-of Paxos-based state machines (so-called \emph{spanservers}). Each spanserver
+Spanner consists of multiple \emph{zones}, each of which is a deployment of
+Bigtable servers. A zone uses one \emph{zonemaster} to assign data to one
+hundred to several thousand sets of partitions. Each partition is a set of
+Paxos-based state machines (so-called \emph{spanservers}). Each spanserver
 implements a lock table to support two-phase-locking based concurrency control
 and a transaction manager to support distributed transactions. Clients in
 Spanner use per-zone \emph{location proxies} to locate the spanservers assigned
-to serve their data.
+to serve their data. To order the transaction between partitions, Spanner uses
+TrueTime API, a combination of GPS and atomic clocks in all of their regions
+(i.e., zones) to synchronize time to within a known uncertainty bound. If two
+transactions are processed during time periods that do not have overlapping
+uncertainty bounds, Spanner can be certain that the later transaction will see
+all the writes of the earlier transaction.
 
-Spanner processes a transaction as following. First, The client process queries
+Spanner processes a transaction as following. First, the client process queries
 the location proxy to determine which partitions store the data accessed by the
 transaction. Second, the client retrieves the required data from the groups of
 partitions, acquiring locks for them. If a transaction involves only one
@@ -90,22 +167,26 @@ multi-partitions transaction, the client acquires the locks on all involved
 partitions. Next, the client executes its transaction locally, commits the
 result to the involved partitions. If the transaction is single-partition, the
 spanservers simply commit the result by using Paxos among its replica. If the
-transaction is multi-partition, one of the involved spanservers plays the role
+transaction is multi-partition, one of the involved partitions plays the role
 of the coordinator to perform two-phase commit with the other groups for
-committing the transaction. To order the transaction between partitions, Spanner
-uses TrueTime API, a combination of GPS and atomic clocks in all of their regions (i.e.,
-zones) to synchronize time to within a known uncertainty bound. If two
-transactions are processed during time periods that do not have overlapping
-uncertainty bounds, Spanner can be certain that the later transaction will see
-all the writes of the earlier transaction.
+committing the transaction.
 
-Spanner supports a number of operators for client to build complex applications.
+% Spanner supports a number of operators for client to build complex applications.
 
 Although not detailed in the paper, Spanner allows data to be re-sharded across
 \emph{spanservers} or \emph{zones} data centers to balance loads and in response
 to failures by \emph{placement driver}. Periodically, \emph{placement driver}
 communicates with spanservers to re-arrange data. During these transfers,
 clients can still execute transactions (including updates) on the database.
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/spanner}
+  \end{minipage}
+  \caption{Transaction processing in Spanner}
+  \label{fig:spanner}
+\end{figure*}
 
 \subsection{Calvin}
 Similar to Spanner, Calvin also shards its data on multiple partitions, and
@@ -116,103 +197,50 @@ transactions into a distributed, replicated log before being sent to partitions
 to process. Each replica simply reads and processes transactions from this
 replicated log.
 
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/calvin}
+  \end{minipage}
+  \caption{Transaction processing in Spanner}
+  \label{fig:calvin}
+\end{figure*}
 
-\section{Execution models}
+% \section{Execution models}
 
-In Spanner, clients can build complex applications by issuing multiple read and
-write requests to servers and encapsulating multiple requests into a
-transaction, which can also contain client-side arbitrary computation on the
-data. When the client commits the transaction, if the transaction spans across
-multiple partitions, one of the involved partitions plays the role of the
-coordinator to perform two-phase commit with the other groups for committing the
-transaction. Thus, transactions in Spanner’s execute-coordinate model may abort.
+% In Spanner, clients can build applications by issuing multiple read and
+% write requests to servers and encapsulating multiple requests into a
+% transaction, which can also contain client-side arbitrary computation on the
+% data. When the client commits the transaction, if the transaction spans across
+% multiple partitions, one of the involved partitions plays the role of the
+% coordinator to perform two-phase commit with the other groups for committing the
+% transaction. Thus, transactions in Spanner’s execute-coordinate model may abort.
 
-In state machine replication, the application logic runs entirely at the
-replicas; clients simply invoke the operations (similarly to database stored
-procedures). State machine replication relies on an atomic multicast protocol to
-totally order client requests within and across involved partitions. Each
-replica simply reads and processes requests as in the order it delivers them.
-This model makes sure the executions of requests will never abort.
+% In state machine replication, the application logic runs entirely at the
+% replicas; clients simply invoke the operations (similar to database stored
+% procedures). State machine replication relies on an atomic multicast protocol to
+% totally order client requests within and across involved partitions. Each
+% replica simply reads and processes requests as in the order it delivers them.
+% This model makes sure the executions of requests will never abort.
 
 
 \section{Scaling state machine replication}
 
-State machine replication yields configurable availability but limited
-scalability. Adding resources (i.e., replicas) results in a service that
-tolerates more failures, but does not translate into sustainable improvements in
-throughput. This happens for a couple reasons. First, the underlying
-communication protocol needed to ensure ordered message delivery may not scale
-itself (i.e., a communication bottleneck). Second, every command must be
-executed sequentially by each replica (i.e., an execution bottleneck).
-
-Several approaches have been proposed to address SMR's scalability limitations.
-To cope with communication overhead, some proposals have suggested to spread the
-load of ordering commands among multiple processes (e.g.,
-\cite{Moraru:2013gw,Mencius,Marandi:2012hb}), as opposed to dedicating a single
-process to determine the order of commands (e.g.,
-\cite{Lam98}).%\fxnote[draft]{remove inapplicable reference}
-
-Two directions of research have been suggested to overcome execution
-bottlenecks. One approach (scaling up) is to take advantage of multiple cores to
-execute commands concurrently without sacrificing consistency
-\cite{Kapritsos:2012um,Marandi:2014bj,Kotla:2004ep,Guo:2014jp}. Ideally, one
-could use a replication technique that supports parallelism (multithreading) to
-scale up a replicated service. But existing techniques have at least one
-sequential part in their execution. Another approach (scaling out) is to
-partition the service's state (also known as \emph{sharding}) and replicate each
-partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). The idea is to
-divide the state of a service in multiple partitions so that most commands
-access one partition only and are equally distributed among partitions.
-
-% Unfortunately, most services cannot be “perfectly partitioned”, that is, the
-% service state cannot be divided in a way that commands access one partition
-% only. As a consequence, partitioned systems must cope with multi-partition
-% commands. In the next chapter, we review some approaches in the second category,
-% which include Scalable State Machine Replication (\ssmr) \cite{bezerra2014ssmr},
-% Google Spanner \cite{corbett2013spanner}, and some other techniques.
-
-
-% \subsection{Partitioning application state}
-
-% Modern distributed systems typically scale performance by partitioning
-% application state and tolerate failures by replicating each partition. Clients
-% submit commands for execution to one or more partitions. Within a partition,
-% replicas coordinate by means of a consensus protocol (e.g., Paxos~\cite{Lam98}).
-% To coordinate the execution of multi-partition commands, replicated partitions
-% rely on some distributed coordination protocol (e.g., two-phase locking
-% \cite{corbett2013spanner}, optimistic concurrency control \cite{Chang:2008},
-% atomic multicast \cite{bezerra2014ssmr}).
-
-In principle, increasing the number of partitions should result in increased
-system performance. However, if the execution of commands involves multiple
-partitions, then performance can actually decrease, due to overhead from
-ordering and coordinating commands across partitions to ensure strong
-consistency. Different techniques have been proposed to handle commands that
-access state in multiple partitions, but inherently multi-partition commands are
-more expensive than single-partition commands. Moreover, if data is not
-distributed carefully, then load imbalances can nullify the benefits of
-partitioning. Thus, an ideal partitioning scheme is one that would both (i)
-allow commands to be executed at a single partition only, and (ii) evenly
-distribute data so that load is balanced among partitions. We refer to workloads
-that can be partitioned in a way that satisfies these two properties as
-exhibiting \emph{strong locality}. Conversely, workloads that cannot avoid
-multi-partition commands with balanced load among partitions exhibit \emph{weak
-locality}.
-
-Broadly speaking, there are two classes of techniques for partitioning:
-\emph{static} and \emph{dynamic}. Figure~\ref{fig:motivation} shows the result
-of a motivating experiment that compares two representative systems, one of each
-class. In the experiment, we measured the throughput and number of state moves
-over time with two different workloads: one with strong locality and one with
-weak locality. The workloads are inspired by the social network Twitter, in
-which the network is modeled as a graph, and users can ``post'' messages. The
-social graph was generated using a Zipfian distribution, where the Zipf
-parameter was adjusted to alter the locality.  For brevity, we postpone the
-details of the experimental setup until Section~\ref{sec:dynastar-experiments}.
+Broadly speaking, there are two classes of techniques for scaling state machine
+replication by partitioning: \emph{static} and \emph{dynamic}.
+% Figure~\ref{fig:motivation} shows the result of a motivating experiment that
+% compares two representative systems, one of each class. In the experiment, we
+% measured the throughput and number of state moves over time with two different
+% workloads: one with strong locality and one with weak locality. The workloads
+% are inspired by the social network Twitter, in which the network is modeled as a
+% graph, and users can ``post'' messages. The social graph was generated using a
+% Zipfian distribution, where the Zipf parameter was adjusted to alter the
+% locality.  For brevity, we postpone the details of the experimental setup until
+% Section~\ref{sec:dynastar-experiments}.
 \emph{Static} techniques choose an immutable assignment of application state
 variables to partitions prior to executing commands. This techniques requires a
 good understanding about the workload to avoids load imbalances and favors
-single-partition commands.  Moreover, many online applications experience
+single-partition commands. Moreover, many online applications experience
 variations in demand. These happen for a number of reasons. In social networks,
 for example, some users may experience a surge increase in their number of
 followers (e.g., new ``celebrities''); workload demand may shift along the hours
@@ -230,41 +258,42 @@ challenge in designing a dynamic scheme is determining how the system selects
 the partition to which to move data.
 
 
-\begin{figure*}[ht!]
-  \centering
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-strong-locality}
-    \caption{Throughput with strong locality}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-weak-locality}
-    \caption{Throughput with weak locality}
-  \end{subfigure} \\
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-strong-locality}
-  \caption{Number of move commands with strong locality}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-weak-locality}
-    \caption{Number of move commands with weak locality}
-  \end{subfigure}
-  \caption{\dynastar, S-SMR* (i.e., optimized S-SMR) and DS-SMR under strong and weak locality, 4 partitions.}
-  \label{fig:motivation}
-\end{figure*}
+% \begin{figure*}[ht!]
+%   \centering
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-strong-locality}
+%     \caption{Throughput with strong locality}
+%   \end{subfigure}
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-tp-weak-locality}
+%     \caption{Throughput with weak locality}
+%   \end{subfigure} \\
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-strong-locality}
+%   \caption{Number of move commands with strong locality}
+%   \end{subfigure}
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[width=0.95\columnwidth]{figures/experiments/dynastar/socc-moves-weak-locality}
+%     \caption{Number of move commands with weak locality}
+%   \end{subfigure}
+%   \caption{\dynastar, S-SMR* (i.e., optimized S-SMR) and DS-SMR under strong and weak locality, 4 partitions.}
+%   \label{fig:motivation}
+% \end{figure*}
 
 \subsection{Static state partitioning with S-SMR}
 \label{sec:ssmr}
 
-In this section, we describe \ssmr\, an extension to SMR that under certain
-workloads allows performance to grow proportionally to the number of replicas.
-\ssmr\ partitions the service state and replicates each partition. It relies on
-an atomic multicast primitive to consistently order commands within and across
-partitions. In addition, \ssmr\ assumes a static workload partitioning. Any
-state reorganization requires system shutdown and manual intervention.
+In this section, we describe Scalable state machine replication (\ssmr), an
+extension to SMR that under certain workloads allows performance to grow
+proportionally to the number of replicas. \ssmr\ partitions the service state
+and replicates each partition. It relies on an atomic multicast primitive to
+consistently order commands within and across partitions. In addition, \ssmr\
+assumes a static workload partitioning. Any state reorganization requires system
+shutdown and manual intervention.
 
 In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
 partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
@@ -316,6 +345,68 @@ the major limitation of not allowing the service to dynamically adapt to
 different access patterns.
 
 \subsection{Dynamic state partitioning}
+
+Dynamic techniques address the limitations of static techniques by adapting the
+partitioning scheme as workloads change
+
+% There are two general approaches to handle multi-partition commands in terms of
+% consistency guarantees. One approach, known as \emph{weak consistency}, is to
+% weaken the guarantees of commands that involve multiple partitions (e.g.,
+% \cite{facebookTAO}). In the context of SMR, this would mean that requests access
+% data within single partition (single-partition commands) are strongly consistent
+% (i.e., linearizable), while concurrent requests accessing multiple partitions
+% (multi-partition commands) may lead to inconsistencies. This approach relaxes
+% the consistency guarantees and makes systems less exposed to impossibility
+% results \cite{FLP85, diskpaxos}, but makes the effects of data partitioning and
+% replication visible to the application. To lower the chance of potential
+% conflicts, data access patterns can be considered when partitioning data (i.e.,
+% objects often accessed together can be co-located in the same partition). But
+% these optimizations require prior knowledge about the workload, and are often
+% performed offline \cite{facebookTAO}
+
+% The other approach, known as \emph{strong consistency}, is to provide strong
+% consistency guarantees for both single- and multi-partition commands and hide
+% the complexity of data partitioning and replication from the application. The
+% algorithms used to implement strong consistency comes with the cost of a more
+% complex execution path for commands that involve multiple partitions. Some
+% proposals in this category totally order requests before their execution, as in
+% state machine replication, or execute requests first and then totally order the
+% validation of their execution, as in distributed database systems with
+% two-phase-commit.
+
+% \subsection{Partitioning application state}
+
+% Modern distributed systems typically scale performance by partitioning
+% application state and tolerate failures by replicating each partition. Clients
+% submit commands for execution to one or more partitions. Within a partition,
+% replicas coordinate by means of a consensus protocol (e.g., Paxos~\cite{Lam98}).
+% To coordinate the execution of multi-partition commands, replicated partitions
+% rely on some distributed coordination protocol (e.g., two-phase locking
+% \cite{corbett2013spanner}, optimistic concurrency control \cite{Chang:2008},
+% atomic multicast \cite{bezerra2014ssmr}).
+
+% In principle, increasing the number of partitions should result in increased
+% system performance. However, if the execution of commands involves multiple
+% partitions, then performance can actually decrease, due to overhead from
+% ordering and coordinating commands across partitions to ensure strong
+% consistency. Different techniques have been proposed to handle commands that
+% access state in multiple partitions, but inherently multi-partition commands are
+% more expensive than single-partition commands. Moreover, if data is not
+% distributed carefully, then load imbalances can nullify the benefits of
+% partitioning. Thus, an ideal partitioning scheme is one that would both (i)
+% allow commands to be executed at a single partition only, and (ii) evenly
+% distribute data so that load is balanced among partitions. We refer to workloads
+% that can be partitioned in a way that satisfies these two properties as
+% exhibiting \emph{strong locality}. Conversely, workloads that cannot avoid
+% multi-partition commands with balanced load among partitions exhibit \emph{weak
+% locality}.
+
+
+
+% \subsection{Static state partitioning with S-SMR}
+
+
+% \subsection{Dynamic state partitioning}
 
 %\ssmr\ performs better as the number of multi-partition commands decreases.
 

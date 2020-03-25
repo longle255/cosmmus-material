@@ -59,7 +59,7 @@ be that the variable exists but belongs to some other partition $\ppm'$. Since
 only the oracle and the servers at $\ppm'$ have this knowledge, it is the oracle
 who replies to delete commands.
 
-\dssmr\ server and oracle proxies coordinate to execute commands that create or
+The \dssmr\ server and oracle proxies coordinate to execute commands that create or
 move variables. Such coordination is done by means of \rmcast{}. When a
 $create(v)$ command is delivered at $\ppm$, the server proxy waits for a message
 from the oracle, telling whether the variable can be created or not, to be
@@ -91,7 +91,7 @@ cannot be executed (with a $nok$ value). For a $create(v)$ command, the prophecy
 tells where $v$ should be created, based on rules defined by the application, if
 $v$ does not exist. If $v$ already exists, the prophecy will contain $nok$, so
 that the client knows that the create command cannot be executed. The prophecy
-regarding a $delete(v)$ command contains the partition that contains $v$, or
+regarding a $delete(v)$ command has the partition that contains $v$, or
 $ok$, in case $v$ was already deleted or never~existed.
 
 Besides dispensing prophecies, the oracle is responsible for executing create,
