@@ -1,18 +1,18 @@
 
 \dssmr{} addresses the limitations of \ssmr{} by adapting the partitioning
 scheme as workloads change, by moving data ``on demand'' to maximize the number
-of single partition user commands, while avoiding imbalances in the load of the
+of single-partition user commands, while avoiding imbalances in the load of the
 partitions. The major challenge in this approach is determining how the system
 selects the partition to which to move data. \dssmr{} selects partitions
 randomly, which allows for a completely decentralized implementation, in which
 partitions make only local choices about data movement. We refer to this
 approach as \emph{decentralized partitioning}. This approach works well for data
 with \emph{strong locality}, but it is unstable for workloads with \emph{weak
-locality}\footnote{Workloads are referred as \emph{strong locality} if that can
+locality}.\footnote{Workloads are referred as \emph{strong locality} if that can
 be partitioned in a way that would both (i) allow commands to be executed at a
 single partition only, and (ii) evenly distribute data so that load is balanced
 among partitions. Conversely, workloads that cannot avoid multi-partition
-commands with balanced load among partitions exhibit \emph{weak locality}.}.
+commands with balanced load among partitions exhibit \emph{weak locality}.}
 This happens because with weak locality, objects in \dssmr{} are constantly
 being moved back and forth between partitions without converging to a stable
 configuration.

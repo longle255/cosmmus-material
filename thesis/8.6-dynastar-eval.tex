@@ -52,7 +52,7 @@ TPC-C benchmark on an un-partitioned database.  Figure
 ~\ref{fig:tpcc_repartitioning} shows the performance of \dynastar with 8
 warehouses and 8 partitions. At the first part of the experiment, all the
 variables are randomly distributed across all partitions. As a result, almost
-every transaction accesses all partitions. Thus every transaction required
+every transaction accesses all partitions. Thus, every transaction required
 coordination between partitions, and objects were constantly moving back and
 forth. This can be observed in the first 50 seconds of the experiment depicted
 in Figure ~\ref{fig:tpcc_repartitioning}: low throughput (i.e., a few
@@ -64,7 +64,7 @@ executed transactions and instructed the partitions to apply the new
 partitioning. When the partitions delivered the partitioning request, they
 exchanged objects to achieve the new partitioning. It takes about 10 seconds for
 partitions to reach the new partitioning. During the repartitioning,
-transactions which access objects that are not being relocated will continue to
+transactions that access objects that are not being relocated will continue to
 process. After the state is relocated, most objects involved in a transaction
 can be found in a local partition, which considerably increases performance and
 reduces latency.
@@ -88,7 +88,7 @@ a partitioning scheme that leads to scalable performance.
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/tpcc-scaling-tp-lat.pdf}
+    \includegraphics[width=0.7\columnwidth]{figures/experiments/dynastar/tpcc-scaling-tp-lat.pdf}
   \caption{Performance scalability with TPC-C. Throughput (in thousands of transactions per second, ktps) and latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
   \label{fig:tpcc_scaling}
 \end{figure}
@@ -108,39 +108,45 @@ used METIS to partition the data in advance. Thus, S-SMR* started with an
 optimized partitioning. \dynastar started with random location of the objects.
 Each client issues a sequence of commands. For each command, the client selects
 a random node as the active user with Zipfian access pattern ($\rho$ = 0.95). We
-focused on two types of workloads: timeline only commands and mix commands (85\%
+focused on two types of workloads: timeline-only commands and mix commands (85\%
 timeline and 15\% post). Each client operates in a closed loop, that is, the
 client issues a command and then waits from the response to submit the next
 command.
 
 \begin{figure*}[ht!]
   \centering
-  \begin{subfigure}{.4\textwidth}
-    % \centering
-    \includegraphics[width=.9\textwidth]{figures/experiments/dynastar/chirper-compare-timeline}
-    \caption{}
-  \end{subfigure}
-  \begin{subfigure}{.4\textwidth}
-    % \centering
-    \includegraphics[width=.9\textwidth]{figures/experiments/dynastar/chirper-compare-mix}
-    \caption{}
-  \end{subfigure}
-  \caption{Performance of social network service. Throughput (in thousands of commands per second, kcps) and latency for different partitions.
-  Latency for $\approx$75\% peak throughput in milliseconds (bars show average, whiskers show 95-th percentile).}
-  \label{fig:socialscalability}
+    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-timeline-no-title}
+  \caption{Performance of timeline command of social network service. Throughput
+  (in thousands of commands per second, kcps) and latency for different
+  partitions. Latency for $\approx$75\% peak throughput in milliseconds (bars
+  show average, whiskers show 95-th percentile).}
+  \label{fig:socialscalability-timeline}
+\end{figure*}
+
+
+\begin{figure*}[ht!]
+  \centering
+    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-mix-no-title}
+  \caption{Performance of post command social network service. Throughput (in
+  thousands of commands per second, kcps) and latency for different partitions.
+  Latency for $\approx$75\% peak throughput in milliseconds (bars show average,
+  whiskers show 95-th percentile).}
+  \label{fig:socialscalability-mix}
 \end{figure*}
 
 \subsubsection{\dynastar vs. other techniques}
 \label{sec:dynastar-evaluation:results}
 
-Figure~\ref{fig:socialscalability} shows the peak throughput and latency for approximately 75\% of peak throughput
- (average and 95-th percentile) of the evaluated techniques as we vary the number of
- partitions of the fixed graph for the social networks.
+Figure~\ref{fig:socialscalability-timeline} and~\ref{fig:socialscalability-mix}
+shows the peak throughput and latency for approximately 75\% of peak throughput
+(average and 95-th percentile) of the evaluated techniques as we vary the number
+of partitions of the fixed graph for the social networks.
 
-In the experiment with timeline commands, all three techniques perform similarly. This happens because no moves occur in
-\dynastar or \dssmr{}, and no synchronization among partitions is necessary for S-SMR* in this case.
-Consequently, all three schemes scale remarkably well, and
-the difference in throughput between each technique is due to the implementation of each one.
+In the experiment with timeline commands, all three techniques perform
+similarly. This happens because no moves occur in \dynastar or \dssmr{}, and no
+synchronization among partitions is necessary for S-SMR* in this case.
+Consequently, all three schemes scale remarkably well, and the difference in
+throughput between each technique is due to the implementation of each one.
 %Although \dynastar and DS-SMR have comparable performance, they differ in an important way.
 %As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges
 %to maximum throughput after 20 seconds from the beginning of the execution, while it takes
@@ -200,16 +206,17 @@ partitions.
 
 \subsubsection{Performance under dynamic workloads}
 
-Figure~\ref{fig:socialcelebrity} depicts the performance of \dynastar and S-SMR* with an evolving social network.
-We started the system with the original network from Higg dataset. After 200 seconds, we introduced a new celebrity user in the workload.
-The celebrity user posted more frequently, and
-other users started following the celebrity.
+Figure~\ref{fig:socialcelebrity} depicts the performance of \dynastar and S-SMR*
+with an evolving social network. We started the system with the original network
+from Higg dataset. After 200 seconds, we introduced a new celebrity user in the
+workload. The celebrity user posted more frequently, and other users started
+following the celebrity.
 
 \begin{figure*}[ht!]
   \centering
   \begin{subfigure}{.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-celeb-dynastar.pdf}
+    \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-celeb-dynastar-no-oracle.pdf}
     \caption{}
   \end{subfigure}
   \begin{subfigure}{.48\textwidth}
@@ -217,7 +224,8 @@ other users started following the celebrity.
     \includegraphics[width=\textwidth]{./figures/experiments/dynastar/chirper-celeb-ssmr.pdf}
     \caption{}
   \end{subfigure}
-  \caption{Repartitioning a dynamic workload with \dynastar~(a) and S-SMR* without repartitioning (b).}%
+  \caption{Repartitioning a dynamic workload with \dynastar~(a) and S-SMR*
+  without repartitioning (b).}%
   \label{fig:socialcelebrity}
 \end{figure*}
 
@@ -273,12 +281,13 @@ to their original location after command execution .
 
 
 Table ~\ref{table:dynastar-socialsnapshot} shows the throughput of each
-partition when the system reached the maximum throughput at the second of 180.
+partition when the system reached the maximum throughput at the time 180.
 Although the objects were evenly distributed among partitions, there was still a
 skew in the load of the system, e.g., partition 1 and 2 served more commands
 than the other partitions. This happened because of the skew in the access
-pattern: some users were more active and posted more than the others, thus the
-requests that sent to their servers are more than to other servers.
+pattern: some users were more active and posted more than the others,
+% thus the requests that sent to their servers are more than to other servers.
+thus some servers receive more requests than the other servers.
 
 \begin{table}[htp]
 \caption{Average load at partitions at peak throughput.}
@@ -315,9 +324,9 @@ the TPC-C experiments, only district and warehouse objects are in the workload
 graph; thus, the oracle only needs 1 MB of memory to store the graph for each
 warehouse.
 
-We conducted the experiment to evaluate if the \dynastar oracle is a bottleneck
+We conducted experiments to evaluate if the \dynastar oracle is a bottleneck
 to system performance. The results show that the load on the oracle is low,
-suggesting that \dynastar scales well.The first experiment assesses the
+suggesting that \dynastar scales well. The first experiment assesses the
 scalability of the METIS algorithm only. We measured the time to compute the
 partitioning solution, and the memory usage of the algorithms for increasingly
 large graphs. The results, depicted in Figure~\ref{fig:metis_size_time}, show
@@ -331,9 +340,17 @@ to 10 million vertices.
 	\label{fig:metis_size_time}
 \end{figure}
 
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\columnwidth]{figures/experiments/dynastar/chirper-celeb-dynastar-oracle.pdf}
+  \caption{Queries sent to oracle in the social network service}
+  \label{fig:socialcelebrity-oracle}
+\end{figure}
+
+
 The second experiment evaluates the oracle in terms of the number of queries
 sent to the oracle over time. The results shown in the bottom chart in the
-Figure~\ref{fig:socialcelebrity} suggest that the oracle would not become a
+Figure~\ref{fig:socialcelebrity-oracle} suggest that the oracle would not become a
 bottleneck. The number of queries processed to the oracle is zero at the
 beginning of the experiment, as the clients have cached the location of all
 objects. After 80 seconds, the repartitioning was triggered, making all cached
@@ -341,5 +358,4 @@ data on clients invalid. Thus the throughput of queries at the oracle increases,
 when clients started asking for new location of variables. However, the load
 diminishes rapidly and gradually reduce. This is because access to the oracle is
 necessary only when clients have an invalid cache or when a repartition happens
-
 

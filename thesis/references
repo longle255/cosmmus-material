@@ -50,3 +50,24 @@ Fernando + Robert
 13 - 15 July
 3- 14 Aug
 
+
+
+
+
+
+- more paxos and raft on related work.
+- add more experiment
+-  conclusion : adding more content, future work, rdma multicast
+
+
+the way do: move data to single/mulitiple direction, rdma allow access remote
+
+
+graph partitioning => incremental
+
+
+
+
+https://www.cs.princeton.edu/courses/archive/fall18/cos418/docs/L16-spanner.pdf
+https://courses.cs.washington.edu/courses/csep552/13sp/lectures/6/spanner.pdf
+https://www.cs.princeton.edu/courses/archive/fall15/cos518/studpres/spanner.pdf

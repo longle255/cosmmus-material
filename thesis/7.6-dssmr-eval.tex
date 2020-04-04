@@ -9,25 +9,53 @@ locality. By locality, we mean the likelihood that certain groups of data items
 are accessed together (by the same command). In
 Section~\ref{sec:dssmr-evaluation:setup}, we describe the environment where we
 conducted our experiments. In Section~\ref{sec:dssmr-evaluation:strongloc}, we
-show the results with strong-locality workloads.
-In Section~\ref{sec:dssmr-evaluation:weakloc}, we show the results for
+show the results with strong-locality workloads. In
+Section~\ref{sec:dssmr-evaluation:weakloc}, we show the results for
 weak-locality workloads.
 
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth}
+\begin{figure*}[ht!]
 \centering
-      \includegraphics[width=1\linewidth]{figures/experiments/dssmr/strong-locality}
-\end{minipage}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-tp}
+\end{subfigure}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
+\end{subfigure}
 \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
 \label{fig:dssmr-strongloc}
 \end{figure*}
 
+% \begin{figure*}[ht!]
+% \begin{minipage}[b]{1\linewidth}
+% \centering
+%       \includegraphics[width=1\linewidth]{figures/experiments/dssmr/strong-locality}
+% \end{minipage}
+% \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
+% \label{fig:dssmr-strongloc}
+% \end{figure*}
 
-\begin{figure*}
-\begin{minipage}[b]{1\linewidth}
+
+% \begin{figure*}[ht!]
+% \begin{minipage}[b]{1\linewidth}
+% \centering
+%       \includegraphics[width=1\linewidth]{figures/experiments/dssmr/weak-locality}
+% \end{minipage}
+% \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with weak-locality workload. Throughput is shown in thousands of commands per second (kcps).}
+% \label{fig:dssmr-weakloc}
+% \end{figure*}
+
+\begin{figure*}[ht!]
 \centering
-      \includegraphics[width=1\linewidth]{figures/experiments/dssmr/weak-locality}
-\end{minipage}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-tp}
+\end{subfigure}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-lat}
+\end{subfigure}
 \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with weak-locality workload. Throughput is shown in thousands of commands per second (kcps).}
 \label{fig:dssmr-weakloc}
 \end{figure*}
@@ -54,6 +82,16 @@ follow requests and 50\% of unfollow), and Mix (7.5\% post, 3.75\% follow,
 
 \subsection{Results for strong locality}
 \label{sec:dssmr-evaluation:strongloc}
+
+
+\begin{figure*}[ht!]
+\begin{minipage}[b]{1\linewidth}
+\centering
+      \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput}
+\end{minipage}
+\caption{Number of move versus throughput in DS-SMR in the experiment of Post commands on 4 partitions}
+\label{fig:dssmr-move-vs-tp}
+\end{figure*}
 
 % THROUGHPUT
 
@@ -114,6 +152,40 @@ significant increase in throughput and the scalability that \dssmr\ brought to
 the system; with \ssmr{}, the system did not scale with multi-partition
 commands.
 
+
+\begin{figure*}[ht!]
+\centering
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-mix-2p}
+\end{subfigure}
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-post-2p}
+\end{subfigure}
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-mix-4p}
+\end{subfigure}
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-post-4p}
+\end{subfigure}
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-mix-8p}
+      \caption{Mix}
+\end{subfigure}
+\begin{subfigure}{.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-post-8p}
+      \caption{Post}
+\end{subfigure}
+\caption{Cumulative distribution function (CDF) of latency for mix workloads of \dssmr\ and \ssmr.}%
+\label{fig:dssmr-cdf}
+\end{figure*}
+
+
 \begin{table*}[htp]
       \vspace{10mm}
       \caption{Absolute values of \dssmrappname\ running \ssmr\ and \dssmr{}.}
@@ -123,8 +195,8 @@ commands.
                & \multicolumn{4}{|c|}{Timeline}  &  \multicolumn{4}{|c|}{Post}   &  \multicolumn{4}{|c|}{Follow/unfollow}  &  \multicolumn{4}{|c|}{Mix}    \\ \hline
                & 1     & 2     & 4     & 8       & 1     & 2     & 4   & 8    & 1     & 2     & 4       & 8           & 1     & 2     & 4     & 8     \\ \hline\hline
                & \multicolumn{16}{|c|}{Throughput (commands per second)} \\ \hline
-      \ssmr\   & 31757 & 60699 & 71274 & 84065   & 32151 & 2884  & 1894  & 1200  & 32541 & 11476 & 8580    & 3371          & 32151 & 22803 & 16822 & 10657 \\ \hline
-      \dssmr\  & 28882 & 55925 & 57900 & 86685   & 14874 & 23295 & 35188 & 54250 & 30215 & 48976 & 54025   & 83880         & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
+      \ssmr\   & 32561 & 61220 & 75812 & 11867   & 32483 & 2893  & 1882  & 1190  & 32541 & 11476 & 8580    & 3371          & 32151 & 22803 & 16822 & 10657 \\ \hline
+      \dssmr\  & 29248 & 56347 & 70717 & 11175   & 19248 & 23667 & 35547 & 54025 & 30215 & 48976 & 54025   & 83880         & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
                & \multicolumn{16}{|c|}{\textbf{Throughput rate = \dssmr\ tput / \ssmr\ tput}} \\ \hline
                & \textbf{0.91} & \textbf{0.92}  & \textbf{0.81} & \textbf{1.03}     & \textbf{0.46}   & \textbf{8.08}   & \textbf{18.48}  & \textbf{45.00} & \textbf{0.93} & \textbf{4.27} & \textbf{6.30} & \textbf{24.88} & \textbf{0.84} & \textbf{2.00} & \textbf{3.01} & \textbf{6.97} \\ \hline\hline
                & \multicolumn{16}{|c|}{Latency (milliseconds)} \\ \hline

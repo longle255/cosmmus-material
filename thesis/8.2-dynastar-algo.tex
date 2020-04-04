@@ -1,4 +1,4 @@
-\subsection{Detailed Algorithm}
+\section{Detailed Algorithm}
 \label{sec:dynastar-algo}
 
 \label{sec:dynastar-detailed}
@@ -16,11 +16,12 @@ create and delete commands are analogous.
 \subsubsection{The client process}
 
 To execute a command $C$, the client atomically multicasts $C$ to the oracle
-(Algorithm 1). The oracle replies with a prophecy, which may already tell the
-client that $C$ cannot be executed (e.g., it needs a variable that does not
-exist, it tries to create a variable that already exists). If $C$ can be
-executed, the client receives a prophecy containing the partition where $C$ will
-be executed. The client then waits for the result of the execution of $C$.
+(Algorithm \ref{alg:dynastar-client_proxy}). The oracle replies with a prophecy,
+which may already tell the client that $C$ cannot be executed (e.g., it needs a
+variable that does not exist, it tries to create a variable that already
+exists). If $C$ can be executed, the client receives a prophecy containing the
+partition where $C$ will be executed. The client then waits for the result of
+the execution of $C$.
 
 \subsubsection{The oracle}
 
@@ -67,7 +68,7 @@ graph) and executing commands (i.e., edges in the graph). These hints can be
 submitted by the clients or by the partitions, which collect data upon executing
 commands and periodically inform the oracle (Task 4). The oracle computes a
 partitioning plan of the graph and multicasts it to all servers and to itself.
-Upon delivering new partition plan, the oracle updates its location map
+Upon delivering a new partition plan, the oracle updates its location map
 accordingly (Task 5).
 
 To compute an optimized partitioning, the oracle uses a graph partitioner. A new
