@@ -60,12 +60,19 @@
 \maketitle
 
 \begin{abstract}
-Today's online services must meet strict availability and performance requirements.
-State machine replication, one of the most fundamental approaches to increasing the availability of services without sacrificing strong consistency, provides configurable availability but limited performance scalability.
-Scalable State Machine Replication (S-SMR) achieves scalable performance by partitioning the service state and coordinating the ordering and execution of commands.
-While S-SMR scales the performance of single-partition commands with the number of deployed partitions, replica coordination needed by multi-partition commands introduces an overhead in the execution of multi-partition commands.
-In the paper, we review Scalable State Machine Replication and quantify the overhead due to replica coordination in different scenarios.
-In brief, we show that performance overhead is affected by the number of partitions involved in multi-partition commands and data locality.
+Today's online services must meet strict availability and performance
+requirements. State machine replication, one of the most fundamental approaches
+to increasing the availability of services without sacrificing strong
+consistency, provides configurable availability but limited performance
+scalability. Scalable State Machine Replication (S-SMR) achieves scalable
+performance by partitioning the service state and coordinating the ordering and
+execution of commands. While S-SMR scales the performance of single-partition
+commands with the number of deployed partitions, replica coordination needed by
+multi-partition commands introduces an overhead in the execution of
+multi-partition commands. In the paper, we review Scalable State Machine
+Replication and quantify the overhead due to replica coordination in different
+scenarios. In brief, we show that performance overhead is affected by the number
+of partitions involved in multi-partition commands and data locality.
 \end{abstract}
 
 \section{Introduction}

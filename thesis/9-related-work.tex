@@ -3,9 +3,11 @@
 \label{sec:rw}
 
 In this chapter, we review related work on optimizing and scaling state machine
-replication, partitioning application state, and optimize graph partitioning.
+replication, partitioning application state, and optimizing graph partitioning.
 
-\paragraph{Consensus and state machine replication}
+\section{Optimizing ordering protocol}
+
+\subsection{Consensus and state machine replication}
 State machine replication (SMR) was first introduced by Leslie Lamport as an
 example in ~\cite{Lam78}. Schneider \cite{Sch90} then gave a more systematic
 approach to the design and implementation of SMR protocols. Util now SMR have
@@ -19,8 +21,6 @@ order of commands. The best-known consensus algorithm is the Paxos protocol by
 Lamport \cite{Lam98}. Raft \cite{184040}, a Paxos alternative also
 implements consensus-based SMR, and it is suggested to be easier to understand
 (than Paxos) from an engineering point of view.
-
-\paragraph{Optimizing ordering protocol}
 
 Even though increasing the performance of state machine replication is
 non-trivial, different techniques have been proposed for achieving scalable
@@ -37,7 +37,7 @@ messages is evenly distributed among replicas, as opposed to having a leader
 process that performs more work than the others and may eventually become a
 bottleneck.
 
-\paragraph{Parallelizing execution of commands}
+\subsection{Parallelizing execution of commands}
 
 Multi-threaded execution is a potential source of non-determinism, depending on
 how threads are scheduled to be executed in the operating system. However, some
@@ -55,7 +55,7 @@ tentatively executed in parallel. After the parallel execution, replicas verify
 whether they reached a consistent state; if not, commands are rolled back and
 re-executed sequentially.
 
-\paragraph{Weakening consistency guarantees}
+\subsection{Weakening consistency guarantees}
 
 Many database replication schemes aim at achieving high throughput by relaxing
 consistency, that is, they do not ensure linearizability. In deferred-update
@@ -69,7 +69,7 @@ some applications, these consistency levels may be enough, allowing the system
 to scale better, but services that require linearizability cannot be implemented
 with such techniques.
 
-\paragraph{Partitioning application state}
+\section{Partitioning application state}
 Partitioning the state of a replicated service is conceptually similar to
 partial replication of databases. Efforts to make linearizable systems scalable
 have been made in the past~\cite{bezerra2014ssmr, corbett2013spanner,
@@ -97,7 +97,7 @@ partitioning techniques to decide where each variable should be. Moreover,
 \dynastar\ dilutes the cost of repartitioning by moving variables on-demand,
 that is, only when they are accessed by some command.
 
-\paragraph{Optimize graph partitioning}
+\section{Optimize graph partitioning}
 
 Graph partitioning is an interesting problem with many proposed
 solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.

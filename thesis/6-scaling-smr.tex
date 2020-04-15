@@ -13,7 +13,20 @@ provide the illusion of operating a single high-performance and fault-tolerant
 system. In this chapter, we will survey several approaches to scaling the
 performance of a replicated system.
 
-\section{Replication and partitioning}
+Conceptually, replication can be categorized into two different categories:
+full- and partial replication. Full replication means that the whole state of
+the service is available on all replicas, while in partial replication, each
+replica only contains a subset of the state. For example, in a distributed
+database, full replication allows all rows of a table are available on all
+replicated nodes, while partial replication means some replicas contain only a
+subset of the rows. Intuitively, full replication often comes at a higher cost. If
+all replicas have to keep the whole same state, execute the same sequence of
+commands, the system can not scale. Increasing the number of replicas results in
+bounded improvements in performance. On the other hand, a partially replicated
+replica only stores a subset of the state and handles requests that involve that
+data, thus provide scalable performance.
+
+\section{Full replication schemes}
 
 Replication refers to the technique of managing redundancy data on a set of
 servers (replicas) in a way to ensure that each replica of the service keeps a
@@ -70,18 +83,9 @@ used for transactional databases that implement deferred-update replication
   \label{fig:replication}
 \end{figure*}
 
-Conceptually, replication can be categorized into two different categories:
-full- and partial replication. Full replication means that the whole state of
-the service is available on all replicas, while in partial replication, each
-replica only contains a subset of the state. For example, in a distributed
-database, full replication allows all rows of a table are available on all
-replicated nodes, while partial replication means some replicas contain only a
-subset of the rows. Intuitively, full replication often comes at a higher cost. If
-all replicas have to keep the whole same state, execute the same sequence of
-commands, the system can not scale. Increasing the number of replicas results in
-bounded improvements in performance. On the other hand, a partially replicated
-replica only stores a subset of the state and handles requests that involve that
-data, thus provide scalable performance.
+
+\section{Partial replication schemes}
+
 
 In other words, scalable performance can be achieved with state partitioning.
 Partitioning (also known as \emph{sharding}) is a technique that divides the
@@ -131,11 +135,7 @@ different approaches uses in each phase. In some cases, a phase could be omitted
 the ordering phase (\emph{SC}), it is not necessary to run the agreement
 coordination (\emph{AC}) phase). In the next few sections, we briefly describe the
 performance scaling by partitioning of different replication models.
-%At the end of the chapter, we compare them based on their scalability
-%and consistency level provided.
 
-
-\section{Scaling in distributed database systems}
 
 In database systems, scaling is often achieved by partitioning (usually referred
 as \emph{sharding}). Sharding is a way of dividing the dataset into horizontal
@@ -157,7 +157,9 @@ database. Every transaction in Calvin participates in the same global protocol,
 while Spanner applies a separate consensus protocol per partition.
 
 
-\subsection{Google Spanner}
+
+\subsection{Server coordination without agreement coordination}
+
 
 Spanner is a NewSQL \cite{Grolinger:2013tp} globally distributed database system
 developed by Google \cite{corbett2013spanner}. Spanner provides features such as
@@ -248,7 +250,8 @@ to failures by \emph{placement driver}. Periodically, \emph{placement driver}
 communicates with spanservers to re-arrange data. During these transfers,
 clients can still execute transactions (including updates) on the database.
 
-\subsection{Calvin}
+
+\subsection{Agreement coordination without server coordination}
 
 Calvin is a distributed transaction protocol that consists of a transaction
 scheduling and replication management layer for distributed storage systems
@@ -298,6 +301,114 @@ Figure~\ref{fig:replication:coordination}:
   \item The replicas send response to the client.
 \end{enumerate}
 
+\subsection{Server coordination with agreement coordination}
+\label{sec:ssmr}
+In this section, we describe Scalable state machine replication (\ssmr), an
+extension to SMR that under certain workloads allows performance to grow
+proportionally to the number of replicas. \ssmr\ partitions the service state
+and replicates each partition. It relies on an atomic multicast primitive to
+consistently order commands within and across partitions. In addition, \ssmr\
+assumes a static workload partitioning. Any state reorganization requires system
+shutdown and manual intervention.
+
+In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
+partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
+$\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
+server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
+``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
+S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
+each command.
+\footnote{The oracle returns a set with the partitions accessed
+by the command, but this set does not need to be minimal; it may contain all
+partitions in the worst case, when the partitions accessed by the command cannot
+be determined before the command is executed.}
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/ssmr}
+  \end{minipage}
+  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+  \label{fig:ssmr}
+\end{figure*}
+
+To execute a command, the client multicasts the command to the appropriate
+partitions, as determined by the oracle. Commands that access a single partition
+are executed as in classical SMR: replicas of the concerned partition agree on
+the execution order and each replica executes the command independently. In the
+case of a multi-partition command, replicas of the involved partitions deliver
+the command and then may need to exchange state in order to execute the command
+since some partitions may not have all the values read in the command. This
+mechanism allows commands to execute seamlessly despite the partitioned state.
+
+S-SMR improves on classical SMR by allowing replicated systems to scale, while
+ensuring linearizability. Under workloads with multi-partition commands,
+however, it has limited performance, in terms of latency and throughput
+scalability. Such decreased performance when executing multi-partition commands
+is due to partitions (i) exchanging state variables and (ii) synchronizing by
+exchanging signals. Thus, the performance of \ssmr\ is particularly
+sensitive to the way the service state is partitioned.
+
+One way to reduce the number of multi-partition commands is by dynamically
+changing the partitioning, putting variables that are usually accessed together
+in the same partition. However, the partitioning oracle of \ssmr\ relies on a
+static mapping of variables to partitions. One advantage of this implementation
+is that all clients and servers can have their own local oracle, which always
+returns a correct set of partitions for every query. Such a static mapping has
+the major limitation of not allowing the service to dynamically adapt to
+different access patterns.
+
+In summary, the following steps are involved in the processing of a request in
+\ssmr\, according to our functional model.
+
+\begin{enumerate}
+  \item Client sends the requests to the servers of all involved partitions.
+  \item Server coordination is given by the total order property of the Atomic
+  multicast.
+  \item All involved replicas execute the requests in the order they are delivered.
+  \item Partitions exchanges signals to ensure linearizability.
+  \item All replica send back their result to the client, and the client
+  typically only waits for the first answer.
+\end{enumerate}
+
+\begin{figure*}
+  \begin{minipage}[b]{1.0\linewidth}
+  \centering
+        \includegraphics[width=1\linewidth]{figures/coordination-ssmr}
+  \end{minipage}
+  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+  \label{fig:coordination-ssmr}
+\end{figure*}
+
+\section{Conclusion}
+
+In this chapter, we surveyed a number of approaches to partitioning a replicated
+system. Replication and partitioning are widely used by several system, from
+databases, file systems to distributed object systems. We introduced an abstract
+framework that identifies five basic coordination steps in a partitioned
+replicated system. This framework allows us to give a general comparison of the
+discussed approaches... [tbd]
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \section{Replication and partitioning}
+% \section{Scaling in distributed database systems}
+
+
+% \subsection{Google Spanner}
+
+% \subsection{Calvin}
+
 % \section{Execution models}
 
 % In Spanner, clients can build applications by issuing multiple read and
@@ -316,7 +427,7 @@ Figure~\ref{fig:replication:coordination}:
 % This model makes sure the executions of requests will never abort.
 
 
-\section{Scaling state machine replication with S-SMR}
+% \section{Scaling state machine replication with S-SMR}
 
 % Broadly speaking, there are two classes of techniques for scaling state machine
 % replication by partitioning: \emph{static} and \emph{dynamic}.
@@ -377,86 +488,6 @@ Figure~\ref{fig:replication:coordination}:
 % \end{figure*}
 
 % \subsection{Static state partitioning with S-SMR}
-\label{sec:ssmr}
-
-In this section, we describe Scalable state machine replication (\ssmr), an
-extension to SMR that under certain workloads allows performance to grow
-proportionally to the number of replicas. \ssmr\ partitions the service state
-and replicates each partition. It relies on an atomic multicast primitive to
-consistently order commands within and across partitions. In addition, \ssmr\
-assumes a static workload partitioning. Any state reorganization requires system
-shutdown and manual intervention.
-
-In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
-partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
-$\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
-server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
-``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
-S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
-each command.
-
-% \footnote{The oracle returns a set with the partitions accessed
-% by the command, but this set does not need to be minimal; it may contain all
-% partitions in the worst case, when the partitions accessed by the command cannot
-% be determined before the command is executed.
-
-
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=1\linewidth]{figures/ssmr}
-  \end{minipage}
-  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
-  \label{fig:ssmr}
-\end{figure*}
-
-To execute a command, the client multicasts the command to the appropriate
-partitions, as determined by the oracle. Commands that access a single partition
-are executed as in classical SMR: replicas of the concerned partition agree on
-the execution order and each replica executes the command independently. In the
-case of a multi-partition command, replicas of the involved partitions deliver
-the command and then may need to exchange state in order to execute the command
-since some partitions may not have all the values read in the command. This
-mechanism allows commands to execute seamlessly despite the partitioned state.
-
-S-SMR improves on classical SMR by allowing replicated systems to scale, while
-ensuring linearizability. Under workloads with multi-partition commands,
-however, it has limited performance, in terms of latency and throughput
-scalability. Such decreased performance when executing multi-partition commands
-is due to partitions (i) exchanging state variables and (ii) synchronizing by
-exchanging signals. Thus, the performance of \ssmr\ is particularly
-sensitive to the way the service state is partitioned.
-
-One way to reduce the number of multi-partition commands is by dynamically
-changing the partitioning, putting variables that are usually accessed together
-in the same partition. However, the partitioning oracle of \ssmr\ relies on a
-static mapping of variables to partitions. One advantage of this implementation
-is that all clients and servers can have their own local oracle, which always
-returns a correct set of partitions for every query. Such a static mapping has
-the major limitation of not allowing the service to dynamically adapt to
-different access patterns.
-
-In summary, the following steps are involved in the processing of a request in
-\ssmr\, according to our functional model.
-
-\begin{enumerate}
-  \item Client sends the requests to the servers of all involved partitions.
-  \item Server coordination is given by the total order property of the Atomic
-  multicast.
-  \item All involved replicas execute the requests in the order they are delivered.
-  \item Partitions exchanges signals to ensure linearizability.
-  \item All replica send back their result to the client, and the client
-  typically only waits for the first answer.
-\end{enumerate}
-
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=1\linewidth]{figures/coordination-ssmr}
-  \end{minipage}
-  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
-  \label{fig:coordination-ssmr}
-\end{figure*}
 
 % \subsection{Dynamic state partitioning}
 
@@ -587,15 +618,3 @@ In summary, the following steps are involved in the processing of a request in
 % Figure~\ref{fig:motivation} shows, the decentralized dynamic approach works well
 % for data with strong locality, but is unstable for workloads with weak locality,
 % since data is constantly moved from one partition to another.
-
-
-
-\subsection{Conclusion}
-
-In this chapter, we surveyed a number of approaches to partitioning a replicated
-system. Replication and partitioning are widely used by several system, from
-databases, file systems to distributed object systems. We introduced an abstract
-framework that identifies five basic coordination steps in a partitioned
-replicated system. This framework allows us to give a general comparison of the
-discussed approaches... [tbd]
-

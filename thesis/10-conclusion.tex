@@ -1,39 +1,164 @@
 \chapter[Conclusion]{Conclusion}
 
-In this thesis we have investigated the problem of scaling state machine
-replication, focusing on understanding the performance characteristics and
-proposing techniques to achieve a scalable performance.
+With the explosive growth of the Internet, everyday online activities are
+increasingly dependent on the performance and reliability of large-scale
+distributed systems, such as e-banking, social networks, and e-commerce
+platforms. Over the years, state machine replication has become the most
+standard approach for providing highly available stateful services. By
+replicating deterministic services across a number of servers, the replicated
+service is available as long as the total number of failures does not exceed a
+certain threshold. The strong consistency guarantee of state machine replication
+hides the complexity of data replication among independent replicas, makes the
+underlying designs simpler. However, scaling such a replicated system while
+preserving the strong consistency guarantee is not trivial, since each replica
+must execute every command. To address this problem, several systems have
+investigated the use of state partitioning in the context of SMR, allowing
+client commands to be executed on a subset of replicas. 
+
+In this dissertation, we have explored the space of building highly available
+and scalable systems from a performance perspective and proposed new solutions
+to improve its efficiency. The contribution of this thesis is centered on
+scaling performance of a replicated state machine system. First, we presented a
+general comparison of several approaches to scaling the performance of a
+partitioned replicated system in the distributed system and database
+communities, by using an abstract framework for coordination. Second, we
+introduced \dssmrlong{} (\dssmr), a scalable variant of the well-known state
+machine replication technique. \dssmr\ implements dynamic state partitioning to
+adapt to different access patterns throughout the execution while scaling
+throughput with the number of partitions and ensuring linearizability. Third, we
+present \dynastar, a partitioning strategy for scalable state machine
+replication. Different from \dssmr{}, \dynastar performs well in all workloads
+evaluated. When the state can be perfectly partitioned, \dynastar converges more
+quickly than DS-SMR; when partitioning cannot avoid cross-partition commands, it
+largely outperforms DS-SMR. The key insights of \dynastar are to build a
+workload graph on-the-fly and use an optimized partitioning of the workload
+graph, computed with an online graph partitioner, to decide how to efficiently
+move state variables. 
+
+\section{Research assessment}
+
+This dissertation presents three contributions: (i) Generic framework for
+scaling partitioned replicated system, (ii) Dynamic partitioning for SMR
+(\dssmr), and (iii) Optimized partitioning for SMR (\dynastar). In the following,
+we discuss and review some of the important lessons that we have learned during
+this research.
+
+\paragraph{Survey on scalable partitioned replicated system}
+Scaling a replicated system has been a topic of interest for many years. The
+service is replicated on a number of servers, to tolerate a certain degree of
+failure. Partitioning (or sharding) is a technique that divides the state of a
+service in multiple partitions, so the load could be  equally distributed among
+partitions. A partitioned replicated protocol can be described using five
+generic phases: (i) the client submits request to the system, (ii) the replicas
+of involved partitions coordinate with each other to synchronize the execution
+of the request, (iii) the request is executed, (iv) the involved partitions
+agree on the result of the execution and (v) the system sends the outcome of the
+request to the client. Some approaches may skip or simplify some phases: Google
+Spanner \cite{corbett2013spanner} uses two-phase commit and two-phase locking
+for concurrency control and doesn't need to order the transactions across
+partitions; Calvin \cite{calvin}, on the other hand, orders the transactions in
+a global log, deterministically executes transactions on all involved replicas
+and remove the overhead of coordinating after the execution phase.
+
+\paragraph{Dynamic partitioning for state machine replication} 
+Classic SMR provides configurable fault tolerance and strong consistency but
+limited performance scalability, since all replicated nodes must execute the same
+sequence of commands. Some recent proposals have extended state machine
+replication with sharding. Essentially, these approaches partition (shard) the
+service state and replicate each partition. Commands that access state in a
+single partition are handled as in classic state machine replication.\dssmr\ is
+the technique that allows a partitioned SMR system to dynamically reconfigure
+its data placement on-the-fly. \dssmr\ repartitions the service state
+dynamically, based on the workload. When a command needs variables from
+different partitions, those variables are first moved to the same partition.
+Then, the command is executed as a single-partition command. To reduce the
+chances of skewed load among partitions, the destination partition is chosen
+randomly. As a result, variables that are usually accessed together will tend to
+stay in the same partition, significantly improving scalability. We evaluate the
+performance of \dssmr\ with a scalable social network application. The results
+demonstrate that \dssmr\ could provide a scalable performance under workloads
+that exhibit strong locality.
+
+\paragraph{Optimized partitioning for state machine replication}
+Sharding and replication are the mechanisms of choice of most scalable and
+fault-tolerant distributed systems. The performance of a partitioned system,
+however, heavily depends on the partitioning of the data: in order to scale,
+most commands must involve a single shard, and load must be balanced across
+shards. Estimating a good partitioning of the application state is challenging
+since it requires a priori information about the workload. Moreover, even if
+such information is available, access patterns may change during system
+execution. A good partitioning of the data for uniform access patterns may lead
+to poor performance under skewed access patterns. \dynastar is a partitioning
+strategy for scalable state machine replication. Differently from \dssmr{},
+\dynastar performs well in workloads that exhibit strong and weak locality. In
+the presence of strong locality, it converges more quickly than \dssmr{}; in the
+presence of weak locality, it largely outperforms \dssmr{}. The key insights of
+\dynastar are to build a workload graph on-the-fly and use an optimized
+partitioning of the workload graph, computed with an online graph partitioner,
+to decide how to efficiently move state variables. We describe \dynastar design
+and implementation, and presents a detailed performance evaluation using two
+benchmarks, a social network based on real data and TPC-C.
+
+\section{Future directions}
+
+The main objectives of this dissertation are to explorer the space of techniques
+for scalable, strongly consistent replicated systems. However, many questions
+remain open, so we point here at possible research directions.
+
+\paragraph{Remote updating objects} \dynastar and \dssmr\ have similar execution
+model: moving objects that are required by a command to the same partition and
+execute the command against that partition. \dynastar has an extra step of
+returning back updated objects to their original locations to preserve the
+optimized partitioning. The operations of moving objects back and forth impose
+significant overhead on the performance of the system. 
+
+One direction to remove this overhead is to let partitions update the objects
+remotely by making use of remote direct memory access (RDMA) technique.
+\cite{recio2007remote,dragojevic2014farm}. Essentially, RDMA is a approach
+that allows a host to access the memory of another host without involving the
+processor at the other host. RDMA enables zero-copy transfers, low-latency
+communication and reduces CPU overhead by bypassing the OS kernel and by
+implementing several layers of the network stack in hardware. \dynastar powered
+by RDMA can allow  partition remotely read or write the update to an object
+of a remote partition, without the need to relocate the object. However, how
+to handle the synchronization of the concurrent remote accesses is not trivial.
+It is worthwhile to study synchronization techniques and possibly propose a new
+and efficient protocol that can combine \dynastar with the RDMA techniques.
+
+\paragraph{Optimal scalable atomic multicast protocol.} 
+In order to provide scalable performance, \dssmr\ and \dynastar make use of
+state partitioning. The requests from the client are only sent to the replicas
+of the partitions that store the data being accessed. Traditional SMR relies on
+total messages ordering, but in the case of \dssmr\ and \dynastar, this may
+become a bottleneck. To address this problem, \dssmr\ and \dynastar don't
+totally order the requests but use a total ordered multicast primitive instead,
+which avoids enforcing a precedence relation between messages that do not share
+the same destinations. This allows the ordering layer (i.e., the atomic
+multicast protocol) to be itself also scalable.  As one of the directions for
+expanding the subject of this study, a scalable atomic multicast protocol that
+had optimal latency, while providing optimal throughput, would be the ideal
+primitive for our system to build on.
 
 
-We have proposed here \dynastar, a novel state machine replication approach that
-allows state machine replication to scale by dynamically adapting to the
-workload, while still ensuring strong consistency. This is a work in progress,
-though, and thus needs to be further elaborated. For this purpose, a few points
-need to be addressed:
+\paragraph{Incremental partitioning.} Our default implementation of \dynastar
+uses METIS \cite{Abou-Rjeili:2006} to provide a partitioning based on the
+workload graph. Although METIS does not necessarily produce the best possible
+partitioning of the workload graph, it offers a good compromise between
+performance and partitioning quality. However, METIS needs to repartition graphs
+from scratch every time a change is introduced in the graph or the number of
+partitions. This could result in having \dynastar relocating the whole graph
+\cite{SerafiniTEPAS16}. The other techniques that related to incremental graph
+partitioning are orthogonal to our paradigm, so they can be used to further
+improve \dynastar performance.
 
-\begin{itemize}
 
-    \item[i)]\emph{Decentralized partitioning:}
-    Even though defining optimized partitioning by using a centralized oracle
-    shows its advantages over the decentralized approach, the oracle is still
-    prone to becoming a bottleneck as the workload becomes bigger or less
-    clustered, since it has to handle more queries from clients. A decentralized
-    graph partitioning approach could help solve this problem.
-
-    \item[ii)]\emph{Reconfiguring partitions:}
-    In \dynastar, we considered a fixed number of partitions. Changing the
-    number of partitions in a \dynastar\ deployment while the system is running,
-    is not a trivial problem to solve efficiently. Ideally \dynastar\ could
-    allow application's state to shrink or expand to fit into a partitioning
-    configuration with more or less partitions, in order to add or remove a
-    partition dynamically.
-
-\end{itemize}
-
-Furthermore, \dynastar currently requires clients to explicitly send specific
-commands to create workload graph (e.g., creating vertices or edges between
-vertices). We plan to create a development environment, in the form of a
-programming library, that allows the application designer to focus on the
-application logic, rather than on graph partitioning and remote execution
-details. The creation of the graph, handling of state partitioning and
-distributed execution of commands will be handled internally by the library.
+\paragraph{Decentralized partitioning.} Even though defining optimized
+partitioning by using a centralized component (i.e., the oracle) shows its
+advantages over the decentralized approach, the drawback of this approach is the
+scalability as the oracle is still prone to becoming a bottleneck in some cases.
+For instance:  (i) the workload may become too big to be stored in a single
+machine, or (ii) the workload is more dynamic (i.e., the access patterns change
+more frequently), that reduces the efficiency of the client cache and thus
+increases the queries to the oracle). As another direction for improving this
+work, it is worthwhile to come up with a decentralized graph partitioning and
+mapping that could help to remove the centralized component.
