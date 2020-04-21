@@ -10,10 +10,10 @@ the performance of state machine replication.
 
 State machine replication (SMR) was first introduced by Leslie Lamport as an
 example in ~\cite{Lam78}. Schneider \cite{Sch90} then gave a more systematic
-approach to the design and implementation of SMR protocols. Util now SMR have
+approach to the design and implementation of SMR protocols. Util now, SMR has
 become a well-known approach to replication and has been extensively studied,
 both in academia ~\cite{Kapritsos:2012um, Kotla:2004ep, santos2013htsmr,
-Mencius} and in the industry. SMR provides strong consistency guarantees , which
+Mencius} and in the industry. SMR provides strong consistency guarantees, which
 come from total order and deterministic execution of commands. Traditional SMR
 relies on a consensus protocol to define a common order of execution of such
 commands. Deterministic execution is usually ensured by having every replica
@@ -23,30 +23,30 @@ execute the set of ordered commands sequentially.
 \section{Consensus and state machine replication}
 
 Consensus \cite{Lam78, paprzycki:2001distributed} is a problem that requires one
-or more processes cooperate, each with an initial value, to eventually agree on
+or more processes to cooperate, each with an initial value, to eventually agree on
 a single such value. It was proved that in any asynchronous system with faulty
 processors, there is no deterministic algorithm providing termination
 \cite{FLP85}. One solution to prevent processes in the asynchronous system from
 not making progress is to use failure detectors \cite{aguilera:2000failure}.
-Chandra and Toueg \cite{CT96} propose a class of algorithms which use failure
-detectors to solve consensus. Another solution is to introduce  synchrony and
-assume a known delay to the system’s communication \cite{Aspnes:2003vp}.
+Chandra and Toueg \cite{CT96} propose a class of algorithms that use failure
+detectors to solve consensus. Another solution is to introduce synchrony and
+assume a known delay to the system's communication \cite{Aspnes:2003vp}.
 
-Traditional consensus based SMR repeatedly run multiple instances of a consensus
+Traditional consensus-based SMR repeatedly runs multiple instances of a consensus
 protocol to allow replicas to reach an agreed order of commands. The best-known
 consensus algorithm is the Paxos protocol by Lamport \cite{Lam98}. However,
 Paxos's description leaves many open design questions. Several works have argued
 that Paxos is not an easy algorithm to implement \cite{paxoslive,
 Kirsch:2008paxos}. Raft \cite{184040}, a Paxos alternative also implements
 consensus-based SMR, and it is suggested to be easier to understand (than Paxos)
-from an engineering point of view. Despite of its complexity, several systems
-has been using Paxos to provide various abstractions such as storage systems
+from an engineering point of view. Despite its complexity, several systems
+have been using Paxos to provide various abstractions such as storage systems
 \cite{Bolosky:20011paxos}, locking services \cite{Mike:2006chubby}, and
 distributed databases \cite{Baker:2011megastore}. Google Chubby
 \cite{Mike:2006chubby}, Google Spanner \cite{corbett2013spanner} are employing
 some implementation of the Paxos algorithm to achieve consensus and also to
 cater for replication. Zap \cite{Hunt:2010zoo}, the atomic broadcast protocol at
-the core of ZooKeeper, is a modified version of Paxos with focus on
+the core of ZooKeeper, is a modified version of Paxos with a focus on
 high-performance.
 
 \section{Scaling state machine replication}
@@ -54,7 +54,7 @@ high-performance.
 Even though increasing the performance of state machine replication is
 non-trivial, different techniques have been proposed for achieving scalable
 systems, such as partitioning the application state, parallelizing execution of
-commands, weakening consistency,  or optimizing the propagation and ordering of
+commands, weakening consistency or optimizing the propagation and ordering of
 commands. 
 
 \subsubsection{Partitioning application state}
@@ -66,9 +66,9 @@ Glendenning:2011kj, Marandi:2011dj}.  In Scatter~\cite{Glendenning:2011kj}, the
 authors propose a scalable key-value store based on DHTs, ensuring
 linearizability, but only for requests that access the same key. In the work of
 Marandi et al~\cite{Marandi:2011dj}, variant of SMR is proposed in which data
-items are partitioned but commands have to be totally ordered.
+items are partitioned, but commands have to be totally ordered.
 Spanner~\cite{corbett2013spanner} is a leader-leased, Paxos based system that
-use TrueTime-accurate clock synchronization that require special hardwares to
+uses TrueTime-accurate clock synchronization that requires special hardwares to
 improve geo-distributed read performance. Spanner uses a separate Paxos group
 per partition and synchronized clocks to ensure strong consistency across
 partitions. Although the authors say that Spanner works well with GPS and atomic
@@ -94,7 +94,6 @@ votes in order to decide the outcome of the transaction.
 % partitioning techniques to decide where each variable should be. Moreover,
 % \dynastar\ dilutes the cost of repartitioning by moving variables on-demand,
 % that is, only when they are accessed by some command.
-
 
 \subsubsection{Optimizing ordering protocol}
 
@@ -135,21 +134,21 @@ whether they reached a consistent state; if not, commands are rolled back and
 re-executed sequentially. Storyboard in \cite{Kapitza:2010Storyboard} was
 introduced as an approach that supports deterministic execution in
 multi-threading environments. Storyboard uses a forecasting mechanism to
-predicts an ordered sequence of locks across replicas, based on
+predicts an ordered sequence of locks across replicas based on
 application-specific knowledge. Guo et al.~\cite{guo2014rex} proposed Rex, a
-replicated state-machine framework for multi-core system that uses an
-execute-agree-follow strategy. In Rex, A so called primary server receives
+replicated state-machine framework for a multi-core system that uses an
+execute-agree-follow strategy. In Rex, A so-called primary server receives
 requests and processes those requests deterministically. The executions of
-request could be in parallel. Rex uses locks to synchronize the concurrent
-access to shared variable. The primary server periodically proposes the trace
+requests could be in parallel. Rex uses locks to synchronize the concurrent
+access to a shared variable. The primary server periodically proposes the trace
 for agreement to the other replicas to update.
 
 \subsubsection{Weakening consistency guarantees}
 
 Many replication schemes aim at achieving high throughput by relaxing
-consistency, that is, they do not ensure linearizability. In deferred-update
+consistency; that is, they do not ensure linearizability. In deferred-update
 replication \cite{chundi96dur, kobus2013hybrid, sciascia2012sdur, SousaOMP01},
-replicas commit read-only transactions immediately, not always synchronizing
+replicas commit read-only transactions immediately, not always synchronized
 with each other. Although this indeed improves performance, it allows
 non-linearizable executions. Database systems usually ensure serializability
 \cite{BHG87} or snapshot isolation \cite{LinKJPA09}, which do not take into
@@ -163,17 +162,17 @@ consistency (e.g., Facebook's TAO \cite{facebookTAO}). Eventual consistency
 converge to a common state, even though some intermediate states might diverge
 to a certain extent. Some other systems try to combine the benefits of weak and
 strong consistency models by supporting both.  In Gemini \cite{Li2012geo},
-transactions that can execute under weak consistency run fast, without needing
+transactions that can execute under weak consistency run fast without needing
 to coordinate with other datacenters. PNUTS \cite{Cooper2008PNUTSYH} and
 DynamoDB \cite{Sivasubramanian:2012dynamo} also combine weak consistency with
 per-object strong consistency. Both works rely on conditional writes, where a
-write fails in the presence of concurrent writes..
+write fails in the presence of concurrent writes.
 
 \section{Graph partitioning in performance scaling}
 
 Graph partitioning is an interesting problem with many proposed
 solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.
-In this work, we do not introduce a new graph partitioning solution, but instead
+In this work, we do not introduce a new graph partitioning solution, but instead,
 we use a well-known one (METIS~\cite{Abou-Rjeili:2006}) to partition the state
 of a service implemented with state machine replication. Similarly to
 \dynastar{}, Schism~\cite{curino2010sch} and Clay~\cite{SerafiniTEPAS16} also
@@ -181,11 +180,11 @@ use graph-based partitioning to decide where to place data items in a
 transactional database. In either case, not much detail is given about how to
 handle repartitioning dynamically without violating consistency. Turcu et al.
 ~\cite{7004087} proposed a technique that reduces the amount of cross-partition
-commands and implements an advanced transaction routing.
+commands and implements advanced transaction routing.
 Sword~\cite{quamar2013sword} is another graph-based dynamic repartitioning
 technique. It uses a hyper-graph partitioning algorithm to distribute rows of
 tables in a relational database across database shards. Sword does not ensure
-linearizability and it is not clear how it implements repartitioning without
+linearizability, and it is not clear how it implements repartitioning without
 violating consistency. E-Store~\cite{taft2014est} is yet another repartitioning
 proposal for transactional databases. It repartitions data according to access
 patterns from the workload. It strives to minimize the number of multi-partition
@@ -203,9 +202,8 @@ layer based on Paxos can be reconfigured by adding or removing acceptors. These
 systems are dynamic in a way that is orthogonal to what \dynastar\ proposes.
 
 \dynastar\ consists of allowing the \emph{state partitioning}, that is, which
-state variables belong to which partition, to change dynamically. The greatest
+state variables belong to which partition to change dynamically. The greatest
 challenge that is addressed by \dynastar\ is how to provide such a solution,
 with a dynamic partitioning oracle, while ensuring a very strong level of
 consistency (linearizability), as variables are created, deleted, and moved
 across partitions, based on the access patterns of the workload.
-
