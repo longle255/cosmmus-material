@@ -1,0 +1,2957 @@
+---
+abstract:
+- |
+Today's online services must meet strict availability and performance
+requirements. State machine replication (SMR), one of the most
+fundamental approaches to increasing the availability of services
+without sacrificing strong consistency, provides configurable
+availability but limited performance scalability. The lacking of
+scalability of SMR dues to the fact that every replica has to execute
+all commands, which limits the overall performance by the throughput
+of a single replica, so adding servers does not increase the maximum
+throughput. Scalable State Machine Replication (S-SMR) achieves
+scalable performance by partitioning the service state and
+coordinating the ordering and execution of commands. While S-SMR
+scales the performance of single-partition commands with the number of
+deployed partitions, replica coordination needed by multi-partition
+commands introduces an overhead in the execution of multi-partition
+commands. In this thesis, we propose and implement the following
+ideas: (i) Dynamic scalable state machine replication (DS-SMR), (ii)
+Dynastar: Optimized partitioning for SMR. DS-SMR addresses the problem
+of S-SMR by allowing repartitioning the service state dynamically,
+based on the workload. Variables that are usually accessed together
+are moved to the same partition, which significantly improves
+scalability. To provide better partitioning for DS-SMR, we develop
+DynaStar, a novel approach to scaling SMR. DynaStar also uses
+dynamically repartitioning state technique, combined with a
+centralized oracle to maintain a global view of workload and inform
+heuristics about data placement. Using this oracle, DynaStar is able
+to adapt to workload changes over time, while also minimizing the
+number of state changes. The performance evaluation using two
+benchmarks, a social network based on real data and TPC-C, show that
+DynaStar is a practical technique that achieves excellent throughput.
+- |
+  \[Preface\] The result of this research appears in the following
+  publications:
+
+  -   
+  -   
+  -   
+author:
+- Long Hoang Le
+bibliography:
+- references.bib
+dedication: To Nam Phuong
+title: Scaling State Machine Replication
+---
+
+Introduction
+============
+
+Context and goal of the thesis
+------------------------------
+
+Moderns applications today deploy services across a massive and
+continuously expanding infrastructure, in order to serve users
+efficiently and reliably. With the wide availability of commodity
+hardware, failures in data centers are increasingly common and
+inevitable, even in well-established service providers
+[@disruption:google]. The causes of failures are varied. Machines fail
+individually due to power failures, hardware failures, or collectively
+due to human errors [@disruption:amazon], software bugs, or even extreme
+weather events [@disruption:weather]. While confronting such failures,
+applications still need to offer uninterrupted service to their users.
+To this end, introducing fault tolerance through redundancy is critical
+for the availability and integrity of the applications.
+
+Redundancy by replication can increase both availability and
+scalability. By having several copies of the application running on
+multiple replicas, the failure of one replica does not result in the
+interruption of the service. Moreover, requests from users can be
+distributed across multiple replicas, so the workload can be divided
+among different machines, which would translate into better scalability.
+A main difficulty with replicating an application though is managing
+consistency among replicas. A strong consistency system gives
+programmers an intuitive model for the effects of concurrent updates
+(i.e., clients perform concurrent updates as there is a single copy of
+the application state), making it less likely that complex system
+behavior will result in bugs.
+
+State machine replication is a well-known form of software replication,
+in particular of *active replication* to build fault-tolerant services
+using commodity hardware (e.g.,
+[@Shvachko:2003; @Ghemawat:2003; @Burrows:2006; @MacCormick:2004]). In
+essence, the idea is to model the application as a deterministic state
+machine whose state transitions consist of the execution of client
+requests [@Lam78; @Sch90]. Then, the service is fully replicated on
+several servers that deterministically execute every client command in
+every non-faulty server in the same order to reach the same results.
+State machine replication provides configurable fault tolerance in the
+sense that the system can be set to tolerate any number of faulty
+replicas. In terms of scalability, unfortunately, classic state machine
+replication does not scale. Increasing the number of replicas will not
+scale performance since each replica must execute every command. Thus,
+the overall performance is limited by the throughput of a single
+replica.
+
+Conceptually, scalable performance can be achieved with state
+partitioning, also known as sharding (e.g.,
+[@facebookTAO; @sciascia2012sdur; @Aguilera:2007]), which partitions the
+persistent state of the services across multiple servers. Ideally, if
+the service state (e.g., state variables) can be divided such that
+commands access one partition only and are equally distributed among
+partitions, then system throughput (i.e., the number of commands that
+can be executed per time unit) will increase linearly with the number of
+partitions. Although promising, exploiting partitioning in SMR is
+challenging. First, most applications cannot be partitioned in such a
+way that commands always fall within a single partition. Therefore, a
+partitioning scheme must cope with multi-partition commands. Second,
+determining an efficient partitioning of the state that avoids load
+imbalances and favors single-partition commands normally is
+computationally expensive and requires an accurate characterization of
+the workload. Even if enough information is available, finding a good
+partitioning is a complex optimization
+problem [@curino2010sch; @taft2014est]. Third, many online applications
+experience variations in demand. These happen for a number of reasons.
+In social networks, some users may experience a surge increase in their
+number of followers (e.g., new "celebrities"); workload demand may shift
+along the hours of the day and the days of the week, and unexpected
+(e.g., a video that goes viral) or planned events (e.g., a new company
+starts trading in the stock exchange) may lead to exceptional periods
+when requests increase significantly higher than in normal periods.
+
+It is crucial that highly available partitioned systems be able to
+dynamically adapt to the workload in an optimized way (e.g., minimize
+cross-partition communication). We believe there should be a way to
+provide strong consistency in a scalable manner, that is, to create a
+linearizable, scalable and efficient replicated service. Throughout this
+thesis, we aim to solve the problems mentioned above, while
+substantiating the following claim:
+
+> "It is possible to devise an approach that allows a fault-tolerant
+> system to scale by dynamically adapting to the changes in the
+> workload, while providing strong consistency, that is, ensuring
+> linearizability"
+
+Research contributions {#sec:contribution}
+----------------------
+
+The contribution of this thesis is centered on scaling performance of a
+replicated state machine system. In this section, we outline the main
+contributions of this work and provide a short description of each one.
+We defer detailed discussions to the next chapters.
+
+To achieve the goal defined above for the doctoral thesis, we first
+present an intensive analysis of current approaches on scaling state
+machine replication. In this study we consider a set of techniques
+that\...
+
+With the understanding of the limitations of current approaches, we
+propose **Dynamic Scalable State Machine Replication** (DS-SMR), a
+technique that allows a partitioned SMR system to reconfigure its data
+placement on-the-fly. DS-SMR achieves dynamic data reconfiguration
+without sacrificing scalability or violating the properties of classical
+SMR. These requirements introduce significant challenges. Since state
+variables may change location, clients must find the current location of
+variables. The scalability requirement rules out the use of a
+centralized oracle that clients can consult to find out the partitions a
+command must be multicast to. Even if clients can determine the current
+location of the variables needed to execute a command, by the time the
+command is delivered at the involved partitions, one or more variables
+may have changed their location. Although the client can retry the
+command with the new locations, how to guarantee that the command will
+succeed in the second attempt? In classical SMR, every command invoked
+by a non-faulty client always succeeds. DS-SMR should provide similar
+guarantees. DS-SMR was designed to exploit workload locality. This
+scheme benefits from simple manifestations of locality, such as commands
+that repeatedly access the same state variables, and more complex cases,
+such as structural locality in social network applications, where users
+with common interests have a higher probability of being interconnected
+in the social graph. Focusing on locality allows us to adopt a simple
+but effective approach to state reconfiguration: whenever a command
+requires data from multiple partitions, the variables involved are moved
+to a single partition and the command is executed against this
+partition. To reduce the chances of skewed load among partitions, the
+destination partition is chosen randomly. Although DS-SMR could use more
+sophisticated forms of partitioning, formulated as an optimization
+problem (e.g., [@curino2010sch; @taft2014est]), its technique has the
+advantage that it does not need any prior information about the workload
+and is not computationally expensive.
+
+DS-SMR addresses the limitations of static scheme by adapting the
+partitioning scheme as workloads change, by moving data "on demand" to
+maximize the number of single partition user commands, while avoiding
+imbalances in the load of the partitions. The major challenge in this
+approach is determining how the system selects the partition to which to
+move data. DS-SMR selects partitions randomly, which allows for a
+completely decentralized implementation, in which partitions make only
+local choices about data movement. We refer to this approach as
+*decentralized partitioning*. This approach works well for data with
+*strong locality*, but it is unstable for workloads with *weak
+locality*[^1]. This happens because with weak locality, objects in
+DS-SMR are constantly being moved back and forth between partitions
+without converging to a stable configuration.
+
+For this reason, we introduce the main contribution of this thesis,
+**DynaStar, Optimized Dynamic Partitioning for Scalable State Machine
+Replication**. Like DS-SMR, DynaStar does not require any a priori
+knowledge about the workload. However, DynaStar differs from the prior
+approach because it creates the workload graph on-the-fly and use graph
+partitioning techniques to efficiently relocate application state
+on-demand. In order to reach the optimized partitioning, DynaStar
+maintains a location oracle with a global view of the application state.
+The oracle minimizes the number of state relocations by monitoring the
+workload, and re-computing an optimized partitioning on demand using a
+static partitioning algorithm. The oracle is also the first contact when
+a client submits a command, to discover the partitions on which state
+variables are stored. If the command accesses variables in multiple
+partitions, the oracle issues a move command to the partitions,
+re-locating variables to a single partition. When re-locating a
+variable, the oracle is faced with a choice of which partition to use as
+a destination. DynaStar chooses the partition for relocation (i.e., one
+that would minimize the number of state relocations) by partitioning the
+workload graph using the METIS [@Abou-Rjeili:2006] partitioner. To track
+object locations without compromising scalability, in addition to
+information about the location of state variables in the oracle, each
+client caches previous consults to the oracle. As a result, the oracle
+is only contacted the first time a client accesses a variable or after a
+variable changes its partition. Under the assumption of locality, we
+expect that most queries to the oracle will be accurately resolved by
+the client's cache.
+
+Thesis outline {#sec:structure}
+--------------
+
+The rest of the thesis is organized as follows. Chapter 2 provides the
+background for the thesis, by describing the system model and the
+communication primitives used throughout this thesis. Chapter 3
+considers the general problems of scaling replicated systems. Chapter 4
+discusses DS-SMR, a dynamic partitioning scheme for
+state machine replication, explaining how it may achieve dynamic state
+reconfiguration while still maintaining strong consistency for
+state machine replication. Chapter 5 presents DynaStar, which combines
+the dynamic repartitioning state technique and the centralized oracle to
+maintain a global view of workload and partition application state.
+Chapter 6 surveys related works on scaling state machine replication.
+Finally, Chapter 7 concludes this thesis and proposes future research
+directions.
+
+System model and definitions {#sec:sysmodel}
+============================
+
+In this chapter, we present the system model, introduce two variations
+of a multicast communication primitive, and define our correctness
+criterion (i.e., linearizability).
+
+System model
+------------
+
+Unless mentioned otherwise, we make the following assumptions about
+processes, failure and synchrony models.
+
+-   **Processes and communication.** We consider a distributed system
+    consisting of an unbounded set of client processes
+    $\mathcal{C}= \{c_1, c_2, ...\}$ and a bounded set of server
+    processes (replicas) $\mathcal{S}= \{s_1, ..., s_n\}$. Set
+    $\mathcal{S}$ is divided into disjoint groups of servers
+    $\mathcal{S}_0, ..., \mathcal{S}_k$. Processes communicate by
+    message passing, using either one-to-one or one-to-many
+    communication. One-to-one communication uses primitives $send(p,m)$
+    and $receive(m)$, where $m$ is a message and $p$ is the process $m$
+    is addressed to. If sender and receiver are correct, then every
+    message sent is eventually received. One-to-many communication
+    relies on reliable multicast and atomic multicast, defined in
+    §[2.1.1](#sec:rmcast){reference-type="ref" reference="sec:rmcast"}
+    and §[2.1.2](#sec:amcast){reference-type="ref"
+    reference="sec:amcast"}, respectively.
+
+-   **Failure model.** We assume the *crash* failure model. Processes
+    are either *correct*, if they never fail, or *faulty*, otherwise. In
+    either case, processes do not experience arbitrary behavior (i.e.,
+    no Byzantine failures).
+
+-   **Synchrony model.** Consensus cannot be solved deterministically in
+    an asynchronous system with faults, as established by the FLP
+    impossibility result [@FLP85]. So, we consider a system that is
+    *partially synchronous* [@DLS88]: it is initially asynchronous and
+    eventually becomes synchronous. When the system is asynchronous,
+    there are no bounds on the time it takes for messages to be
+    transmitted and actions to be executed; when the system is
+    synchronous, such bounds exist but are unknown to the processes. The
+    partially synchronous assumption allows consensus defined in
+    §[2.2](#sec:consensus){reference-type="ref"
+    reference="sec:consensus"}, to be implemented under realistic
+    conditions [@FLP85; @Lam98].
+
+### Reliable multicast {#sec:rmcast}
+
+Reliable broadcast provides stronger properties than regular broadcast,
+by ensuring that a message is either delivered to all correct processes
+or to none. To reliably multicast a message $m$ to a set of groups
+$\gamma$, processes use primitive r-mcast$(\gamma, m)$. Message $m$ is
+delivered at the destinations with r-deliver$(m)$. Reliable multicast
+has the following properties:
+
+-   If a correct process r-mcasts $m$, then every correct process in
+    $\gamma$ r-delivers $m$ *(validity)*.
+
+-   If a correct process r-delivers $m$, then every correct process in
+    $\gamma$ eventually r-delivers $m$ *(agreement)*.
+
+-   For any message $m$, every process $p$ in $\gamma$ r-delivers $m$ at
+    most once, and only if some process has r-mcast $m$ to $\gamma$
+    previously *(integrity)*.
+
+### Atomic multicast {#sec:amcast}
+
+Atomic broadcast, also referred to as total order broadcast, is an
+extension of reliable broadcast that ensures that messages are delivered
+by all correct processes in the same order. Atomic multicast is a
+generalization of atomic broadcast, allows messages to be addressed to a
+subset of the processes in the system. Similarly to atomic broadcast,
+atomic multicast ensures that the destination processes of every message
+agree either to deliver or to not deliver the message, and no two
+process deliver any two messages in different order. To atomically
+multicast a message $m$ to a set of groups $\gamma$, processes use
+primitive a-mcast$(\gamma, m)$. Message $m$ is delivered at the
+destinations with a-deliver$(m)$. We define delivery order $<$ as
+follows: $m < m'$ iff there exists a process that delivers $m$ before
+$m'$.
+
+Atomic multicast ensures the following properties:
+
+-   If a correct process a-mcasts $m$ to group $\gamma$, every correct
+    process in $\gamma$ a-delivers $m$ *(validity)*.
+
+-   If a process in $\gamma$ a-delivers $m$, then every correct process
+    in $\gamma$ a-delivers $m$ *(uniform agreement)*.
+
+-   For any message $m$, every process a-delivers $m$ at most once, and
+    only if some process has a-mcast $m$ previously *(integrity)*.
+
+-   If a process a-mcasts $m$ and then $m'$ to group $\gamma$, then no
+    process in $\gamma$ a-delivers $m'$ before $m$ *(fifo order)*.
+
+-   The delivery order is acyclic *(atomic order)*.
+
+-   For any messages $m$ and $m'$ and any processes $p$ and $q$ such
+    that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq \gamma$, if $p$
+    delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$
+    before $m$ or $q$ delivers $m$ before $m'$ *(prefix order)*.
+
+Atomic broadcast is a special case of atomic multicast in which there is
+a single group of processes.
+
+Consensus {#sec:consensus}
+---------
+
+Consensus is a fundamental coordination problem of distributed computing
+[@Lam78; @santos2013htsmr]. The problem is related to replication and
+appears when implementing atomic broadcast, group membership, or similar
+services. Given a set of servers proposing values, it is the problem of
+deciding on one value among the servers. The consensus problem is
+defined by the primitives *propose(v)* and *decide(v)*, where *v* is an
+arbitrary value. Any uniform consensus must satisfy the following three
+properties:
+
+-   If a process decides *v*, then *v* was previously proposed by some
+    process *(uniform integrity)*.
+
+-   If one or more correct processes propose a value then eventually
+    some value is decided by all correct processes *(termination)*.
+
+-   No two processes decide different values *(uniform agreement)*.
+
+Consistency
+-----------
+
+An object that can be concurrently accessed by many processes is called
+a concurrent object [@linearizability]. Interleaving accesses to the
+same object can sometimes lead to unexpected behaviors. The effect of
+this issue can be captured by defining a consistency criterion over the
+shared object, which specifies the level in which operations can
+interleave in accessing the object. Informally, systems that provide
+strong consistency are easier to interact with, because they behave in
+an intuitive way: they behave as the system had only one copy of the
+object, and all operations modified and read that object atomically. In
+this thesis, we specifically focus on strong consistency.
+
+Strong consistency commonly refers to the formal concept of either
+strict serializability or linearizability. A system is strictly
+serializable if the outcome of any sequence of operations, as observed
+by its clients, is equivalent to a serialization of those operations in
+which the temporal ordering of non-overlapping operations is respected.
+(i.e., if an operation *$o_1$* is acknowledged by the system before
+another operation *$o_2$* is proposed by some clients, then *$o_1$*
+comes before *$o_2$* in the equivalent serialization). Linearizability
+is a sub-case of strict serializability in which every operation reads
+or updates a single object. The advantage of linearizability is its
+"local" property: it is sufficient for a system to linearize operations
+for each individual object to achieve global linearizability.
+
+Linearizability is defined with respect to a sequential specification.
+The *sequential specification* of a service consists of a set of
+commands and a set of *legal sequences of commands*, which define the
+behavior of the service when it is accessed sequentially. In a legal
+sequence of commands, every response to the invocation of a command
+immediately follows its invocation, with no other invocation or response
+in between them. For example, a sequence of operations for a read-write
+variable $v$ is legal if every read command returns the value of the
+most recent write command that precedes the read, if there is one, or
+the initial value, otherwise. An execution $\mathcal{E}$ is linearizable
+if there is some permutation of the commands executed in
+$\mathcal{E}$ that respects (i) the service's sequential specification
+and (ii) the real-time precedence of commands. Command $C_1$ precedes
+command $C_2$ in real-time if the response of $C_1$ occurs before the
+invocation of $C_2$.
+
+State machine replication {#sec:smr}
+-------------------------
+
+State machine replication, also called active replication, is a common
+approach to building fault-tolerant systems[@Lam78; @Sch90]. State
+machines model deterministic applications. They atomically execute
+commands issued by clients. This results in a modification of the
+internal state of the state machine and also in the production of an
+output to a client. An execution of a state machine is completely
+determined by the sequence of commands it executes and is independent of
+external inputs such as timeouts. A fault-tolerant state machine can be
+implemented by replicating it over multiple servers. Commands must be
+executed by every replica in a consistent order, despite the fact that
+different replicas might receive them in different orders. To guarantee
+that servers deliver the same sequence of commands, SMR can be
+implemented with atomic broadcast: commands are atomically broadcast to
+all servers and all correct servers deliver and execute the same
+sequence of commands [@BJ87b; @DSU04]. In this thesis, we consider
+implementations of state machine replication that ensure
+linearizability.
+
+Scaling state machine replication
+---------------------------------
+
+State machine replication yields configurable availability but limited
+scalability. Adding resources (i.e., replicas) results in a service that
+tolerates more failures, but does not translate into sustainable
+improvements in throughput. This happens for a couple reasons. First,
+the underlying communication protocol needed to ensure ordered message
+delivery may not scale itself (i.e., a communication bottleneck).
+Second, every command must be executed sequentially by each replica
+(i.e., an execution bottleneck).
+
+Several approaches have been proposed to address SMR's scalability
+limitations. To cope with communication overhead, some proposals have
+suggested to spread the load of ordering commands among multiple
+processes (e.g., [@Moraru:2013gw; @Mencius; @Marandi:2012hb]), as
+opposed to dedicating a single process to determine the order of
+commands (e.g., [@Lam98]).
+
+Two directions of research have been suggested to overcome execution
+bottlenecks. One approach (scaling up) is to take advantage of multiple
+cores to execute commands concurrently without sacrificing consistency
+[@Kapritsos:2012um; @Marandi:2014bj; @Kotla:2004ep; @Guo:2014jp].
+Ideally, one could use a replication technique that supports parallelism
+(multithreading) to scale up a replicated service. But existing
+techniques have at least one sequential part in their execution. Another
+approach (scaling out) is to partition the service's state (also known
+as *sharding*) and replicate each partition (e.g.,
+[@Glendenning:2011kj; @Marandi:2011dj]). The idea is to divide the state
+of a service in multiple partitions so that most commands access one
+partition only and are equally distributed among partitions.
+Unfortunately, most services cannot be "perfectly partitioned", that is,
+the service state cannot be divided in a way that commands access one
+partition only. As a consequence, partitioned systems must cope with
+multi-partition commands. In the next chapter, we review some approaches
+in the second category, which include Scalable State Machine Replication
+(S-SMR) [@bezerra2014ssmr], Google Spanner [@corbett2013spanner], and
+some other techniques.
+
+Graph partitioning problem
+--------------------------
+
+In computer system, graphs are widely used to describe the dependencies
+of the data within a computation. All applications can model their data
+and/or workload using graph. For example, in a social network
+application, the workload could be modeled as a weighted graph, the
+users are represented by nodes and the connections/relations between
+those users by the edges between nodes. Once the workload is modeled as
+graph, **Graph partitioning** can be used to determine how to divide the
+work and data for efficient concurrent access or computation.
+
+A weighted (directed) graph *graph* $G$ consists of a set of nodes $V$
+and a set of edges $E \subset V \times V$ to represent relations between
+the nodes, as well as two cost functions. One function assigns weights
+to the nodes $c : V
+\rightarrow R_{>0}$ and a second function $\omega : E \rightarrow R$
+assigns costs to the edges. All graphs contain subgraphs. A subgraph is
+a graph whose node and edge set are subsets of another graph. An edge
+that connects vertices of two different subgraph is called a *crossing
+edge*. Graph partitioning is a fundamental problem of finding a
+specified number of distinct subsets of the set of vertices of a graph
+(subgraph). *Balance* is the constraint that requires that all subgraph
+have about equal size. *Total edge cut* is the number of crossing edges
+those subgraphs. Intuitively, a good partitioning is the one that
+minimizes the total edges connecting subgraphs, while maintaining the
+balance among partitions. This is generally considered to be a NP-hard
+problem [@10.1006/jpdc.1997.1404]
+
+Locality of workloads {#sysmodel:locality}
+---------------------
+
+In order to achieve better partitioning, it's necessary to exploit the
+locality of the workload. Locality is one of the long-known and
+much-exploited principle in computer science. Operating system and
+databases have been exploiting the locality for years [@locality:os]. In
+the scope of this thesis, we define the locality of a workloads is the
+behavior in the data accessing patterns produced by the application. The
+workloads are referred as *strong locality* if that can be partitioned
+in a way that would both (i) allow commands to be executed at a single
+partition only, and (ii) evenly distribute data so that load is balanced
+among partitions. Conversely, workloads that cannot avoid
+multi-partition commands with balanced load among partitions exhibit
+*weak locality*.
+
+Scaling partitioned replicated system
+=====================================
+
+Replication refers to the technique of managing redundancy data on a set
+of servers (replicas) in a way to ensure that each replica of the
+service keeps a consistent state, given a set of consistency criteria.
+Over more than three decades, replication has become an area of interest
+that has been studied in traditional domains, such as database systems,
+file systems, and later in distributed object systems. Although
+replication is often used to achieve higher availability, replication
+decisions can also help improve performance. Availability is the
+capability of the system continues to work, even in the presence of
+failures, as long as the number of failures is below a given tolerable
+limit. Performance refers to the response time and throughput of the
+system. For instance, a service that serves mainly read data can
+distribute the requests to the different replicated machines, helps to
+process requests in parallel, thus, improves the throughput of the
+system.
+
+Conceptually, replication can be categorized into two main categories:
+full- and partial replication. Full replication means that the whole
+state of the service is available on all replicas, while in partial
+replication, each replica only contains a subset of the state. For
+example, in a distributed database, full replication allows all rows of
+a table are available on all replicated nodes, while partial replication
+means some replicas contain only a subset of the rows. Intuitively, full
+replication often comes at a higher cost. If all replicas have to keep
+the whole same state, execute the same sequence of commands, the system
+can not scale. It may also become infeasible to have a full copy of the
+system's data when that data grows, as the replicas may not have enough
+space to store it. Therefore, increasing the number of replicas in a
+full replicated system results in bounded improvements in performance.
+On the other hand, the main idea of partial replication is that not all
+replicas have to process a request. The replicas in a partially
+replicated system only store a subset of the state and handle requests
+that involve that data, thus provide scalable performance. However, the
+main challenge is how to keep the replicas in a replicated system
+consistent. In this chapter, we will survey several approaches to
+replication and scaling the performance of a replicated system.
+
+Full replication schemes
+------------------------
+
+Replication has become a standard approach to fault-tolerant: if one
+server fails, another one takes over. In a full replicated system, every
+server replicates a full copy of the service's state. All replicas use
+an algorithm that ensures data coherence across all these nodes.
+Although there are many replication techniques [@Replication:book],
+there remain two major classes of replication techniques that have
+become widely well-known to ensure this consistency: *active
+replication* and *passive replication*.
+
+##### Active replication
+
+With *active replication* (also called state machine replication)
+approach, the requests of the client are sent to all members of a given
+group (replicas) in the same order. The replicas will then execute the
+requests as though they were the only member of the group, to reach the
+same state, and reply to the client. If a client sends a request to a
+group of $n$ replicas (assuming no failures), then the client will
+receive n identical reply to the original request. With this replication
+scheme, a crash does not increase the latency experienced by the client.
+State machine replication is a fundamentally powerful building block
+that enables the implementation of highly available distributed services
+by replication. State machine replication achieves strong consistency
+(i.e., linearizability) by regulating how client commands are propagated
+to and executed by the replicas: every non-faulty replica must receive
+and execute every command deterministically and in the same order. There
+are also other replication schemes, such as chain replication
+[@chainreplication; @chainreplication:byzantine] and multi-primary
+replication, which is commonly used for transactional databases that
+implement deferred-update replication
+[@sciascia2012sdur; @Replication:book; @chundi96dur].
+
+##### Passive replication
+
+In the *passive replication* (also called *primary-backup*) approach,
+the requests are sent to only one member of the replica group (the
+*primary*), while all other are *backups*. The primary will execute the
+request and send the response to the client. Any modification to the
+primary's state is updated to other members of the group (the backups).
+If the primary fails, one of the backups takes over the service by
+becoming a new primary. Unlike the active replication approach, passive
+replication does not waste resource on redundant execution of request,
+and allow non-deterministic requests. However, a failure on the leader
+will affect the latency of a command.
+
+In the work of Pedone et al [@pedone:replication], the authors presented
+a model that allowed to compare and distinguish replication protocols in
+databases and distributed systems (Figure
+ [\[fig:replication:org\]](#fig:replication:org){reference-type="ref"
+reference="fig:replication:org"}). This model classifies replication
+protocols by five generic steps of replication as following:
+
+![image](figures/replication-original.pdf){width="1\\linewidth"}
+
+-   *Request phase(RE):* In the request phase, a client submits an
+    operation to the system by sending the request to one ore more
+    replicas.
+
+-   *Server coordination phase (SC):* The replicas coordinate with each
+    other to synchronize the execution of the request.
+
+-   *Execution phase (EX):* The operation is executed on the replica
+    servers.
+
+-   *Agreement coordination phase (AC):* The replica servers coordinate
+    to agree on the result of the execution.
+
+-   *Response phase (END):* The result of the operation is transmitted
+    back to the client.
+
+The differences between different replicated systems come from the
+different approaches uses in each phase. In some cases, a phase could be
+omitted (e.g., when messages are ordered by an atomic
+multicast/broadcast primitive in the ordering phase (*SC*), it is not
+necessary to run the agreement coordination (*AC*) phase). With this
+generic functional model, the involved steps in the active replication
+technique can be depicted as follow (Figure
+[\[fig:replication:active\]](#fig:replication:active){reference-type="ref"
+reference="fig:replication:active"}):
+
+![image](figures/replication-active.pdf){width="1\\linewidth"}
+
+1.  The client submits the request to the server by using an atomic
+    broadcast primitive.
+
+2.  Server coordination is given by the total order property of the
+    Atomic Broadcast.
+
+3.  All replicas deterministically execute the request in the order they
+    are delivered.
+
+4.  There is no coordination required after the execution. All replicas
+    should reach the same state.
+
+5.  All replicas send the reply to the client.
+
+The involved steps in the passive replication technique can be depicted
+according to the generic functional model as follow (Figure
+[\[fig:replication:passive\]](#fig:replication:passive){reference-type="ref"
+reference="fig:replication:passive"}):
+
+![image](figures/replication-passive.pdf){width="1\\linewidth"}
+
+1.  The client submit the request to the primary.
+
+2.  Server coordination is not required.
+
+3.  All replicas deterministically execute the request in the order they
+    are delivered.
+
+4.  The primary coordinates with the backups by broadcasting the update
+    information.
+
+5.  The primary sends the reply to the client.
+
+Partial replication schemes
+---------------------------
+
+Full replication ensures the update of every transaction to be
+replicated on every replica in the system. This prevents the system from
+scaling with the increase in the number of replicas. In fact, the
+performance of the system is limited by the performance of a single
+replica. Partial replication addresses these issues by replicating only
+a subset of data at each replica. Therefore, different subsets of data
+can be accessed and updated concurrently. In other words, scalable
+performance can be achieved with state partitioning.
+
+Partitioning (also known as *sharding*) is a technique that divides the
+state of a service in multiple partitions so that most commands access
+one partition only and are equally distributed among partitions.
+Partitioning replicated state machine can provide highly scalable and
+available systems; however, introduce other challenges. Most services
+cannot be "perfectly partitioned"; that is, the service state cannot be
+divided in a way that commands access one partition only. Therefore, a
+partitioning protocol must cope with multi-partition commands.
+
+In general, we can model abstraction for partitioned replication
+protocols by extending the five-phases functional model in
+[@pedone:replication], to cover the coordination between components in a
+partitioned replicated system (see Figure
+[\[fig:replication:coordination\]](#fig:replication:coordination){reference-type="ref"
+reference="fig:replication:coordination"}). Those phases are:
+
+![image](figures/replication-coordination.pdf){width="1\\linewidth"}
+
+-   *Request phase(RE):* In the request phase, a client submits the to
+    the system. This can be done in different ways: the request could be
+    sent to all involved servers of the request or to one
+    server/partition, then will be forwarded to the other processes. In
+    any case, the client should be able to identify the involved
+    partitions that contain the data accessed by the request. The client
+    can send the request directly or use a proxy layer to handle the
+    transmission.
+
+-   *Server coordination phase (SC):* The replicas of all partitions
+    that contain the data required by the request will coordinate with
+    each other to synchronize the execution of the request. Depend on
+    the consistency level of the application, the concurrent requests
+    will be ordered within and/or across involved partitions.
+
+-   *Execution phase (EX):* The involved replica servers execute the
+    request.
+
+-   *Agreement coordination phase (AC):* The replica servers of all
+    involved partitions agree on the outcome of the execution.
+
+-   *Response phase (END):* The result of the request is sent back to
+    the client.
+
+In database systems, scaling is often achieved by partitioning (usually
+referred as *sharding*). Sharding is a way of dividing the dataset into
+horizontal fragmentation, known as partitions. Each partition
+essentially has the same schema and columns but contains different
+subsets of the total data set. The partitions are then distributed
+across separate database servers, referred to as physical shards, which
+can hold multiple logical partitions. Those physical shards can be
+replicated to tolerate a certain degree of failure. Despite this, the
+data held within all the partitions collectively represent an entire
+logical dataset. To guarantee the consistency, a consensus protocol
+(e.g., Paxos or Raft) is used to enforce consistency across multiple
+replicas of the data. Essentially, this protocol works as a majority
+voting mechanism. Any change to the dataset requires a majority of
+replicas to agree to the change. Google Spanner [@corbett2013spanner]
+and Calvin [@calvin] are two of the database solutions in this category.
+Both systems were designed to be a highly-scalable distributed
+relational database. The main difference between the two systems is that
+Spanner uses two phase commit as an agreement protocol to synchronize
+the changes between partition, without the need of server coordination
+before the execution, while Calvin uses a single, global consensus
+protocol per database to synchronize transaction before the execution.
+All involved replicas of Calvin then deterministically execute and
+commit the transaction, without an agreement protocol. The next sections
+will describe how those database system works. In addition, we will go
+into detail Scalable state machine replication, a system in the third
+category, which requires both server coordination and agreement for
+providing a strong consistency guarantee.
+
+### Agreement coordination without server coordination
+
+Spanner is a NewSQL [@Grolinger:2013tp] globally distributed database
+system developed by Google [@corbett2013spanner]. Spanner provides
+features such as global transactions, strongly consistent reads, and
+automatic multi-site replication and automatic failover. Spanner
+partitions into multiple shards, and replicates every shard via Paxos
+across independent regions for high availability. So every operation in
+a transaction is a replicated operation within a Paxos replicated state
+machine.
+
+Spanner consists of multiple *zones*, each of which is a deployment of
+Bigtable servers. A zone uses one *zonemaster* to assign data to one
+hundred to several thousand sets of partitions. Each partition is a set
+of Paxos-based state machines (so-called *spanservers*). To implement
+transactions, including transactions span across multiple partitions,
+Spanner uses two-phase locking for concurrency control, and two-phase
+commit. Each spanserver implements a lock table to support
+two-phase-locking and a transaction manager to support distributed
+transactions. Operations that require synchronization have to acquire
+the lock from the lock table. The Paxos leader in each partition is
+responsible for participating in these protocols on behalf of that
+partition. Clients in Spanner use per-zone *location proxies* to locate
+the spanservers assigned to serve their data. To order the transaction
+between partitions, Spanner uses TrueTime API, a combination of GPS and
+atomic clocks in all of their regions (i.e., zones) to synchronize time
+to within a known uncertainty bound. If two transactions are processed
+during time periods that do not have overlapping uncertainty bounds,
+Spanner can be certain that the later transaction will see all the
+writes of the earlier transaction.
+
+![image](figures/spanner-single-partition.pdf){width="1\\linewidth"}
+
+##### Single partition transaction
+
+In Spanner, if a transaction accesses data in a single partition
+(single-shard transaction), Spanner processes that transaction as
+following (depicted in
+Figure [\[fig:spanner-single-partition\]](#fig:spanner-single-partition){reference-type="ref"
+reference="fig:spanner-single-partition"}). First, the client process
+queries the location proxy to determine which partitions store the data
+accessed by the transaction and send the transaction to the Paxos leader
+of that partition. The leader acquires the read locks on the involved
+objects and acknowledges the client. The client executes the
+transaction, then initiates the commit on the leader. The leader then
+coordinates with other replicas in its Paxos group to commit the
+transaction, and responses to the client.
+
+![image](figures/spanner-multi-partition.pdf){width="1\\linewidth"}
+
+##### Multi-partition transaction
+
+In the case the transaction accesses more than a single partition, the
+leaders of all involved partitions have to coordinate and perform a
+two-phase commit to ensure consistency and use two-phase locking to
+ensure isolation (described in
+Figure [\[fig:spanner-multi-partition\]](#fig:spanner-multi-partition){reference-type="ref"
+reference="fig:spanner-multi-partition"}). First, the client also needs
+to determine the involved partitions by querying a location proxy. Then
+the client sends the transaction to the leader of each involved group,
+which acquires read locks and returns the most recent data. The client
+then performs the execution of the transaction locally. To commit the
+transaction, the client chooses a coordinator from the set of involved
+leaders, then initiate commit by sending commit message to each leader,
+together with the information of the coordinator. On receiving commit
+message from the client, the involved leaders coordinate to acquire
+write locks by performing two-phase locking followed by two-phase
+commit. After having the transaction committed on all involved
+partitions, the coordinator leader sends a response to the client.
+
+In general, the transaction processing of Spanner could be mapped to the
+coordination protocol in
+Figure [\[fig:replication:coordination\]](#fig:replication:coordination){reference-type="ref"
+reference="fig:replication:coordination"} as the following:
+
+1.  Client sends the transaction to the Paxos leader process.
+
+2.  There is no initial coordination required between involved replicas.
+
+3.  The leader(s) acquires locks and retrieves data for client. The
+    client executes the transaction and initiate commit protocol.
+
+4.  The leader(s) coordinate with others to commit the transaction.
+
+5.  The leader sends response to the client.
+
+Although not detailed in the paper, Spanner allows data to be re-sharded
+across *spanservers* or *zones* data centers to balance loads and in
+response to failures by *placement driver*. Periodically, *placement
+driver* communicates with spanservers to re-arrange data. During these
+transfers, clients can still execute transactions (including updates) on
+the database.
+
+### Server coordination without agreement coordination
+
+Calvin is a distributed transaction protocol that consists of a
+transaction scheduling and replication management layer for distributed
+storage systems [@calvin]. Similar to Spanner, Calvin also shards its
+data on multiple partitions for performance, and replicate those
+partitions for availability. The main difference between the two systems
+is the way Calvin deals with the problem of transaction synchronization.
+Spanner solves that problem by a traditional way: two-phase locking and
+two-phase commit, and reduce cost of synchronization by reducing the
+total amount of time during which transactions hold locks using TrueTime
+API.
+
+By executing transactions using two-phase locking and two-phase commit,
+the traditional database systems have no deterministic transaction
+order. It means that the servers have to coordinate to preserve the
+order before committing the transaction. Calvin chooses to use
+deterministic transaction order. This approach could remove the overhead
+of coordinating after the execution phase, since all the nodes execute
+the same sequence of input in a deterministic way, to produce the same
+output. Calvin achieves the deterministic order by using a sequencer
+(*preprocessing*) to let replicas agree on the execution order and
+transaction boundaries.
+
+Client processes in Calvin first submit transactions into a distributed,
+replicated log before being sent to partitions to process. The sequencer
+then processes this request log, determines the order in which
+transactions are executed, and establishes a global transaction input
+sequence. Then each replica simply reads and processes transactions from
+this global order (Figure
+[\[fig:calvin\]](#fig:calvin){reference-type="ref"
+reference="fig:calvin"}).
+
+![image](figures/calvin.pdf){width="1\\linewidth"}
+
+Essentially, Calvin protocol could be described as the following steps,
+according to our abstraction of coordination protocol in
+Figure [\[fig:replication:coordination\]](#fig:replication:coordination){reference-type="ref"
+reference="fig:replication:coordination"}:
+
+1.  Client submits the transaction to the sequencer nodes.
+
+2.  Sequencers coordinate to order and schedule the execution of the
+    transaction in a global sequence.,
+
+3.  The involved replicas execute the same sequence of transactions,
+    produce the same output.
+
+4.  As all the replicas reach the same state, No agreement coordination
+    is necessary.
+
+5.  The replicas send response to the client.
+
+### Server coordination with agreement coordination {#sec:ssmr}
+
+In this section, we describe Scalable state machine replication (S-SMR),
+an extension to SMR that under certain workloads allows performance to
+grow proportionally to the number of replicas. S-SMR partitions the
+service state and replicates each partition. It relies on an atomic
+multicast primitive to consistently order commands within and across
+partitions. In addition, S-SMR assumes a static workload partitioning.
+Any state reorganization requires system shutdown and manual
+intervention.
+
+In S-SMR [@bezerra2014ssmr], the service state $\mathcal{V}$ is composed
+of $k$ partitions, in set
+$\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
+$\mathcal{S}_i$ is assigned to partition $\mathcal{V}_i$. For brevity,
+we say that server $s$ belongs to $\mathcal{V}_i$ meaning that
+$s \in \mathcal{S}_i$, and say "multicast to $\mathcal{V}_i$" meaning
+"multicast to server group $\mathcal{S}_i$". S-SMR relies on an
+*oracle*, which tells which partitions are accessed by each command.
+[^2]
+
+![image](figures/ssmr.pdf){width="1\\linewidth"}
+
+To execute a command, the client multicasts the command to the
+appropriate partitions, as determined by the oracle. Commands that
+access a single partition are executed as in classical SMR: replicas of
+the concerned partition agree on the execution order and each replica
+executes the command independently. In the case of a multi-partition
+command, replicas of the involved partitions deliver the command and
+then may need to exchange state in order to execute the command since
+some partitions may not have all the values read in the command. This
+mechanism allows commands to execute seamlessly despite the partitioned
+state.
+
+S-SMR improves on classical SMR by allowing replicated systems to scale,
+while ensuring linearizability. Under workloads with multi-partition
+commands, however, it has limited performance, in terms of latency and
+throughput scalability. Such decreased performance when executing
+multi-partition commands is due to partitions (i) exchanging state
+variables and (ii) synchronizing by exchanging signals. Thus, the
+performance of S-SMR is particularly sensitive to the way the service
+state is partitioned.
+
+One way to reduce the number of multi-partition commands is by
+dynamically changing the partitioning, putting variables that are
+usually accessed together in the same partition. However, the
+partitioning oracle of S-SMR relies on a static mapping of variables to
+partitions. One advantage of this implementation is that all clients and
+servers can have their own local oracle, which always returns a correct
+set of partitions for every query. Such a static mapping has the major
+limitation of not allowing the service to dynamically adapt to different
+access patterns.
+
+In summary, the following steps are involved in the processing of a
+request in S-SMR  according to our functional model.
+
+1.  Client sends the requests to the servers of all involved partitions.
+
+2.  Server coordination is given by the total order property of the
+    Atomic multicast.
+
+3.  All involved replicas execute the requests in the order they are
+    delivered.
+
+4.  Partitions exchanges signals to ensure linearizability.
+
+5.  All replica send back their result to the client, and the client
+    typically only waits for the first answer.
+
+![image](figures/coordination-ssmr.pdf){width="1\\linewidth"}
+
+Conclusion
+----------
+
+In this chapter, we surveyed a number of approaches to replication and
+partitioning a replicated system. Replication and partitioning are
+widely used by several system, from databases, file systems to
+distributed object systems. We introduced an abstract framework that
+identifies five basic coordination steps in a partitioned replicated
+system. This framework allows us to give an insight of design choices of
+several approaches in the literature. By understanding those approaches,
+we came up with an approach that tend to minimize the overhead of cross
+partition coordination, thus provide better performance scalability.
+
+Dynamic partitioning for SMR {#sec:dssmr}
+============================
+
+An inherent problem of traditional SMR is that it is not scalable: any
+replica added to the system will deliver all requests, so throughput is
+not increased. Scalable SMR addresses this issue in two ways: (i) by
+partitioning the application state, while allowing every command to
+access (read/write) any combination of partitions and (ii) using caching
+to reduce the communication across partitions, while keeping the
+execution linearizable.
+
+On the downside of this approach, as the number of multi-partition
+commands increases, performance of S-SMR decreases, as partitions must
+communicate. One way to reduce the number of multi-partition commands is
+by dynamically changing the partitioning, placing variables that are
+usually accessed together in the same partition. However, the
+partitioning oracle of S-SMR relies on a static mapping of variables to
+partitions. One advantage of this approach is that all clients and
+servers can have their own local oracle, which always returns a correct
+set of partitions for every query. Such a static mapping has the major
+limitation of not allowing the service to dynamically adapt to different
+access patterns. Any state reorganization requires system shutdown and
+manual intervention.
+
+Given these issues, it is crucial that highly available partitioned
+systems be able to dynamically adapt to the workload. In this chapter,
+we present Dynamic Scalable State Machine Replication (DS-SMR), a
+technique that allows a partitioned SMR system to reconfigure its data
+placement on-the-fly. DS-SMR achieves dynamic data reconfiguration
+without sacrificing scalability or violating the properties of classical
+SMR. These requirements introduce significant challenges. Since state
+variables may change location, clients must find the current location of
+variables. If there exists a centralized oracle that clients can consult
+to find out the partitions a command must be multicast to, the system is
+still unlikely to scale, as the oracle will likely become a bottleneck.
+Even if clients can determine the current location of the variables
+needed to execute a command, by the time the command is delivered at the
+involved partitions, one or more variables may have changed their
+location. Although the client can retry the command with the new
+locations, how to guarantee that the command will succeed in the second
+attempt? In classical SMR, every command invoked by a non-faulty client
+always succeeds. DS-SMR should provide similar guarantees.
+
+DS-SMR was designed to exploit workload locality. Our scheme benefits
+from simple manifestations of locality, such as commands that repeatedly
+access the same state variables, and more complex manifestations, such
+as structural locality in social network applications, where users with
+common interests have a higher probability of being interconnected in
+the social graph. Focusing on locality allows us to adopt a simple but
+effective approach to state reconfiguration: whenever a command requires
+data from multiple partitions, the variables involved are moved to a
+single partition and the command is executed in this partition. To
+reduce the chances of skewed load among partitions, the destination
+partition is chosen randomly. Although DS-SMR could use more
+sophisticated forms of partitioning, formulated as an optimization
+problem (e.g., [@curino2010sch; @taft2014est]), our technique has the
+advantage that it does not need any prior information about the workload
+and is not computationally expensive.
+
+To track object locations without compromising scalability, in addition
+to a centralized oracle that contains accurate information about the
+location of state variables, each client caches previous consults to the
+oracle. As a result, the oracle is only contacted the first time a
+client accesses a variable or after a variable changes its partition.
+Under the assumption of locality, we expect that most queries to the
+oracle will be accurately resolved by the client's cache. To ensure that
+commands always succeed, despite concurrent relocations, after
+attempting to execute a command a few times unsuccessfully,
+DS-SMR retries the command using S-SMR's execution atomicity and
+involving all partitions. Doing so increases the cost to execute the
+command but guarantees that relocations will not interfere with the
+execution of the command.
+
+We have fully implemented DS-SMR as the Eyrie Java library, and we
+performed a number of experiments using Chirper, a social network
+application built with Eyrie. We compared the performance of DS-SMR to
+S-SMR using different workloads. With a mixed workload that combines
+various operations issued in a social network application,
+DS-SMR reached 74 kcps (thousands of commands per second), against less
+than 33 kcps achieved by S-SMR, improving by a factor of over 2.2.
+Moreover, DS-SMR's performance scales with the number of partitions
+under all workloads.
+
+The following contributions are presented in this chapter: (1) It
+introduces DS-SMR and discusses some performance optimizations,
+including the caching technique. (2) It details Eyrie, a Java library to
+simplify the design of services based on DS-SMR. (3) It describes
+Chirper to demonstrate how Eyrie can be used to implement a scalable
+social network service. (4) It presents a detailed experimental
+evaluation of Chirper, deploying it with S-SMR and DS-SMR in order to
+compare the performance of the two replication techniques.
+
+The remainder of this chapter is organized as follows. Section
+[4.1](#sec:dssmr-idea){reference-type="ref" reference="sec:dssmr-idea"}
+gives an overview of DS-SMR. Section
+[4.2](#sec:dssmr-detail){reference-type="ref"
+reference="sec:dssmr-detail"} explains the algorithm in detail. Section
+[4.3](#sec:dssmr-optm){reference-type="ref" reference="sec:dssmr-optm"}
+proposes some performance optimizations. Section
+[4.4](#sec:dssmr-correctness){reference-type="ref"
+reference="sec:dssmr-correctness"} argues about the correctness of the
+algorithm. Section [4.5](#sec:dssmr-implementation){reference-type="ref"
+reference="sec:dssmr-implementation"} details the implementation of
+Eyrie. Section [4.6](#sec:dssmr-experiments){reference-type="ref"
+reference="sec:dssmr-experiments"} reports on the performance of
+Eyrieand Chirper. Section
+[4.7](#sec:dssmr-conclusion){reference-type="ref"
+reference="sec:dssmr-conclusion"} concludes the chapter.
+
+General idea {#sec:dssmr-idea}
+------------
+
+Dynamic S-SMR (DS-SMR) defines a dynamic mapping of variables to
+partitions. Each variable $v$ is mapped to partition $\mathcal{P}$,
+meaning that $v \in \mathcal{P}$. Such a mapping is managed by a
+partitioning oracle, which is implemented as a replicated service run by
+a group of server processes $\mathcal{S}_0$. The oracle service allows
+the mapping of variables to partitions to be retrieved or changed during
+execution. In more detail, DS-SMR distinguishes five types of commands:
+$access(\omega)$ is an application command that accesses (reads or
+writes) variables in set $\omega \subseteq \mathcal{V}$ (as described in
+Section [2](#sec:sysmodel){reference-type="ref"
+reference="sec:sysmodel"}), $create(v)$ creates a new variable $v$ and
+initially maps it to a partition defined by the oracle, $delete(v)$
+removes $v$ from the service state,
+$move(v,\mathcal{P}_s,\mathcal{P}_d)$ moves variable $v$ from partition
+$\mathcal{P}_s$ to partition $\mathcal{P}_d$, and $consult(C)$ asks the
+oracle which variables are accessed by command $C$, and which partition
+contains each of them. The reply from the oracle to a $consult$ command
+is called a $prophecy$. A prophecy usually consists of a set of tuples
+$\langle v, \mathcal{P}\rangle$, meaning that variable $v$ is mapped to
+partition $\mathcal{P}$. The other possible values for a prophecy are
+$ok$ and $nok$, which mean that a command can and cannot be executed,
+respectively.
+
+Clients can consult the oracle to know which partitions each command
+should be multicast to, based on which variables are accessed by the
+command. If the reply received from the oracle tells the client that the
+command accesses a single partition, the client multicasts the command
+to that partition. If the command accesses variables from multiple
+partitions, the client first multicasts one or more $move$ commands to
+the oracle and to the involved partitions, with the intent of having all
+variables in the same partition. Then, the command itself is multicast
+to the one partition that now holds all variables accessed by the
+command. If a subsequent command accesses the same variables, it will
+also access a single partition. With this scheme, the access patterns of
+commands will shape the mapping of variables to partitions, reducing the
+number of multi-partition commands.
+
+![image](figures/dssmr-detail.pdf){width="1\\linewidth"}
+
+Consulting the oracle and issuing the application command are done with
+separate calls to atomic multicast in DS-SMR. It may happen that,
+between those operations, the partitioning changes. We illustrate this
+in Figure [\[fig:dssmr-detail\]](#fig:dssmr-detail){reference-type="ref"
+reference="fig:dssmr-detail"}. Commands $C_1$ and $C_2$ read variable
+$x$. Since partitioning is dynamic, the client issuing the commands
+first consults the oracle before multicasting each command. $C_1$
+executes without the interference of other commands, so consulting the
+oracle and multicasting the command only once is enough for $C_1$ to be
+executed. However, before $C_2$ is multicast to $\mathcal{P}_1$, another
+client issues a $move$ command that relocates $x$ to $\mathcal{P}_2$.
+When $C_2$ is delivered at the servers of $\mathcal{P}_1$, the command
+is not executed, since $x$ is not available at $\mathcal{P}_1$ anymore.
+A similar situation may arise when a command accesses variables from
+multiple partitions, as it consists of multicasting at least three
+commands separately: $consult$, $move$ and $access$. The partitioning
+can change between the execution of any two of those commands.
+
+To solve this problem, the client multicasts the set of variables
+accessed along with each access command. Upon delivery, each server
+checks the set of variables sent by the client. If all variables in the
+set belong to the local partition, the command is executed; otherwise, a
+$retry$ message is sent back to the client. When the client receives a
+$retry$ message, it consults the oracle again, possibly moving variables
+across partitions, and then reissues the access command. To guarantee
+termination, if the command fails a certain number of times, the client
+multicasts the command to all partitions and the servers execute it as
+in the original S-SMR.
+
+The DS-SMR client consists of the application logic and a client proxy.
+The application does not see the state variables divided into
+partitions. When the application issues a command, it sends the command
+to the proxy and eventually receives a reply. All commands that deal
+with partitioning (i.e., consulting the oracle, moving objects across
+partitions and retrying commands as described in the previous paragraph)
+are executed by the client proxy, transparently to the application. When
+the client proxy multicasts a partitioning-related command to multiple
+partitions and the oracle, partitions and oracle exchange signals to
+ensure linearizability, as mentioned in
+Section [3.2.3](#sec:ssmr){reference-type="ref" reference="sec:ssmr"}.
+Every server and oracle process has their own DS-SMR proxy as well. At
+each server, the proxy checks whether commands can be executed and
+manages the exchange of data and signals between processes. At the
+oracle, the service designer defines the application-dependent rules
+that must be followed (e.g., where each variable is created at first)
+and a proxy is responsible for managing the communication of the oracle
+with both clients and servers when executing commands. DS-SMR relies on
+a fault-tolerant multicast layer for disseminating commands across
+replicas and implementing reliable communication between partitions.
+Replies to commands are sent directly through the network.
+Figure [\[fig:dssmr-arch\]](#fig:dssmr-arch){reference-type="ref"
+reference="fig:dssmr-arch"} illustrates the architecture of DS-SMR.
+
+![image](figures/dssmr-arch.pdf){width="0.8\\linewidth"}
+
+Detailed algorithm {#sec:dssmr-detail}
+------------------
+
+When issuing a command, the application simply forwards the command to
+the client proxy and waits for the reply. Consulting the oracle and
+multicasting the command to different partitions is done internally by
+the proxy at the client.
+Algorithms [\[alg:client\_proxy\]](#alg:client_proxy){reference-type="ref"
+reference="alg:client_proxy"},
+[\[alg:server\_proxy\]](#alg:server_proxy){reference-type="ref"
+reference="alg:server_proxy"}, and
+[\[alg:oracle\_proxy\]](#alg:oracle_proxy){reference-type="ref"
+reference="alg:oracle_proxy"} describe in detail how the DS-SMR proxy
+works respectively at client, server and oracle processes. Every server
+proxy at a server in $\mathcal{S}_i$ has only partial knowledge of the
+partitioning: it knows only which variables belong to $\mathcal{P}_i$.
+The oracle proxy has knowledge of every $\mathcal{P}\in \Psi$. To
+maintain such a global knowledge, the oracle must a-deliver every
+command that creates, moves, or deletes variables. (In
+Section [4.3](#sec:dssmr-optm){reference-type="ref"
+reference="sec:dssmr-optm"}, we introduce a caching mechanism to prevent
+the oracle from becoming a performance bottleneck.)
+
+**The client proxy.** To execute a command $C$, the proxy first consults
+the oracle. The oracle knows all state variables and which partition
+contains each of them. Because of this, the oracle may already tell the
+client whether the command can be executed or not. Such is the case of
+the $access(\omega)$ command: if there is a variable $v \in \omega$ that
+the command tries to read or write and $v$ does not exist, the oracle
+already tells the client that the command cannot be executed, by sending
+$nok$ as the prophecy. A $nok$ prophecy is also returned for a
+$create(v)$ command when $v$ already exists. For a $delete(v)$ command
+when $v$ already does not exist, an $ok$ prophecy is returned. If the
+command can be executed, the client proxy receives a prophecy containing
+a pair $\langle v, \mathcal{P}\rangle$, for every variable $v$ created,
+accessed or deleted by the command. If the prophecy regarding an
+$access(\omega)$ command contains multiple partitions, the client proxy
+chooses one of them, $\mathcal{P}_d$, and tries to move all variables in
+$\omega$ to $\mathcal{P}_d$. Then, the command $C$ itself is multicast
+to $\mathcal{P}_d$. As discussed in
+Section [4.1](#sec:dssmr-idea){reference-type="ref"
+reference="sec:dssmr-idea"}, there is no guarantee that an interleave of
+commands will not happen, even if the client waits for the replies to
+the move commands. For this reason, and to save time, the client proxy
+multicasts all move commands at once. Commands that change the
+partitioning (i.e., create and delete) are also multicast to the oracle.
+If the reply received to the command is $retry$, the procedure restarts:
+the proxy consults the oracle again, possibly moves variables across
+partitions, and multicasts $C$ to the appropriate partitions once more.
+After reaching a given threshold of retries for $C$, the proxy falls
+back to S-SMR, multicasting $C$ to all partitions (and the oracle, in
+case $C$ is a create or delete command), which ensures the command's
+termination.
+
+**The server proxy.** Upon delivery, access commands are intercepted by
+the DS-SMR proxy before they are executed by the application server. In
+DS-SMR, every access command is executed in a single partition. If a
+server proxy in partition $\mathcal{P}$ intercepts an $access(\omega)$
+command that accesses a variable $v \in \omega$ that does not belong to
+$\mathcal{P}$, it means that the variable is in some other partition, or
+it does not exist. Either way, the client should retry with a different
+set of partitions, if the variable does exist. To execute a $delete(v)$
+command, the server proxy at partition $\mathcal{P}$ simply removes $v$
+from partition $\mathcal{P}$, in case $v \in \mathcal{P}$. In case
+$v \not\in \mathcal{P}$, it might be that the variable exists but
+belongs to some other partition $\mathcal{P}'$. Since only the oracle
+and the servers at $\mathcal{P}'$ have this knowledge, it is the oracle
+who replies to delete commands.
+
+The DS-SMR server and oracle proxies coordinate to execute commands that
+create or move variables. Such coordination is done by means of r-mcast.
+When a $create(v)$ command is delivered at $\mathcal{P}$, the server
+proxy waits for a message from the oracle, telling whether the variable
+can be created or not, to be r-delivered. Such a message from the oracle
+is necessary because $v$ might not belong to $\mathcal{P}$, but it might
+belong to some other partition $\mathcal{P}'$ that servers of
+$\mathcal{P}$ have no knowledge of. If the create command can be
+executed, the oracle can already reply to the client with a positive
+acknowledgement, saving time. This can be done because atomic multicast
+guarantees that all non-faulty servers at $\mathcal{P}$ will eventually
+deliver and execute the command. As for move commands, each
+$move(v,\mathcal{P}_s,\mathcal{P}_d)$ command consists of moving
+variable $v$ from a source partition $\mathcal{P}_s$ to a destination
+partition $\mathcal{P}_d$. If the server's partition $\mathcal{P}$ is
+the source partition (i.e., $\mathcal{P}$ = $\mathcal{P}_s$), the server
+proxy checks whether $v$ belongs to $\mathcal{P}$. If $v \in
+\mathcal{P}$, the proxy r-mcasts $\langle v, C \rangle$ to
+$\mathcal{P}_d$, so that servers at the destination partition know the
+most recent value of $v$; $C$ is sent along with $v$ to inform which
+move command that message is related to. If $v
+\not\in \mathcal{P}$, a $\langle null, C \rangle$ message is r-mcast to
+$\mathcal{P}_d$, informing $\mathcal{P}_d$ that the move command cannot
+be executed.
+
+**The oracle proxy.** One of the purposes of the oracle proxy is to make
+prophecies regarding the location of state variables. Such prophecies
+are used by client proxies to multicast commands to the right
+partitions. A prophecy regarding an $access(\omega)$ command contains,
+for each $v \in \omega$, a pair $\langle v, \mathcal{P}\rangle$, meaning
+that $v \in \mathcal{P}$. If any of the variables in $\omega$ does not
+exist, the prophecy already tells the client that the command cannot be
+executed (with a $nok$ value). For a $create(v)$ command, the prophecy
+tells where $v$ should be created, based on rules defined by the
+application, if $v$ does not exist. If $v$ already exists, the prophecy
+will contain $nok$, so that the client knows that the create command
+cannot be executed. The prophecy regarding a $delete(v)$ command has the
+partition that contains $v$, or $ok$, in case $v$ was already deleted or
+never existed.
+
+Besides dispensing prophecies, the oracle is responsible for executing
+create, move, and delete commands, coordinating with server proxies when
+necessary, and replying directly to clients in some cases. For each
+$move(v,\mathcal{P}_s,\mathcal{P}_d)$ command, the oracle checks whether
+$v$ in fact belongs to the source partition $\mathcal{P}_s$. If that is
+the case, the command is executed, moving $v$ to $\mathcal{P}_d$. Each
+$create(v)$ command is multicast to the oracle and to a partition
+$\mathcal{P}$. If $v$ already exists, the oracle tells $\mathcal{P}$
+that the command cannot be executed, by r-mcasting $nok$ to
+$\mathcal{P}$. The oracle also sends $nok$ to the client as reply,
+meaning that $v$ already exists. If $v$ does not exist, the oracle tells
+$\mathcal{P}$ that the command can be executed, by r-mcasting $ok$ to
+$\mathcal{P}$. It also tells the client that the command succeeded with
+an $ok$ reply. Finally, each $delete(v)$ command is multicast to the
+oracle and to a partition $\mathcal{P}$, where the client proxy assumed
+$v$ to be located. If $v$ belongs to $\mathcal{P}$, or $v$ does not
+exist, the oracle tells the client that the delete command succeeded.
+Otherwise, that is, if $v$ exists, but $delete(v)$ was multicast to the
+wrong partition, the oracle tells the client to retry.
+
+Performance optimizations {#sec:dssmr-optm}
+-------------------------
+
+In this section, we introduce two optimizations for DS-SMR: caching and
+load balancing.
+
+**Caching.** In
+Algorithm [\[alg:client\_proxy\]](#alg:client_proxy){reference-type="ref"
+reference="alg:client_proxy"}, for every command issued by the client,
+the proxy consults the oracle. If every command passes by the oracle,
+the system is unlikely to scale, as the oracle is prone to becoming a
+bottleneck. To provide a scalable solution, each client proxy has a
+local cache of the partitioning information. Before multicasting an
+application command $C$ to be executed, the client proxy checks whether
+the cache has information about every variable concerned by $C$. If the
+cache does have such a knowledge, the oracle is not consulted and the
+information contained in the cache is used instead. If the reply to $C$
+is $retry$, the oracle is consulted and the returned prophecy is used to
+update the client proxy's cache.
+Algorithm [\[alg:client\_proxy\]](#alg:client_proxy){reference-type="ref"
+reference="alg:client_proxy"} is followed from the second attempt to
+execute $C$ on. The cache is a local service that follows an algorithm
+similar to that of the oracle, except it responds only to $consult(C)$
+commands and, in situations where the oracle would return $ok$ or $nok$,
+the cache tells the client proxy to consult the actual oracle.
+
+Naturally, the cached partitioning information held by the client proxy
+may be outdated. On the one hand, this may lead a command to be
+multicast to the wrong set of partitions, which will incur in the client
+proxy having to retry executing the command. For instance, in
+Figure [\[fig:dssmr-retry\]](#fig:dssmr-retry){reference-type="ref"
+reference="fig:dssmr-retry"} the client has an outdated cache, incurring
+in a new consultation to the oracle when executing $C_3$. On the other
+hand, the client proxy may already have to retry commands, even if the
+oracle is always consulted first, as shown in
+Figure [\[fig:dssmr-detail\]](#fig:dssmr-detail){reference-type="ref"
+reference="fig:dssmr-detail"}. If most commands are executed without
+consulting the oracle, as in the case of $C_4$ in
+Figure [\[fig:dssmr-retry\]](#fig:dssmr-retry){reference-type="ref"
+reference="fig:dssmr-retry"}, we avoid turning the oracle into a
+bottleneck. Moreover, such a cache can be updated ahead of time, not
+having to wait for an actual application command to be issued to only
+then consult the oracle. This way, the client proxy can keep a cache of
+partitioning information of variables that the proxy deems likely to be
+accessed in the future.
+
+**Load balancing**. When moving variables, the client proxies may try to
+distribute them in a way that balances the workload among partitions.
+This way, the system is more likely to scale throughput with the number
+of server groups. One way of balancing load is by having roughly the
+same number of state variables in every partition. This can be
+implemented by having client proxies choosing randomly the partition
+that will receive all variables concerned by each command (at
+line [\[algline:client:partition\]](#algline:client:partition){reference-type="ref"
+reference="algline:client:partition"} of
+Algorithm [\[alg:client\_proxy\]](#alg:client_proxy){reference-type="ref"
+reference="alg:client_proxy"}). Besides improving performance, balancing
+the load among partitions prevents the system from degenerating into a
+single-partition system, with all variables being moved to the same
+place as commands are executed.
+
+page ![image](figures/dssmr-retry.pdf){width="1.0\\linewidth"}
+
+Correctness {#sec:dssmr-correctness}
+-----------
+
+In this section, we argue that DS-SMR ensures termination and
+linearizability. By ensuring termination, we mean that for every command
+$C$ issued by a correct client, a reply to $C$ different than $retry$ is
+eventually received by the client. This assumes that at least one oracle
+process is correct and that every partition has at least one correct
+server. Given these constraints, the only thing that could prevent a
+command from terminating would be an execution that forced the client
+proxy to keep retrying a command. This problem is trivially solved by
+falling back to S-SMR after a predefined number of retries: at a certain
+point, the client proxy multicasts the command to all server and oracle
+processes, which execute the command as in S-SMR, i.e., with
+coordination among all partitions and the oracle.
+
+As for linearizability, we argue that, if every command in execution
+$\mathcal{E}$ of DS-SMR is delivered by atomic multicast and is
+*execution atomic* (as defined in [@bezerra2014ssmr]), then
+$\mathcal{E}$ is linearizable. We denote the order given by atomic
+multicast by relation $\prec$. Given any two messages $m_1$ and $m_2$,
+"$m_1 \prec m_2$" means that there exists a process that delivers both
+messages and $m_1$ is delivered before $m_2$, or there is some message
+$m'$ such that $m_1 \prec m'$ and $m' \prec m_2$, which can be written
+as $m_1 \prec m' \prec m_2$. Also, for the purposes of this proof, we
+consider the oracle to be a partition, as it also a-delivers and
+executes application commands.
+
+Suppose, by means of contradiction, that there exist two commands $x$
+and $y$, where $x$ finishes before $y$ starts, but $y \prec x$ in the
+execution. There are two possibilities to be considered: (i) $x$ and $y$
+are delivered by the same process $p$, or (ii) no process delivers both
+$x$ and $y$.
+
+In case (i), at least one process $p$ delivers both $x$ and $y$. As $x$
+finishes before $y$ starts, then $p$ delivers $x$, then $y$. From the
+properties of atomic multicast, and since each partition is mapped to a
+multicast group, no process delivers $y$, then $x$. Therefore, we reach
+a contradiction in this case.
+
+In case (ii), if there were no other commands in $\mathcal{E}$, then the
+execution of $x$ and $y$ could be done in any order, which would
+contradict the supposition that $y \prec x$. Therefore, there are
+commands $z_1, ..., z_n$ with atomic order $y
+\prec z_1 \prec \cdots \prec z_n \prec x$, where some process $p_0$ (of
+partition $\mathcal{P}_0$) delivers $y$, then $z_1$; some process
+$p_1 \in \mathcal{P}_1$ delivers $z_1$, then $z_2$, and so on: process
+$p_i \in \mathcal{P}_i$ delivers $z_{i}$, then $z_{i+1}$, where
+$1 \leq i < n$. Finally, process $p_n \in \mathcal{P}_n$ delivers $z_n$,
+then $x$.
+
+Let $z_0 = y$ and let $atomic(i)$ be the following predicate: "For every
+process $p_i \in \mathcal{P}_i$, $p_i$ finishes executing $z_i$ only
+after some $p_0
+\in \mathcal{P}_0$ started executing $z_0$." We now claim that
+$atomic(i)$ is true for every $i$, where $0 \leq i \leq n$. We prove our
+claim by induction.
+
+*Basis ($i=0$)*: $atomic(0)$ is obviously true, as $p_0$ can only finish
+executing $z_0$ after starting executing it.
+
+*Induction step*: If $atomic(i)$, then $atomic(i+1)$.\
+Proof: Command $z_{i+1}$ is multicast to both $\mathcal{P}_i$ and
+$\mathcal{P}_{i+1}$. Since $z_{i+1}$ is execution atomic, before any
+$p_{i+1} \in \mathcal{P}_{i+1}$ finishes executing $z_{i+1}$, some
+$p_i \in \mathcal{P}_i$ starts executing $z_{i+1}$. Since
+$z_i \prec z_{i+1}$, every $p_i \in \mathcal{P}_i$ start executing
+$z_{i+1}$ only after finishing the execution of $z_i$. As $atomic(i)$ is
+true, this will only happen after some $p_0 \in \mathcal{P}_0$ started
+executing $z_0$.
+
+As $z_n \prec x$, for every $p_n \in \mathcal{P}_n$, $p_n$ executes
+command $x$ only after the execution of $z_n$ at $p_n$ finishes. From
+the above claim, this happens only after some $p_0 \in \mathcal{P}_0$
+starts executing $y$. This means that $y$ ($z_0$) was issued by a client
+before any client received a response for $x$, which contradicts the
+assumption that $x$ precedes $y$ in real-time, i.e., that command $y$
+was issued after the reply for command $x$ was received.
+
+Implementation {#sec:dssmr-implementation}
+--------------
+
+In this section, we describe Eyrie, a library that implements both
+S-SMR and DS-SMR, and Chirper, a scalable social network application
+built with Eyrie. Eyrie and Chirper were both implemented in Java.
+
+### Eyrie
+
+To implement a replicated service with Eyrie, the developer (i.e.,
+service designer) must extend three classes: PRObject, StateMachine,
+OracleStateMachine.
+
+**The PRObject class.** Eyrie supports partial replication (i.e., some
+objects may be replicated in some partitions, not all). Therefore, when
+executing a command, a replica might not have local access to some of
+the objects involved in the execution of the command. The developer
+informs Eyrie which object classes are partially replicated by extending
+the PRObject class. Each object of such a class is stored either locally
+or remotely, but the application code is agnostic to that. All calls to
+methods of such objects are intercepted by Eyrie, transparently to the
+developer.
+
+**The StateMachine class.** This class implements the logic of the
+server proxy. The application server class must extend the StateMachine
+class. To execute commands, the developer must provide an implementation
+for the method executeCommand(Command). The code for such a method is
+agnostic to the existence of partitions. In other words, it can be
+exactly the same as the code used to execute commands with classical
+state machine replication (i.e., full replication). Eyrie is responsible
+for handling all communication between partitions and oracle
+transparently. To start the server, method runStateMachine() is called.
+Method createObject() also needs to be implemented, where the developer
+defines how new state objects are loaded or created.
+
+**The OracleStateMachine class.** This class implements the logic of the
+oracle proxy. It extends StateMachine, so the oracle can be deployed
+similarly to a fault-tolerant partition in the original S-SMR. Class
+OracleStateMachine has a default implementation, but the developer is
+encouraged to override its methods. Method extractObject(Command)
+returns the set of objects accessed by the command. It should be
+overridden by the application so that the client proxy can relocate all
+necessary objects to a destination partition before executing the
+application command. Method
+getTargetPartition(Set$\langle$Object$\rangle$) returns a particular
+partition to which objects should be moved, when they are not in the
+same partition yet, in order to execute an application command that
+accesses those objects. The default implementation of the method returns
+a random partition. The developer can override it in order to further
+improve the distribution of objects among partitions. For instance, the
+destination partition could be chosen based on an attribute of the
+objects passed to the method.
+
+The client proxy is implemented in class Client, which handles all
+communication of the application client with the partitioned service.
+The client proxy provides methods *sendCreate(Command, Callback)*,
+*sendAccess(Command, Callback)*, and *sendDelete(Command, Callback)*.
+The client proxy's default behavior is to keep retrying commands (and
+fallback to S-SMR in case of too many retries) and only call back the
+application client when the command has been successfully executed.
+However, the developer can change this behavior by overriding the
+error() method of Callback. The error() method is called when a $retry$
+reply is received.
+
+### Chirper
+
+We implemented Chirper, a social network application similar to Twitter,
+using Eyrie. Twitter is an online social networking service in which
+users can post 140-character messages and read posted messages of other
+users. The API consists basically of: post (user publishes a message),
+follow (user starts following another user), unfollow (user stops
+following someone), and getTimeline (user requests messages of all
+people whom the user follows).
+
+State partitioning in Chirper is based on users' interest. A function
+$f(uid)$ returns the partition that user with id $uid$ should belong to,
+based on the user's interest. Function $f$ is implemented in method
+getObjectPlacement(User) of class ChirperOracle, which extends
+OracleStateMachine (class User extends PRObject). Taking into account
+that a typical user probably spends more time reading messages (i.e.,
+issuing getTimeline) than writing them (i.e., issuing post), we decided
+to optimize getTimeline to be single-partition. This means that, when a
+user requests his or her timeline, all messages should be available in
+the partition that stores that user's data, in the form of a
+materialized timeline (similarly to a materialized view in a database).
+To make this possible, whenever a post request is executed, the message
+is inserted into the materialized timeline of all users that follow the
+one that is posting. Also, when a user starts following another user,
+the messages of the followed user are inserted into the follower's
+materialized timeline as part of the command execution; likewise, they
+are removed when a user stops following another user. Because of this
+design decision, every getTimeline request accesses only one partition,
+follow and unfollow requests access objects on at most two partitions,
+and post requests access up to all partitions. The Chirper client does
+not need any knowledge about partitions, since it uses method
+sendAccessCommand(command) of the DS-SMR client proxy to issue its
+commands.
+
+One detail about the post request is that it needs access to all users
+that follow the user issuing the post. To ensure linearizability when
+executing a post request, the Chirper server overrides the
+extractObject(command) method to check if all followers that will be
+accessed by the command are available in the local partition (i.e., the
+partition of the server executing the post command). If this is the
+case, the request is executed. Otherwise, the server sends a
+$retry(\gamma)$ message, where $\gamma$ is the complete set of followers
+of the user who was posting. Then, the Chirper server proceeds to the
+next command. Upon receiving the $retry(\gamma)$ message, the client
+proxy tries to move all users in $\gamma$ to the same partition before
+retrying to execute the post command.
+
+Performance evaluation {#sec:dssmr-experiments}
+----------------------
+
+In this section, we present the results found for Chirper with different
+loads and partitionings and compare them with the original
+S-SMR [@bezerra2014ssmr]. In these experiments, we are interested in
+assessing DS-SMR's performance with workloads that present different
+levels of locality. By locality, we mean the likelihood that certain
+groups of data items are accessed together (by the same command). In
+Section [4.6.1](#sec:dssmr-evaluation:setup){reference-type="ref"
+reference="sec:dssmr-evaluation:setup"}, we describe the environment
+where we conducted our experiments. In
+Section [4.6.2](#sec:dssmr-evaluation:strongloc){reference-type="ref"
+reference="sec:dssmr-evaluation:strongloc"}, we show the results with
+strong-locality workloads. In
+Section [4.6.3](#sec:dssmr-evaluation:weakloc){reference-type="ref"
+reference="sec:dssmr-evaluation:weakloc"}, we show the results for
+weak-locality workloads.
+
+![image](./figures/experiments/dssmr/dssmr-strong-locality-tp.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/dssmr-strong-locality-lat.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/dssmr-weak-locality-tp.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/dssmr-weak-locality-lat.pdf){width="\\textwidth"}
+
+### Environment setup and configuration parameters {#sec:dssmr-evaluation:setup}
+
+We conducted all experiments on a cluster that had two types of nodes:
+(a) HP SE1102 nodes, equipped with two Intel Xeon L5420 processors
+running at 2.5 GHz and with 8 GB of main memory, and (b) Dell SC1435
+nodes, equipped with two AMD Opteron 2212 processors running at 2.0 GHz
+and with 4 GB of main memory. The HP nodes were connected to an HP
+ProCurve 2920-48G gigabit network switch, and the Dell nodes were
+connected to another, identical switch. Those switches were
+interconnected by a 20 Gbps link. All nodes ran CentOS Linux 7.1 with
+kernel 3.10 and had the OpenJDK Runtime Environment 8 with the 64-Bit
+Server VM (build 25.45-b02).
+
+For the experiments, we use the following workloads: Timeline (composed
+only of getTimeline requests), Post (only post requests),
+Follow/unfollow (50% of follow requests and 50% of unfollow), and Mix
+(7.5% post, 3.75% follow, 3.75% unfollow, and 85% getTimeline).
+
+### Results for strong locality {#sec:dssmr-evaluation:strongloc}
+
+![image](figures/experiments/dssmr/move-vs-throughput.pdf){width="0.6\\linewidth"}
+
+We can see in
+Figure [\[fig:dssmr-strongloc\]](#fig:dssmr-strongloc){reference-type="ref"
+reference="fig:dssmr-strongloc"} and
+Table [\[tbl:results\]](#tbl:results){reference-type="ref"
+reference="tbl:results"} the results achieved with Chirper, running with
+a strong-locality workload. For the Timeline workload, the throughput
+with DS-SMR and S-SMR are very similar. This happens because getTimeline
+requests are optimized to be single-partition: all posts in a user's
+timeline are stored along with the User object. Every getTimeline
+requests accesses a single User object (of the user whose timeline is
+being requested). This is the ideal workload for S-SMR. In DS-SMR, the
+partitioning does not change, and consulting the oracle becomes
+unnecessary thanks to the local cache at each client. This happens
+because there are no other commands in the Timeline workload.
+
+In the Post workload, every command accesses up to all partitions in the
+system, which is the worst case for S-SMR: the more partitions are
+involved in the execution of a command, the worst is the system's
+performance. We can see that the throughput of S-SMR decreases
+significantly as the number of partitions increases. For DS-SMR, we can
+see that the system throughput scales with the number of partitions.
+This happens because User objects that are accessed together but are in
+different partitions are moved to the same partition based on the
+interests of the users. As the execution proceeds, this leads to a lower
+rate of multi-partition commands, which allows throughput to scale. (In
+the case of posts on 2 partitions, the number of move commands started
+at 3 kcps, with throughput of 23 kps, and eventually reduced to less
+than 0.1 kcps.) As a result the throughput improvement of DS-SMR with
+respect to S-SMR increases over time. With eight partitions, DS-SMR
+sports a performance that is 45 times that of S-SMR!
+
+With the Follow/unfollow workload, the system performs in a similar way
+to that observed with the Post workload. The difference is that each
+follow or unfollow request accesses only two User objects, whereas every
+post request may affect an unbounded number of users. For this reason,
+each follow/unfollow command is executed at most by two partitions in
+S-SMR. In DS-SMR, a single move command is enough to have all User
+objects affected by such a command in the same partition. For this
+reason, both replication techniques have better throughput under the
+Follow/unfollow workload than with Post. As with the Post workload,
+DS-SMR's advantage over S-SMR increases with the number of partitions,
+reaching up to almost 25 times with eight partitions.
+
+We approximate a realistic distribution of commands with the Mix
+workload. With such a workload, S-SMR does not perform as bad as in the
+Post or Follow/unfollow workloads, but the system throughput still
+decreases as partitions are added. As with the other workloads,
+DS-SMR scaled under the Mix workload. With eight partitions, it reached
+74 kcps (thousands of commands per second), fairly close to the ideal
+case (the Timeline workload), where DS-SMR reached 86 kcps. Under the
+Mix workload, S-SMR had less than 33 kcps in the best case (one
+partition) and around 10 kcps with eight partitions. In the
+configuration with eight partitions, DS-SMR reaches almost seven times
+S-SMR's throughput.
+
+Latency values with DS-SMR are higher than with S-SMR. This was expected
+for two reasons. First, there is an extra group of servers (the oracle)
+to communicate with. Second, executing a command often means moving all
+accessed objects to the same partition. Taking this into account, we
+consider the (often slight) increase in latency observed with DS-SMR a
+low price to pay for the significant increase in throughput and the
+scalability that DS-SMR brought to the system; with S-SMR, the system
+did not scale with multi-partition commands.
+
+![image](./figures/experiments/dssmr/latency-cdf-mix-2p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/latency-cdf-post-2p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/latency-cdf-mix-4p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dssmr/latency-cdf-post-4p.pdf){width="\\textwidth"}
+
+![Mix](./figures/experiments/dssmr/latency-cdf-mix-8p.pdf){width="\\textwidth"}
+
+![Post](./figures/experiments/dssmr/latency-cdf-post-8p.pdf){width="\\textwidth"}
+
+max width=
+
+  --------- ---------- ---------- ---------- ---------- ---------- ---------- ----------- ----------- ---------- ---------- ---------- ----------- ---------- ---------- ---------- ----------
+                1          2          4          8          1          2           4           8          1          2          4           8          1          2          4          8
+                                                                                                                                                                                    
+  S-SMR       32561      61220      75812      11867      32483       2893       1882        1190       32541      11476       8580       3371       32151      22803      16822      10657
+  DS-SMR      29248      56347      70717      11175      19248      23667       35547       54025      30215      48976      54025       83880      27101      45686      50671      74257
+                                                                                                                                                                                    
+             **0.91**   **0.92**   **0.81**   **1.03**   **0.46**   **8.08**   **18.48**   **45.00**   **0.93**   **4.27**   **6.30**   **24.88**   **0.84**   **2.00**   **3.01**   **6.97**
+                                                                                                                                                                                    
+  S-SMR        3.1        6.6        5.6        7.0        3.4        5.2         7.9         8.3        3.0        5.2        7.0         8.8        3.4        3.7        3.8        7.9
+  DS-SMR       6.9        7.1        8.6        11.4       6.7        8.6        11.3         9.1        6.6        6.1        7.4         7.0        7.3        6.5        7.8        7.9
+  --------- ---------- ---------- ---------- ---------- ---------- ---------- ----------- ----------- ---------- ---------- ---------- ----------- ---------- ---------- ---------- ----------
+
+[\[tbl:results\]]{#tbl:results label="tbl:results"}
+
+### Results for weak locality {#sec:dssmr-evaluation:weakloc}
+
+The
+Figure [\[fig:dssmr-weakloc\]](#fig:dssmr-weakloc){reference-type="ref"
+reference="fig:dssmr-weakloc"} shows the results achieved with Chirper,
+running with a weak-locality workload.
+
+Conclusion {#sec:dssmr-conclusion}
+----------
+
+This chapter introduced DS-SMR, the initial idea of DynaStar. So far, we
+have proposed an approach that allows scaling state machine replication
+by dynamically repartitioning application state based on the workload.
+Variables that are usually accessed together are moved to the same
+partition, which significantly improves scalability. However, in order
+to reduce the chances of skewed load among partitions in DS-SMR  the
+destination partition is chosen randomly. Although this heuristic
+algorithm could bring a balanced partitioning, it fails to guarantee
+optimal partitioning and to minimize the rate of multi-partition
+commands. In the next chapter, we will discuss more details about
+reaching an optimized partitioning.
+
+Optimized partitioning for SMR {#sec:dynastar}
+==============================
+
+DS-SMR addresses the limitations of S-SMR by adapting the partitioning
+scheme as workloads change, by moving data "on demand" to maximize the
+number of single-partition user commands, while avoiding imbalances in
+the load of the partitions. The major challenge in this approach is
+determining how the system selects the partition to which to move data.
+DS-SMR selects partitions randomly, which allows for a completely
+decentralized implementation, in which partitions make only local
+choices about data movement. We refer to this approach as *decentralized
+partitioning*. This approach works well for data with *strong locality*,
+but it is unstable for workloads with *weak locality*.[^3] This happens
+because with weak locality, objects in DS-SMR are constantly being moved
+back and forth between partitions without converging to a stable
+configuration.
+
+In this chapter, we introduce DynaStar, a new dynamic approach to the
+state partitioning problem. Like the other dynamic approach, DynaStar
+does not require any a priori knowledge about the workload. However,
+DynaStar differs from the prior approach because it maintains a location
+oracle with a global view of the application state. The oracle minimizes
+the number of state relocations by monitoring the workload, and
+re-computing an optimized partitioning on demand using a static
+partitioning algorithm.
+
+The location oracle maintains two data structures: (i) a mapping of
+application state variables to partitions, and (ii) a *workload graph*
+with state variables as vertices and edges as commands that access the
+variables. Before a client submits a command, it contacts the location
+oracle to discover the partitions on which state variables are stored.
+If the command accesses variables in multiple partitions, the oracle
+chooses one partition to execute the command and instructs the other
+involved partitions to temporarily relocate the needed variables to the
+chosen partition. Of course, when relocating a variable, the oracle is
+faced with a choice of which partition to use as a destination. DynaStar
+chooses the partition for relocation by partitioning the workload graph
+using the METIS [@Abou-Rjeili:2006] partitioner and selecting the
+partition that would minimize the number of state relocations.
+
+To tolerate failures, DynaStar implements the oracle as a regular
+partition, replicated in a set of nodes. To ensure that the oracle does
+not become a performance bottleneck, clients cache location information.
+Therefore, clients only query the oracle when they access a variable for
+the first time or when cached entries become invalid (i.e., because a
+variable changed location). DynaStar copes with commands addressed to
+wrong partitions by telling clients to retry a command.
+
+We implemented DynaStar and compared its performance to other schemes,
+including an idealized approach that knows the workload ahead of time.
+Although this scheme is not achievable in practice, it provides an
+interesting baseline to compare against. DynaStar's performance rivals
+that of the idealized scheme, while having no a priori knowledge of the
+workload. We show that DynaStar largely outperforms existing dynamic
+schemes under two representative workloads, the TPC-C benchmark and a
+social network service. We also show that the location oracle never
+becomes a bottleneck and can handle workload graphs with millions of
+vertices.
+
+In summary, this chapter makes the following contributions:
+
+-   It introduces DynaStar and discusses its implementation.
+
+-   It evaluates different partitioning schemes for state machine
+    replication under a variety of conditions.
+
+-   It presents a detailed experimental evaluation of DynaStar using the
+    TPC-C benchmark and a social network service populated with a real
+    social network graph that contains half a million users and 14
+    million edges.
+
+The rest of the chapter is structured as follows.
+Section [5.1](#sec:dynastar-idea){reference-type="ref"
+reference="sec:dynastar-idea"} introduces DynaStar and describes the
+technique in detail.
+Section [5.2](#sec:dynastar-algo){reference-type="ref"
+reference="sec:dynastar-algo"} overviews our prototype.
+Section [5.6](#sec:dynastar-experiments){reference-type="ref"
+reference="sec:dynastar-experiments"} reports on the results of our
+experiments.
+Section [5.7](#sec:dynastar-conclusion){reference-type="ref"
+reference="sec:dynastar-conclusion"} concludes the chapter.
+
+General idea {#sec:dynastar-idea}
+------------
+
+DynaStar defines a dynamic mapping of application variables to
+partitions. Application programmers may also define other granularity of
+data when mapping application state to partitions. For example, in our
+social network application
+(§[5.5.4](#sec:imp:Chirper){reference-type="ref"
+reference="sec:imp:Chirper"}), each user (together with the information
+associated with the user) is mapped to a partition; in our TPC-C
+implementation (§[5.5.3](#sec:imp:tpcc){reference-type="ref"
+reference="sec:imp:tpcc"}), every district in a warehouse is mapped to a
+partition. Such a mapping is managed by a partitioning oracle, which is
+handled as a replicated partition. The oracle allows the mapping of
+variables to partitions to be retrieved or changed during execution. To
+simplify the discussion, in
+§[5.1](#sec:dynastar-idea){reference-type="ref"
+reference="sec:dynastar-idea"}--[\[sec:dynastar-detailed\]](#sec:dynastar-detailed){reference-type="ref"
+reference="sec:dynastar-detailed"} we initially assume that every
+command involves the oracle. In
+§[5.3](#sec:dynastar-optm){reference-type="ref"
+reference="sec:dynastar-optm"}, we explain how clients can use a cache
+to avoid the oracle in the execution of most commands.
+
+Clients in DynaStar submit commands to the oracle and wait for the
+reply. DynaStar supports three types of commands: $create(v)$ creates a
+new variable $v$ and initially maps it to a partition defined by the
+oracle; $access(\omega)$ is an application command that reads and
+modifies variables in set $\omega
+\subseteq \mathcal{V}$; and $delete(v)$ removes $v$ from the service
+state. The reply from the oracle is called a $prophecy$, and usually
+consists of a set of tuples $\langle v, \mathcal{P}\rangle$, meaning
+$v \in \mathcal{P}$, and a target partition $\mathcal{P}_d$ on which the
+command will be executed. The $prophecy$ could also tell the clients if
+a command cannot be executed (e.g., it accesses variables that do not
+exist). If the command can be executed, the client waits for the reply
+from the target partition.
+
+If a command $C$ accesses variables in $\omega$ on a single partition,
+the oracle multicasts $C$ to that partition for execution. If the
+command accesses variables on multiple partitions, the oracle multicasts
+a $global(\omega,\mathcal{P}_d,
+C)$ command to the involved partitions to gather all variables in
+$\omega$ to the target partition $\mathcal{P}_d$. After having all
+required variables, the target partition executes command $C$, sends the
+reply to the client, and returns the variables to their source.
+
+The oracle also collects hints from clients and partitions to build up a
+workload graph and monitors the changes in the graph. In the workload
+graph, vertices represent state variables and edges dependencies between
+variables. An edge connects two variables in the graph if a command
+accesses both of them. Periodically, the oracle computes a new optimized
+partitioning and sends the partitioning plan to all partitions. Upon
+delivering the new partitioning, the partitions exchange variables and
+update their state accordingly. DynaStar relocates variables without
+blocking the execution of commands.
+
+Detailed Algorithm {#sec:dynastar-algo}
+------------------
+
+[\[sec:dynastar-detailed\]]{#sec:dynastar-detailed
+label="sec:dynastar-detailed"}
+
+Algorithms [\[alg:dynastar-client\_proxy\]](#alg:dynastar-client_proxy){reference-type="ref"
+reference="alg:dynastar-client_proxy"},
+[\[alg:dynastar-oracle\_proxy\]](#alg:dynastar-oracle_proxy){reference-type="ref"
+reference="alg:dynastar-oracle_proxy"}, and
+[\[alg:dynastar-server\_proxy\]](#alg:dynastar-server_proxy){reference-type="ref"
+reference="alg:dynastar-server_proxy"} describe the client, oracle, and
+server processes, respectively. We omit the delete command since the
+coordination involved in the create and delete commands are analogous.
+
+#### The client process
+
+To execute a command $C$, the client atomically multicasts $C$ to the
+oracle (Algorithm
+[\[alg:dynastar-client\_proxy\]](#alg:dynastar-client_proxy){reference-type="ref"
+reference="alg:dynastar-client_proxy"}). The oracle replies with a
+prophecy, which may already tell the client that $C$ cannot be executed
+(e.g., it needs a variable that does not exist, it tries to create a
+variable that already exists). If $C$ can be executed, the client
+receives a prophecy containing the partition where $C$ will be executed.
+The client then waits for the result of the execution of $C$.
+
+#### The oracle
+
+When the oracle delivers a request, it distinguishes between two cases
+(Task 1 in
+Algorithm [\[alg:dynastar-oracle\_proxy\]](#alg:dynastar-oracle_proxy){reference-type="ref"
+reference="alg:dynastar-oracle_proxy"}).
+
+-   If the command is to create a variable $v$, and $v$ does not already
+    exist, the oracle chooses a random partition for $v$, multicasts the
+    create command to the partition and itself, and returns the
+    partition to the client as a prophecy
+    (Figure [\[fig:oracle\_repartition\]](#fig:oracle_repartition){reference-type="ref"
+    reference="fig:oracle_repartition"}).
+
+-   If the command reads and writes existing variables, the oracle first
+    checks that all such variables exist. If the variables exist and
+    they are all in a single partition, the oracle multicasts the
+    command to that partition for execution. If the variables are
+    distributed in multiple partitions, the oracle deterministically
+    determines the destination partition, and atomically multicasts a
+    command to the involved partitions so that all variables are
+    gathered at the destination partition. The oracle chooses as the
+    destination partition the partition that contains most of the
+    variables needed by the command. (In case of a tie, one partition is
+    chosen deterministically, among those that contain most variables.)
+    Once the destination partition has received all variables needed by
+    the command, it executes the command and returns the variables to
+    their source partition.
+
+![image](figures/dynastar.pdf){width="\\linewidth"}
+
+Upon delivering a create (Task 2), the oracle updates its partition
+information. The exchange of signals between the partition where the
+variable will be created and the oracle ensures that interleaved
+executions between create and delete commands will not lead to
+violations of linearizability (i.e., this is essentially the execution
+of a multi-partition command involving the oracle and a partition (Task
+3)  [@bezerra2014ssmr]). The oracle also keeps track of the workload
+graph by receiving hints with variables (i.e., vertices in the graph)
+and executing commands (i.e., edges in the graph). These hints can be
+submitted by the clients or by the partitions, which collect data upon
+executing commands and periodically inform the oracle (Task 4). The
+oracle computes a partitioning plan of the graph and multicasts it to
+all servers and to itself. Upon delivering a new partition plan, the
+oracle updates its location map accordingly (Task 5).
+
+To compute an optimized partitioning, the oracle uses a graph
+partitioner. A new partitioning can be requested by the application, by
+a partition, or by the oracle itself (e.g., upon delivering a certain
+number of hints). To determine the destination partition of a set of
+variables, as part of a move, the oracle uses its mapping of the current
+location of variables and the last computed partitioning.
+
+#### The server process
+
+When a server delivers a command $C$, it first checks if it has all
+variables needed by $C$. If the server has all such variables, it
+executes $C$ and sends the response back to the client (Tasks 1a and 2
+in
+Algorithm [\[alg:dynastar-server\_proxy\]](#alg:dynastar-server_proxy){reference-type="ref"
+reference="alg:dynastar-server_proxy"}). If not all the variables needed
+by $C$ are in that partition, the server runs a deterministic function
+to determine the destination partition to execute $C$ (Task 1b). The
+function uses as input the variables needed by $C$ and $C$ itself. In
+this case, each server that is in the multicast group of $C$ but is not
+the destination partition sends all the needed variables stored locally
+to the destination partition and waits to receive them back. The
+destination partition waits for a message from other partitions. Once
+all variables needed are available, the destination partition executes
+the $C$, sends the response back to the client, and returns the
+variables to their source. Periodically, the servers deliver a new
+partitioning plan from the oracle (Task 3). Each server will send the
+variables to the designated partition, as in the plan, and wait for
+variables from other partitions. Once a server receives all variables,
+it updates its location map accordingly. To determine the destination
+partition for a command, the servers uses the last computed
+partitioning.
+
+Performance optimizations {#sec:dynastar-optm}
+-------------------------
+
+In the algorithm presented in the previous section, clients always need
+to involve the oracle, and the oracle dispatches every command to the
+partitions for execution. Obviously, if every command involves the
+oracle, the system is unlikely to scale, as the oracle will likely
+become a bottleneck. To address this issue, clients are equipped with a
+location cache. Before submitting a command to the oracle, the client
+checks its location cache. If the cache contains the partition of the
+variables needed by the command, the client can atomically multicast the
+command to the involved partition and thereby avoid contacting the
+oracle.
+
+The client still needs to contact the oracle in one of these situations:
+(a) the cache contains outdated information; or (b) the command is a
+create, in which case it must involve the oracle, as explained before.
+If the cache contains outdated information, it may address a partition
+that does not have the information of all the variables accessed by the
+command. In this case, the addressed partition tells the client to retry
+the command. The client then contacts the oracle and updates its cache
+with the oracle's response. Although outdated cache information results
+in execution overhead, it is expected to happen rarely since
+repartitioning is not frequent.
+
+Correctness {#sec:dynastar-correctness}
+-----------
+
+Similar to DS-SMR, we consider linearizability consistency criterion of
+DynaStar. To prove that DynaStar ensures linearizability, we must show
+that for any execution $\sigma$ of the system, there is a total order
+$\pi$ on client commands that (i) respects the semantics of the
+commands, as defined in their sequential specifications, and
+(ii) respects the real-time precedence of
+commands (§[5.4](#sec:dynastar-correctness){reference-type="ref"
+reference="sec:dynastar-correctness"}). Let $\pi$ be a total order of
+operations in $\sigma$ that respects $<$, the order atomic multicast
+induces on commands.
+
+To argue that $\pi$ respects the semantics of commands, let $C_i$ be the
+$i$-th command in $\pi$ and $p$ a process in partition $\mathcal{P}_p$
+that executes $C_i$. We claim that when $p$ executes $C_i$, it has
+updated values of variables in $vars(C_i)$, the variables accessed by
+$C_i$. We prove the claim by induction on $i$. The base step trivially
+holds from the fact that variables are initialized correctly. Let
+$v \in vars(C_i)$, $C_v$ be the last client command before $C_i$ in
+$\pi$ that accesses $v$, and $q$ a process in $\mathcal{P}_q$ that
+executes $C_v$. From the inductive hypothesis, $q$ has an updated value
+of $v$ when it executes $C_v$. There are two cases to consider:
+(a) $p = q$. In this case, $p$ obviously has an updated value of $v$
+when it executes $C_i$ since no other command accesses $v$ between $C_v$
+and $C_i$. (b) $p \neq q$. Since processes in the same partition execute
+the same commands, it must be that $\mathcal{P}_p \neq \mathcal{P}_q$.
+From the algorithm, when $q$ executes $C_v$, $v \in \mathcal{P}_q$ and
+when $p$ executes $C_i$, $v \in \mathcal{P}_p$. Thus, $q$ executed a
+command to move $v$ to another partition after executing $C_v$ and $p$
+executed a command to move $v$ to $\mathcal{P}_p$ before executing
+$C_i$. Since there is no command that accesses $v$ between $C_v$ and
+$C_i$ in $\pi$, $q$ has an updated $v$ when it executes $C_v$ (from
+inductive hypothesis), and $p$ receives the value of $v$ at $q$, it
+follows that $p$ has an updated $v$ when it executes $C_i$.
+
+We now argue that there is a total order $\pi$ that respects the
+real-time precedence of commands in $\sigma$. Assume $C_i$ ends before
+$C_j$ starts, or more precisely, the time $C_i$ ends at a client is
+smaller than the time $C_j$ starts at a client,
+$\ensuremath{t^{cli}_{end}}(C_i) < \ensuremath{t^{cli}_{start}}(C_j)$.
+Since the time $C_i$ ends at the server from which the client receives
+the response for $C_i$ is smaller than the time $C_i$ ends at the
+client,
+$\ensuremath{t^{srv}_{end}}(C_i) < \ensuremath{t^{cli}_{end}}(C_i)$, and
+the time $C_j$ starts at the client is smaller than the time $C_j$
+starts at the first server,
+$\ensuremath{t^{cli}_{start}}(C_j) < \ensuremath{t^{srv}_{start}}(C_j)$,
+we conclude that
+$\ensuremath{t^{srv}_{end}}(C_i) < \ensuremath{t^{srv}_{start}}(C_j)$.
+
+We must show that either $C_i < C_j$; or neither $C_i < C_j$ nor
+$C_j < C_i$. For a contradiction, assume that $C_j <  C_i$ and let $C_j$
+be executed by partition $\mathcal{P}_j$.
+
+There are two cases:
+
+1.  $C_i$ is a client command executed by $\mathcal{P}_j$. In this case,
+    since $C_i$ only starts after $C_j$ at a server, it follows that
+    $\ensuremath{t^{srv}_{end}}(C_j) <
+    \ensuremath{t^{srv}_{start}}(C_i)$, a contradiction.
+
+2.  $C_i$ is a client command executed by $\mathcal{P}_i$ that first
+    involves a move of variables $vars$ from $\mathcal{P}_j$ to
+    $\mathcal{P}_i$. At $\mathcal{P}_j$,
+    $\ensuremath{t^{srv}_{end}}(C_j) <
+    \ensuremath{t^{srv}_{start}}(global(vars,\mathcal{P}_j,\mathcal{P}_i))$
+    since the move is only executed after $C_j$ ends. Since the move
+    only finishes after variables in $vars$ are in $\mathcal{P}_i$ and
+    $C_i$ can be executed, it must be that
+    $\ensuremath{t^{srv}_{end}}(global(vars,\mathcal{P}_j,\mathcal{P}_i)) < \ensuremath{t^{srv}_{start}}(C_i)$.
+    We conclude that $\ensuremath{t^{srv}_{end}}(C_j) <
+    \ensuremath{t^{srv}_{start}}(C_i)$, a contradiction.
+
+Therefore, either $C_i < C_j$ and from the definition of $\pi$, $C_i$
+precedes $C_j$ or neither $C_i < C_j$ nor $C_j < C_i$, and there is a
+total order in which $C_i$ precedes $C_j$.
+
+For termination, we argue that every correct client eventually receives
+a response for every command $C$ that it issues. This assumes that every
+partition (including the oracle partition) is always operational,
+despite the failure of some servers in the partition. For a
+contradiction, assume that some correct client submits a command $C$
+that is not executed. Atomic multicast ensures that $C$ is delivered by
+the involved partition. Therefore, $C$ is delivered at a partition that
+does not contain all the variables needed by $C$. As a consequence, the
+client retries with the oracle, which moves all variables to a single
+partition and requests the destination partition to execute $C$, a
+contradiction that concludes our argument.
+
+Implementation {#sec:dynastar-implementation}
+--------------
+
+### Atomic multicast {#atomic-multicast}
+
+Our DynaStar prototype uses the BaseCast atomic multicast protocol
+[@Coelho:2017], available as open source.[^4] Each group of servers in
+BaseCast executes an instance of Multi-Paxos.[^5] Groups coordinate to
+ensure that commands multicast to multiple groups are consistently
+ordered (as defined by the atomic multicast properties
+§[2.1.2](#sec:amcast){reference-type="ref" reference="sec:amcast"}).
+BaseCast is a genuine atomic multicast in that only the sender and
+destination replicas of a multicast message communicate to order the
+multicast message.
+
+### DynaStar
+
+Our DynaStar prototype is written as a Java 8 library. Application
+designers who use DynaStar to implement a replicated service must extend
+three key classes:
+
+-   *PRObject*: provides a common interface for replicated data items.
+    All instance of *PRObject*'s sub-classes are replicated by the
+    framework(i.e., objects are distributed among partitions). The
+    application is agnostic to the location of those objects. DynaStar
+    intercepts all calls to replicated objects and forward them to
+    associated partition automatically.
+
+-   *ProxyClient*: provides the communication between application client
+    and server, while encapsulating all complex logic of handling caches
+    or retried requests. The proxy client also allows sending multiple
+    asynchronous requests, and delivering corresponding response to each
+    request.
+
+-   *PartitionStateMachine*: encapsulates the logic of the server proxy.
+    The server logic is written without knowledge of the actual
+    partitioning scheme. In other words, developer programs for
+    classical state machine replication (i.e., full replication). The
+    DynaStar library handles all communication between partitions and
+    the oracle transparently. Objects that are involved in application's
+    command will be available to the partition at the time it is
+    accessed by the partitions.
+
+-   *OracleStateMachine*: computes the mapping of objects to partitions.
+    The oracle can be configured to trigger repartitioning in different
+    ways: repartitioning request from application, based on the number
+    of changes to the graph, or based on some interval of time. Our
+    default implementation uses METIS[^6] to provide a partitioning
+    based on the workload graph. While partitioning a graph, METIS aims
+    to reduce the number of multi-partition commands (edge-cuts) while
+    trying to keep the various partitions balanced. We configured METIS
+    to allow a 20% unbalance among partitions. METIS repartitions a
+    graph without considering previous partitions. Consequently,
+    DynaStar may need to relocate a large number of objects upon a
+    repartitioning. Other partitioning techniques could be used to
+    introduce incremental graph partitioning [@SerafiniTEPAS16].
+
+We note one important implementation detail. The oracle is
+multi-threaded: it can serve requests while computing a new partitioning
+concurrently. To ensure that all replicas start using the new
+partitioning consistently, the oracle identifies each partitioning with
+a unique id. When an oracle replica finishes a repartitioning, it
+atomically multicasts the id of the new partitioning to all replicas of
+the oracle. The first delivered id message defines the order of the new
+partitioning with respect to other oracle operations.
+
+### TPC-C benchmark {#sec:imp:tpcc}
+
+TPC-C is an industry standard for evaluating the performance of OLTP
+systems [@tpcc]. TPC-C implements a wholesale supplier company. The
+company has a number of distributed sales districts and associated
+warehouses. Each warehouse has 10 districts. Each district services
+3,000 customers. Each warehouse maintains a stock of 100,000 items. The
+TPC-C database consists of 9 tables and five transaction types that
+simulate a warehouse-centric order processing application: *New-Order*
+(45% of transactions in the workload), *Payment* (43%), *Delivery* (4%),
+*Order-Status* (4%) and *Stock-Level* (4%).
+
+We implemented a Java version of TPC-C that runs on top of DynaStar.
+Each row in TPC-C tables is an object in DynaStar. The oracle models the
+workload at the granularity of districts, thus each district and
+warehouse is a node in the graph. If a transaction accesses a district
+and a warehouse, the oracle will create an edge between that district
+and the warehouse. The objects (e.g., customers, orders) that belong to
+a district are considered part of district. However, if a transaction
+requires objects from multiple districts, only those objects will be
+moved on demand, rather than the whole district. The ITEM table is
+replicated in all servers, since it is not updated in the benchmark. A
+transaction is a set of commands that access those objects, implemented
+as server procedures.
+
+### Chirper social network service {#sec:imp:Chirper}
+
+Using DynaStar, we have also developed a Twitter-like social network
+service, named Chirper. In our social network, users can follow,
+unfollow, post, or read other users' tweets according to whom the user
+is following. Like Twitter, users are constrained to posting
+140-character messages.
+
+Each user in the social network corresponds to a node in a graph. If one
+user follows another, a directed edge is created from the follower to
+the followee. Each user has an associated *timeline*, which is a
+sequence of post messages from the people that the user follows. Thus,
+when a user issues a post command, it results in writing the message to
+the timeline of all the user's followers. In contrast, when users read
+their own timeline, they only need to access the state associated with
+their own node.
+
+Since DynaStar guarantees linearizable executions, any causal
+dependencies between posts in Chirper will be seen in the correct order.
+More precisely, if user B posts a message after receiving a message
+posted by user A, no user who follows A and B will see B's message
+before seeing A's message.
+
+Overall, in Chirper, post, follow or unfollow commands can lead to
+object moves. Follow and unfollow commands can involve at most two
+partitions, while posts may require object moves from many partitions.
+
+### Alternative system
+
+We compare DynaStar to an optimized version of S-SMR [@bezerra2014ssmr]
+and DS-SMR [@le2016dssmr], publicly available.[^7] S-SMR scales
+performance with the number of partitions under a variety of workloads.
+It differs from DynaStar in two important aspects: multi-partition
+commands are executed by all involved partitions, after the partitions
+exchange needed state for the execution of the command, and S-SMR
+supports static state partitioning. In our experiments, we manually
+optimize S-SMR's partitioning with knowledge about the workload. In the
+experiments, we refer to this system and configuration as S-SMR\*.
+
+Performance evaluation {#sec:dynastar-experiments}
+----------------------
+
+In this section, we report results from two benchmarks: TPC-C and
+Chirper social networking service described in the previous section. Our
+experiments show that DynaStar is able to rapidly adapt to changing
+workloads, while achieving throughputs and latencies far better than the
+existing state-of-the-art approaches to state machine replication
+partitioning.
+
+### Experimental environment {#sec:dynastar-evaluation:setup}
+
+We conducted all experiments on Amazon EC2 T2 large instances (nodes).
+Each node has 8 GB of RAM, two virtual cores and is equipped with an
+Amazon EBS standard SSD with a maximal bandwidth 10000 IOPS. All nodes
+ran Ubuntu Server 16.04 LTS 64 and had the OpenJDK Runtime Environment 8
+with the 64-Bit Server VM (build 25.45-b02). In all experiments, the
+oracle had the same resources as every other partition: 2 replicas and 3
+Paxos acceptors (in total five nodes per partition).
+
+### Methodology and goals {#sec:dynastar-evaluation:methodology}
+
+The experiments seek to answer the following questions:
+
+-   *What is the impact of repartitioning on a real dataset?*
+
+-   *How does partitioning affect performance when the workload grows
+    with the number of partitions and when the workload has constant
+    size?*
+
+-   *How does DynaStar performance compare to other approaches?*
+
+-   *How does DynaStar perform under dynamic workloads?*
+
+-   *What is the performance of the oracle?*
+
+##### Performance metrics {#performance-metrics .unnumbered}
+
+The latency was measured as the end-to-end time between issuing the
+command, and receiving the response. Throughput was measured as the
+number of posts/second or transactions/second that the clients were able
+to send.
+
+### TPC-C benchmark {#sec:dynastar-evaluation:tpc-c}
+
+In the experiments in this section, we deploy as many partitions as the
+number of warehouses.
+
+#### The impact of graph repartitioning
+
+In order to assess the impact of state partitioning on performance, we
+ran the TPC-C benchmark on an un-partitioned database. Figure
+ [5.1](#fig:tpcc_repartitioning){reference-type="ref"
+reference="fig:tpcc_repartitioning"} shows the performance of DynaStar
+with 8 warehouses and 8 partitions. At the first part of the experiment,
+all the variables are randomly distributed across all partitions. As a
+result, almost every transaction accesses all partitions. Thus, every
+transaction required coordination between partitions, and objects were
+constantly moving back and forth. This can be observed in the first 50
+seconds of the experiment depicted in Figure
+ [5.1](#fig:tpcc_repartitioning){reference-type="ref"
+reference="fig:tpcc_repartitioning"}: low throughput (i.e., a few
+transactions executed per second), high latency (i.e., up to several
+seconds), and a high percentage of cross-partition transactions.
+
+After 50 seconds, the oracle computed a new partitioning based on
+previously executed transactions and instructed the partitions to apply
+the new partitioning. When the partitions delivered the partitioning
+request, they exchanged objects to achieve the new partitioning. It
+takes about 10 seconds for partitions to reach the new partitioning.
+During the repartitioning, transactions that access objects that are not
+being relocated will continue to process. After the state is relocated,
+most objects involved in a transaction can be found in a local
+partition, which considerably increases performance and reduces latency.
+
+![Repartitioning in DynaStar; throughput (top), objects exchanged
+between partitions (middle), and percentage of multi-partition commands
+(bottom).](figures/experiments/dynastar/tpcc-detail-dynastar.pdf){#fig:tpcc_repartitioning
+width="0.8\\columnwidth"}
+
+#### Scalability
+
+In order to show how DynaStar scales out, we varied the number of
+partitions from 1 to 128 partitions. We used sufficient clients to
+saturate the throughput of the system in each experiment. Figure
+ [5.2](#fig:tpcc_scaling){reference-type="ref"
+reference="fig:tpcc_scaling"} shows the peak throughput of DynaStar and
+S-SMR\* as we vary the number of partitions. Notice that we increase the
+state size as we add partitions (i.e., there is one warehouse per
+partition). The result shows that DynaStar is capable of applying a
+partitioning scheme that leads to scalable performance.
+
+![Performance scalability with TPC-C. Throughput (in thousands of
+transactions per second, ktps) and latency for $\approx$75% peak
+throughput in milliseconds (bars show average, whiskers show 95-th
+percentile).](figures/experiments/dynastar/tpcc-scaling-tp-lat.pdf){#fig:tpcc_scaling
+width="0.7\\columnwidth"}
+
+### Social network
+
+We used the Higgs Twitter dataset [@snapnets] as the social graph in the
+experiments. The graph is a subset of the Twitter network that was built
+based on the monitoring of the spreading of news on Twitter after the
+discovery of a new particle with the features of the elusive Higgs boson
+on 4th July 2012. The dataset consists of 456631 nodes and more than 14
+million edges.
+
+We evaluate the performance of DynaStar and other techniques. With
+S-SMR\*, we used METIS to partition the data in advance. Thus, S-SMR\*
+started with an optimized partitioning. DynaStar started with random
+location of the objects. Each client issues a sequence of commands. For
+each command, the client selects a random node as the active user with
+Zipfian access pattern ($\rho$ = 0.95). We focused on two types of
+workloads: timeline-only commands and mix commands (85% timeline and 15%
+post). Each client operates in a closed loop, that is, the client issues
+a command and then waits from the response to submit the next command.
+
+![image](figures/experiments/dynastar/chirper-compare-timeline-no-title.pdf){width="0.6\\columnwidth"}
+
+![image](figures/experiments/dynastar/chirper-compare-mix-no-title.pdf){width="0.6\\columnwidth"}
+
+#### DynaStar vs. other techniques {#sec:dynastar-evaluation:results}
+
+Figure [\[fig:socialscalability-timeline\]](#fig:socialscalability-timeline){reference-type="ref"
+reference="fig:socialscalability-timeline"}
+and [\[fig:socialscalability-mix\]](#fig:socialscalability-mix){reference-type="ref"
+reference="fig:socialscalability-mix"} shows the peak throughput and
+latency for approximately 75% of peak throughput (average and 95-th
+percentile) of the evaluated techniques as we vary the number of
+partitions of the fixed graph for the social networks.
+
+In the experiment with timeline commands, all three techniques perform
+similarly. This happens because no moves occur in DynaStar or DS-SMR,
+and no synchronization among partitions is necessary for S-SMR\* in this
+case. Consequently, all three schemes scale remarkably well, and the
+difference in throughput between each technique is due to the
+implementation of each one.
+
+In the experiment with the mix workload, we see that DS-SMR performance
+decreases significantly. This happens because objects in DS-SMR will
+only converge if there is a perfect way to partition the data, that is,
+data items can be grouped such that eventually no command accesses
+objects across partitions. In the mix workload experiments, objects in
+DS-SMR are constantly moving back and forth between partition without
+converging to a stable configuration.
+
+In contrast, for DynaStar and S-SMR\*, the throughput scales with the
+number of partitions in experiments with up to 8 partitions. Increasing
+the number of partitions to 16 with the fixed graph reveals a tradeoff:
+On the one hand, additional partitions should improve performance as
+there are more resources to execute commands. On the other hand, the
+number of edge cuts increases with the number of partitions, which hurts
+performance as there are additional operations involving multiple
+partitions.
+
+Notice that only post operations are subject to this tradeoff since they
+may involve multiple partitions. The most common operation in social
+networks is the request to read a user timeline. This is a
+single-partition command in our application and as a consequence it
+scales linearly with the number of partitions.
+
+#### Performance under dynamic workloads
+
+Figure [\[fig:socialcelebrity\]](#fig:socialcelebrity){reference-type="ref"
+reference="fig:socialcelebrity"} depicts the performance of DynaStar and
+S-SMR\* with an evolving social network. We started the system with the
+original network from Higg dataset. After 200 seconds, we introduced a
+new celebrity user in the workload. The celebrity user posted more
+frequently, and other users started following the celebrity.
+
+![](./figures/experiments/dynastar/chirper-celeb-dynastar-no-oracle.pdf){width="\\textwidth"}
+
+![](./figures/experiments/dynastar/chirper-celeb-ssmr.pdf){width="\\textwidth"}
+
+At the beginning of the experiment, DynaStar performance was not as good
+as S-SMR\* (i.e., lower throughput, higher number of percentage of
+multi-partition commands, and higher number of exchanged objects),
+because S-SMR\* started with an optimized partitioning, while DynaStar
+started with a random partitioning. After 50 seconds, DynaStar triggered
+the repartitioning process, which led to an optimized location of data.
+Repartitioning helped reduce the percentage of multi-partition commands
+to 10%, and thus increased the throughput. After the repartitioning,
+DynaStar outperforms S-SMR\* with the optimized partitioning. After 200
+seconds, the network started to change its structure, as many users
+started to follow a celebrity, and created more edges between nodes in
+the graph. Both DynaStar and S-SMR suffered from the change, as the rate
+of multi-partition command increased, and the throughput decreased.
+However, when the repartitioning takes place in DynaStar, around 300
+seconds into the execution, the previously user mapping got a better
+location from the oracle, which adapted the changes. After the
+repartitioning, the objects are moved to a better partition, with a
+resulting increase in throughput.
+
+Figure [\[fig:dynastar-socialcdf\]](#fig:dynastar-socialcdf){reference-type="ref"
+reference="fig:dynastar-socialcdf"} shows the cumulative distribution
+functions (CDFs) of latency for the mix workload of DynaStar and S-SMR\*
+on different configurations. The results suggest that S-SMR\* achieves
+lower latency than DynaStar for 80% of the load. This is expected, as
+for multi-partition commands, partitions in DynaStar have to send
+additional data to return objects to their original location after
+command execution .
+
+![image](./figures/experiments/dynastar/chirper-latency-cdf-2p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dynastar/chirper-latency-cdf-4p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dynastar/chirper-latency-cdf-8p.pdf){width="\\textwidth"}
+
+![image](./figures/experiments/dynastar/chirper-latency-cdf-16p.pdf){width="\\textwidth"}
+
+Table  [5.1](#table:dynastar-socialsnapshot){reference-type="ref"
+reference="table:dynastar-socialsnapshot"} shows the throughput of each
+partition when the system reached the maximum throughput at the time
+180. Although the objects were evenly distributed among partitions,
+there was still a skew in the load of the system, e.g., partition 1 and
+2 served more commands than the other partitions. This happened because
+of the skew in the access pattern: some users were more active and
+posted more than the others, thus some servers receive more requests
+than the other servers.
+
+max width=
+
+::: {#table:dynastar-socialsnapshot}
+   Partition   Tput    M-part commands per sec   Exchanged objects per sec
+  ----------- ------- ------------------------- ---------------------------
+       1       12766             887                       3907
+       2       11790             643                       3036
+       3       6775              440                       1503
+       4       6458              400                       1490
+
+  : Average load at partitions at peak throughput.
+:::
+
+### The performance of the oracle
+
+DynaStar uses an oracle that maintains a global view of the workload
+graph. The oracle allows DynaStar to make better choices about data
+movement, resulting in overall better throughput and lower latency.
+However, introducing a centralized component in a distributed system is
+always a cause for some skepticism, in case the component becomes a
+bottleneck, or a single point of failure. To cope with failures, the
+oracle is implemented as a replicated partition.
+
+The oracle keeps a mapping of objects to partitions and the relations
+between objects. The size of the mapping depends on the complexity and
+the granularity of the graph. In the social network dataset, where each
+user is modeled as an object in the workload graph, the graph uses 1.5
+GB of the oracle's memory. In the TPC-C experiments, only district and
+warehouse objects are in the workload graph; thus, the oracle only needs
+1 MB of memory to store the graph for each warehouse.
+
+We conducted experiments to evaluate if the DynaStar oracle is a
+bottleneck to system performance. The results show that the load on the
+oracle is low, suggesting that DynaStar scales well. The first
+experiment assesses the scalability of the METIS algorithm only. We
+measured the time to compute the partitioning solution, and the memory
+usage of the algorithms for increasingly large graphs. The results,
+depicted in Figure [5.3](#fig:metis_size_time){reference-type="ref"
+reference="fig:metis_size_time"}, show that METIS scales linearly in
+both memory and computation time on graphs of up to 10 million vertices.
+
+![METIS processor and memory
+usage.](./figures/experiments/dynastar/metis_size_time.pdf){#fig:metis_size_time
+width="0.7\\columnwidth"}
+
+![Queries sent to oracle in the social network
+service](figures/experiments/dynastar/chirper-celeb-dynastar-oracle.pdf){#fig:socialcelebrity-oracle
+width="0.8\\columnwidth"}
+
+The second experiment evaluates the oracle in terms of the number of
+queries sent to the oracle over time. The results shown in the bottom
+chart in the
+Figure [5.4](#fig:socialcelebrity-oracle){reference-type="ref"
+reference="fig:socialcelebrity-oracle"} suggest that the oracle would
+not become a bottleneck. The number of queries processed to the oracle
+is zero at the beginning of the experiment, as the clients have cached
+the location of all objects. After 80 seconds, the repartitioning was
+triggered, making all cached data on clients invalid. Thus the
+throughput of queries at the oracle increases, when clients started
+asking for new location of variables. However, the load diminishes
+rapidly and gradually reduce. This is because access to the oracle is
+necessary only when clients have an invalid cache or when a repartition
+happens
+
+Conclusion {#sec:dynastar-conclusion}
+----------
+
+In this chapter, we present DynaStar, a partitioning strategy for
+scalable state machine replication. DynaStar is inspired by DS-SMR, a
+decentralized dynamic scheme of DS-SMR. Differently from DS-SMR,
+however, DynaStar performs well in all workloads evaluated. When the
+state can be perfectly partitioned, DynaStar converges more quickly than
+DS-SMR; when partitioning cannot avoid cross-partition commands, it
+largely outperforms DS-SMR. The key insights of DynaStar are to build a
+workload graph on-the-fly and use an optimized partitioning of the
+workload graph, computed with an online graph partitioner, to decide how
+to efficiently move state variables. The chapter describes how one can
+turn this conceptually simple idea into a system that sports performance
+close to an optimized (but impractical) scalable system.
+
+Related work {#sec:rw}
+============
+
+In this chapter, we review some selected publications in the research
+areas considered by this dissertation, specially in the context of state
+machine replication and scaling the performance of state machine
+replication.
+
+State machine replication {#state-machine-replication}
+-------------------------
+
+State machine replication (SMR) was first introduced by Leslie Lamport
+as an example in  [@Lam78]. Schneider [@Sch90] then gave a more
+systematic approach to the design and implementation of SMR protocols.
+Util now, SMR has become a well-known approach to replication and has
+been extensively studied, both in academia
+ [@Kapritsos:2012um; @Kotla:2004ep; @santos2013htsmr; @Mencius] and in
+the industry. SMR provides strong consistency guarantees, which come
+from total order and deterministic execution of commands. Traditional
+SMR relies on a consensus protocol to define a common order of execution
+of such commands. Deterministic execution is usually ensured by having
+every replica execute the set of ordered commands sequentially.
+
+Consensus and state machine replication
+---------------------------------------
+
+Consensus [@Lam78; @paprzycki:2001distributed] is a problem that
+requires one or more processes to cooperate, each with an initial value,
+to eventually agree on a single such value. It was proved that in any
+asynchronous system with faulty processors, there is no deterministic
+algorithm providing termination [@FLP85]. One solution to prevent
+processes in the asynchronous system from not making progress is to use
+failure detectors [@aguilera:2000failure]. Chandra and Toueg [@CT96]
+propose a class of algorithms that use failure detectors to solve
+consensus. Another solution is to introduce synchrony and assume a known
+delay to the system's communication [@Aspnes:2003vp].
+
+Traditional consensus-based SMR repeatedly runs multiple instances of a
+consensus protocol to allow replicas to reach an agreed order of
+commands. The best-known consensus algorithm is the Paxos protocol by
+Lamport [@Lam98]. However, Paxos's description leaves many open design
+questions. Several works have argued that Paxos is not an easy algorithm
+to implement [@paxoslive; @Kirsch:2008paxos]. Raft [@184040], a Paxos
+alternative also implements consensus-based SMR, and it is suggested to
+be easier to understand (than Paxos) from an engineering point of view.
+Despite its complexity, several systems have been using Paxos to provide
+various abstractions such as storage systems [@Bolosky:20011paxos],
+locking services [@Mike:2006chubby], and distributed databases
+[@Baker:2011megastore]. Google Chubby [@Mike:2006chubby], Google Spanner
+[@corbett2013spanner] are employing some implementation of the Paxos
+algorithm to achieve consensus and also to cater for replication. Zap
+[@Hunt:2010zoo], the atomic broadcast protocol at the core of ZooKeeper,
+is a modified version of Paxos with a focus on high-performance.
+
+Scaling state machine replication
+---------------------------------
+
+Even though increasing the performance of state machine replication is
+non-trivial, different techniques have been proposed for achieving
+scalable systems, such as partitioning the application state,
+parallelizing execution of commands, weakening consistency or optimizing
+the propagation and ordering of commands.
+
+#### Partitioning application state
+
+Partitioning the state of a replicated service is conceptually similar
+to partial replication of databases. Efforts to make linearizable
+systems scalable have been made in the
+past [@bezerra2014ssmr; @corbett2013spanner; @Glendenning:2011kj; @Marandi:2011dj].
+In Scatter [@Glendenning:2011kj], the authors propose a scalable
+key-value store based on DHTs, ensuring linearizability, but only for
+requests that access the same key. In the work of Marandi et
+al [@Marandi:2011dj], variant of SMR is proposed in which data items are
+partitioned, but commands have to be totally ordered.
+Spanner [@corbett2013spanner] is a leader-leased, Paxos based system
+that uses TrueTime-accurate clock synchronization that requires special
+hardwares to improve geo-distributed read performance. Spanner uses a
+separate Paxos group per partition and synchronized clocks to ensure
+strong consistency across partitions. Although the authors say that
+Spanner works well with GPS and atomic clocks, if clocks become out of
+synch beyond tolerated bounds, correctness is not guaranteed.
+$M^2Paxos$ [@7579738] proposes a scheme where leases are used instead of
+partitions owning objects, but assumes full state replication.
+S-SMR [@bezerra2014ssmr] ensures consistency across partitions without
+any assumption about clock synchronization, but relies on a static
+partitioning of the state. P-store [@Schiper:2010pstore] is a genuine
+partial replication protocol for wide area networks. P-store divided
+replicas into groups and partitioned data between the groups to ensure
+that all replicas in the same group replicate the same data items. When
+a transaction is committing, it sends a message to all involved replicas
+to validate. If a transaction is local to the group, each replica can
+individually decide whether to commit or abort; otherwise, if the
+transaction is global, all the involved replicas exchange votes in order
+to decide the outcome of the transaction.
+
+#### Optimizing ordering protocol
+
+Several works have focused on scaling performance of state machine
+replication by improving the performance of the ordering protocol. This
+allows the ordering layer (i.e., the underlying atomic broadcast
+algorithm) to be itself also scalable. For instance, Kapritsos and
+Junqueira [@kapritsos2010scalable] propose to divide the ordering of
+commands between different clusters: each cluster orders only some
+requests, and then forwards the partial order to every server replica,
+which then merges the partial orders deterministically into a single
+total order that is consistent across the system. In
+S-Paxos [@biely2012spaxos], Paxos [@Lam98] is used to order commands,
+but it is implemented in a way such that the task of ordering messages
+is evenly distributed among replicas, as opposed to having a leader
+process that performs more work than the others and may eventually
+become a bottleneck. Mencius [@Mencius] proposes a rotating leader
+protocol designed for Wide-Area Networks, which improves throughput by
+distributing over multiple replicas the load that is usually
+concentrated on the leader. On the other hand, Ring-Paxos
+[@Marandi:2012hb] focus instead on achieving high network efficiency on
+fast Gigabit LANs.
+
+#### Parallelizing execution of commands
+
+Multi-threaded execution is a potential source of non-determinism,
+depending on how threads are scheduled to be executed in the operating
+system. However, some works have proposed multi-threaded implementations
+of state machine replication, circumventing the non-determinism caused
+by concurrency in some way. In [@santos2013htsmr], for instance, the
+authors propose organizing each replica in multiple modules that perform
+different tasks concurrently, such as receiving messages, batching, and
+dispatching commands to be executed. The execution of commands is still
+sequential, but the replica performs all other tasks in parallel. In
+CBASE [@Kotla:2004ep], a parallelizer module uses application semantics
+to determine which commands can be executed concurrently without
+reducing determinism (e.g., read-only commands, which can be executed in
+any order relative to one another). In Eve [@Kapritsos:2012um], commands
+are tentatively executed in parallel. After the parallel execution,
+replicas verify whether they reached a consistent state; if not,
+commands are rolled back and re-executed sequentially. Storyboard in
+[@Kapitza:2010Storyboard] was introduced as an approach that supports
+deterministic execution in multi-threading environments. Storyboard uses
+a forecasting mechanism to predicts an ordered sequence of locks across
+replicas based on application-specific knowledge. Guo et
+al. [@guo2014rex] proposed Rex, a replicated state-machine framework for
+a multi-core system that uses an execute-agree-follow strategy. In Rex,
+A so-called primary server receives requests and processes those
+requests deterministically. The executions of requests could be in
+parallel. Rex uses locks to synchronize the concurrent access to a
+shared variable. The primary server periodically proposes the trace for
+agreement to the other replicas to update.
+
+#### Weakening consistency guarantees
+
+Many replication schemes aim at achieving high throughput by relaxing
+consistency; that is, they do not ensure linearizability. In
+deferred-update replication
+[@chundi96dur; @kobus2013hybrid; @sciascia2012sdur; @SousaOMP01],
+replicas commit read-only transactions immediately, not always
+synchronized with each other. Although this indeed improves performance,
+it allows non-linearizable executions. Database systems usually ensure
+serializability [@BHG87] or snapshot isolation [@LinKJPA09], which do
+not take into account real-time precedence of different commands among
+different clients. For some applications, these consistency levels may
+be enough, allowing the system to scale better, but services that
+require linearizability cannot be implemented with such techniques. Some
+applications do not require strong consistency for most of their
+operations, can weakening the consistency guarantees to eventual
+consistency (e.g., Facebook's TAO [@facebookTAO]). Eventual consistency
+[@Gustavsson:2002eventual] means that the correct replicas will
+eventually converge to a common state, even though some intermediate
+states might diverge to a certain extent. Some other systems try to
+combine the benefits of weak and strong consistency models by supporting
+both. In Gemini [@Li2012geo], transactions that can execute under weak
+consistency run fast without needing to coordinate with other
+datacenters. PNUTS [@Cooper2008PNUTSYH] and DynamoDB
+[@Sivasubramanian:2012dynamo] also combine weak consistency with
+per-object strong consistency. Both works rely on conditional writes,
+where a write fails in the presence of concurrent writes.
+
+Graph partitioning in performance scaling
+-----------------------------------------
+
+Graph partitioning is an interesting problem with many proposed
+solutions [@Abou-Rjeili:2006; @hendrickson2000graph; @kernighan1970efficient; @7004087].
+In this work, we do not introduce a new graph partitioning solution, but
+instead, we use a well-known one (METIS [@Abou-Rjeili:2006]) to
+partition the state of a service implemented with state machine
+replication. Similarly to DynaStar, Schism [@curino2010sch] and
+Clay [@SerafiniTEPAS16] also use graph-based partitioning to decide
+where to place data items in a transactional database. In either case,
+not much detail is given about how to handle repartitioning dynamically
+without violating consistency. Turcu et al.  [@7004087] proposed a
+technique that reduces the amount of cross-partition commands and
+implements advanced transaction routing. Sword [@quamar2013sword] is
+another graph-based dynamic repartitioning technique. It uses a
+hyper-graph partitioning algorithm to distribute rows of tables in a
+relational database across database shards. Sword does not ensure
+linearizability, and it is not clear how it implements repartitioning
+without violating consistency. E-Store [@taft2014est] is yet another
+repartitioning proposal for transactional databases. It repartitions
+data according to access patterns from the workload. It strives to
+minimize the number of multi-partition accesses and is able to
+redistribute data items among partitions during execution. E-Store
+assumes that all non-replicated tables form a tree-schema based on
+foreign key relationships. This has the drawback of ruling out
+graph-structured schemas and $m$-$n$ relationships. DynaStar is a more
+general approach that works with any kind of relationship between data
+items, while also ensuring linearizability.
+
+Some replication schemes are "dynamic" in that they allow the membership
+to be reconfigured during execution (e.g.,
+[@birman2010dsr; @dustdar2007soc; @guessoum2003dar]). For instance, a
+multicast layer based on Paxos can be reconfigured by adding or removing
+acceptors. These systems are dynamic in a way that is orthogonal to what
+DynaStar proposes.
+
+DynaStar consists of allowing the *state partitioning*, that is, which
+state variables belong to which partition to change dynamically. The
+greatest challenge that is addressed by DynaStar is how to provide such
+a solution, with a dynamic partitioning oracle, while ensuring a very
+strong level of consistency (linearizability), as variables are created,
+deleted, and moved across partitions, based on the access patterns of
+the workload.
+
+Conclusion {#conclusion-1}
+==========
+
+With the explosive growth of the Internet, everyday online activities
+are increasingly dependent on the performance and reliability of
+large-scale distributed systems, such as e-banking, social networks, and
+e-commerce platforms. Over the years, state machine replication has
+become the most standard approach for providing highly available
+stateful services. By replicating deterministic services across a number
+of servers, the replicated service is available as long as the total
+number of failures does not exceed a certain threshold. The strong
+consistency guarantee of state machine replication hides the complexity
+of data replication among independent replicas, makes the underlying
+designs simpler. However, scaling such a replicated system while
+preserving the strong consistency guarantee is not trivial, since each
+replica must execute every command. To address this problem, several
+systems have investigated the use of state partitioning in the context
+of SMR, allowing client commands to be executed on a subset of replicas.
+
+In this dissertation, we have explored the space of building highly
+available and scalable systems from a performance perspective and
+proposed new solutions to improve its efficiency. The contribution of
+this thesis is centered on scaling performance of a replicated state
+machine system. First, we presented a general comparison of several
+approaches to scaling the performance of a partitioned replicated system
+in the distributed system and database communities, by using an abstract
+framework for coordination. Second, we introduced Dynamic Scalable State
+Machine Replication (DS-SMR), a scalable variant of the well-known state
+machine replication technique. DS-SMR implements dynamic state
+partitioning to adapt to different access patterns throughout the
+execution while scaling throughput with the number of partitions and
+ensuring linearizability. Third, we present DynaStar, a partitioning
+strategy for scalable state machine replication. Different from DS-SMR,
+DynaStar performs well in all workloads evaluated. When the state can be
+perfectly partitioned, DynaStar converges more quickly than DS-SMR; when
+partitioning cannot avoid cross-partition commands, it largely
+outperforms DS-SMR. The key insights of DynaStar are to build a workload
+graph on-the-fly and use an optimized partitioning of the workload
+graph, computed with an online graph partitioner, to decide how to
+efficiently move state variables.
+
+Research assessment
+-------------------
+
+This dissertation presents three contributions: (i) Generic framework
+for scaling partitioned replicated system, (ii) Dynamic partitioning for
+SMR (DS-SMR), and (iii) Optimized partitioning for SMR (DynaStar). In
+the following, we discuss and review some of the important lessons that
+we have learned during this research.
+
+##### Survey on scalable partitioned replicated system
+
+Scaling a replicated system has been a topic of interest for many years.
+The service is replicated on a number of servers, to tolerate a certain
+degree of failure. Partitioning (or sharding) is a technique that
+divides the state of a service in multiple partitions, so the load could
+be equally distributed among partitions. A partitioned replicated
+protocol can be described using five generic phases: (i) the client
+submits request to the system, (ii) the replicas of involved partitions
+coordinate with each other to synchronize the execution of the request,
+(iii) the request is executed, (iv) the involved partitions agree on the
+result of the execution and (v) the system sends the outcome of the
+request to the client. Some approaches may skip or simplify some phases:
+Google Spanner [@corbett2013spanner] uses two-phase commit and two-phase
+locking for concurrency control and doesn't need to order the
+transactions across partitions; Calvin [@calvin], on the other hand,
+orders the transactions in a global log, deterministically executes
+transactions on all involved replicas and remove the overhead of
+coordinating after the execution phase.
+
+##### Dynamic partitioning for state machine replication
+
+Classic SMR provides configurable fault tolerance and strong consistency
+but limited performance scalability, since all replicated nodes must
+execute the same sequence of commands. Some recent proposals have
+extended state machine replication with sharding. Essentially, these
+approaches partition (shard) the service state and replicate each
+partition. Commands that access state in a single partition are handled
+as in classic state machine replication.DS-SMR is the technique that
+allows a partitioned SMR system to dynamically reconfigure its data
+placement on-the-fly. DS-SMR repartitions the service state dynamically,
+based on the workload. When a command needs variables from different
+partitions, those variables are first moved to the same partition. Then,
+the command is executed as a single-partition command. To reduce the
+chances of skewed load among partitions, the destination partition is
+chosen randomly. As a result, variables that are usually accessed
+together will tend to stay in the same partition, significantly
+improving scalability. We evaluate the performance of DS-SMR with a
+scalable social network application. The results demonstrate that
+DS-SMR could provide a scalable performance under workloads that exhibit
+strong locality.
+
+##### Optimized partitioning for state machine replication
+
+Sharding and replication are the mechanisms of choice of most scalable
+and fault-tolerant distributed systems. The performance of a partitioned
+system, however, heavily depends on the partitioning of the data: in
+order to scale, most commands must involve a single shard, and load must
+be balanced across shards. Estimating a good partitioning of the
+application state is challenging since it requires a priori information
+about the workload. Moreover, even if such information is available,
+access patterns may change during system execution. A good partitioning
+of the data for uniform access patterns may lead to poor performance
+under skewed access patterns. DynaStar is a partitioning strategy for
+scalable state machine replication. Differently from DS-SMR, DynaStar
+performs well in workloads that exhibit strong and weak locality. In the
+presence of strong locality, it converges more quickly than DS-SMR; in
+the presence of weak locality, it largely outperforms DS-SMR. The key
+insights of DynaStar are to build a workload graph on-the-fly and use an
+optimized partitioning of the workload graph, computed with an online
+graph partitioner, to decide how to efficiently move state variables. We
+describe DynaStar design and implementation, and presents a detailed
+performance evaluation using two benchmarks, a social network based on
+real data and TPC-C.
+
+Future directions
+-----------------
+
+The main objectives of this dissertation are to explorer the space of
+techniques for scalable, strongly consistent replicated systems.
+However, many questions remain open, so we point here at possible
+research directions.
+
+##### Remote updating objects
+
+DynaStar and DS-SMR have similar execution model: moving objects that
+are required by a command to the same partition and execute the command
+against that partition. DynaStar has an extra step of returning back
+updated objects to their original locations to preserve the optimized
+partitioning. The operations of moving objects back and forth impose
+significant overhead on the performance of the system.
+
+One direction to remove this overhead is to let partitions update the
+objects remotely by making use of remote direct memory access (RDMA)
+technique. [@recio2007remote; @dragojevic2014farm]. Essentially, RDMA is
+a approach that allows a host to access the memory of another host
+without involving the processor at the other host. RDMA enables
+zero-copy transfers, low-latency communication and reduces CPU overhead
+by bypassing the OS kernel and by implementing several layers of the
+network stack in hardware. DynaStar powered by RDMA can allow partition
+remotely read or write the update to an object of a remote partition,
+without the need to relocate the object. However, how to handle the
+synchronization of the concurrent remote accesses is not trivial. It is
+worthwhile to study synchronization techniques and possibly propose a
+new and efficient protocol that can combine DynaStar with the RDMA
+techniques.
+
+##### Optimal scalable atomic multicast protocol.
+
+In order to provide scalable performance, DS-SMR and DynaStar make use
+of state partitioning. The requests from the client are only sent to the
+replicas of the partitions that store the data being accessed.
+Traditional SMR relies on total messages ordering, but in the case of
+DS-SMR and DynaStar, this may become a bottleneck. To address this
+problem, DS-SMR and DynaStar don't totally order the requests but use a
+total ordered multicast primitive instead, which avoids enforcing a
+precedence relation between messages that do not share the same
+destinations. This allows the ordering layer (i.e., the atomic multicast
+protocol) to be itself also scalable. As one of the directions for
+expanding the subject of this study, a scalable atomic multicast
+protocol that had optimal latency, while providing optimal throughput,
+would be the ideal primitive for our system to build on.
+
+##### Incremental partitioning.
+
+Our default implementation of DynaStar uses METIS [@Abou-Rjeili:2006] to
+provide a partitioning based on the workload graph. Although METIS does
+not necessarily produce the best possible partitioning of the workload
+graph, it offers a good compromise between performance and partitioning
+quality. However, METIS needs to repartition graphs from scratch every
+time a change is introduced in the graph or the number of partitions.
+This could result in having DynaStar relocating the whole graph
+[@SerafiniTEPAS16]. The other techniques that related to incremental
+graph partitioning are orthogonal to our paradigm, so they can be used
+to further improve DynaStar performance.
+
+##### Decentralized partitioning.
+
+Even though defining optimized partitioning by using a centralized
+component (i.e., the oracle) shows its advantages over the decentralized
+approach, the drawback of this approach is the scalability as the oracle
+is still prone to becoming a bottleneck in some cases. For instance: (i)
+the workload may become too big to be stored in a single machine, or
+(ii) the workload is more dynamic (i.e., the access patterns change more
+frequently), that reduces the efficiency of the client cache and thus
+increases the queries to the oracle). As another direction for improving
+this work, it is worthwhile to come up with a decentralized graph
+partitioning and mapping that could help to remove the centralized
+component.
+
+[^1]: The definition of *strong-* and *weak-locality* is postponed until
+    Section [2.7](#sysmodel:locality){reference-type="ref"
+    reference="sysmodel:locality"}.
+
+[^2]: The oracle returns a set with the partitions accessed by the
+    command, but this set does not need to be minimal; it may contain
+    all partitions in the worst case, when the partitions accessed by
+    the command cannot be determined before the command is executed.
+
+[^3]: Workloads are referred as *strong locality* if that can be
+    partitioned in a way that would both (i) allow commands to be
+    executed at a single partition only, and (ii) evenly distribute data
+    so that load is balanced among partitions. Conversely, workloads
+    that cannot avoid multi-partition commands with balanced load among
+    partitions exhibit *weak locality*.
+
+[^4]: https://bitbucket.org/paulo\_coelho/libmcast
+
+[^5]: http://libpaxos.sourceforge.net/paxos\_projects.php\#libpaxos3
+
+[^6]: http://glaros.dtc.umn.edu/gkhome/views/metis
+
+[^7]: https://bitbucket.org/kdubezerra/eyrie\
+    https://bitbucket.org/usi-dslab/ds-smr

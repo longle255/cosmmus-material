@@ -179,17 +179,49 @@ every replica in the system. This prevents the system from scaling with the
 increase in the number of replicas. In fact, the performance of the system is
 limited by the performance of a single replica. Partial replication addresses
 these issues by replicating only a subset of data at each replica. Therefore,
-different subsets of data can be accessed and updated concurrently. In other
-words, scalable performance can be achieved with state partitioning.
+different subsets of data can be accessed and updated concurrently. 
+% In other words, scalable performance can be achieved with state partitioning.
 
 Partitioning (also known as \emph{sharding}) is a technique that divides the
 state of a service in multiple partitions so that most commands access one
-partition only and are equally distributed among partitions. Partitioning
-replicated state machine can provide highly scalable and available systems;
-however, introduce other challenges. Most services cannot be ``perfectly
-partitioned''; that is, the service state cannot be divided in a way that
-commands access one partition only. Therefore, a partitioning protocol must cope
-with multi-partition commands.
+partition only and are equally distributed among partitions. Partitioned
+replicated system can provide highly scalable and available systems; however,
+introduce other challenges. Most services cannot be ``perfectly partitioned'';
+that is, the service state cannot be divided in a way that commands access one
+partition only. Therefore, a partitioning protocol must cope with
+multi-partition commands. In database systems, partitioning is usually referred
+as \emph{sharding}, where the dataset is divided into horizontal fragmentation,
+known as partitions. Each partition essentially has the same schema and columns
+but contains different subsets of the total data set. The partitions are then
+distributed across separate database servers, referred to as physical shards,
+which can hold multiple logical partitions. Those physical shards can be
+replicated to tolerate a certain degree of failure. Despite this, the data held
+within all the partitions collectively represent an entire logical dataset. To
+guarantee the consistency, a consensus protocol (e.g., Paxos or Raft) is used to
+enforce consistency across multiple replicas of the data. Essentially, this
+protocol works as a majority voting mechanism. Any change to the dataset
+requires a majority of replicas to agree to the change. Google
+Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin} are two of the
+database solutions in this category. Both systems were designed to be a
+highly-scalable distributed relational database. The main difference between the
+two systems is that Spanner uses two phase commit as an agreement protocol to
+synchronize the changes between partition, without the need of server
+coordination before the execution, while Calvin uses a single, global consensus
+protocol per database to synchronize transaction before the execution. All
+involved replicas of Calvin then deterministically execute and commit the
+transaction, without an agreement protocol. The next sections will describe how
+those database system works. In addition, we will go into detail Scalable state
+machine replication, a system in the third category, which requires both server
+coordination and agreement for providing a strong consistency guarantee.
+
+
+
+% Partitioning
+% replicated state machine can provide highly scalable and available systems;
+% however, introduce other challenges. Most services cannot be ``perfectly
+% partitioned''; that is, the service state cannot be divided in a way that
+% commands access one partition only. Therefore, a partitioning protocol must cope
+% with multi-partition commands.
 
 
 In general, we can model abstraction for partitioned replication protocols by
@@ -225,32 +257,6 @@ cover the coordination between components in a partitioned replicated system
   partitions agree on the outcome of the execution.
   \item \textit{Response phase (END):} The result of the request is sent back to the client.
 \end{itemize}
-
-In database systems, scaling is often achieved by partitioning (usually referred
-as \emph{sharding}). Sharding is a way of dividing the dataset into horizontal
-fragmentation, known as partitions. Each partition essentially has the same
-schema and columns but contains different subsets of the total data set. The
-partitions are then distributed across separate database servers, referred to as
-physical shards, which can hold multiple logical partitions. Those physical
-shards can be replicated to tolerate a certain degree of failure. Despite this,
-the data held within all the partitions collectively represent an entire logical
-dataset. To guarantee the consistency, a consensus protocol (e.g., Paxos or
-Raft) is used to enforce consistency across multiple replicas of the data.
-Essentially, this protocol works as a majority voting mechanism. Any change to
-the dataset requires a majority of replicas to agree to the change. Google
-Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin} are two of the
-database solutions in this category. Both systems were designed to be a
-highly-scalable distributed relational database. The main difference between the
-two systems is that Spanner uses two phase commit as an agreement protocol to
-synchronize the changes between partition, without the need of server
-coordination before the execution, while Calvin uses a single, global consensus
-protocol per database to synchronize transaction before the execution. All
-involved replicas of Calvin then deterministically execute and commit the
-transaction, without an agreement protocol. The next sections will describe how
-those database system works. In addition, we will go into detail Scalable state
-machine replication, a system in the third category, which requires both server
-coordination and agreement for providing a strong consistency guarantee.
-
 
 \subsection{Agreement coordination without server coordination}
 
