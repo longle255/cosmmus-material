@@ -44,35 +44,35 @@ of replication techniques that have become widely well-known to ensure this
 consistency: \emph{active replication} and \emph{passive replication}.
 
 
-\paragraph{Active replication} With \emph{active replication} (also called
-state machine replication) approach, the requests of the client are sent to all
-members of a given group (replicas) in the same order. The replicas will then
-execute the requests as though they were the only member of the group, to reach
-the same state, and reply to the client. If a client sends a request to a group
-of $n$ replicas (assuming no failures), then the client will receive n identical
-reply to the original request. With this replication scheme, a crash does not
-increase the latency experienced by the client. State machine replication is a
-fundamentally powerful building block that enables the implementation of highly
-available distributed services by replication. State machine replication
-achieves strong consistency (i.e., linearizability) by regulating how client
-commands are propagated to and executed by the replicas: every non-faulty
-replica must receive and execute every command deterministically and in the same
-order. There are also other replication schemes, such as chain replication \cite
-{chainreplication, chainreplication:byzantine} and multi-primary replication,
-which is commonly used for transactional databases that implement
-deferred-update replication \cite{sciascia2012sdur, Replication:book,
-chundi96dur}.
+\subsubsection{Active replication} 
+With \emph{active replication} (also called state machine replication) approach,
+the requests of the client are sent to all members of a given group (replicas)
+in the same order. The replicas will then execute the requests as though they
+were the only member of the group, to reach the same state, and reply to the
+client. If a client sends a request to a group of $n$ replicas (assuming no
+failures), then the client will receive n identical reply to the original
+request. With this replication scheme, a crash does not increase the latency
+experienced by the client. State machine replication is a fundamentally powerful
+building block that enables the implementation of highly available distributed
+services by replication. State machine replication achieves strong consistency
+(i.e., linearizability) by regulating how client commands are propagated to and
+executed by the replicas: every non-faulty replica must receive and execute
+every command deterministically and in the same order. There are also other
+replication schemes, such as chain replication \cite {chainreplication,
+chainreplication:byzantine} and multi-primary replication, which is commonly
+used for transactional databases that implement deferred-update replication
+\cite{sciascia2012sdur, Replication:book, chundi96dur}.
 
-\paragraph{Passive replication} In the \emph{passive replication} (also called
-\emph{primary-backup}) approach, the requests are sent to only one member of the
-replica group (the \emph{primary}), while all other are \emph{backups}. The
-primary will execute the request and send the response to the client. Any
-modification to the primary's state is updated to other members of the group
-(the backups). If the primary fails, one of the backups takes over the service
-by becoming a new primary. Unlike the active replication approach, passive
-replication does not waste resource on redundant execution of request, and allow
-non-deterministic requests. However, a failure on the leader will affect the
-latency of a command.
+\subsubsection{Passive replication} 
+In the \emph{passive replication} (also called \emph{primary-backup}) approach,
+the requests are sent to only one member of the replica group (the
+\emph{primary}), while all other are \emph{backups}. The primary will execute
+the request and send the response to the client. Any modification to the
+primary's state is updated to other members of the group (the backups). If the
+primary fails, one of the backups takes over the service by becoming a new
+primary. Unlike the active replication approach, passive replication does not
+waste resource on redundant execution of request, and allow non-deterministic
+requests. However, a failure on the leader will affect the latency of a command.
 
 In the work of Pedone et al~\cite{pedone:replication}, the authors presented a
 model that allowed to compare and distinguish replication protocols in databases
@@ -182,33 +182,32 @@ these issues by replicating only a subset of data at each replica. Therefore,
 different subsets of data can be accessed and updated concurrently. 
 % In other words, scalable performance can be achieved with state partitioning.
 
-Partitioning (also known as \emph{sharding}) is a technique that divides the
-state of a service in multiple partitions so that most commands access one
-partition only and are equally distributed among partitions. Partitioned
-replicated system can provide highly scalable and available systems; however,
-introduce other challenges. Most services cannot be ``perfectly partitioned'';
-that is, the service state cannot be divided in a way that commands access one
-partition only. Therefore, a partitioning protocol must cope with
-multi-partition commands. In database systems, partitioning is usually referred
-as \emph{sharding}, where the dataset is divided into horizontal fragmentation,
-known as partitions. Each partition essentially has the same schema and columns
-but contains different subsets of the total data set. The partitions are then
-distributed across separate database servers, referred to as physical shards,
-which can hold multiple logical partitions. Those physical shards can be
-replicated to tolerate a certain degree of failure. Despite this, the data held
-within all the partitions collectively represent an entire logical dataset. To
-guarantee the consistency, a consensus protocol (e.g., Paxos or Raft) is used to
-enforce consistency across multiple replicas of the data. Essentially, this
-protocol works as a majority voting mechanism. Any change to the dataset
-requires a majority of replicas to agree to the change. Google
-Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin} are two of the
-database solutions in this category. Both systems were designed to be a
-highly-scalable distributed relational database. The main difference between the
-two systems is that Spanner uses two phase commit as an agreement protocol to
-synchronize the changes between partition, without the need of server
-coordination before the execution, while Calvin uses a single, global consensus
-protocol per database to synchronize transaction before the execution. All
-involved replicas of Calvin then deterministically execute and commit the
+Partitioning is a technique that divides the state of a service in multiple
+partitions so that most commands access one partition only and are equally
+distributed among partitions. Partitioned replicated system can provide highly
+scalable and available systems; however, introduce other challenges. Most
+services cannot be ``perfectly partitioned''; that is, the service state cannot
+be divided in a way that commands access one partition only. Therefore, a
+partitioning protocol must cope with multi-partition commands. In database
+systems, partitioning is usually referred as \emph{sharding}, where the dataset
+is divided into horizontal fragmentation, known as partitions. Each partition
+essentially has the same schema and columns but contains different subsets of
+the total data set. The partitions are then distributed across separate database
+servers, referred to as physical shards, which can hold multiple logical
+partitions. Those physical shards can be replicated to tolerate a certain degree
+of failure. Despite this, the data held within all the partitions collectively
+represent an entire logical dataset. To guarantee the consistency, a consensus
+protocol (e.g., Paxos or Raft) is used to enforce consistency across multiple
+replicas of the data. Essentially, this protocol works as a majority voting
+mechanism. Any change to the dataset requires a majority of replicas to agree to
+the change. Google Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin}
+are two of the database solutions in this category. Both systems were designed
+to be a highly-scalable distributed relational database. The main difference
+between the two systems is that Spanner uses two phase commit as an agreement
+protocol to synchronize the changes between partition, without the need of
+server coordination before the execution, while Calvin uses a single, global
+consensus protocol per database to synchronize transaction before the execution.
+All involved replicas of Calvin then deterministically execute and commit the
 transaction, without an agreement protocol. The next sections will describe how
 those database system works. In addition, we will go into detail Scalable state
 machine replication, a system in the third category, which requires both server
@@ -295,16 +294,16 @@ that the later transaction will see all the writes of the earlier transaction.
   \label{fig:spanner-single-partition}
 \end{figure*}
 
-\paragraph{Single partition transaction} In Spanner, if a transaction accesses
-data in a single partition (single-shard transaction), Spanner processes that
-transaction as following (depicted in
+\subsubsection{Single partition transaction} 
+In Spanner, if a transaction accesses data in a single partition (single-shard
+transaction), Spanner processes that transaction as following (depicted in
 Figure~\ref{fig:spanner-single-partition}). First, the client process queries
 the location proxy to determine which partitions store the data accessed by the
 transaction and send the transaction to the Paxos leader of that partition. The
-leader acquires the read locks on the involved objects and acknowledges the client.
-The client executes the transaction, then initiates the commit on the leader. The
-leader then coordinates with other replicas in its Paxos group to commit the
-transaction, and responses to the client.
+leader acquires the read locks on the involved objects and acknowledges the
+client. The client executes the transaction, then initiates the commit on the
+leader. The leader then coordinates with other replicas in its Paxos group to
+commit the transaction, and responses to the client.
 
 \begin{figure*}[ht!]
   \begin{minipage}[b]{1.0\linewidth}
@@ -315,21 +314,21 @@ transaction, and responses to the client.
   \label{fig:spanner-multi-partition}
 \end{figure*}
 
-\paragraph{Multi-partition transaction} In the case the transaction accesses
-more than a single partition, the leaders of all involved partitions have to
-coordinate and perform a two-phase commit to ensure consistency and use
-two-phase locking to ensure isolation (described in
-Figure~\ref{fig:spanner-multi-partition}). First, the client also needs to determine
-the involved partitions by querying a location proxy. Then the client sends the
-transaction to the leader of each involved group, which acquires read locks and
-returns the most recent data. The client then performs the execution of the
-transaction locally. To commit the transaction, the client chooses a coordinator
-from the set of involved leaders, then initiate commit by sending commit message
-to each leader, together with the information of the coordinator. On receiving
-commit message from the client, the involved leaders coordinate to acquire write
-locks by performing two-phase locking followed by two-phase commit. After having
-the transaction committed on all involved partitions, the coordinator leader
-sends a response to the client.
+\subsubsection{Multi-partition transaction} 
+In the case the transaction accesses more than a single partition, the leaders
+of all involved partitions have to coordinate and perform a two-phase commit to
+ensure consistency and use two-phase locking to ensure isolation (described in
+Figure~\ref{fig:spanner-multi-partition}). First, the client also needs to
+determine the involved partitions by querying a location proxy. Then the client
+sends the transaction to the leader of each involved group, which acquires read
+locks and returns the most recent data. The client then performs the execution
+of the transaction locally. To commit the transaction, the client chooses a
+coordinator from the set of involved leaders, then initiate commit by sending
+commit message to each leader, together with the information of the coordinator.
+On receiving commit message from the client, the involved leaders coordinate to
+acquire write locks by performing two-phase locking followed by two-phase
+commit. After having the transaction committed on all involved partitions, the
+coordinator leader sends a response to the client.
 
 In general, the transaction processing of Spanner could be mapped to the
 coordination protocol in Figure~\ref{fig:replication:coordination} as the
@@ -401,13 +400,13 @@ Figure~\ref{fig:replication:coordination}:
 
 \subsection{Server coordination with agreement coordination}
 \label{sec:ssmr}
-In this section, we describe Scalable state machine replication (\ssmr), an
-extension to SMR that under certain workloads allows performance to grow
-proportionally to the number of replicas. \ssmr\ partitions the service state
-and replicates each partition. It relies on an atomic multicast primitive to
-consistently order commands within and across partitions. In addition, \ssmr\
-assumes a static workload partitioning. Any state reorganization requires system
-shutdown and manual intervention.
+Scalable state machine replication (\ssmr) is an extension to SMR that under
+certain workloads allows performance to grow proportionally to the number of
+replicas. \ssmr\ partitions the service state and replicates each partition. It
+relies on an atomic multicast primitive to consistently order commands within
+and across partitions. In addition, \ssmr\ assumes a static workload
+partitioning. Any state reorganization requires system shutdown and manual
+intervention.
 
 In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
 partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
