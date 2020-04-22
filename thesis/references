@@ -71,3 +71,17 @@ graph partitioning => incremental
 https://www.cs.princeton.edu/courses/archive/fall18/cos418/docs/L16-spanner.pdf
 https://courses.cs.washington.edu/courses/csep552/13sp/lectures/6/spanner.pdf
 https://www.cs.princeton.edu/courses/archive/fall15/cos518/studpres/spanner.pdf
+
+
+
+
+
+// check spanner again => leader before execution needs coordination? 
+// spanner graph -> no two phase commit 
+smr = active replication
+remove some duplicated text
+
+recall original framework, how replication fit to this.
+
+
+how each solution address problem of finding object. => typical problem of partial replication.
