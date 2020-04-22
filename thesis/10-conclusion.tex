@@ -3,21 +3,21 @@
 With the explosive growth of the Internet, everyday online activities are
 increasingly dependent on the performance and reliability of large-scale
 distributed systems, such as e-banking, social networks, and e-commerce
-platforms. Over the years, state machine replication has become the most
-standard approach for providing highly available stateful services. By
+platforms. Over the years, state machine replication has become the 
+standard approach to providing highly available stateful services. By
 replicating deterministic services across a number of servers, the replicated
 service is available as long as the total number of failures does not exceed a
 certain threshold. The strong consistency guarantee of state machine replication
-hides the complexity of data replication among independent replicas, makes the
+hides the complexity of data replication among independent replicas, and makes the
 underlying designs simpler. However, scaling such a replicated system while
 preserving the strong consistency guarantee is not trivial, since each replica
 must execute every command. To address this problem, several systems have
 investigated the use of state partitioning in the context of SMR, allowing
 client commands to be executed on a subset of replicas. 
 
-In this dissertation, we have explored the space of building highly available
+In this dissertation, we have explored the space of highly available
 and scalable systems from a performance perspective and proposed new solutions
-to improve its efficiency. The contribution of this thesis is centered on
+to improve efficiency. The contribution of this thesis is centered on
 scaling performance of a replicated state machine system. First, we presented a
 general comparison of several approaches to scaling the performance of a
 partitioned replicated system in the distributed system and database
@@ -37,30 +37,30 @@ move state variables.
 
 \section{Research assessment}
 
-This dissertation presents three contributions: (i) Generic framework for
-scaling partitioned replicated system, (ii) Dynamic partitioning for SMR
-(\dssmr), and (iii) Optimized partitioning for SMR (\dynastar). In the following,
-we discuss and review some of the important lessons that we have learned during
-this research.
+This dissertation presents three contributions: (i) a generic framework for
+scaling partitioned replicated system, (ii) a dynamic partitioning scheme for SMR
+(\dssmr), and (iii) an optimized partitioning scheme for SMR (\dynastar). In the following,
+we review and discuss the most salient aspects of these contributions.
+%some of the important lessons that we have learned during this research.
 
-\paragraph{Survey on scalable partitioned replicated system}
+\paragraph{Survey on scalable partitioned replicated systems.}
 Scaling a replicated system has been a topic of interest for many years. The
 service is replicated on a number of servers, to tolerate a certain degree of
 failure. Partitioning (or sharding) is a technique that divides the state of a
 service in multiple partitions, so the load could be  equally distributed among
 partitions. A partitioned replicated protocol can be described using five
-generic phases: (i) the client submits request to the system, (ii) the replicas
-of involved partitions coordinate with each other to synchronize the execution
+generic phases: (i) the client submits a request to the system, (ii) the replicas
+of the involved partitions coordinate with each other to synchronize the execution
 of the request, (iii) the request is executed, (iv) the involved partitions
-agree on the result of the execution and (v) the system sends the outcome of the
+agree on the result of the execution, and (v) the system sends the outcome of the
 request to the client. Some approaches may skip or simplify some phases: Google
 Spanner \cite{corbett2013spanner} uses two-phase commit and two-phase locking
-for concurrency control and doesn't need to order the transactions across
+for concurrency control and does not need to order the transactions across
 partitions; Calvin \cite{calvin}, on the other hand, orders the transactions in
-a global log, deterministically executes transactions on all involved replicas
-and remove the overhead of coordinating after the execution phase.
+a global log, deterministically executes transactions on all involved replicas,
+and removes the overhead of coordinating after the execution phase.
 
-\paragraph{Dynamic partitioning for state machine replication} 
+\paragraph{Dynamic partitioning for state machine replication.} 
 Classic SMR provides configurable fault tolerance and strong consistency but
 limited performance scalability, since all replicated nodes must execute the same
 sequence of commands. Some recent proposals have extended state machine
@@ -72,14 +72,14 @@ its data placement on-the-fly. \dssmr\ repartitions the service state
 dynamically, based on the workload. When a command needs variables from
 different partitions, those variables are first moved to the same partition.
 Then, the command is executed as a single-partition command. To reduce the
-chances of skewed load among partitions, the destination partition is chosen
+negative effects of skewed load among partitions, the destination partition is chosen
 randomly. As a result, variables that are usually accessed together will tend to
 stay in the same partition, significantly improving scalability. We evaluate the
 performance of \dssmr\ with a scalable social network application. The results
 demonstrate that \dssmr\ could provide a scalable performance under workloads
 that exhibit strong locality.
 
-\paragraph{Optimized partitioning for state machine replication}
+\paragraph{Optimized partitioning for state machine replication.}
 Sharding and replication are the mechanisms of choice of most scalable and
 fault-tolerant distributed systems. The performance of a partitioned system,
 however, heavily depends on the partitioning of the data: in order to scale,
@@ -101,7 +101,7 @@ benchmarks, a social network based on real data and TPC-C.
 
 \section{Future directions}
 
-The main objectives of this dissertation are to explorer the space of techniques
+The main objectives of this dissertation are to explore the space of techniques
 for scalable, strongly consistent replicated systems. However, many questions
 remain open, so we point here at possible research directions.
 
