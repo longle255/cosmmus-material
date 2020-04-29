@@ -147,19 +147,24 @@ similarly. This happens because no moves occur in \dynastar or \dssmr{}, and no
 synchronization among partitions is necessary for S-SMR* in this case.
 Consequently, all three schemes scale remarkably well, and the difference in
 throughput between each technique is due to the implementation of each one.
-%Although \dynastar and DS-SMR have comparable performance, they differ in an important way.
-%As shown in Figure~\ref{fig:motivation} (top left graph) for 4 partitions, \dynastar converges
-%to maximum throughput after 20 seconds from the beginning of the execution, while it takes
-%DS-SMR (decentralized dynamic scheme) about 80 seconds to converge.
-%This means that \dynastar can react to workload changes more rapidly than DS-SMR.
+%Although \dynastar and DS-SMR have comparable performance, they differ in an
+%important way. As shown in Figure~\ref{fig:motivation} (top left graph) for 4
+%partitions, \dynastar converges to maximum throughput after 20 seconds from the
+%beginning of the execution, while it takes DS-SMR (decentralized dynamic
+%scheme) about 80 seconds to converge. This means that \dynastar can react to
+%workload changes more rapidly than DS-SMR.
 
 
-% With social networks with edge cut percentage greater than zero \dssmr\ performance decreases significantly.
-% This happens because in such cases, objects in \dssmr\ are constantly being moved back and forth between partitions
-% without converging to a stable configuration.
-% %(see also Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions).
-% In contrast, for \dynastar and \ssmr with an optimized partitioning, we see that the throughput scales with the number of partitions in experiments with up to 10\% of edge cuts.
-%With 10\% of edge cuts and above, the overhead from moves (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains from additional partitions.
+% With social networks with edge cut percentage greater than zero \dssmr\
+% performance decreases significantly. This happens because in such cases,
+% objects in \dssmr\ are constantly being moved back and forth between
+% partitions without converging to a stable configuration. %(see also
+% Figure~\ref{fig:motivation}, graph on the bottom right, for 4 partitions). In
+% contrast, for \dynastar and \ssmr with an optimized partitioning, we see that
+% the throughput scales with the number of partitions in experiments with up to
+% 10\% of edge cuts. With 10\% of edge cuts and above, the overhead from moves
+% (in \dynastar) and cross-partition commands (in S-SMR) outweighs the gains
+% from additional partitions.
 
 In the experiment with the mix workload, we see that \dssmr{} performance
 decreases significantly. This happens because objects in \dssmr{} will only
@@ -170,12 +175,12 @@ moving back and forth between partition without converging to a stable
 configuration.
 
 In contrast, for \dynastar and S-SMR*, the throughput scales with the number of
-partitions in experiments with up to 8 partitions. Increasing the number of
-partitions to 16 with the fixed graph reveals a tradeoff: On the one hand,
-additional partitions should improve performance as there are more resources to
-execute commands. On the other hand, the number of edge cuts increases with the
-number of partitions, which hurts performance as there are additional operations
-involving multiple partitions.
+partitions in experiments with up to 8 partitions. However, increasing the
+number of partitions to 16 with the fixed graph reveals a tradeoff: additional
+partitions should improve performance as there are more resources to execute
+commands, but the number of edge cuts increases with the number of partitions,
+and hurts performance as there are additional operations involving multiple
+partitions.
 
 Notice that only post operations are subject to this tradeoff since they may
 involve multiple partitions. The most common operation in social networks is the
@@ -187,21 +192,29 @@ partitions.
 % \paragraph*{The ideal number of partitions.}
 % \label{sec:dynastar-evaluation:results}
 
-% While in the previous section we considered executions with a fixed percentage of edge cuts.
-% %, as we increased the number of partitions
-% %(by adjusting the social graph clustering coefficient),
-% We now consider a fixed social network graph and vary the number of partitions.
-% Increasing the number of partitions with a fixed graph introduces a tradeoff.
-% On the one hand, additional partitions improve performance as there are more resources to execute posts.
-% On the other hand, the number of edge cuts increases with the number of partitions, which hurts performance as there are additional operations involving multiple partitions.
-% We evaluate the performance of \dynastar, \dssmr\ and \ssmr with an optimized partitioning.% when subject to this tradeoff.
+% While in the previous section we considered executions with a fixed percentage
+% of edge cuts. %, as we increased the number of partitions %(by adjusting the
+% social graph clustering coefficient), We now consider a fixed social network
+% graph and vary the number of partitions. Increasing the number of partitions
+% with a fixed graph introduces a tradeoff. On the one hand, additional
+% partitions improve performance as there are more resources to execute posts.
+% On the other hand, the number of edge cuts increases with the number of
+% partitions, which hurts performance as there are additional operations
+% involving multiple partitions. We evaluate the performance of \dynastar,
+% \dssmr\ and \ssmr with an optimized partitioning.% when subject to this
+% tradeoff.
 
-% Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and optimized \ssmr throughput scale up to ten partitions, after which performance decreases. \dssmr\ throughput decreases gradually as we increase partitions, since the chance that objects are spread between partitions also increases.
-% % For each configuration, we computed the percentage of edge cuts and found that for 2, 3, 4, 6 and 8 partitions the percentages were respectively
-% % 0.13\%, 0.88, 1.06\%, 2.28\% and 2.67\%.
-% Notice that only post operations are subject to this tradeoff since they may involve multiple partitions.
-% The most common operation in social networks is the request to read a user timeline. This is a single-partition
-% command in our application and as a consequence it scales linearly with the number of partitions.
+% Figure~\ref{fig:4p1p_varying_partition_size} shows that \dynastar and
+% optimized \ssmr throughput scale up to ten partitions, after which performance
+% decreases. \dssmr\ throughput decreases gradually as we increase partitions,
+% since the chance that objects are spread between partitions also increases. %
+% For each configuration, we computed the percentage of edge cuts and found that
+% for 2, 3, 4, 6 and 8 partitions the percentages were respectively % 0.13\%,
+% 0.88, 1.06\%, 2.28\% and 2.67\%. Notice that only post operations are subject
+% to this tradeoff since they may involve multiple partitions. The most common
+% operation in social networks is the request to read a user timeline. This is a
+% single-partition command in our application and as a consequence it scales
+% linearly with the number of partitions.
 
 
 \subsubsection{Performance under dynamic workloads}
@@ -246,8 +259,8 @@ execution, the previously user mapping got a better location from the oracle,
 which adapted the changes. After the repartitioning, the objects are moved to a
 better partition, with a resulting increase in throughput.
 
-Figure~\ref{fig:dynastar-socialcdf} shows the cumulative distribution functions (CDFs) of
-latency for the mix workload of \dynastar and S-SMR* on different
+Figure~\ref{fig:dynastar-socialcdf} shows the cumulative distribution functions
+(CDFs) of latency for the mix workload of \dynastar and S-SMR* on different
 configurations. The results suggest that S-SMR* achieves lower latency than
 \dynastar for 80\% of the load. This is expected, as for multi-partition
 commands, partitions in \dynastar have to send additional data to return objects

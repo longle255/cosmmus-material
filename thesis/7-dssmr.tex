@@ -9,16 +9,4 @@
 \input{7.4-dssmr-correctness}
 \input{7.5-dssmr-impl}
 \input{7.6-dssmr-eval}
-
-\section{Conclusion}
-\label{sec:dssmr-conclusion}
-This chapter introduced \dssmr, the initial idea of \dynastar. So far, we have
-proposed an approach that allows scaling state machine replication by
-dynamically repartitioning application state based on the workload.  Variables
-that are usually accessed together are moved to the same partition, which
-significantly improves scalability. However, in order to reduce the chances of
-skewed load among partitions in \dssmr\, the destination partition is chosen
-randomly. Although this heuristic algorithm could bring a balanced partitioning,
-it fails to guarantee optimal partitioning and to minimize the rate of
-multi-partition commands. In the next chapter, we will discuss more details
-about reaching an optimized partitioning.
+\input{7.7-dssmr-conclusion}

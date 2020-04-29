@@ -13,52 +13,6 @@ show the results with strong-locality workloads. In
 Section~\ref{sec:dssmr-evaluation:weakloc}, we show the results for
 weak-locality workloads.
 
-\begin{figure*}[ht!]
-\centering
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-tp}
-\end{subfigure}
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
-\end{subfigure}
-\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
-\label{fig:dssmr-strongloc}
-\end{figure*}
-
-% \begin{figure*}[ht!]
-% \begin{minipage}[b]{1\linewidth}
-% \centering
-%       \includegraphics[width=1\linewidth]{figures/experiments/dssmr/strong-locality}
-% \end{minipage}
-% \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
-% \label{fig:dssmr-strongloc}
-% \end{figure*}
-
-
-% \begin{figure*}[ht!]
-% \begin{minipage}[b]{1\linewidth}
-% \centering
-%       \includegraphics[width=1\linewidth]{figures/experiments/dssmr/weak-locality}
-% \end{minipage}
-% \caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with weak-locality workload. Throughput is shown in thousands of commands per second (kcps).}
-% \label{fig:dssmr-weakloc}
-% \end{figure*}
-
-\begin{figure*}[ht!]
-\centering
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-tp}
-\end{subfigure}
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-lat}
-\end{subfigure}
-\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with weak-locality workload. Throughput is shown in thousands of commands per second (kcps).}
-\label{fig:dssmr-weakloc}
-\end{figure*}
 
 \subsection{Environment setup and configuration parameters}
 \label{sec:dssmr-evaluation:setup}
@@ -84,18 +38,33 @@ follow requests and 50\% of unfollow), and Mix (7.5\% post, 3.75\% follow,
 \label{sec:dssmr-evaluation:strongloc}
 
 
+\fxnote{Added figure and text for TP vs Move}
+We can see in Figure~\ref{fig:dssmr-move-vs-tp-strong} the number of commands that
+involved relocations of objects versus the throughput of the system in the
+experiment of Post commands on strong-locality workload, running on four
+partitions configuration. At the beginning of the experiment, all the user
+objects were randomly distributed across all partitions. As a result, most of the
+commands accessed more than one partitions. Thus, many commands required
+coordination between partitions, and objects were moved across partitions. Those
+coordinations hurt the throughput of the system. This can be observed in the
+first fifteen seconds of the experiment. As the experiments went, due to the
+effect of locality, those user objects that were often accessed together
+gradually converged to the same partitions, minimized the movement of the object
+between partition, helped to maximize the throughput.
+
+
 \begin{figure*}[ht!]
 \begin{minipage}[b]{1\linewidth}
 \centering
       \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput}
 \end{minipage}
-\caption{Number of move versus throughput in DS-SMR in the experiment of Post commands on 4 partitions}
-\label{fig:dssmr-move-vs-tp}
+\caption{Number of move versus throughput of \dynastar with Post commands, running on strong-locality workload on 4 partitions}
+\label{fig:dssmr-move-vs-tp-strong}
 \end{figure*}
 
 % THROUGHPUT
 
-We can see in Figure~\ref{fig:dssmr-strongloc} and Table~\ref{tbl:results} the
+The Figure~\ref{fig:dssmr-strongloc} and Table~\ref{tbl:results} depicted the
 results achieved with \dssmrappname{}, running with a strong-locality workload.
 For the Timeline workload, the throughput with \dssmr\ and \ssmr\ are very
 similar. This happens because getTimeline requests are optimized to be
@@ -155,6 +124,33 @@ commands.
 
 \begin{figure*}[ht!]
 \centering
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-tp}
+\end{subfigure}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
+\end{subfigure}
+\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
+\label{fig:dssmr-strongloc}
+\end{figure*}
+
+\fxnote{Added figures and text for CDF of latency}
+In Figure~\ref{fig:dssmr-cdf} we show the cumulative distribution functions
+(CDFs) of latency for mixed and post workloads of \dssmr\ and \ssmr on different
+configurations of the number of partitions. The results show that the latency
+distributions for \dssmr\ are higher than \ssmr on experiments with a small
+number of partitions. However, with the higher number of partitions (8
+partitions), the latency of \dssmr\ improves and even better than \ssmr in the
+mixed workload. This is expected, due to the difference in the nature of each
+protocol: the the number of messages being exchanged in a \dssmr's execution
+increases linearly, while this number of \ssmr increases exponentially with the
+number of partitions. Thus, the latency of \dssmr\ is expected to be better than
+\ssmr when the number of partitions is increasing.
+
+\begin{figure*}[ht!]
+\centering
 \begin{subfigure}{.48\textwidth}
       \centering
       \includegraphics[width=\textwidth]{./figures/experiments/dssmr/latency-cdf-mix-2p}
@@ -211,7 +207,50 @@ commands.
 
 \subsection{Results for weak locality} \label{sec:dssmr-evaluation:weakloc}
 
-The Figure~\ref{fig:dssmr-weakloc} shows the results achieved with
-\dssmrappname{}, running with a weak-locality workload.
+\fxnote{Added result for weak locality}
 
-\fxnote{Add few more words on this performance. [Should we include this here?]}
+In this set of experiments, we want to evaluate how \dssmr\ and \ssmr behave on
+workloads that exhibit weak-locality. Figure~\ref{fig:dssmr-move-vs-tp-weak}
+shows the number of move and throughput of \dssmr\ running Post command on a
+four partitions configuration. We see that the performance of \dssmr\ decreases
+significantly, while the number of moves is constantly high. This happens
+because user objects in \dssmr{} will only converge if there is a perfect way to
+partition the data, that is, data items can be grouped such that eventually no
+command accesses objects across partitions. 
+
+\begin{figure*}[ht!]
+\begin{minipage}[b]{1\linewidth}
+\centering
+      \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput-weak}
+\end{minipage}
+\caption{Number of move versus throughput of \dynastar with Post commands, running on weak-locality workload on 4 partitions}
+\label{fig:dssmr-move-vs-tp-weak}
+\end{figure*}
+
+The Figure~\ref{fig:dssmr-weakloc} shows the results comparison when running
+both \dssmr\ and \ssmr on the weak-locality workload. Although both protocol
+have similar performance in most of the experiments, \ssmr\ is still better than
+\dssmr in some cases. This is expected, as the objects in \dssmr are constantly
+moving back and forth between partitions, without converging to a stable
+configuration.
+
+This result shows some limitation of \dssmr\. Although \dssmr works well for
+data with strong locality, it is unstable for workloads with weak locality,
+since data can not converge. It also show that the mechanism of randomly
+selecting partition in \dssmr, which allows for a completely decentralized
+implementation, may not work well in some cases.
+
+\begin{figure*}[ht!]
+\centering
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-tp}
+\end{subfigure}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-weak-locality-lat}
+\end{subfigure}
+\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with weak-locality workload. Throughput is shown in thousands of commands per second (kcps).}
+\label{fig:dssmr-weakloc}
+\end{figure*}
+      
