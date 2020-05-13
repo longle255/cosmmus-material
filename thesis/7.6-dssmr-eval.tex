@@ -38,19 +38,19 @@ follow requests and 50\% of unfollow), and Mix (7.5\% post, 3.75\% follow,
 \label{sec:dssmr-evaluation:strongloc}
 
 
-\fxnote{Added figure and text for TP vs Move}
-We can see in Figure~\ref{fig:dssmr-move-vs-tp-strong} the number of commands that
-involved relocations of objects versus the throughput of the system in the
-experiment of Post commands on strong-locality workload, running on four
-partitions configuration. At the beginning of the experiment, all the user
+%\fxnote{Added figure and text for TP vs Move}
+Figure~\ref{fig:dssmr-move-vs-tp-strong} shows the number of commands that
+involved relocations of objects versus the throughput of the system.
+The experiment contained Post commands with the strong-locality workload and four
+partitions. At the beginning of the experiment, all the user
 objects were randomly distributed across all partitions. As a result, most of the
-commands accessed more than one partitions. Thus, many commands required
-coordination between partitions, and objects were moved across partitions. Those
-coordinations hurt the throughput of the system. This can be observed in the
-first fifteen seconds of the experiment. As the experiments went, due to the
+commands accessed more than one partition. Thus, many commands required
+coordination between partitions, and objects were moved across partitions. 
+Coordination of so many commands hurt the throughput of the system. This can be observed in the
+first fifteen seconds of the experiment. As the experiments progressed, due to the
 effect of locality, those user objects that were often accessed together
 gradually converged to the same partitions, minimized the movement of the object
-between partition, helped to maximize the throughput.
+between partition, and helped to maximize the throughput.
 
 
 \begin{figure*}[ht!]
@@ -64,16 +64,38 @@ between partition, helped to maximize the throughput.
 
 % THROUGHPUT
 
-The Figure~\ref{fig:dssmr-strongloc} and Table~\ref{tbl:results} depicted the
-results achieved with \dssmrappname{}, running with a strong-locality workload.
+Figure~\ref{fig:dssmr-strongloc} and Table~\ref{tbl:results} depict the
+results achieved with \dssmrappname{}, running with the strong-locality workload.
 For the Timeline workload, the throughput with \dssmr\ and \ssmr\ are very
 similar. This happens because getTimeline requests are optimized to be
 single-partition: all posts in a user's timeline are stored along with the User
-object. Every getTimeline requests accesses a single User object (of the user
+object. Every getTimeline request accesses a single User object (of the user
 whose timeline is being requested). This is the ideal workload for \ssmr{}. In
 \dssmr{}, the partitioning does not change, and consulting the oracle becomes
 unnecessary thanks to the local cache at each client. This happens because there
 are no other commands in the Timeline workload.
+
+\begin{table*}[htp]
+      \vspace{10mm}
+      \caption{Absolute values of \dssmrappname\ running \ssmr\ and \dssmr{}.}
+      \centering
+      \begin{adjustbox}{max width=\textwidth}
+      \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+               & \multicolumn{4}{|c|}{Timeline}  &  \multicolumn{4}{|c|}{Post}   &  \multicolumn{4}{|c|}{Follow/unfollow}  &  \multicolumn{4}{|c|}{Mix}    \\ \hline
+               & 1     & 2     & 4     & 8       & 1     & 2     & 4   & 8    & 1     & 2     & 4       & 8           & 1     & 2     & 4     & 8     \\ \hline\hline
+               & \multicolumn{16}{|c|}{Throughput (commands per second)} \\ \hline
+      \ssmr\   & 32561 & 61220 & 75812 & 11867   & 32483 & 2893  & 1882  & 1190  & 32541 & 11476 & 8580    & 3371          & 32151 & 22803 & 16822 & 10657 \\ \hline
+      \dssmr\  & 29248 & 56347 & 70717 & 11175   & 19248 & 23667 & 35547 & 54025 & 30215 & 48976 & 54025   & 83880         & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
+               & \multicolumn{16}{|c|}{\textbf{Throughput rate = \dssmr\ tput / \ssmr\ tput}} \\ \hline
+               & \textbf{0.91} & \textbf{0.92}  & \textbf{0.81} & \textbf{1.03}     & \textbf{0.46}   & \textbf{8.08}   & \textbf{18.48}  & \textbf{45.00} & \textbf{0.93} & \textbf{4.27} & \textbf{6.30} & \textbf{24.88} & \textbf{0.84} & \textbf{2.00} & \textbf{3.01} & \textbf{6.97} \\ \hline\hline
+               & \multicolumn{16}{|c|}{Latency (milliseconds)} \\ \hline
+      \ssmr\   & 3.1 & 6.6 & 5.6 & 7.0  & 3.4 & 5.2  & 7.9  & 8.3  & 3.0  & 5.2  & 7.0  & 8.8  & 3.4  & 3.7  & 3.8  & 7.9  \\ \hline
+      \dssmr\  & 6.9 & 7.1 & 8.6 & 11.4 & 6.7 & 8.6  & 11.3 & 9.1  & 6.6  & 6.1  & 7.4  & 7.0  & 7.3  & 6.5  & 7.8  & 7.9  \\ \hline
+      \end{tabular}
+      \end{adjustbox}
+      \label{tbl:results}
+      \vspace{10mm}
+\end{table*}%
 
 In the Post workload, every command accesses up to all partitions in the system,
 which is the worst case for \ssmr{}: the more partitions are involved in the
@@ -132,22 +154,23 @@ commands.
       \centering
       \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
 \end{subfigure}
-\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload. Throughput is shown in thousands of commands per second (kcps).}
+\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload (throughput in thousands of commands per second, kcps).}
 \label{fig:dssmr-strongloc}
 \end{figure*}
 
-\fxnote{Added figures and text for CDF of latency}
+%\fxnote{Added figures and text for CDF of latency}
 In Figure~\ref{fig:dssmr-cdf} we show the cumulative distribution functions
 (CDFs) of latency for mixed and post workloads of \dssmr\ and \ssmr on different
 configurations of the number of partitions. The results show that the latency
-distributions for \dssmr\ are higher than \ssmr on experiments with a small
+distributions for \dssmr\ are consistently higher than \ssmr on experiments with a small
 number of partitions. However, with the higher number of partitions (8
-partitions), the latency of \dssmr\ improves and even better than \ssmr in the
-mixed workload. This is expected, due to the difference in the nature of each
-protocol: the the number of messages being exchanged in a \dssmr's execution
-increases linearly, while this number of \ssmr increases exponentially with the
-number of partitions. Thus, the latency of \dssmr\ is expected to be better than
-\ssmr when the number of partitions is increasing.
+partitions), the latency of \dssmr\ improves and in some cases it is even better than \ssmr's in 
+both workloads. 
+%This is expected, due to the difference in the nature of each
+%protocol: the the number of messages being exchanged in a \dssmr's execution
+%increases linearly, while this number of \ssmr increases exponentially with the
+%number of partitions. Thus, the latency of \dssmr\ is expected to be better than
+%\ssmr when the number of partitions is increasing.
 
 \begin{figure*}[ht!]
 \centering
@@ -182,61 +205,30 @@ number of partitions. Thus, the latency of \dssmr\ is expected to be better than
 \end{figure*}
 
 
-\begin{table*}[htp]
-      \vspace{10mm}
-      \caption{Absolute values of \dssmrappname\ running \ssmr\ and \dssmr{}.}
-      \centering
-      \begin{adjustbox}{max width=\textwidth}
-      \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
-               & \multicolumn{4}{|c|}{Timeline}  &  \multicolumn{4}{|c|}{Post}   &  \multicolumn{4}{|c|}{Follow/unfollow}  &  \multicolumn{4}{|c|}{Mix}    \\ \hline
-               & 1     & 2     & 4     & 8       & 1     & 2     & 4   & 8    & 1     & 2     & 4       & 8           & 1     & 2     & 4     & 8     \\ \hline\hline
-               & \multicolumn{16}{|c|}{Throughput (commands per second)} \\ \hline
-      \ssmr\   & 32561 & 61220 & 75812 & 11867   & 32483 & 2893  & 1882  & 1190  & 32541 & 11476 & 8580    & 3371          & 32151 & 22803 & 16822 & 10657 \\ \hline
-      \dssmr\  & 29248 & 56347 & 70717 & 11175   & 19248 & 23667 & 35547 & 54025 & 30215 & 48976 & 54025   & 83880         & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
-               & \multicolumn{16}{|c|}{\textbf{Throughput rate = \dssmr\ tput / \ssmr\ tput}} \\ \hline
-               & \textbf{0.91} & \textbf{0.92}  & \textbf{0.81} & \textbf{1.03}     & \textbf{0.46}   & \textbf{8.08}   & \textbf{18.48}  & \textbf{45.00} & \textbf{0.93} & \textbf{4.27} & \textbf{6.30} & \textbf{24.88} & \textbf{0.84} & \textbf{2.00} & \textbf{3.01} & \textbf{6.97} \\ \hline\hline
-               & \multicolumn{16}{|c|}{Latency (milliseconds)} \\ \hline
-      \ssmr\   & 3.1 & 6.6 & 5.6 & 7.0  & 3.4 & 5.2  & 7.9  & 8.3  & 3.0  & 5.2  & 7.0  & 8.8  & 3.4  & 3.7  & 3.8  & 7.9  \\ \hline
-      \dssmr\  & 6.9 & 7.1 & 8.6 & 11.4 & 6.7 & 8.6  & 11.3 & 9.1  & 6.6  & 6.1  & 7.4  & 7.0  & 7.3  & 6.5  & 7.8  & 7.9  \\ \hline
-      \end{tabular}
-      \end{adjustbox}
-      \label{tbl:results}
-      \vspace{10mm}
-\end{table*}%
 
 
 \subsection{Results for weak locality} \label{sec:dssmr-evaluation:weakloc}
 
-\fxnote{Added result for weak locality}
+%\fxnote{Added result for weak locality}
+Figure~\ref{fig:dssmr-weakloc} compares 
+ \dssmr\ and \ssmr on the weak-locality workload. Although both protocols
+have similar performance in most of the experiments, \ssmr\ outperforms
+\dssmr\ in several cases. This is expected, as the objects in \dssmr\ are constantly
+moving back and forth between partitions, without converging to a stable
+configuration.
 
-In this set of experiments, we want to evaluate how \dssmr\ and \ssmr behave on
-workloads that exhibit weak-locality. Figure~\ref{fig:dssmr-move-vs-tp-weak}
-shows the number of move and throughput of \dssmr\ running Post command on a
-four partitions configuration. We see that the performance of \dssmr\ decreases
+Figure~\ref{fig:dssmr-move-vs-tp-weak}
+shows the number of move and throughput of \dssmr\ running Post commands on a
+four-partition configuration. We see that the performance of \dssmr\ decreases
 significantly, while the number of moves is constantly high. This happens
 because user objects in \dssmr{} will only converge if there is a perfect way to
 partition the data, that is, data items can be grouped such that eventually no
 command accesses objects across partitions. 
 
-\begin{figure*}[ht!]
-\begin{minipage}[b]{1\linewidth}
-\centering
-      \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput-weak}
-\end{minipage}
-\caption{Number of move versus throughput of \dynastar with Post commands, running on weak-locality workload on 4 partitions}
-\label{fig:dssmr-move-vs-tp-weak}
-\end{figure*}
-
-The Figure~\ref{fig:dssmr-weakloc} shows the results comparison when running
-both \dssmr\ and \ssmr on the weak-locality workload. Although both protocol
-have similar performance in most of the experiments, \ssmr\ is still better than
-\dssmr in some cases. This is expected, as the objects in \dssmr are constantly
-moving back and forth between partitions, without converging to a stable
-configuration.
-
-This result shows some limitation of \dssmr\. Although \dssmr works well for
-data with strong locality, it is unstable for workloads with weak locality,
-since data can not converge. It also show that the mechanism of randomly
+These results show the limitations of \dssmr. Although \dssmr\ works well for
+data with strong locality, it is unstable for workloads with weak locality.
+This happens because data can not converge to a favorable partitioning. 
+It also shows that the mechanism of randomly
 selecting partition in \dssmr, which allows for a completely decentralized
 implementation, may not work well in some cases.
 
@@ -254,3 +246,12 @@ implementation, may not work well in some cases.
 \label{fig:dssmr-weakloc}
 \end{figure*}
       
+\begin{figure*}[ht!]
+\begin{minipage}[b]{1\linewidth}
+\centering
+      \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput-weak}
+\end{minipage}
+\caption{Number of move versus throughput of \dynastar with Post commands, running on weak-locality workload on 4 partitions}
+\label{fig:dssmr-move-vs-tp-weak}
+\end{figure*}
+

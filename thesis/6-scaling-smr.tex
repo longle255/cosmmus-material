@@ -1,20 +1,21 @@
-\chapter[Scaling partitioned replicated system]{Scaling partitioned replicated system}
+%!TEX root =  main.tex
+\chapter[Scaling partitioned replicated system]{Scaling partitioned replicated systems}
 
-Replication refers to the technique of managing redundancy data on a set of
+Replication refers to the technique of managing redundant data on a set of
 servers (replicas) in a way to ensure that each replica of the service keeps a
-consistent state, given a set of consistency criteria. Over more than three
-decades, replication has become an area of interest that has been studied in
-traditional domains, such as database systems, file systems, and later in
-distributed object systems. Although replication is often used to achieve higher
+consistent state, given a consistency criteria. Over more than three
+decades, replication has become an area of interest and has been studied in
+many domains, such as database systems, file systems, and later in
+distributed object systems. Although replication is often used to achieve high
 availability, replication decisions can also help improve performance.
-Availability is the capability of the system continues to work, even in the
+Availability is the capability of a system to continue to work, even in the
 presence of failures, as long as the number of failures is below a given
 tolerable limit. Performance refers to the response time and throughput of the 
 system. For instance, a service that serves mainly read data can distribute the
-requests to the different replicated machines, helps to process requests in
-parallel, thus, improves the throughput of the system. 
+requests to the different replicated machines. Each replica can then process requests in
+parallel and improve the throughput of the system. 
 
-Conceptually, replication can be categorized into two main categories: full- and
+Conceptually, replication can be categorized into two main categories: full and
 partial replication. Full replication means that the whole state of the service
 is available on all replicas, while in partial replication, each replica only
 contains a subset of the state. For example, in a distributed database, full
