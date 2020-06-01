@@ -1,83 +1,83 @@
 %!TEX root =  main.tex
-\chapter[Scaling partitioned replicated system]{Scaling partitioned replicated systems}
+\chapter[Scaling partitioned replicated systems]{Scaling partitioned replicated systems}
 
 Replication refers to the technique of managing redundant data on a set of
 servers (replicas) in a way to ensure that each replica of the service keeps a
-consistent state, given a consistency criteria. Over more than three
-decades, replication has become an area of interest and has been studied in
-many domains, such as database systems, file systems, and later in
+consistent state, given a consistency criterion. Over more than three
+decades, replication has been an area of interest and has been studied in
+many domains, such as database systems, file systems, and 
 distributed object systems. Although replication is often used to achieve high
-availability, replication decisions can also help improve performance.
+availability, replication can also help improve performance.
 Availability is the capability of a system to continue to work, even in the
 presence of failures, as long as the number of failures is below a given
-tolerable limit. Performance refers to the response time and throughput of the 
-system. For instance, a service that serves mainly read data can distribute the
-requests to the different replicated machines. Each replica can then process requests in
-parallel and improve the throughput of the system. 
+threshold. Performance refers to the throughput and response time of the 
+system. For instance, a service that serves mainly read operations can distribute the
+requests to the different replicas. Each replica can then process requests in
+parallel and improve the throughput and the response of the system. 
 
 Conceptually, replication can be categorized into two main categories: full and
 partial replication. Full replication means that the whole state of the service
 is available on all replicas, while in partial replication, each replica only
 contains a subset of the state. For example, in a distributed database, full
-replication allows all rows of a table are available on all replicated nodes,
-while partial replication means some replicas contain only a subset of the rows.
+replication means that all rows of a table are available on all replicated servers,
+while partial replication means that some replicas contain only a subset of the rows.
 Intuitively, full replication often comes at a higher cost. If all replicas have
-to keep the whole same state, execute the same sequence of commands, the system
-can not scale. It may also become infeasible to have a full copy of the system's
-data when that data grows, as the replicas may not have enough space to store
-it. Therefore, increasing the number of replicas in a full replicated system
-results in bounded improvements in performance. On the other hand, the main idea
-of partial replication is that not all replicas have to process a request. The
+to keep the whole same state and execute the same sequence of commands, the system
+cannot scale under update operations. It may also become infeasible to have a full copy of the system's
+state when data continually grows, as the replicas may not have enough space to store
+it (i.e., typically in main memory databases). Therefore, increasing the number of replicas in a fully replicated system
+results in bounded improvements in performance. The main idea
+of partial replication is that not all replicas have to process each request. The
 replicas in a partially replicated system only store a subset of the state and
-handle requests that involve that data, thus provide scalable performance.
-However, the main challenge is how to keep the replicas in a replicated system
+handle requests that involve that data, thus providing the potential for scalable performance.
+However, the main challenge is how to keep the replicas in a partially replicated system
 consistent. In this chapter, we will survey several approaches to replication
 and scaling the performance of a replicated system.
 
 \section{Full replication schemes}
 
-Replication has become a standard approach to fault-tolerant: if one server
-fails, another one takes over. In a full replicated system, every server
+Replication has become a standard approach to fault tolerance: if one server
+fails, another one takes over. In a fully replicated system, every server
 replicates a full copy of the service's state. All replicas use an algorithm
 that ensures data coherence across all these nodes. Although there are many
-replication techniques \cite{Replication:book}, there remain two major classes
-of replication techniques that have become widely well-known to ensure this
+replication techniques \cite{Replication:book}, there are two major classes
+of replication techniques that have become widely known to ensure strong
 consistency: \emph{active replication} and \emph{passive replication}.
 
 
 \subsubsection{Active replication} 
-With \emph{active replication} (also called state machine replication) approach,
-the requests of the client are sent to all members of a given group (replicas)
+With the \emph{active replication} (also called state machine replication) approach,
+client requests are sent to all members of a given group of replicas
 in the same order. The replicas will then execute the requests as though they
 were the only member of the group, to reach the same state, and reply to the
 client. If a client sends a request to a group of $n$ replicas (assuming no
-failures), then the client will receive n identical reply to the original
+failures), then the client will receive $n$ identical replies to the 
 request. With this replication scheme, a crash does not increase the latency
 experienced by the client. State machine replication is a fundamentally powerful
 building block that enables the implementation of highly available distributed
-services by replication. State machine replication achieves strong consistency
-(i.e., linearizability) by regulating how client commands are propagated to and
-executed by the replicas: every non-faulty replica must receive and execute
-every command deterministically and in the same order. There are also other
-replication schemes, such as chain replication \cite {chainreplication,
-chainreplication:byzantine} and multi-primary replication, which is commonly
-used for transactional databases that implement deferred-update replication
-\cite{sciascia2012sdur, Replication:book, chundi96dur}.
+services by replication. 
+%State machine replication achieves strong consistency
+%(i.e., linearizability) by regulating how client commands are propagated to and
+%executed by the replicas: every non-faulty replica must receive and execute
+%every command deterministically and in the same order. 
+Some other replication schemes, such as chain replication \cite {chainreplication,
+chainreplication:byzantine}, multi-primary replication, and deferred-update replication
+\cite{sciascia2012sdur, Replication:book, chundi96dur} are based on state machine replication.
 
 \subsubsection{Passive replication} 
 In the \emph{passive replication} (also called \emph{primary-backup}) approach,
 the requests are sent to only one member of the replica group (the
-\emph{primary}), while all other are \emph{backups}. The primary will execute
-the request and send the response to the client. Any modification to the
+\emph{primary}), while all other members are \emph{backups}. The primary will execute
+each request and send the response to the client. Any modifications to the
 primary's state is updated to other members of the group (the backups). If the
 primary fails, one of the backups takes over the service by becoming a new
 primary. Unlike the active replication approach, passive replication does not
-waste resource on redundant execution of request, and allow non-deterministic
+waste resource on redundant execution of requests, and allows non-deterministic
 requests. However, a failure on the leader will affect the latency of a command.
 
-In the work of Pedone et al~\cite{pedone:replication}, the authors presented a
-model that allowed to compare and distinguish replication protocols in databases
-and distributed systems (Figure ~\ref{fig:replication:org}). This model
+In~\cite{pedone:replication}, the authors presented a
+framework to compare and distinguish replication protocols in databases
+and distributed systems (Figure~\ref{fig:replication:org}). This model
 classifies replication protocols by five generic steps of replication as
 following:
 
@@ -91,7 +91,7 @@ following:
 \end{figure*}
 
 \begin{itemize}
-  \item \textit{Request phase(RE):} In the request phase, a client submits an
+  \item \textit{Request phase (RE):} In the request phase, a client submits an
      operation to the system by sending the request to one ore more replicas.
   \item \textit{Server coordination phase (SC):} The replicas coordinate
   with each other to synchronize the execution of the request.
@@ -103,11 +103,11 @@ following:
 \end{itemize}
 
 The differences between different replicated systems come from the different
-approaches uses in each phase. In some cases, a phase could be omitted (e.g.,
+ways in which each phase is implemented. In some cases, a phase could be omitted (e.g.,
 when messages are ordered by an atomic multicast/broadcast primitive in the
 ordering phase (\emph{SC}), it is not necessary to run the agreement
 coordination (\emph{AC}) phase). With this generic functional model, the
-involved steps in the active replication technique can be depicted as follow
+involved steps in the active replication technique can be depicted as follows
 (Figure \ref{fig:replication:active}):
 
 \begin{figure*}[ht!]
@@ -132,7 +132,7 @@ involved steps in the active replication technique can be depicted as follow
 \end{enumerate}
 
 The involved steps in the passive replication technique can be depicted
-according to the generic functional model as follow (Figure
+according to the generic functional model as follows (Figure
 \ref{fig:replication:passive}):
 
 \begin{figure*}[ht!]
@@ -145,10 +145,9 @@ according to the generic functional model as follow (Figure
 \end{figure*}
 
 \begin{enumerate}
-  \item The client submit the request to the primary.
+  \item The client submits the request to the primary.
   \item Server coordination is not required.
-  \item All replicas deterministically execute the request in the order they are
-  delivered.
+  \item The primary is the only process that executes the request.
   \item The primary coordinates with the backups by broadcasting the update
   information.
   \item The primary sends the reply to the client.
@@ -175,7 +174,7 @@ according to the generic functional model as follow (Figure
 
 \section{Partial replication schemes}
 
-Full replication ensures the update of every transaction to be replicated on
+Full replication ensures the update of every operation to be replicated on
 every replica in the system. This prevents the system from scaling with the
 increase in the number of replicas. In fact, the performance of the system is
 limited by the performance of a single replica. Partial replication addresses
@@ -185,33 +184,35 @@ different subsets of data can be accessed and updated concurrently.
 
 Partitioning is a technique that divides the state of a service in multiple
 partitions so that most commands access one partition only and are equally
-distributed among partitions. Partitioned replicated system can provide highly
-scalable and available systems; however, introduce other challenges. Most
+distributed among partitions. Partitioned replicated systems can provide highly
+scalable and available systems; however, they introduce other challenges. Most
 services cannot be ``perfectly partitioned''; that is, the service state cannot
 be divided in a way that commands access one partition only. Therefore, a
 partitioning protocol must cope with multi-partition commands. In database
-systems, partitioning is usually referred as \emph{sharding}, where the dataset
+systems, partitioning is usually referred to as \emph{sharding}, where the dataset
 is divided into horizontal fragmentation, known as partitions. Each partition
 essentially has the same schema and columns but contains different subsets of
 the total data set. The partitions are then distributed across separate database
 servers, referred to as physical shards, which can hold multiple logical
-partitions. Those physical shards can be replicated to tolerate a certain degree
-of failure. Despite this, the data held within all the partitions collectively
-represent an entire logical dataset. To guarantee the consistency, a consensus
-protocol (e.g., Paxos or Raft) is used to enforce consistency across multiple
-replicas of the data. Essentially, this protocol works as a majority voting
+partitions. Those physical shards can be replicated to tolerate failures. 
+Despite this, the data held within all the partitions collectively
+represent an entire logical dataset. 
+
+To guarantee consistency across multiple replicas of the data, a consensus
+protocol (e.g., Paxos~\cite{reference_here}, Raft~\cite{reference_here}) is used. 
+Essentially, this protocol works as a quorum
 mechanism. Any change to the dataset requires a majority of replicas to agree to
 the change. Google Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin}
-are two of the database solutions in this category. Both systems were designed
-to be a highly-scalable distributed relational database. The main difference
-between the two systems is that Spanner uses two phase commit as an agreement
+are two database solutions in this category. Both systems were designed
+to be highly scalable distributed relational databases. The main difference
+between the two systems is that Spanner uses two-phase commit as an agreement
 protocol to synchronize the changes between partition, without the need of
 server coordination before the execution, while Calvin uses a single, global
-consensus protocol per database to synchronize transaction before the execution.
+consensus protocol per database to synchronize transactions before the execution.
 All involved replicas of Calvin then deterministically execute and commit the
 transaction, without an agreement protocol. The next sections will describe how
-those database system works. In addition, we will go into detail Scalable state
-machine replication, a system in the third category, which requires both server
+those database systems work. In addition, we will detail Scalable State
+Machine Replication, a system in the third category, which requires both server
 coordination and agreement for providing a strong consistency guarantee.
 
 
@@ -224,9 +225,9 @@ coordination and agreement for providing a strong consistency guarantee.
 % with multi-partition commands.
 
 
-In general, we can model abstraction for partitioned replication protocols by
-extending the five-phases functional model in \cite{pedone:replication}, to
-cover the coordination between components in a partitioned replicated system
+In general, we can model partitioned replication protocols by
+extending the five-phase functional model in \cite{pedone:replication} to
+include the coordination between components in a partitioned replicated system
 (see Figure \ref{fig:replication:coordination}). Those phases are:
 
 
@@ -240,20 +241,19 @@ cover the coordination between components in a partitioned replicated system
 \end{figure*}
 
 \begin{itemize}
-  \item \textit{Request phase(RE):} In the request phase, a client submits the
+  \item \textit{Request phase (RE):} In the request phase, a client submits the request
      to the system. This can be done in different ways: the request could
-  be sent to all involved servers of the request or to one server/partition,
-  then will be forwarded to the other processes. In any case, the client should
+  be sent to all servers involved in the request or to one server/partition, which would
+  then forward the request to the other processes. In any case, the client should
   be able to identify the involved partitions that contain the data accessed by
   the request. The client can send the request directly or use a proxy layer to
   handle the transmission.
   \item \textit{Server coordination phase (SC):} The replicas of all partitions
   that contain the data required by the request will coordinate with each other
-  to synchronize the execution of the request. Depend on the consistency level
-  of the application, the concurrent requests will be ordered within and/or across
-  involved partitions.
-  \item \textit{Execution phase (EX):} The involved replica servers execute the request.
-  \item \textit{Agreement coordination phase (AC):} The replica servers of all involved
+  to synchronize the execution of the request. Depending on the consistency level,  
+  concurrent requests will be ordered within and/or across the involved partitions.
+  \item \textit{Execution phase (EX):} The involved servers execute the request.
+  \item \textit{Agreement coordination phase (AC):} The servers of all involved
   partitions agree on the outcome of the execution.
   \item \textit{Response phase (END):} The result of the request is sent back to the client.
 \end{itemize}
@@ -263,25 +263,25 @@ cover the coordination between components in a partitioned replicated system
 Spanner is a NewSQL \cite{Grolinger:2013tp} globally distributed database system
 developed by Google \cite{corbett2013spanner}. Spanner provides features such as
 global transactions, strongly consistent reads, and automatic multi-site
-replication and automatic failover. Spanner partitions into multiple shards, and
+replication and automatic failover. Spanner partitions data into multiple shards, and
 replicates every shard via Paxos across independent regions for high
-availability. So every operation in a transaction is a replicated operation
+availability. So, every operation in a transaction is a replicated operation
 within a Paxos replicated state machine.
 
 Spanner consists of multiple \emph{zones}, each of which is a deployment of
 Bigtable servers. A zone uses one \emph{zonemaster} to assign data to one
 hundred to several thousand sets of partitions. Each partition is a set of
 Paxos-based state machines (so-called \emph{spanservers}).  To implement
-transactions, including transactions span across multiple partitions, Spanner
-uses two-phase locking for concurrency control, and two-phase commit. Each
+transactions, including transactions that span across multiple partitions, Spanner
+uses two-phase locking, for concurrency control, and two-phase commit, for transaction termination. Each
 spanserver implements a lock table to support two-phase-locking and a
 transaction manager to support distributed transactions. Operations that
-require synchronization have to acquire the lock from the lock table. The Paxos
+require synchronization have to acquire a lock from the lock table. The Paxos
 leader in each partition is responsible for participating in these protocols on
 behalf of that partition. Clients in Spanner use per-zone \emph{location
 proxies} to locate the spanservers assigned to serve their data. To order the
 transaction between partitions, Spanner uses TrueTime API, a combination of GPS
-and atomic clocks in all of their regions (i.e., zones) to synchronize time to
+and atomic clocks in all of their regions (i.e., zones) to synchronize time 
 within a known uncertainty bound. If two transactions are processed during time
 periods that do not have overlapping uncertainty bounds, Spanner can be certain
 that the later transaction will see all the writes of the earlier transaction.
@@ -291,61 +291,61 @@ that the later transaction will see all the writes of the earlier transaction.
   \centering
         \includegraphics[width=1\linewidth]{figures/spanner-single-partition}
   \end{minipage}
-  \caption{Coordination in handling of single-partition transaction in Spanner}
+  \caption{Coordination in single-partition transactions in Spanner}
   \label{fig:spanner-single-partition}
 \end{figure*}
 
-\subsubsection{Single partition transaction} 
+\subsubsection{Single-partition transactions}
+ 
 In Spanner, if a transaction accesses data in a single partition (single-shard
-transaction), Spanner processes that transaction as following (depicted in
+transaction), Spanner processes that transaction as follows (see
 Figure~\ref{fig:spanner-single-partition}). First, the client process queries
 the location proxy to determine which partitions store the data accessed by the
 transaction and send the transaction to the Paxos leader of that partition. The
 leader acquires the read locks on the involved objects and acknowledges the
 client. The client executes the transaction, then initiates the commit on the
 leader. The leader then coordinates with other replicas in its Paxos group to
-commit the transaction, and responses to the client.
+commit the transaction, and responds to the client.
 
 \begin{figure*}[ht!]
   \begin{minipage}[b]{1.0\linewidth}
   \centering
         \includegraphics[width=1\linewidth]{figures/spanner-multi-partition}
   \end{minipage}
-  \caption{Coordination in handling of multi-partition transaction in Spanner}
+  \caption{Coordination of multi-partition transactions in Spanner}
   \label{fig:spanner-multi-partition}
 \end{figure*}
 
-\subsubsection{Multi-partition transaction} 
+\subsubsection{Multi-partition transactions} 
 In the case the transaction accesses more than a single partition, the leaders
 of all involved partitions have to coordinate and perform a two-phase commit to
-ensure consistency and use two-phase locking to ensure isolation (described in
-Figure~\ref{fig:spanner-multi-partition}). First, the client also needs to
-determine the involved partitions by querying a location proxy. Then the client
+ensure consistency and use two-phase locking to ensure isolation (see
+Figure~\ref{fig:spanner-multi-partition}). First, the client needs to
+determine the involved partitions by querying a location proxy. Then, the client
 sends the transaction to the leader of each involved group, which acquires read
 locks and returns the most recent data. The client then performs the execution
 of the transaction locally. To commit the transaction, the client chooses a
-coordinator from the set of involved leaders, then initiate commit by sending
+coordinator from the set of involved leaders, then initiates the commit by sending a
 commit message to each leader, together with the information of the coordinator.
-On receiving commit message from the client, the involved leaders coordinate to
+On receiving the commit message from the client, the involved leaders coordinate to
 acquire write locks by performing two-phase locking followed by two-phase
 commit. After having the transaction committed on all involved partitions, the
 coordinator leader sends a response to the client.
 
-In general, the transaction processing of Spanner could be mapped to the
-coordination protocol in Figure~\ref{fig:replication:coordination} as the
-following:
+In general, the transaction processing of Spanner can be mapped to the
+coordination protocol in Figure~\ref{fig:replication:coordination} as follows:
 \begin{enumerate}
   \item Client sends the transaction to the Paxos leader process.
   \item There is no initial coordination required between involved replicas.
-  \item The leader(s) acquires locks and retrieves data for client. The client
-  executes the transaction and initiate commit protocol.
-  \item The leader(s) coordinate with others to commit the transaction.
-  \item The leader sends response to the client.
+  \item The leader(s) acquires locks and retrieves data for the client. The client
+  executes the transaction and initiates the commit protocol.
+  \item The leader(s) coordinates with other leaders to commit the transaction.
+  \item The leader sends the response to the client.
 \end{enumerate}
 
-Although not detailed in the paper, Spanner allows data to be re-sharded across
-\emph{spanservers} or \emph{zones} data centers to balance loads and in response
-to failures by \emph{placement driver}. Periodically, \emph{placement driver}
+Spanner allows data to be re-sharded across
+\emph{spanservers}, or \emph{zones} data centers, to balance loads and in response
+to failures by the \emph{placement driver}~\cite{reference_here}. Periodically, the \emph{placement driver}
 communicates with spanservers to re-arrange data. During these transfers,
 clients can still execute transactions (including updates) on the database.
 
@@ -354,27 +354,27 @@ clients can still execute transactions (including updates) on the database.
 Calvin is a distributed transaction protocol that consists of a transaction
 scheduling and replication management layer for distributed storage systems
 \cite{calvin}. Similar to Spanner, Calvin also shards its data on multiple
-partitions for performance, and replicate those partitions for availability. The
+partitions for performance, and replicates those partitions for availability. The
 main difference between the two systems is the way Calvin deals with the problem
-of transaction synchronization. Spanner solves that problem by a traditional
-way: two-phase locking and two-phase commit, and reduce cost of synchronization
-by reducing the total amount of time during which transactions hold locks using
+of transaction synchronization. Spanner solves the problem in a traditional
+way (i.e., two-phase locking and two-phase commit) and reduces the cost of synchronization
+by decreasing the time during which transactions hold locks using
 TrueTime API.
 
-By executing transactions using two-phase locking and two-phase commit, the
-traditional database systems have no deterministic transaction order. It means
-that the servers have to coordinate to preserve the order before committing the
-transaction. Calvin chooses to use deterministic transaction order. This
+By executing transactions using two-phase locking and two-phase commit, 
+traditional database systems have no a priori deterministic transaction order. 
+This means that the servers do not need to ensure some transaction order defined before the execution of the
+transaction. Calvin chooses to use a deterministic transaction order. This
 approach could remove the overhead of coordinating after the execution phase,
-since all the nodes execute the same sequence of input in a deterministic way,
-to produce the same output. Calvin achieves the deterministic order by using
+since all the nodes execute the same sequence of input transactions in a deterministic way,
+to produce the same output. Calvin achieves deterministic order by using
 a sequencer (\emph{preprocessing}) to let replicas agree on the execution order and
 transaction boundaries.
 
-Client processes in Calvin first submit transactions into a distributed,
-replicated log before being sent to partitions to process. The sequencer then
+Client processes in Calvin first submit transactions to a distributed,
+replicated log before the transactions are sent to partitions for execution. The sequencer then
 processes this request log, determines the order in which transactions are
-executed, and establishes a global transaction input sequence. Then each replica
+executed, and establishes a global transaction input sequence. Then, each replica
 simply reads and processes transactions from this global order (Figure
 \ref{fig:calvin}).
 
@@ -387,21 +387,21 @@ simply reads and processes transactions from this global order (Figure
   \label{fig:calvin}
 \end{figure*}
 
-Essentially, Calvin protocol could be described as the following steps, according to
-our abstraction of coordination protocol in
+Essentially, Calvin can be described in the following steps, according to
+the framework of coordination protocol in
 Figure~\ref{fig:replication:coordination}:
 
 \begin{enumerate}
   \item Client submits the transaction to the sequencer nodes.
   \item Sequencers coordinate to order and schedule the execution of the transaction in a global sequence.,
   \item The involved replicas execute the same sequence of transactions, produce the same output.
-  \item As all the replicas reach the same state, No agreement coordination is necessary.
-  \item The replicas send response to the client.
+  \item As all the replicas reach the same state, no agreement coordination is necessary.
+  \item The replicas send the response to the client.
 \end{enumerate}
 
 \subsection{Server coordination with agreement coordination}
 \label{sec:ssmr}
-Scalable state machine replication (\ssmr) is an extension to SMR that under
+Scalable State Machine Replication (\ssmr) is an extension to state machine replication (SMR) that under
 certain workloads allows performance to grow proportionally to the number of
 replicas. \ssmr\ partitions the service state and replicates each partition. It
 relies on an atomic multicast primitive to consistently order commands within
@@ -415,8 +415,7 @@ $\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
 server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
 ``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
 S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
-each command.
-\footnote{The oracle returns a set with the partitions accessed
+each command.\footnote{The oracle returns a set with the partitions accessed
 by the command, but this set does not need to be minimal; it may contain all
 partitions in the worst case, when the partitions accessed by the command cannot
 be determined before the command is executed.}
@@ -426,7 +425,7 @@ be determined before the command is executed.}
   \centering
         \includegraphics[width=1\linewidth]{figures/ssmr}
   \end{minipage}
-  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+  \caption{Atomic multicast and S-SMR (for simplicity, there is a single replica per partition)}
   \label{fig:ssmr}
 \end{figure*}
 
@@ -448,7 +447,7 @@ exchanging signals. Thus, the performance of \ssmr\ is particularly
 sensitive to the way the service state is partitioned.
 
 One way to reduce the number of multi-partition commands is by dynamically
-changing the partitioning, putting variables that are usually accessed together
+changing the partitioning, placing variables that are usually accessed together
 in the same partition. However, the partitioning oracle of \ssmr\ relies on a
 static mapping of variables to partitions. One advantage of this implementation
 is that all clients and servers can have their own local oracle, which always
@@ -465,7 +464,7 @@ In summary, the following steps are involved in the processing of a request in
   multicast.
   \item All involved replicas execute the requests in the order they are delivered.
   \item Partitions exchanges signals to ensure linearizability.
-  \item All replica send back their result to the client, and the client
+  \item All replicas send back the result to the client, and the client
   typically only waits for the first answer.
 \end{enumerate}
 
@@ -474,21 +473,22 @@ In summary, the following steps are involved in the processing of a request in
   \centering
         \includegraphics[width=1\linewidth]{figures/coordination-ssmr}
   \end{minipage}
-  \caption{Atomic multicast and S-SMR. (To simplify the figure, we show a single replica per partition.)}
+  \caption{Atomic multicast and S-SMR (for simplicity, there is a single replica per partition)}
   \label{fig:coordination-ssmr}
 \end{figure*}
 
 \section{Conclusion}
 
 In this chapter, we surveyed a number of approaches to replication and
-partitioning a replicated system. Replication and partitioning are widely used
+partitioning of a replicated system. Replication and partitioning are widely used
 by several system, from databases, file systems to distributed object systems.
 We introduced an abstract framework that identifies five basic coordination
 steps in a partitioned replicated system. This framework allows us to give an
 insight of design choices of several approaches in the literature. By
-understanding those approaches, we came up with an approach that tend to
-minimize the overhead of cross partition coordination, thus provide better
+understanding these approaches, we came up with techniques that aim to
+minimize the overhead of cross partition coordination, thus providing better
 performance scalability.
+We discuss these techniques in the next chapters.
 
 
 
