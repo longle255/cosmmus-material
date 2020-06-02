@@ -199,7 +199,7 @@ Despite this, the data held within all the partitions collectively
 represent an entire logical dataset. 
 
 To guarantee consistency across multiple replicas of the data, a consensus
-protocol (e.g., Paxos~\cite{reference_here}, Raft~\cite{reference_here}) is used. 
+protocol (e.g., Paxos~\cite{Lam98}, Raft~\cite{184040}) is used. 
 Essentially, this protocol works as a quorum
 mechanism. Any change to the dataset requires a majority of replicas to agree to
 the change. Google Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin}
@@ -343,11 +343,12 @@ coordination protocol in Figure~\ref{fig:replication:coordination} as follows:
   \item The leader sends the response to the client.
 \end{enumerate}
 
-Spanner allows data to be re-sharded across
-\emph{spanservers}, or \emph{zones} data centers, to balance loads and in response
-to failures by the \emph{placement driver}~\cite{reference_here}. Periodically, the \emph{placement driver}
-communicates with spanservers to re-arrange data. During these transfers,
-clients can still execute transactions (including updates) on the database.
+Spanner allows data to be re-sharded across \emph{spanservers}, or \emph{zones}
+data centers, to balance loads and in response to failures by the
+\emph{placement driver}~\cite{corbett2013spanner}. Periodically, the
+\emph{placement driver} communicates with spanservers to re-arrange data. During
+these transfers, clients can still execute transactions (including updates) on
+the database.
 
 \subsection{Server coordination without agreement coordination}
 
@@ -420,14 +421,14 @@ by the command, but this set does not need to be minimal; it may contain all
 partitions in the worst case, when the partitions accessed by the command cannot
 be determined before the command is executed.}
 
-\begin{figure*}
-  \begin{minipage}[b]{1.0\linewidth}
-  \centering
-        \includegraphics[width=1\linewidth]{figures/ssmr}
-  \end{minipage}
-  \caption{Atomic multicast and S-SMR (for simplicity, there is a single replica per partition)}
-  \label{fig:ssmr}
-\end{figure*}
+% \begin{figure*}
+%   \begin{minipage}[b]{1.0\linewidth}
+%   \centering
+%         \includegraphics[width=1\linewidth]{figures/ssmr}
+%   \end{minipage}
+%   \caption{Atomic multicast and S-SMR (for simplicity, there is a single replica per partition)}
+%   \label{fig:ssmr}
+% \end{figure*}
 
 To execute a command, the client multicasts the command to the appropriate
 partitions, as determined by the oracle. Commands that access a single partition

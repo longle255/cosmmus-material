@@ -6,10 +6,10 @@ Moderns applications today deploy services across a massive and
 continuously expanding infrastructure, in order to serve users efficiently
 and reliably. With the wide availability of commodity hardware, failures in data
 centers are increasingly common and inevitable, even in well-established service
-providers \citep{disruption:google}. The causes of failures are varied. Machines
+providers \cite{disruption:google}. The causes of failures are varied. Machines
 fail individually due to power failures, hardware failures, or collectively due
-to human errors \citep{disruption:amazon}, software bugs, or even extreme weather
-events \citep{disruption:weather}. While confronting such failures, applications
+to human errors \cite{disruption:amazon}, software bugs, or even extreme weather
+events \cite{disruption:weather}. While confronting such failures, applications
 still need to offer uninterrupted service to their users. To this end,
 introducing fault tolerance through redundancy is critical for the availability
 and integrity of the applications.
@@ -28,7 +28,7 @@ state), making it less likely that complex system behavior will result in bugs.
 State machine replication is a well-known form of software replication, in
 particular of \emph{active replication} to build fault-tolerant services using
 commodity hardware (e.g.,
-\cite{Shvachko:2003,Ghemawat:2003,Burrows:2006,MacCormick:2004}). In essence,
+\cite{Shvachko:2003,Ghemawat:2003,Mike:2006chubby,MacCormick:2004}). In essence,
 the idea is to model the application as a deterministic state machine whose
 state transitions consist of the execution of client requests \cite{Lam78,
 Sch90}. Then, the service is fully replicated on several servers that

@@ -188,12 +188,17 @@
   year    = {1987}
 }
 
-@article{Bolosky:20011paxos,
-  author = {Bolosky, William and Bradshaw, Dexter and Haagens, Randolph and Kusters, Norbert and Microsoft, Peng},
-  year   = {2011},
-  month  = {01},
-  pages  = {},
-  title  = {Paxos replicated state machines as the basis of a high-performance data store}
+@inproceedings{Bolosky:20011paxos,
+  author    = {Bolosky, William J. and Bradshaw, Dexter and Haagens, Randolph B. and Kusters, Norbert P. and Li, Peng},
+  title     = {Paxos Replicated State Machines as the Basis of a High-Performance Data Store},
+  year      = {2011},
+  publisher = {USENIX Association},
+  address   = {USA},
+  booktitle = {Proceedings of the 8th USENIX Conference on Networked Systems Design and Implementation},
+  pages     = {141–154},
+  numpages  = {14},
+  location  = {Boston, MA},
+  series    = {NSDI’11}
 }
 
 @inproceedings{Burrows:2006,
@@ -273,6 +278,15 @@ and Binoy, Ravindran},
   year      = {2017}
 }
 
+@article{Cooper2008PNUTSYH,
+  title   = {PNUTS: Yahoo!'s hosted data serving platform},
+  author  = {Brian F. Cooper and Raghu Ramakrishnan and Utkarsh Srivastava and Adam Silberstein and Philip Bohannon and Hans-Arno Jacobsen and Nick Puz and Daniel Weaver and Ramana Yerneni},
+  journal = {PVLDB},
+  year    = {2008},
+  volume  = {1},
+  pages   = {1277-1288}
+}
+
 @article{corbett2013spanner,
   author    = {J. Corbett and others},
   journal   = {ACM Transactions on Computer Systems},
@@ -339,7 +353,7 @@ and Binoy, Ravindran},
 
 @misc{disruption:weather,
   author       = {Jon Brodkin},
-  howpublished = {\url{https://arstechnica.com/information-technology/2012/10/hurricane-sandy-takes-data-centers-offline-with-flooding-power-outages/}},
+  howpublished = {\url{https://bit.ly/2SXuLb1}},
   note         = {[Online; Accessed: 2020-02-20]},
   title        = {Hurricane Sandy takes data centers offline with flooding, power outages},
   year         = {2012}
@@ -459,6 +473,15 @@ and Binoy, Ravindran},
   month     = jan
 }
 
+@inproceedings{Gustavsson:2002eventual,
+  author = {Gustavsson, Sanny and Andler, Sten},
+  year   = {2002},
+  month  = {01},
+  pages  = {105-107},
+  title  = {Self-stabilization and eventual consistency in replicated real-time databases},
+  doi    = {10.1145/582128.582150}
+}
+
 @article{hendrickson2000graph,
   author  = {Bruce Hendrickson and Tamara Kolda},
   title   = {Graph partitioning models for parallel computing},
@@ -562,7 +585,6 @@ and Binoy, Ravindran},
   year    = {2004}
 }
 
-
 @article{Lam78,
   author  = {L. Lamport},
   journal = {Communications of the ACM},
@@ -572,7 +594,6 @@ and Binoy, Ravindran},
   volume  = {21},
   year    = {1978}
 }
-
 
 @article{Lam98,
   author  = {L. Lamport},
@@ -596,6 +617,20 @@ and Binoy, Ravindran},
   title      = {Dynamic Scalable State Machine Replication},
   year       = {2016},
   bdsk-url-1 = {https://doi.org/10.1109/DSN.2016.11}
+}
+
+@inproceedings{Li2012geo,
+  author    = {Li, Cheng and Porto, Daniel and Clement, Allen and Gehrke, Johannes and Pregui\c{c}a, Nuno and Rodrigues, Rodrigo},
+  title     = {Making Geo-Replicated Systems Fast as Possible, Consistent When Necessary},
+  year      = {2012},
+  isbn      = {9781931971966},
+  publisher = {USENIX Association},
+  address   = {USA},
+  booktitle = {Proceedings of the 10th USENIX Conference on Operating Systems Design and Implementation},
+  pages     = {265–278},
+  numpages  = {14},
+  location  = {Hollywood, CA, USA},
+  series    = {OSDI’12}
 }
 
 @article{linearizability,
@@ -632,7 +667,6 @@ and Binoy, Ravindran},
   bdsk-url-1 = {https://doi.org/10.1142/9781860948947_0004}
 }
 
-
 @inproceedings{MacCormick:2004,
   author    = {MacCormick, John and Murphy, Nick and Najork, Marc and Thekkath, Chandramohan A. and Zhou, Lidong},
   booktitle = {OSDI},
@@ -651,7 +685,6 @@ and Binoy, Ravindran},
   title         = {High Performance State-Machine Replication},
   year          = {2011}
 }
-
 
 @article{Marandi:2012hb,
   author  = {Marandi, Parisa Jalili and Primi, Marco and Pedone, Fernando},
@@ -695,7 +728,6 @@ and Binoy, Ravindran},
   year    = {2013}
 }
 
-
 @article{paprzycki:2001distributed,
   author  = {Paprzycki, Marcin},
   year    = {2001},
@@ -705,7 +737,6 @@ and Binoy, Ravindran},
   volume  = {4},
   journal = {Scalable Computing: Practice and Experience}
 }
-
 
 @inproceedings{paxoslive,
   author    = {Chandra, Tushar D. and Griesemer, Robert and Redstone, Joshua},
@@ -723,7 +754,6 @@ and Binoy, Ravindran},
   location  = {Portland, Oregon, USA},
   series    = {PODC ’07}
 }
-
 
 @inproceedings{pedone:replication,
   author  = {Pedone, Fernando and Wiesmann, Matthias and Schiper, André and Kemme, Bettina and Alonso, Gustavo},
@@ -831,6 +861,16 @@ and Binoy, Ravindran},
   year      = {2010}
 }
 
+@article{Sivasubramanian:2012dynamo,
+  author  = {Sivasubramanian, Swaminathan},
+  year    = {2012},
+  month   = {05},
+  pages   = {},
+  title   = {Amazon dynamoDB: a seamlessly scalable non-relational database service},
+  journal = {Proceedings of the 2012 International Conference on Management of Data. SIGMOD'12},
+  doi     = {10.1145/2213836.2213945}
+}
+
 @misc{snapnets,
   author       = {Jure Leskovec and Andrej Krevl},
   howpublished = {\url{http://snap.stanford.edu/data}},
@@ -851,11 +891,10 @@ and Binoy, Ravindran},
 
 @article{taft2014est,
   author  = {Taft, Rebecca and Mansour, Essam and Serafini, Marco and Duggan, Jennie and Elmore, Aaron J. and Aboulnaga, Ashraf and Pavlo, Andrew and Stonebraker, Michael},
-  journal = {Proc. VLDB Endow.},
+  journal = {Proc. VLDB Endow},
   title   = {{E-Store}: Fine-grained Elastic Partitioning for Distributed Transaction Processing Systems},
   year    = {2014}
 }
-
 
 @article{tpcc,
   author  = {W. W. {Hsu} and A. J. {Smith} and H. C. {Young}},
@@ -865,40 +904,4 @@ and Binoy, Ravindran},
   volume  = {40},
   number  = {3},
   pages   = {781-802}
-}
-
-@inproceedings{Gustavsson:2002eventual,
-author = {Gustavsson, Sanny and Andler, Sten},
-year = {2002},
-month = {01},
-pages = {105-107},
-title = {Self-stabilization and eventual consistency in replicated real-time databases},
-doi = {10.1145/582128.582150}
-}
-
-@article{Sivasubramanian:2012dynamo,
-author = {Sivasubramanian, Swaminathan},
-year = {2012},
-month = {05},
-pages = {},
-title = {Amazon dynamoDB: a seamlessly scalable non-relational database service},
-journal = {Proceedings of the 2012 International Conference on Management of Data. SIGMOD'12},
-doi = {10.1145/2213836.2213945}
-}
-
-@article{Cooper2008PNUTSYH,
-  title={PNUTS: Yahoo!'s hosted data serving platform},
-  author={Brian F. Cooper and Raghu Ramakrishnan and Utkarsh Srivastava and Adam Silberstein and Philip Bohannon and Hans-Arno Jacobsen and Nick Puz and Daniel Weaver and Ramana Yerneni},
-  journal={PVLDB},
-  year={2008},
-  volume={1},
-  pages={1277-1288}
-}
-
-@inproceedings{Li2012geo,
-author = {Li, Cheng and Porto, Daniel and Clement, Allen and Gehrke, Johannes and Preguiça, Nuno and Rodrigues, Rodrigo},
-year = {2012},
-month = {10},
-pages = {265-278},
-title = {Making geo-replicated systems fast as possible, consistent when necessary}
 }

@@ -13,8 +13,8 @@
 \usetikzlibrary{automata}
 \usepackage{listings}
 \usepackage{subcaption}
-\usepackage{natbib}
-\usepackage{bibentry}
+% \usepackage{bibentry} % for preface
+% \usepackage{natbib}
 % \usepackage[T1]{fontenc}
 % \usepackage[utf8]{inputenc}
 
@@ -58,7 +58,7 @@ morecomment=[l]{//s},
 
 \include{0-settings}
 
-\makeindex %optional, also comment out \theindex at the end
+% \makeindex %optional, also comment out \theindex at the end
 
 \begin{document}
 
@@ -97,12 +97,10 @@ morecomment=[l]{//s},
 
 \backmatter
 
-% \bibliographystyle{plainnat}
-% \bibliographystyle{dcu}
-\bibliographystyle{plain}
+\bibliographystyle{dcu}
 \bibliography{references}
 \cleardoublepage
-\theindex %optional, use only if you have an index, must use
+% \theindex %optional, use only if you have an index, must use
 	  %\makeindex in the preamble
 
 \end{document}
