@@ -95,31 +95,33 @@ detailed discussions to the next chapters.
 % that...\fxnote{add description of the evaluation chapter}
 
 % With the understanding of the limitations of current approaches, 
-To achieve the goal defined above for the doctoral thesis, we first we propose
-\textbf{\dssmrlong}\ (\dssmr), a technique that allows a partitioned SMR system
-to reconfigure its data placement on-the-fly. \dssmr\ achieves dynamic data
-reconfiguration without sacrificing scalability or violating the properties of
-classical SMR. These requirements introduce significant challenges. Since state
-variables may change location, clients must find the current location of
-variables. The scalability requirement rules out the use of a centralized oracle
-that clients can consult to find out the partitions a command must be multicast
-to. Even if clients can determine the current location of the variables needed
-to execute a command, by the time the command is delivered at the involved
-partitions, one or more variables may have changed their location. Although the
-client can retry the command with the new locations, how to guarantee that the
-command will succeed in the second attempt? In classical SMR, every command
-invoked by a non-faulty client always succeeds. \dssmr\ should provide similar
-guarantees. \dssmr\ was designed to exploit workload locality. This scheme
-benefits from simple manifestations of locality, such as commands that
-repeatedly access the same state variables, and more complex cases,
-such as structural locality in social network applications, where users with
-common interests have a higher probability of being interconnected in the social
-graph. Focusing on locality allows us to adopt a simple but effective approach
-to state reconfiguration: whenever a command requires data from multiple
-partitions, the variables involved are moved to a single partition and the
-command is executed against this partition. To reduce the chances of skewed load
-among partitions, the destination partition is chosen randomly. Although \dssmr\
-could use more sophisticated forms of partitioning, formulated as an
+To achieve the goal defined above for the doctoral thesis, we first conducted a
+survey of different ways to partial replications, by extending the replication
+framework for replication \cite{pedone:replication} and with different protocols.
+We then proposed \textbf{\dssmrlong}\ (\dssmr), a technique that allows a
+partitioned SMR system to reconfigure its data placement on-the-fly. \dssmr\
+achieves dynamic data reconfiguration without sacrificing scalability or
+violating the properties of classical SMR. These requirements introduce
+significant challenges. Since state variables may change location, clients must
+find the current location of variables. The scalability requirement rules out
+the use of a centralized oracle that clients can consult to find out the
+partitions a command must be multicast to. Even if clients can determine the
+current location of the variables needed to execute a command, by the time the
+command is delivered at the involved partitions, one or more variables may have
+changed their location. Although the client can retry the command with the new
+locations, how to guarantee that the command will succeed in the second attempt?
+In classical SMR, every command invoked by a non-faulty client always succeeds.
+\dssmr\ should provide similar guarantees. \dssmr\ was designed to exploit
+workload locality. This scheme benefits from simple manifestations of locality,
+such as commands that repeatedly access the same state variables, and more
+complex cases, such as structural locality in social network applications, where
+users with common interests have a higher probability of being interconnected in
+the social graph. Focusing on locality allows us to adopt a simple but effective
+approach to state reconfiguration: whenever a command requires data from
+multiple partitions, the variables involved are moved to a single partition and
+the command is executed against this partition. To reduce the chances of skewed
+load among partitions, the destination partition is chosen randomly. Although
+\dssmr\ could use more sophisticated forms of partitioning, formulated as an
 optimization problem (e.g., \cite{curino2010sch,taft2014est}), its technique has
 the advantage that it does not need any prior information about the workload and
 is not computationally expensive.
