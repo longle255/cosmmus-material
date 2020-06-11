@@ -1,28 +1,49 @@
 \newpage
 \section{Summary}
-Today's online services must meet strict availability and performance
-requirements. State machine replication (SMR), one of the most fundamental
-approaches to increasing the availability of services without sacrificing
-strong consistency, provides configurable availability but limited performance
-scalability. The lacking of scalability of SMR due to the fact that every
-replica has to execute all commands, which limits the overall performance by the
-throughput of a single replica, so adding servers does not increase the
-maximum throughput. Scalable State Machine Replication (S-SMR) achieves
-scalable performance by partitioning the service state and coordinating the
-ordering and execution of commands. While S-SMR scales the performance of
-single-partition commands with the number of deployed partitions, replica
-coordination needed by multi-partition commands introduces an overhead in the
-execution of multi-partition commands. In this thesis, we propose and
-implement the following ideas: (i) Dynamic scalable state machine replication
-(DS-SMR), (ii) Dynastar: Optimized partitioning for SMR. DS-SMR addresses the
-problem of S-SMR by allowing repartitioning the service state dynamically,
-based on the workload. Variables that are usually accessed together are moved
-to the same partition, which significantly improves scalability. To provide
-better partitioning for DS-SMR, we develop, a novel approach to
-scaling SMR. also uses dynamically repartitioning state technique,
-combined with a centralized oracle, to maintain a global view of workload and
-inform heuristics about data placement. Using this oracle, is able
-to adapt to workload changes over time, while also minimizing the number of
-state changes. The performance evaluation using two benchmarks, a social
-network based on real data and TPC-C, shows that is a practical
-technique that achieves excellent throughput.
+Since Bitcoin's initial launch in 2009, blockchain technologies have attracted
+extensive worldwide attention. Since then, several blockchain implementations
+were proposed, each focusing on solving specific shortcomings of the original
+blockchain proposal. Ethereum is after Bitcoin the second-largest cryptocurrency
+platform by market capitalization. Unlike Bitcoin, Ethereum supports programmable
+smart contracts with an entire programming language along with it, running in
+Ethereum Virtual Machine (EVM) \cite{ethereum:evm}. The flexibility within a
+Smart Contract enables users to implement their own autonomous execution logic
+on blockchains\cite{delmolino2016step, buterin2014next, kosba2016hawk}. The
+growing adoption of blockchain-based systems has raised many new challenges. In
+particular, a primary and urgent concern in this context is to provide the level
+of scalability to achieve a target throughput and latency in the presence of
+increasing workload without compromising the decentralized nature of
+blockchains. Bitcoin takes \emph{10 minutes} or longer to confirm a transaction,
+with a maximum throughput of \emph{7 transactions per second}
+\cite{nakamoto2019bitcoin}, while the number is \emph{15 seconds} and \emph{15
+transactions per second} for Ethereum respectively \cite{ethereum:sharding}. 
+
+One direction to scale the performance of blockchain systems is to applying
+partitioning. Partitioning (or \emph{sharding}) is a technique that divides the
+state of a service in multiple partitions so that most requests access one
+partition only and are equally distributed among partitions. Over more than
+three decades, partitioning has been an area of interest and has been studied in
+many domains, such as database systems, file systems, and distributed object
+systems. This is challenging, however, due to the fundamental difference in
+failure models between databases and blockchain. With its decentralized nature,
+there is no single entity in a blockchain system contain information of all
+objects in the network, which makes it difficult for blockchain clients to locate
+objects in the presence of partitioning. In addition, with the lacking of overall
+information, choosing a partition to put the objects in order to maximize the
+balance between partitions is not effective. 
+
+This project proposes an oracle service that provides information for
+blockchain's smart contract to achieve optimize partitioning. The oracle service
+consists of two main components, on-chain smart contract, and off-chain service.
+The on-chain component is in the form of a smart contract, replies to the request of
+user smart contract. The off-chain component is a centralized \lle{or even
+decentralized} service that monitors the blockchain by analyzing the transaction
+history. After receiving a request from user smart contract, the on-chain and
+off-chain components communicate to extract the necessary information for the
+request. With the hints from the oracle service, user smart contracts can
+effectively choose a partition to place objects to maximize the balance of the
+network, thus increase the transaction speed, as well as minimize the cost of
+execution. In addition, unlike some other scaling proposals that require
+extensive modification of the current blockchain code, our proposal will work
+with most of the blockchains that support smart contract, without changing client
+code.

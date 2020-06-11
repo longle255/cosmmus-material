@@ -7,11 +7,18 @@
 \usepackage{array}
 \usepackage[justification=centering]{caption}
 \usepackage{booktabs}
-\usepackage[table,xcdraw]{xcolor}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{chngcntr}
 \usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{graphicx}
 
-
+\newcommand{\mynote}[3]{
+   \fbox{\bfseries\sffamily\scriptsize#1}
+   {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
+\newcommand{\fp}[1]{\mynote{Fernando}{#1}{Red}}
+\newcommand{\lle}[1]{\mynote{Long}{#1}{Cerulean}}
 
 \title{Bridge Proof of Concept}
 \author{Long Hoang Le}
