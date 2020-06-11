@@ -41,7 +41,7 @@ not scale performance since each replica must execute every command. Thus, the
 overall performance is limited by the throughput of a single replica.
 
 Conceptually, scalable performance can be achieved with state partitioning, also
-known as sharding (e.g., \cite{facebookTAO, sciascia2012sdur, Aguilera:2007}),
+known as sharding (e.g., \cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}),
 which partitions the persistent state of the services across multiple servers.
 Ideally, if the service state (e.g., state variables) can be divided
 such that commands access one partition only and are equally distributed among

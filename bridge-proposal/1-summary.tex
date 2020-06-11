@@ -8,29 +8,32 @@ platform by market capitalization. Unlike Bitcoin, Ethereum supports programmabl
 smart contracts with an entire programming language along with it, running in
 Ethereum Virtual Machine (EVM) \cite{ethereum:evm}. The flexibility within a
 Smart Contract enables users to implement their own autonomous execution logic
-on blockchains\cite{delmolino2016step, buterin2014next, kosba2016hawk}. The
+on blockchains \cite{delmolino2016step, buterin2014next, kosba2016hawk}. The
 growing adoption of blockchain-based systems has raised many new challenges. In
 particular, a primary and urgent concern in this context is to provide the level
 of scalability to achieve a target throughput and latency in the presence of
 increasing workload without compromising the decentralized nature of
-blockchains. Bitcoin takes \emph{10 minutes} or longer to confirm a transaction,
+blockchains. Currently, Bitcoin takes \emph{10 minutes} or longer to confirm a transaction,
 with a maximum throughput of \emph{7 transactions per second}
 \cite{nakamoto2019bitcoin}, while the number is \emph{15 seconds} and \emph{15
 transactions per second} for Ethereum respectively \cite{ethereum:sharding}. 
 
 One direction to scale the performance of blockchain systems is to applying
-partitioning. Partitioning (or \emph{sharding}) is a technique that divides the
-state of a service in multiple partitions so that most requests access one
-partition only and are equally distributed among partitions. Over more than
-three decades, partitioning has been an area of interest and has been studied in
-many domains, such as database systems, file systems, and distributed object
-systems. This is challenging, however, due to the fundamental difference in
-failure models between databases and blockchain. With its decentralized nature,
-there is no single entity in a blockchain system contain information of all
-objects in the network, which makes it difficult for blockchain clients to locate
-objects in the presence of partitioning. In addition, with the lacking of overall
+partitioning (e.g., \cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}).
+Partitioning (or \emph{sharding}) is a technique that divides the state of a
+service in multiple partitions so that most requests access one partition only
+and are equally distributed among partitions. Over more than three decades,
+partitioning has been an area of interest and has been studied in many domains,
+such as database systems, file systems, and distributed object systems. This is
+challenging, however, due to the fundamental difference in failure models
+between databases and blockchain. With its decentralized nature, there is no
+single entity in a blockchain system contain information of all objects in the
+network, which makes it difficult for blockchain clients to locate objects in
+the presence of partitioning. In addition, with the lacking of overall
 information, choosing a partition to put the objects in order to maximize the
-balance between partitions is not effective. 
+balance between partitions is not effective. Even if enough information is
+available, finding a good partitioning is a complex optimization
+problem~\cite{curino2010sch,taft2014est}.
 
 This project proposes an oracle service that provides information for
 blockchain's smart contract to achieve optimize partitioning. The oracle service
