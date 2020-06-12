@@ -20,20 +20,17 @@ transactions per second} for Ethereum respectively \cite{ethereum:sharding}.
 
 One direction to scale the performance of blockchain systems is to applying
 partitioning (e.g., \cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}).
-Partitioning (or \emph{sharding}) is a technique that divides the state of a
-service in multiple partitions so that most requests access one partition only
-and are equally distributed among partitions. Over more than three decades,
-partitioning has been an area of interest and has been studied in many domains,
-such as database systems, file systems, and distributed object systems. This is
-challenging, however, due to the fundamental difference in failure models
-between databases and blockchain. With its decentralized nature, there is no
-single entity in a blockchain system contain information of all objects in the
-network, which makes it difficult for blockchain clients to locate objects in
-the presence of partitioning. In addition, with the lacking of overall
-information, choosing a partition to put the objects in order to maximize the
-balance between partitions is not effective. Even if enough information is
-available, finding a good partitioning is a complex optimization
-problem~\cite{curino2010sch,taft2014est}.
+Over more than three decades, partitioning has been an area of interest and has
+been studied in many domains, such as database systems, file systems, and
+distributed object systems. This is challenging, however, due to the fundamental
+difference in failure models between databases and blockchain. With its
+decentralized nature, there is no single entity in a blockchain system contain
+information of all objects in the network, which makes it difficult for
+blockchain clients to locate objects in the presence of partitioning. In
+addition, with the lacking of overall information, choosing a partition to put
+the objects in order to maximize the balance between partitions is not
+effective. Even if enough information is available, finding a good partitioning
+is a complex optimization problem~\cite{curino2010sch,taft2014est}.
 
 This project proposes an oracle service that provides information for
 blockchain's smart contract to achieve optimize partitioning. The oracle service

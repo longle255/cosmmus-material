@@ -402,24 +402,29 @@ Figure~\ref{fig:replication:coordination}:
 
 \subsection{Server coordination with agreement coordination}
 \label{sec:ssmr}
-Scalable State Machine Replication (\ssmr) is an extension to state machine replication (SMR) that under
-certain workloads allows performance to grow proportionally to the number of
-replicas. \ssmr\ partitions the service state and replicates each partition. It
-relies on an atomic multicast primitive to consistently order commands within
-and across partitions. In addition, \ssmr\ assumes a static workload
-partitioning. Any state reorganization requires system shutdown and manual
+Scalable State Machine Replication (\ssmr) is an extension to state machine
+replication (SMR) that under certain workloads allows performance to grow
+proportionally to the number of replicas. \ssmr\ partitions the service state
+and replicates each partition. It relies on an atomic multicast primitive to
+consistently order commands within and across partitions. In addition, \ssmr\
+assumes a static workload partitioning and a location oracle \emph{oracle},
+which tells which partitions are accessed by each command.\footnote{The oracle
+returns a set with the partitions accessed by the command, but this set does not
+need to be minimal; it may contain all partitions in the worst case, when the
+partitions accessed by the command cannot be determined before the command is
+executed.}. Any state reorganization requires system shutdown and manual
 intervention.
 
-In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
-partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
-$\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
-server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
-``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
-S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
-each command.\footnote{The oracle returns a set with the partitions accessed
-by the command, but this set does not need to be minimal; it may contain all
-partitions in the worst case, when the partitions accessed by the command cannot
-be determined before the command is executed.}
+% In S-SMR~\cite{bezerra2014ssmr}, the service state \vvt\ is composed of $k$
+% partitions, in set $\Psi = \{\mathcal{V}_1, ..., \mathcal{V}_k\}$. Server group
+% $\ssm_i$ is assigned to partition $\mathcal{V}_i$. For brevity, we say that
+% server $s$ belongs to $\mathcal{V}_i$ meaning that $s \in \ssm_i$, and say
+% ``multicast to $\mathcal{V}_i$'' meaning ``multicast to server group $\ssm_i$''.
+% S-SMR relies on an \emph{oracle}, which tells which partitions are accessed by
+% each command.\footnote{The oracle returns a set with the partitions accessed
+% by the command, but this set does not need to be minimal; it may contain all
+% partitions in the worst case, when the partitions accessed by the command cannot
+% be determined before the command is executed.}
 
 % \begin{figure*}
 %   \begin{minipage}[b]{1.0\linewidth}

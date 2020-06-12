@@ -13,12 +13,27 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
 
 \newcommand{\mynote}[3]{
    \fbox{\bfseries\sffamily\scriptsize#1}
    {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
 \newcommand{\fp}[1]{\mynote{Fernando}{#1}{Red}}
 \newcommand{\lle}[1]{\mynote{Long}{#1}{Cerulean}}
+
+\newcommand{\ssmr}{\mbox{S-SMR}\xspace}
+\newcommand{\ssmrshort}{Scalable SMR}
+\newcommand{\ssmrlong}{Scalable State Machine Replication}
+%
+% DS-SRM
+\newcommand{\dssmr}{\mbox{DS-SMR}}
+\newcommand{\dssmrshort}{Dynamic S-SMR}
+\newcommand{\dssmrlong}{Dynamic Scalable State Machine Replication}
+
+\newcommand{\dynastar}{\mbox{DynaStar}\xspace}
+
 
 \title{Bridge Proof of Concept}
 \author{Long Hoang Le}
