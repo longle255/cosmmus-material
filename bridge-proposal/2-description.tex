@@ -1,15 +1,23 @@
 %!TEX root =  main.tex
 \newpage
+\setcounter{page}{1}
 \section{Project description}
 
 \subsection{Research background}
 
-In the core of most blockchains, assets are transferred
-under the control of custom scripts that enforce necessary conditions to
-transfer an asset from one party to another. The custom script (so-called
-\emph{smart contracts}) is a self-executable, self-enforceable and
-self-verifiable published on the blockchain. Being the first generation of
+In this section, we briefly summarize the state-of-the-art in the proposed
+research areas and outline the current state of the principal investigator own
+research.
+
+\subsubsection{Current state of research in the field}
+Since the first introduction of Bitcoin, the demand for blockchain solutions is
+increasing over years. There exist a multitude of blockchain technologies since
+then, try to address different aspects of digital life. In the core of most
+blockchains, essentially, assets are transferred under the control of custom
+scripts (so-called \emph{smart contracts}) that enforce necessary conditions to
+transfer an asset from one party to another. Being the first generation of
 blockchain, Bitcoin has very limited support for smart contract. On the other
+<<<<<<< HEAD
 hand, later generations of blockchain (Etherum, NEO, Stellar, etc.) address this
 problem by providing a general purpose programmable infrastructure (as known as
 smart contract), where the blockchain does not only store financial data but
@@ -93,6 +101,103 @@ Figure \ref{fig:tpcc}(b) shows the scalability of \dynastar when increase the
 size of the system (adding more data and computational resources). It's worth to
 note that in a TPC-C benchmark, the average rate of mutli-partition transactions
 is 15\%.
+=======
+hand, later generations of blockchain address this problem by providing a
+general-purpose programmable infrastructure, where the blockchain does not only
+store financial data but also have the capability of deploying and executing
+custom code on the blockchain system. For example, Ethereum is after Bitcoin the
+second-largest cryptocurrency platform by market capitalization. Unlike Bitcoin,
+Ethereum supports programmable smart contracts with an entire programming
+language along with it, running in Ethereum Virtual Machine (EVM)
+\cite{ethereum:evm}. The flexibility within a smart contract allows users to
+implement their own autonomous execution logic on blockchains enable more
+options for optimization. However, several challenges in blockchain technology
+remain to be addressed, two of which are scalability and interoperability.
+
+First, the performance of mainstream blockchains is still a barrier to the
+adoption of blockchain technology. As a global payment system, Visa is capable
+of processing around 24,000 transactions per second on average \cite{visa},
+while the number is 7 and 15 for Bitcoin and Etherum respectively
+\cite{ethereum:sharding, nakamoto2019bitcoin}. Scaling the performance of
+blockchain systems has become a hot topic for both industry and academia, with
+many proposals. Those proposals varies from optimizing the performance of the
+consensus protocols \cite{dang2019towards}, partitioning the blockchain
+\cite{wang2019sok}, to shifting the computation from the blockchain (on-chain) to
+the outside (off-chain) \cite{teutsch2019scalable, network2018cheap}. Among all
+proposed method for scaling the performance, sharding the blockchain state is an
+effective and practical solution, as it can overcome both performance and
+scalability problems of blockchain. Partitioning (or \emph{sharding}) is a
+technique that divides the state of a service or a system in multiple partitions
+so that most requests or transactions access one partition only and are equally
+distributed among partitions. As a result, partitions can work in parallel to
+maximize the performance and improve the throughput. In the context of
+blockchain, state partitioning is challenging, however, due to fundamental
+differences between previous domains and blockchain, notably the failure model.
+With its decentralized nature, there is no single entity in a blockchain system
+that contains information of all objects in the network, which makes it
+difficult for blockchain clients to locate objects in the presence of
+partitioning. In addition, with the lacking of overall information, choosing a
+partition to place the objects in order to maximize the balance between
+partitions is not effective. Even if enough information is available, finding a
+good partitioning is a complex optimization problem~\cite{curino2010sch,taft2014est}. 
+
+Second, with the increasing number of blockchain systems and distributed
+applications (DApps), there is a raising demand of interoperability.
+Interoperability in the context of blockchain means connecting multiple
+blockchains to share, exchange, or changing the state of the own or the other
+blockchain \cite{buterin2016chain}. In the recent evolvement of blockchain
+technologies, some blockchain systems have supported interoperability in their
+core, in the form of an inter blockchain communication (IBC) protocol
+\cite{kwon2016cosmos, thomas2015protocol, kokoris2018omniledger,
+al2017chainspace}. Moreover, some solutions start to appear that allows smart
+contracts to move between existing blockchains \cite{fynn2020move,
+back2014enabling, herlihy2018atomic}. In \cite{fynn2020move},Fynn \emph{et al.}
+introduced a move primitive \cite{fynn2020move} allows programmable blockchains
+to interoperate by moving contracts and data from one to another. The
+possibilities of interoperability are endless. An application in a private
+blockchain can access data from a public blockchain \cite{prusty2018blockchain},
+A contract can shift an expensive computational off-chain
+\cite{teutsch2019scalable, network2018cheap}, or a DApps can access data from
+multiple blockchains. However, it also leaves new open questions. One could be
+how to locate objects in a blockchain, while contracts and objects are being
+moved around, or is it financially beneficial to move a calculation to a
+side-chain.
+
+This project’s main goal is to develope an oracle service that analyzes
+blockchain's transactions to provide such necessary information. The service
+will answer the several questions such as where is the objects or contracts
+after they have been moved across different blockchain, where to put the objects
+to optimize the partitioning of the network to improve the performance, or to
+which side-chain off-load a transaction is financially beneficial.
+
+\subsubsection{Current state of main investigator's research}
+
+Investigator Long Hoang Le conducts research in distributed systems. Much of his
+work has focused on scalable and fault tolerant system, particularly in scaling
+state machine replication \cite{le2016dssmr, le2019dynastar, bezerra2016strong}.
+His work on DS-SMR \cite{le2016dssmr} was nominated for best paper award at DSN
+2016. 
+
+State machine replication is a common approach to building fault-tolerant
+systems \cite{Lam78, Sch90}. Participants in a replicated state machine system
+form agreement on a sequence of transactions and apply them in sequence order
+deterministically to the reach the same state. With its simple yet effective
+execution model, state machine replication is at the core of many blockchain
+systems \cite{baudet2019state, cachin2016architecture}. This approach provides a
+configurable degree of availability but limits the achievable throughput of the
+replicated service to what a single replica can process sequentially. In the
+work \dynastar \cite{le2019dynastar}, Le \emph{et al.} proposed an approach for
+scaling the performance of SMR by allowing SMR system to partition the state and
+reconfigure its data placement on-the-fly. \dynastar maintains a location oracle
+with a global view of the application state. \dynastar shows that by using the
+data of the oracle to come up with an optimized partitioning, scalable
+performance for SMR is achievable for real-world application. Figure
+\ref{fig:tpcc} shows the performance evaluation of \dynastar with TPC-C
+benchmark. Figure \ref{fig:tpcc}(a) depicts the impact of partitioning on the
+performance of a system before and after an optimized partitioning configuration
+is applied. Figure \ref{fig:tpcc}(b) shows the scalability of \dynastar when
+increase the size of the system (adding more data and computational resources). 
+>>>>>>> update the description part 1
 
 \begin{figure*}[ht!]
   \centering
@@ -114,24 +219,19 @@ is 15\%.
 
 \subsection{Innovation potential and market review} 
 
-\subsubsection{General ideas}
+% This proposal is based on an assumption that contracts and data can move across
+% blockchain. Moving and sharing data across blockchain systems or between
+% partitions in a blockchain (interoperability) has been in the blockchain
+% wishlist for some time. A protocol with this goals has been proposed in the
+% Ethereum research forum concurrently with the development of this work
+% \cite{buterin2018yanking}. In another work, a move primitive introduced by Fynn \emph{et al.}
+% \cite{fynn2020move} allows programmable blockchains to interoperate by moving
+% contracts and data from one to another. This solution is plugable as a smart
+% contract, requires no modification to the blockchain. 
 
-\subsubsection{General ideas}
-
-\subsubsection{Integrability}
-This proposal is based on an assumption that contracts and data can move across
-blockchain. Moving and sharing data across blockchain systems or between
-partitions in a blockchain (interoperability) has been in the blockchain
-wishlist for some time. A protocol with this goals has been proposed in the
-Ethereum research forum concurrently with the development of this work
-\cite{buterin2018yanking}. In another work, a move primitive introduced by Fynn \emph{et al.}
-\cite{fynn2020move} allows programmable blockchains to interoperate by moving
-contracts and data from one to another. This solution is plugable as a smart
-contract, requires no modification to the blockchain. 
-
-With the on-chain component in the form of smart contract, our proposed system
-could be integrated to existing blockchain systems easily without any change in
-the blockchain protocol. 
+% With the on-chain component in the form of smart contract, our proposed system
+% could be integrated to existing blockchain systems easily without any change in
+% the blockchain protocol. 
 
 \subsubsection{Expected outcome}
 
@@ -143,5 +243,37 @@ could achieve a rate of less then 10 percents of cross partition transaction.
 
 \subsection{Implementation strategy}
 
+The Figure \ref{fig:architecture} shows the architecture of the proposed oracle
+service. The core components of the system are divided in two part: the on-chain
+smart contract component, and the off-chain service component. The on-chain
+smart contract (OSC) is a set of smart contracts that are developed separately
+for each supported blockchain. The OSC plays the roles of the interface of the
+service, receives requests from other contracts in the form of contract calls
+and dispatches those requests to the off-chain component. The OSC is also
+responsible for computing the fee of each request. The off-chain component
+consists of a computational unit (CU) and a set of blockchain analyzers. The
+analyzers monitor the blockchains by actively fetching and analyzing the
+transactions history to aggregate multiple metrics of a standard blockchain, for
+example the location of contracts and objects in the case of movement, the
+average execution cost or the pending transactions count, etc. The CU is a set
+of computational nodes that serves requests by historical data fetched by the
+adapters.
+
+Upon receiving requests from user smart contract, the OSC validates the requests
+and forwards those requests to the CU. The CU queries the data from backlog and
+reply to the OSC. Once receiving the response from CU, the OSC calculate the fee
+for the request, and send back the data to the user smart contract.
+
+\begin{figure*}[ht!]
+\begin{minipage}[b]{1\linewidth}
+\centering
+      \includegraphics[width=0.6\linewidth]{figures/architecture}
+\end{minipage}
+\caption{The architecture of the proposed oracle service}
+\label{fig:architecture}
+\end{figure*}
+
+
+  
 \subsection{Project plan}
 
