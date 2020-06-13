@@ -1,3 +1,4 @@
+%!TEX root =  main.tex
 \newpage
 \section{Summary}
 Since Bitcoin's initial launch in 2009, blockchain technologies have attracted
@@ -18,23 +19,23 @@ with a maximum throughput of \emph{7 transactions per second}
 \cite{nakamoto2019bitcoin}, while the number is \emph{15 seconds} and \emph{15
 transactions per second} for Ethereum respectively \cite{ethereum:sharding}. 
 
-One direction to scale the performance of blockchain systems is to applying
+One direction to scale the performance of blockchain systems is state
 partitioning (e.g., \cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}).
 Over more than three decades, partitioning has been an area of interest and has
 been studied in many domains, such as database systems, file systems, and
-distributed object systems. This is challenging, however, due to the fundamental
-difference in failure models between databases and blockchain. With its
-decentralized nature, there is no single entity in a blockchain system contain
+distributed object systems. State partitioning is challenging, however, due to fundamental
+differences between previous domains and blockchain, notably the failure model. With its
+decentralized nature, there is no single entity in a blockchain system that contains
 information of all objects in the network, which makes it difficult for
 blockchain clients to locate objects in the presence of partitioning. In
-addition, with the lacking of overall information, choosing a partition to put
+addition, with the lacking of overall information, choosing a partition to place
 the objects in order to maximize the balance between partitions is not
 effective. Even if enough information is available, finding a good partitioning
 is a complex optimization problem~\cite{curino2010sch,taft2014est}.
 
 This project proposes an oracle service that provides information for
-blockchain's smart contract to achieve optimize partitioning. The oracle service
-consists of two main components, on-chain smart contract, and off-chain service.
+blockchain's smart contract to achieve optimized partitioning. The oracle service
+consists of two main components, one on-chain and one off-chain.
 The on-chain component is in the form of a smart contract, replies to the request of
 user smart contract. The off-chain component is a centralized \lle{or even
 decentralized} service that monitors the blockchain by analyzing the transaction
