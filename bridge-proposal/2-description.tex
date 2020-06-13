@@ -1,4 +1,3 @@
-%!TEX root =  main.tex
 \newpage
 \setcounter{page}{1}
 \section{Project description}
@@ -16,111 +15,6 @@ then, try to address different aspects of digital life. In the core of most
 blockchains, essentially, assets are transferred under the control of custom
 scripts (so-called \emph{smart contracts}) that enforce necessary conditions to
 transfer an asset from one party to another. Being the first generation of
-<<<<<<< HEAD
-blockchain, Bitcoin has very limited support for smart contract. On the other
-<<<<<<< HEAD
-hand, later generations of blockchain (Etherum, NEO, Stellar, etc.) address this
-problem by providing a general purpose programmable infrastructure (as known as
-smart contract), where the blockchain does not only store financial data but
-also have the capability of deploying and executing custom code on the
-blockchain system. This increases the flexibility of the system and enable more
-options for optimization.
-
-% Ethereum is after Bitcoin the second-largest cryptocurrency platform by market
-% capitalization. Unlike Bitcoin, Ethereum supports programmable smart contracts
-% with an entire programming language along with it, running in Ethereum Virtual
-% Machine (EVM) \cite{ethereum:evm}. The flexibility within a smart contract
-% enables users to implement their own autonomous execution logic on blockchains
-% \cite{delmolino2016step, buterin2014next, kosba2016hawk}.
-
-
-\subsubsection{Blockchain and scalability problem}
-While the demand for blockchain solutions is increasing over years since the
-first introduction of Bitcoin, the performance of mainstream blockchains is
-still a barrier to the adoption of blockchain technology. As a global payment
-system, Visa is capable of processing around 24,000 transactions per second on
-average \cite{visa}, while Bitcoin and Ethereum can handle 7 and 15 transactions per second, 
-respectively \cite{ethereum:sharding, nakamoto2019bitcoin}. Scaling the
-performance of blockchain systems has become a hot topic for both industry and
-academia, with many proposals. Those proposals varies from optimizing the
-performance of the consensus protocols \cite{dang2019towards}, partitioning the
-blockchain \cite{wang2019sok} to shifting the computation from the blockchain
-(on-chain) to the outside (off-chain) \cite{teutsch2019scalable,
-network2018cheap}. Being the first generation of blockchain, Bitcoin has very
-limited support for programmable transactions, thus also has limited options for
-scaling that doesn't require changes in its protocol. On the other hand, later
-generations of blockchain (Ethereum, NEO, Stellar, etc.) address this problem by
-providing a general purpose programmable infrastructure (as known as smart
-contract), where the blockchain does not only store financial data but also have
-the capability of deploying and executing custom code on the blockchain system.
-This increases the flexibility of the system and enable more options for
-optimization.
-
-\subsubsection{Scaling by partitioning}
-Among all proposed method for scaling the performance, sharding the blockchain
-state is an effective and practical solution, as it can overcome both
-performance and scalability problems of blockchain. Partitioning (or
-\emph{sharding}) is a technique that divides the state of a service or a system
-in multiple partitions so that most requests or transactions access one
-partition only and are equally distributed among partitions. As a result,
-partitions can work in parallel to maximize the performance and improve the
-throughput. On the downside of this approach, if a transaction accesses data
-from multiple partitions, those partitions have to coordinate to execute the
-transaction, thus increase the cost of the execution. The major challenge in
-this approach is to come up with an optimized partitioning scheme to minimize
-the number of cross-partition transactions, and also an effective execution
-scheme that could handle multi-partition transactions.
-
-\subsubsection{State machine replication (SMR) and Scaling SMR}
-State machine replication, also called active replication, is a common approach
-to building fault-tolerant systems \cite{Lam78, Sch90}. Participants in a
-replicated state machine system form agreement on a sequence of transactions and
-apply them in sequence order deterministically to the reach the same state. With
-its simple yet effective execution model, state machine replication is at the
-core of many blockchain systems \cite{baudet2019state, cachin2016architecture}.
-In terms of scalability, unfortunately, classic state machine replication does
-not scale. Increasing the number of replicas will not scale performance since
-each replica must execute every command. In the work called Dynamic scalable
-state machine replication (\dssmr), Le \emph{et al.} proposed an approach for
-scaling the performance of SMR by allowing SMR system to reconfigure its data
-placement on-the-fly. By moving data ``on demand'' to maximize the number of
-single partition requests, \dssmr{} allows SMR system to adapt the partitioning
-scheme as workloads change. To keep track the partition of objects in the
-system, \dssmr{} maintain a location oracle with a global view of the
-application state. The result of this work shows that scalable performance could
-be achieved in a replication system with a good partitioning scheme. In a later
-work, the authors introduced \dynastar, an optimized partitioning solutions for
-SMR. \dynastar shows that by using the data of the location oracle to come up
-with an optimized partitioning, scalable performance is achievable for
-real-world application. The authors also presented a detailed experimental
-evaluation of \dynastar using the TPC-C benchmark and a social network service
-populated with a real social network graph. Figure \ref{fig:tpcc} shows the
-performance evaluation of \dynastar with TPC-C benchmark. Figure
-\ref{fig:tpcc}(a) depicts the impact of partitioning on the performance of a
-system before and after an optimized partitioning configuration is applied.
-Figure \ref{fig:tpcc}(b) shows the scalability of \dynastar when increase the
-size of the system (adding more data and computational resources). It's worth to
-note that in a TPC-C benchmark, the average rate of mutli-partition transactions
-is 15\%.
-=======
-hand, later generations of blockchain address this problem by providing a
-general-purpose programmable infrastructure, where the blockchain does not only
-store financial data but also have the capability of deploying and executing
-custom code on the blockchain system. For example, Ethereum is after Bitcoin the
-second-largest cryptocurrency platform by market capitalization. Unlike Bitcoin,
-Ethereum supports programmable smart contracts with an entire programming
-language along with it, running in Ethereum Virtual Machine (EVM)
-\cite{ethereum:evm}. The flexibility within a smart contract allows users to
-implement their own autonomous execution logic on blockchains enable more
-options for optimization. However, several challenges in blockchain technology
-remain to be addressed, two of which are scalability and interoperability.
-
-First, the performance of mainstream blockchains is still a barrier to the
-adoption of blockchain technology. As a global payment system, Visa is capable
-of processing around 24,000 transactions per second on average \cite{visa},
-while the number is 7 and 15 for Bitcoin and Etherum respectively
-\cite{ethereum:sharding, nakamoto2019bitcoin}. Scaling the performance of
-=======
 blockchain, Bitcoin has very limited support for smart contracts. On the other
 hand, later generations of blockchain (Ethereum, NEO, Stellar, etc.) address
 this problem by providing a general-purpose programmable infrastructure, where
@@ -140,7 +34,6 @@ barrier to the adoption of blockchain technology. As a global payment system,
 Visa is capable of processing around 24,000 transactions per second on average
 \cite{visa}, while Bitcoin and Ethereum can handle 7 and 15 transactions per
 second \cite{ethereum:sharding, nakamoto2019bitcoin}. Scaling the performance of
->>>>>>> adding plans
 blockchain systems has become a hot topic for both industry and academia, with
 many proposals. Those proposals vary from optimizing the performance of the
 consensus protocols \cite{dang2019towards}, partitioning the blockchain
@@ -209,17 +102,6 @@ replicated service to what a single replica can process sequentially. In the
 work \dynastar \cite{le2019dynastar}, Le \emph{et al.} proposed an approach for
 scaling the performance of SMR by allowing the SMR system to partition the state and
 reconfigure its data placement on-the-fly. \dynastar maintains a location oracle
-<<<<<<< HEAD
-with a global view of the application state. \dynastar shows that by using the
-data of the oracle to come up with an optimized partitioning, scalable
-performance for SMR is achievable for real-world application. Figure
-\ref{fig:tpcc} shows the performance evaluation of \dynastar with TPC-C
-benchmark. Figure \ref{fig:tpcc}(a) depicts the impact of partitioning on the
-performance of a system before and after an optimized partitioning configuration
-is applied. Figure \ref{fig:tpcc}(b) shows the scalability of \dynastar when
-increase the size of the system (adding more data and computational resources). 
->>>>>>> update the description part 1
-=======
 with a global view of the application state. Figure \ref{fig:tpcc} shows the
 performance evaluation of \dynastar with TPC-C benchmark. Figure
 \ref{fig:tpcc}(a) depicts the impact of partitioning on the performance of a
@@ -233,7 +115,6 @@ application.
 It's worth it to
  note that in a TPC-C benchmark, the average rate of multi-partition transactions
  is 15\
->>>>>>> adding plans
 
 \begin{figure*}[ht!]
   \centering
