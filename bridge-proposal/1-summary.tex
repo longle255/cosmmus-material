@@ -4,47 +4,62 @@
 Since Bitcoin's initial launch in 2009, blockchain technologies have attracted
 extensive worldwide attention. Since then, several blockchain implementations
 were proposed, each focusing on solving specific shortcomings of the original
-blockchain proposal. Ethereum is after Bitcoin the second-largest cryptocurrency
-platform by market capitalization. Unlike Bitcoin, Ethereum supports programmable
-smart contracts with an entire programming language along with it, running in
-Ethereum Virtual Machine (EVM) \cite{ethereum:evm}. The flexibility within a
-Smart Contract enables users to implement their own autonomous execution logic
-on blockchains \cite{delmolino2016step, buterin2014next, kosba2016hawk}. The
-growing adoption of blockchain-based systems has raised many new challenges. In
-particular, a primary and urgent concern in this context is to provide the level
-of scalability to achieve a target throughput and latency in the presence of
+blockchain proposal. Some implementations focus on special features, such as
+smart contract support \cite{buterin2013ethereum, elrom2019neo}, privacy
+\cite{alonso2018monero}. Some others allow enterprises to create private
+blockchains, where only a defined set of entities can participate
+\cite{androulaki2018hyperledger}. The growing adoption of blockchain-based
+systems has raised many new challenges. In particular, two primary and urgent
+challenges in this context are scalability and interoperability. Scalability is
+the ability to achieve a target throughput and latency in the presence of
 increasing workload without compromising the decentralized nature of
-blockchains. Currently, Bitcoin takes \emph{10 minutes} or longer to confirm a transaction,
-with a maximum throughput of \emph{7 transactions per second}
-\cite{nakamoto2019bitcoin}, while the number is \emph{15 seconds} and \emph{15
-transactions per second} for Ethereum respectively \cite{ethereum:sharding}. 
+blockchains. Interoperability allows communication and data exchanging between
+multiple different blockchains. 
 
-One direction to scale the performance of blockchain systems is state
-partitioning (e.g., \cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}).
-Over more than three decades, partitioning has been an area of interest and has
-been studied in many domains, such as database systems, file systems, and
-distributed object systems. State partitioning is challenging, however, due to fundamental
-differences between previous domains and blockchain, notably the failure model. With its
-decentralized nature, there is no single entity in a blockchain system that contains
-information of all objects in the network, which makes it difficult for
-blockchain clients to locate objects in the presence of partitioning. In
-addition, with the lacking of overall information, choosing a partition to place
-the objects in order to maximize the balance between partitions is not
-effective. Even if enough information is available, finding a good partitioning
-is a complex optimization problem~\cite{curino2010sch,taft2014est}.
+Scalable performance could be achieve by state partitioning (e.g.,
+\cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}). State partitioning
+is challenging, however, due to fundamental differences between previous domains
+and blockchain, notably the failure model. With its decentralized nature, there
+is no single entity in a blockchain system that contains information of all
+objects in the network, which makes it difficult for blockchain clients to
+locate objects in the presence of partitioning. In addition, with the lacking of
+overall information, choosing a partition to place the objects in order to
+maximize the balance between partitions is not effective. Even if enough
+information is available, finding a good partitioning is a complex optimization
+problem~\cite{curino2010sch,taft2014est}. Interoperability, on the other hand,
+is gaining more attention in the blockchain community. Some blockchain systems
+has introduced inter blockchain communication (IBC) protocols that enable
+communication and data exchanging between multiple blockchains, allows users to
+choose where to place smart contracts \cite{kwon2016cosmos, thomas2015protocol,
+kokoris2018omniledger, al2017chainspace}. Moreover, some solutions start to
+appear that allow smart contracts to move between blockchains
+\cite{fynn2020move, back2014enabling, herlihy2018atomic}.
 
-This project proposes an oracle service that provides information for
-blockchain's smart contract to achieve optimized partitioning. The oracle service
-consists of two main components, one on-chain and one off-chain.
-The on-chain component is in the form of a smart contract, replies to the request of
-user smart contract. The off-chain component is a centralized \lle{or even
-decentralized} service that monitors the blockchain by analyzing the transaction
-history. After receiving a request from user smart contract, the on-chain and
-off-chain components communicate to extract the necessary information for the
-request. With the hints from the oracle service, user smart contracts can
+Scalability and interoperability are different problems of blockchain, they are
+however in need a common component: an oracle that provides some information of
+the blockchains. A partitioned blockchains needs an overview of the partitioning
+in order to place the objects and contract on an optimized location to maintain
+the balance of the network and therefore increase the performance. For
+blockchains to interact with each other, some information of the other
+blockchains like the cost of transaction, the performance of the network is also
+necessary. This project proposes an oracle service that provides such
+information. The oracle service consists of two main components, one on-chain
+and one off-chain. The on-chain component is in the form of a smart contract,
+replies to the request of user smart contract. The off-chain component is a
+service that monitors the blockchains by analyzing the transaction history.
+After receiving a request from user smart contract, the on-chain and off-chain
+components communicate to extract the necessary information for the request.
+User smart contract pays per-query fees to get the hints from the oracle
+service. The cost of each query depends on the amount of information returned.
+With the information provided by the oracle, the blockchain system can
 effectively choose a partition to place objects to maximize the balance of the
-network, thus increase the transaction speed, as well as minimize the cost of
-execution. In addition, unlike some other scaling proposals that require
-extensive modification of the current blockchain code, our proposal will work
-with most of the blockchains that support smart contract, without changing client
-code.
+network, thus increase the transaction speed, as well as optimizing the the
+execution cost with cross-chain transaction.
+
+% In addition, unlike some other scaling proposals that require
+% extensive modification of the current blockchain code, our proposal will work
+% with most of the blockchains that support smart contract, without changing
+% client code.
+
+
+% fee changes base on the hints
