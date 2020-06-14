@@ -207,14 +207,17 @@ REST API. In addition, the design of our system is yet flexible enough to add
 support for new blockchain.}
 
 \lle{Our main source of revenue is from blockchain's users. Users will be
-charged based on the time it takes to execute their queries (for instance, a query
-for the location of objects results in a lower cost than a query for calculating
-an optimized location). With our pay-per-call pricing model, the users only pay
+charged based on the time it takes to execute their queries. This time is
+calculated from the time our computational unit begins executing the query until
+it returns. The price depends on the maximum amount of memory that users are
+willingly pay (for instance, a query for the location of objects results in
+a lower cost than a query for an optimized location that takes more time and
+resources to calculate). With our pay-per-call pricing model, the users only pay
 for the queries that they run. This payment model has several benefits. There is
-no barrier to entry for users, no commitment required, and it offers the users more
-flexibility around the services they want, and when they want them. For instance,
-the application could decide to cache some queries results once in a while for
-further usages to optimize costs.}
+no barrier to entry for users, no commitment required, and it offers the users
+more flexibility around the services they want, and when they want them. For
+instance, the application could decide to cache some queries results once in a
+while for further usages to optimize costs.}
 
 
 \begin{figure*}[ht!]
