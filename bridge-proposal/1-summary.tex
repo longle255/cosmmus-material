@@ -3,10 +3,10 @@
 \thispagestyle{empty}
 \section{Summary}
 Since Bitcoin's initial launch in 2009, blockchain technologies have attracted
-extensive worldwide attention. Since then, several blockchain implementations
-were proposed, each focusing on solving specific shortcomings of the original
+extensive worldwide attention. Several blockchain implementations
+have been proposed, each focusing on solving specific shortcomings of the original
 blockchain proposal. Some implementations focus on special features, such as
-smart contract support \cite{buterin2013ethereum, elrom2019neo}, privacy
+smart contract support \cite{buterin2013ethereum, elrom2019neo}, and privacy
 \cite{alonso2018monero}. Some others allow enterprises to create private
 blockchains, where only a defined set of entities can participate
 \cite{androulaki2018hyperledger}. The growing adoption of blockchain-based
@@ -15,48 +15,50 @@ are scalability and interoperability.
 
 Scalability is the ability to achieve a target throughput and latency in the
 presence of increasing workload without compromising the decentralized nature of
-blockchains. Scalability could be achieve by state partitioning (e.g.,
-\cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}). It is crucial to
-come up with a partitioning where most requests or transactions access one
+blockchains. Scalability could be achieved by state partitioning (e.g.,
+\cite{facebookTAO, sciascia2012sdur, aguilera2007sinfonia}). In order to be effective, the
+partitioning must ensure that most requests or transactions access one
 partition only and are equally distributed among partitions. That way,
-partitions can work in parallel to maximize the performance and improve the
-throughput. Besides, when partitioning a blockchain, other factors need to be
-considered: computation, storage, and bandwidth. On the other hand,
-interoperability allows communication and data exchanged between multiple
+partitions can work in parallel to improve performance. Besides, when partitioning a blockchain, other factors need to be
+considered: computation, storage, and bandwidth. 
+
+Interoperability allows communication and data exchange between multiple
 different blockchains (e.g., sharing data between public and private
-blockchains, or exchanging cryptocurrencies such as bitcoins for ether).
+blockchains, exchanging cryptocurrencies such as bitcoins for ether).
 Interoperability is gaining more attention in the blockchain community. Some
-blockchain systems have introduced inter blockchain communication (IBC)
-protocols that enable communication and data exchanging between multiple
-blockchains, allows users to choose where to place smart contracts
+blockchain systems are introducing inter-blockchain communication (IBC)
+protocols that enable communication and data exchange between multiple
+blockchains.
+This technology allows users to choose where to place smart contracts
 \cite{kwon2016cosmos, thomas2015protocol, kokoris2018omniledger,
-al2017chainspace}. Moreover, some solutions start to appear that allows smart
+al2017chainspace}. Moreover, some solutions start to appear that allow smart
 contracts to move between existing blockchains \cite{fynn2020move, back2014enabling,
 herlihy2018atomic}. 
 
-Scalability and interoperability are different problems of blockchain; they are,
-however, having the same concern. They both need a mechanism that tracks and
-provides some information about the blockchains. A partitioned blockchain needs
+Although scalability and interoperability are different aspects of blockchain, they
+share a similar concern: They both need a mechanism that tracks and
+provides some information about blockchains. A partitioned blockchain needs
 an overview of the partitioning of the system to compute an optimized location
-to place contracts and objects, therefore maintains the balance of the network
-and increase the performance. In an inter blockchains transactions, where data
-could be shared and exchanged between different blockchains, it's necessary to
+to place contracts and objects, thereby maintaining the balance of the network
+and increasing the performance. In inter-blockchains transactions, where data
+could be shared and exchanged between different blockchains, it is necessary to
 track the movement of the data, as well as to have some information about the
-parties like the cost of the transaction, the performance of the network, etc.
+parties, including the cost of transactions and the performance of the network.
 
 This project proposes an oracle service that provides such information. The
 oracle service consists of two main components, one on-chain and one off-chain.
-The on-chain component is in the form of a smart contract, replies to the
-request of user smart contract. The off-chain component is a service that
-monitors the blockchains by analyzing transaction history. After receiving a
-request from user smart contract, the on-chain and off-chain components
-communicate to extract the necessary information for the request. User smart
-contract pays per-query fees to get the hints from the oracle service. The cost
-of each query depends on the amount of information returned. With the
+The on-chain component is in the form of a smart contract that helps user smart 
+contracts and transactions.
+The off-chain component is a service that
+monitors the blockchains by analyzing transaction history. To process
+user requests (e.g., for object location, for optimizing transaction costs) the on-chain and off-chain components
+communicate to extract the necessary information for the request. User transactions 
+pay per-query fees to get the hints from the oracle service. The cost
+of each query depends on the amount of information returned and its accuracy. With the
 information provided by the oracle, the blockchain system can effectively choose
 a partition to place objects to maximize the balance of the network, thus
-increase the transaction speed, as well as optimizing the the execution cost
-with cross-chain transactions.
+increasing the transaction speed, as well as optimizing the execution cost
+of transactions.
 
 % In addition, unlike some other scaling proposals that require
 % extensive modification of the current blockchain code, our proposal will work
