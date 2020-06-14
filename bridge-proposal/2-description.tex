@@ -146,18 +146,16 @@ A detailed experimental evaluation with standard benchmarks has revealed perform
 \subsection{Innovation potential and market review} 
 
 This project's main goal is to develop an oracle service that analyzes
-blockchain transactions to provide such necessary information. The service
-will answer several questions such as where are the objects or contracts
-after they have been moved across different blockchain, where to put the objects
-to optimize the partitioning of the network to improve the performance, or to
-which side-chain off-load a transaction is financially beneficial.
+blockchain transactions to provide object information about placement and economics. The service
+will answer several questions such as where objects and smart contracts are located, where to place objects
+to optimize the partitioning of the network to improve performance, or to maximize financial benefits.
 
 The information provided by our oracle service serves multiple purposes. First,
-it provides a location mapping for contracts and objects within and across
+it provides a location mapping for smart contracts and objects within and across
 partitions. This enables blockchain clients to quickly locate to which
 partitions or blockchain they should send their transactions. Second, the
 location mapping opens up possibilities for further improvements, e.g.,
-computing the optimized location for the upcoming transactions and object.
+computing the optimized location for the upcoming transactions and objects.
 Third, with the information of the execution cost and time provided by our
 oracle service, the blockchain client can decide to off-load expensive
 computation to a side-chain to optimize the cost.
@@ -173,8 +171,8 @@ computation to a side-chain to optimize the cost.
 % transaction. 
 
 Figure \ref{fig:transaction-fee} shows the mean value in USD of transaction
-fee in the first six months of the year 2020 \cite{transactionfee}. This data
-suggests that the average fee for executing an ordinary transaction in Stellar
+fees in the first six months of the year 2020 \cite{transactionfee}. This data
+suggests that the average fee for executing an ordinary transaction on the Stellar
 network is 1,000 times cheaper than on Ethereum Classic network, and is 100,000
 times cheaper than running on Ethereum. If this information is available at the
 time of execution, the blockchain can make an effective decision of where to
@@ -207,7 +205,7 @@ component consists of a computational unit (CU) and a set of blockchain
 analyzers. The analyzers monitor the blockchains by actively fetching and
 analyzing the transaction history to aggregate multiple metrics of a standard
 blockchain, for example, the location of contracts and objects in the case of
-movement, the average execution cost, or the pending transactions count, etc. The
+movement, the average execution cost, or the pending transactions count. The
 CU is a set of computational nodes that serves requests by historical data
 fetched by the analyzers. Upon receiving requests from user smart contract, the
 OSC validates the requests and forwards those requests to the CU. The CU queries
@@ -227,7 +225,7 @@ smart contract.
 \subsection{Project plan}
 
 The project plan will divide the research activities described in Section
-\ref{sec:strategy} into three phases. Figure \cite{fig:plan} identifies the major
+\ref{sec:strategy} into three phases. Figure \ref{fig:plan} identifies the major
 milestones for each of the activity areas, as well as milestones for the overall
 system evaluation.
 
