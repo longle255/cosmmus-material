@@ -11,25 +11,25 @@ research.
 
 \subsubsection{Current state of research in the field}
 
-Since the introduction of Bitcoin, the demand for blockchain-based solutions has increased. 
-A multitude of blockchain technologies have been proposed to address different aspects of digital life. 
+Since the introduction of Bitcoin, the demand for blockchain-based solutions has
+increased. A multitude of blockchain technologies have been proposed to address
+different aspects of digital life. 
 %In the core of most blockchains, essentially, assets are transferred under the control of custom
 %scripts that enforce necessary conditions to transfer an asset from one party to another. 
-Being the first generation of
-blockchain, Bitcoin essentially supports the transferring of assets.
-Later generations of blockchain systems (e.g., Ethereum, NEO, Stellar, Cosmos) have extended blockchains with support
-for \emph{smart contracts}.
-Smart contracts provide a general-purpose programmable infrastructure, where
-the blockchain does not only store financial data but also has the capability
-of deploying and executing custom code. 
-More technically, smart contracts implement the abstraction of state machine replication.
-Ethereum is after Bitcoin the second-largest cryptocurrency platform by market
+Being the first generation of blockchain, Bitcoin essentially supports the
+transferring of assets. Later generations of blockchain systems (e.g., Ethereum,
+NEO, Stellar, Cosmos) have extended blockchains with support for \emph{smart
+contracts}. Smart contracts provide a general-purpose programmable
+infrastructure, where the blockchain does not only store financial data but also
+has the capability of deploying and executing custom code. More technically,
+smart contracts implement the abstraction of state machine replication. Ethereum
+is after Bitcoin the second-largest cryptocurrency platform by market
 capitalization. Unlike Bitcoin, Ethereum supports programmable smart contracts
 with an entire programming language along with it, running in Ethereum Virtual
 Machine (EVM) \cite{ethereum:evm}. The flexibility within a smart contract
 allows users to implement their own autonomous execution logic on blockchains,
-which enables more options for optimization. However, several challenges in blockchain
-technology remain to be addressed, two of which are scalability and
+which enables more options for optimization. However, several challenges in
+blockchain technology remain to be addressed, two of which are scalability and
 interoperability.
 
 \paragraph*{Scalability.} The performance of mainstream blockchains is still a
@@ -101,16 +101,17 @@ State machine replication is a common approach to building fault-tolerant
 systems \cite{Lam78, Sch90}. Participants in a replicated state machine system
 form agreement on a sequence of transactions and apply them in sequence order
 deterministically to reach the same state. With its simple yet effective
-execution model, state machine replication is at the core of blockchain
-systems \cite{baudet2019state, cachin2016architecture}. This approach provides a
+execution model, state machine replication is at the core of blockchain systems
+\cite{baudet2019state, cachin2016architecture}. This approach provides a
 configurable degree of availability but limits the achievable throughput of the
 replicated service to what a single replica can process sequentially. In the
 work \dynastar \cite{le2019dynastar}, Le \emph{et al.} proposed an approach to
-scaling the performance of SMR by allowing the SMR system to partition the state and
-reconfigure its data placement on-the-fly. \dynastar maintains a location oracle
-with a global view of the application state. 
-The oracle helps users locate objects in the system and optimizes data placement for performance.
-A detailed experimental evaluation with standard benchmarks has revealed performance improvements of two orders of magnitude.
+scaling the performance of SMR by allowing the SMR system to partition the state
+and reconfigure its data placement on-the-fly. \dynastar maintains a location
+oracle with a global view of the application state. The oracle helps users
+locate objects in the system and optimizes data placement for performance. A
+detailed experimental evaluation with standard benchmarks has revealed
+performance improvements of two orders of magnitude.
 %Figure \ref{fig:tpcc} shows the
 %performance evaluation of \dynastar with TPC-C benchmark. Figure
 %\ref{fig:tpcc}(a) depicts the impact of partitioning on the performance of a
@@ -146,19 +147,33 @@ A detailed experimental evaluation with standard benchmarks has revealed perform
 \subsection{Innovation potential and market review} 
 
 This project's main goal is to develop an oracle service that analyzes
-blockchain transactions to provide object information about placement and economics. The service
-will answer several questions such as where objects and smart contracts are located, where to place objects
-to optimize the partitioning of the network to improve performance, or to maximize financial benefits.
+blockchain transactions to provide object information about placement and
+economics. The service will answer several questions such as where objects and
+smart contracts are located, where to place objects to optimize the partitioning
+of the network to improve performance, or to maximize financial benefits.
+\lle{Therefore it is aimed be the catalyst that supports the widespread adoption
+of blockchain technologies.}
 
-The information provided by our oracle service serves multiple purposes. First,
-it provides a location mapping for smart contracts and objects within and across
-partitions. This enables blockchain clients to quickly locate to which
-partitions or blockchain they should send their transactions. Second, the
-location mapping opens up possibilities for further improvements, e.g.,
-computing the optimized location for the upcoming transactions and objects.
-Third, with the information of the execution cost and time provided by our
-oracle service, the blockchain client can decide to off-load expensive
-computation to a side-chain to optimize the cost.
+\lle{Blockchain analysis is becoming increasingly important in the
+cryptocurrency market \cite{blockchainanalysis}. Some blockchain monitoring and
+intelligence platforms are now offering analytics tools and software for
+investigating entities, individuals, and transactions interacting with a
+blockchain \cite{chainalysis2020kyt, bloxy, blocmonitor}. Private company use
+blockchain analysis solutions to track its customers’ transactions to learn more
+information about them. Security and government firms use those solutions to
+effectively identify money laundering operations, illicit activity and other
+financial crimes..}. The information provided by our oracle service serves
+different purposes. First, it provides a location mapping for smart contracts
+and objects within and across partitions. This enables blockchain clients to
+quickly locate to which partitions or blockchain they should send their
+transactions. Second, the location mapping opens up possibilities for further
+improvements, e.g., computing the optimized location for the upcoming
+transactions and objects. Third, with the information of the execution cost and
+time provided by our oracle service, the blockchain client can decide to
+off-load expensive computation to a side-chain to optimize the cost. \lle {Our
+main customers are blockchain developers and distributed application designers
+whose main concerns are about the scalability and cost efficiency of the
+blockchains or the applications.}
 
 % With the on-chain component in the form of smart contract, our proposed system
 % could be integrated to existing blockchain systems easily without any change in
@@ -182,6 +197,26 @@ this transaction type available on both blockchains). (ii) there exists a move
 operation that could send the necessary data from one contract to another (such
 primitive was proposed in \cite{fynn2020move}).
 
+\lle{Our proposed service could be quickly and easily integrated with existing
+blockchains, DApps, or non-blockchain based applications. Our solution doesn't
+require any changes in the blockchain code, makes the integration simple without
+hassle. The system is accessible in different ways. On-chain smart contract or
+DApps can request necessary information by issuing a call to our on-chain
+components. Non-blockchain based application can also access to our data with
+REST API. In addition, the design of our system is yet flexible enough to add
+support for new blockchain.}
+
+\lle{Our main source of revenue is from blockchain's users. Users will be
+charged based on the time it takes to execute their queries (for instance, a query
+for the location of objects results in a lower cost than a query for calculating
+an optimized location). With our pay-per-call pricing model, the users only pay
+for the queries that they run. This payment model has several benefits. There is
+no barrier to entry for users, no commitment required, and it offers the users more
+flexibility around the services they want, and when they want them. For instance,
+the application could decide to cache some queries results once in a while for
+further usages to optimize costs.}
+
+
 \begin{figure*}[ht!]
 \begin{minipage}[b]{1\linewidth}
 \centering
@@ -193,25 +228,42 @@ primitive was proposed in \cite{fynn2020move}).
 
 \subsection{Implementation strategy}
 \label{sec:strategy}
-Figure \ref{fig:architecture} presents the overall architecture of the
-proposed oracle service. The core components of the system are divided in two
-parts: the on-chain smart contract component and the off-chain service
-component. The on-chain smart contract (OSC) is a set of smart contracts that
-are developed separately for each supported blockchain. The OSC plays the roles
-of the interface of the service, receives requests from other contracts in the
-form of contract calls, and dispatches those requests to the off-chain component.
-The OSC is also responsible for computing the fee of each request. The off-chain
-component consists of a computational unit (CU) and a set of blockchain
-analyzers. The analyzers monitor the blockchains by actively fetching and
-analyzing the transaction history to aggregate multiple metrics of a standard
-blockchain, for example, the location of contracts and objects in the case of
-movement, the average execution cost, or the pending transactions count. The
-CU is a set of computational nodes that serves requests by historical data
-fetched by the analyzers. Upon receiving requests from user smart contract, the
-OSC validates the requests and forwards those requests to the CU. The CU queries
-the data from the backlog and replies to the OSC. Once receiving the response from CU,
-the OSC calculates the fee for the request, and send back the data to the user
-smart contract.
+
+\lle{To fulfill the goals of the project, the proposed system needs to address
+the following requirements:
+\begin{itemize}
+      \item The system should be able to work with a number of different
+      blockchains. While most of the existing blockchains share the core
+      principals, their implementations and data structure are different. The
+      system should have an abstraction to standardize the communication
+      with different blockchains, simplifying the process of adding support for
+      new blockchain.
+      \item The integration with existing blockchains and DApps should be
+      simple. Ideally, the deployment of the system on existing blockchains
+      should be "plug-and-play", without introducing any new change in the
+      protocol of the blockchain. 
+\end{itemize}}
+
+Figure \ref{fig:architecture} presents the overall architecture of our proposed
+oracle service. The core components of the system are divided in two parts: the
+on-chain smart contract component and the off-chain service component. The
+on-chain smart contract (OSC) is a set of smart contracts that are developed
+separately for each supported blockchain. The OSC plays the roles of the
+interface of the service, receives requests from other contracts in the form of
+contract calls, and dispatches those requests to the off-chain component. The
+OSC is also responsible for computing the fee of each request. \lle{Figure
+\ref{fig:contract} proposes an example of the OSC in the form of Ethereum's
+smart contract}. The off-chain component consists of a computational unit (CU)
+and a set of blockchain analyzers. The analyzers monitor the blockchains by
+actively fetching and analyzing the transaction history to aggregate multiple
+metrics of a standard blockchain, for example, the location of contracts and
+objects in the case of movement, the average execution cost, or the pending
+transactions count. The CU is a set of computational nodes that serves requests
+by historical data fetched by the analyzers. Upon receiving requests from user
+smart contracts, the OSC validates the requests and forwards those requests to
+the CU. The CU queries the data from the backlog and replies to the OSC. Once
+receiving the response from CU, the OSC calculates the fee for the request, and
+send back the data to the user smart contracts.
 
 \begin{figure*}[ht!]
 \begin{minipage}[b]{1\linewidth}
@@ -222,12 +274,55 @@ smart contract.
 \label{fig:architecture}
 \end{figure*}
 
+\begin{figure*}[ht!]
+\begin{lstlisting}[language=Solidity,numbers=none]
+contract Oracle {
+      function getTransactionFee(address sidechain) public view returns (uint);
+      function getContractLocation(address contract) public view returns (uint);
+      function getOptimizedLocation(address contract) public view returns (uint);
+      function execute(address contract, address sidechain) public;
+}
+\end{lstlisting}
+\caption{The service interface on Ethereum's smart contract}
+\label{fig:contract}
+\end{figure*}
+
+
 \subsection{Project plan}
 
 The project plan will divide the research activities described in Section
 \ref{sec:strategy} into three phases. Figure \ref{fig:plan} identifies the major
 milestones for each of the activity areas, as well as milestones for the overall
 system evaluation.
+
+\textbf{Phase 1: Developing off-chain component.} In this phase, we aim to develop
+an abstraction that helps standardize the monitoring process for the blockchain
+analyzers. With this abstraction, we aim to implement at least three analyzers
+for three existing blockchains. We also implement the computational unit in
+this phase. The outcome of this phase is the fully functioning off-chain
+component.
+
+\textbf{Phase 2: Developing on-chain smart contracts.} Similar to Phase 1, we
+will develop an abstraction for the interface for the service in the form of smart
+contracts. Then we implement this abstraction on at least three different
+blockchains.
+
+\textbf{Phase 3: Deploying and evaluating.} We will deploy the system on the supported
+blockchain and start the evaluation process. To benchmark the system, we develop a
+sample DApps that could leverage the information of the oracle to make an optimized
+decision. The evaluation will consider the scalability of the blockchain, as
+well as the financial benefit based on the hints of the oracle service.
+
+\textbf{Risks.} The proposed project is adventurous, as with any research
+proposal, carries with it a certain amount of uncertainty. In this project, some
+use cases of cost-efficient are based on an assumption of the existence of a move
+protocol that enables the transferring of smart contracts and objects from one
+blockchain to another. Although such primitive was presented in a recent work
+\cite{fynn2020move} that allows the moving of a smart contract between Ethereum
+and Burrow, developing and integrating such protocol to our system
+may require a considerable amount of time and effort. To mitigate this risk, we will
+collaborate with Fynn Enrique, the main author of that work, to help us with the
+integration.
 
 % \paragraph*{Research Goal 1}
 % \emph{Implementing on-chain smart contracts.}
