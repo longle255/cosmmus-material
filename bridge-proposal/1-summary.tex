@@ -47,17 +47,18 @@ parties, including the cost of transactions and the performance of the network.
 
 This project proposes an oracle service that provides such information. The
 oracle service consists of two main components, one on-chain and one off-chain.
-The on-chain component is in the form of a smart contract that helps user smart
-contracts and transactions. The off-chain component is a service that monitors
-the blockchains by analyzing transaction history. To process user requests
-(e.g., for object location, for optimizing transaction costs) the on-chain and
-off-chain components communicate to extract the necessary information for the
-request. User transactions pay per-query fees to get the hints from the oracle
-service. \lle{The cost of each query depends on the time and resources that the
-system has spent for that query}. With the information provided by the oracle, the
-blockchain system can effectively choose a partition to place objects to
-maximize the balance of the network, thus increasing the transaction speed, as
-well as optimizing the execution cost of transactions.
+The on-chain component is in the form of a smart contract that  provides
+interaction interface for user smart contracts. The off-chain component is a
+service that monitors the blockchains by analyzing transaction history. To
+process user requests (e.g., for object location, for optimizing transaction
+costs) the on-chain and off-chain components communicate to extract the
+necessary information for the request. User transactions pay per-query fees to
+get the hints from the oracle service. The cost of each query depends on the
+time and resources that the system has spent for that query. With the
+information provided by the oracle, the blockchain system can effectively choose
+a partition to place objects to maximize the balance of the network, thus
+increasing the transaction speed, as well as optimizing the execution cost of
+transactions.
 
 % In addition, unlike some other scaling proposals that require
 % extensive modification of the current blockchain code, our proposal will work
