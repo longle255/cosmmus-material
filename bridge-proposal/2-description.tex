@@ -150,19 +150,19 @@ This project's main goal is to develop an oracle service that analyzes
 blockchain transactions to provide object information about placement and
 economics. The service will answer several questions such as where objects and
 smart contracts are located, where to place objects to optimize the partitioning
-of the network to improve performance, or to maximize financial benefits.
-\lle{Therefore it is aimed be the catalyst that supports the widespread adoption
+of the network to improve performance, or to minimize transaction costs.
+\lle{Therefore, it is aimed to be the catalyst that supports the widespread adoption
 of blockchain technologies.}
 
 \lle{Blockchain analysis is becoming increasingly important in the
 cryptocurrency market \cite{blockchainanalysis}. Some blockchain monitoring and
 intelligence platforms are now offering analytics tools and software for
 investigating entities, individuals, and transactions interacting with a
-blockchain \cite{chainalysis2020kyt, bloxy, blocmonitor}. Private company use
-blockchain analysis solutions to track its customers’ transactions to learn more
+blockchain \cite{chainalysis2020kyt, bloxy, blocmonitor}. Private companies use
+blockchain analysis solutions to track their customers' transactions to learn more
 information about them. Security and government firms use those solutions to
 effectively identify money laundering operations, illicit activity and other
-financial crimes..}. The information provided by our oracle service serves
+financial crimes}. The information provided by our oracle service serves
 different purposes. First, it provides a location mapping for smart contracts
 and objects within and across partitions. This enables blockchain clients to
 quickly locate to which partitions or blockchain they should send their
@@ -173,7 +173,7 @@ time provided by our oracle service, the blockchain client can decide to
 off-load expensive computation to a side-chain to optimize the cost. \lle {Our
 main customers are blockchain developers and distributed application designers
 whose main concerns are about the scalability and cost efficiency of the
-blockchains or the applications.}
+blockchain or its applications.}
 
 % With the on-chain component in the form of smart contract, our proposed system
 % could be integrated to existing blockchain systems easily without any change in
@@ -198,23 +198,23 @@ operation that could send the necessary data from one contract to another (such
 primitive was proposed in \cite{fynn2020move}).
 
 \lle{Our proposed service could be quickly and easily integrated with existing
-blockchains, DApps, or non-blockchain based applications. Our solution doesn't
-require any changes in the blockchain code, makes the integration simple without
-hassle. The system is accessible in different ways. On-chain smart contract or
+blockchains, DApps, or non-blockchain-based applications. Our solution doesn't
+require any changes in the blockchain code, and therefore makes the integration simple without
+hassle. The system is accessible in different ways. On-chain smart contracts or
 DApps can request necessary information by issuing a call to our on-chain
-components. Non-blockchain based application can also access to our data with
-REST API. In addition, the design of our system is yet flexible enough to add
-support for new blockchain.}
+components. Non-blockchain based applications can also access our data with
+REST API. In addition, the design of our system is flexible enough to add
+support for new blockchain systems.}
 
-\lle{Our main source of revenue is from blockchain's users. Users will be
+\lle{Our main source of revenue is from blockchain users. Users will be
 charged based on the time it takes to execute their queries. This time is
 calculated from the time our computational unit begins executing the query until
 it returns. The price depends on the maximum amount of memory that users are
-willingly pay (for instance, a query for the location of objects results in
+willing to pay (e.g., a query for the location of objects results in
 a lower cost than a query for an optimized location that takes more time and
 resources to calculate). With our pay-per-call pricing model, the users only pay
 for the queries that they run. This payment model has several benefits. There is
-no barrier to entry for users, no commitment required, and it offers the users
+no entry barrier for users, no commitment required, and it offers the users
 more flexibility around the services they want, and when they want them. For
 instance, the application could decide to cache some queries results once in a
 while for further usages to optimize costs.}
@@ -237,13 +237,13 @@ the following requirements:
 \begin{itemize}
       \item The system should be able to work with a number of different
       blockchains. While most of the existing blockchains share the core
-      principals, their implementations and data structure are different. The
+      principles, their implementations and data structures are different. The
       system should have an abstraction to standardize the communication
       with different blockchains, simplifying the process of adding support for
-      new blockchain.
+      new blockchains.
       \item The integration with existing blockchains and DApps should be
       simple. Ideally, the deployment of the system on existing blockchains
-      should be "plug-and-play", without introducing any new change in the
+      should be "plug-and-play", without introducing any changes in the
       protocol of the blockchain. 
 \end{itemize}}
 
@@ -300,24 +300,24 @@ system evaluation.}
 \lle{\textbf{Phase 1: Developing off-chain component.} In this phase, we aim to develop
 an abstraction that helps standardize the monitoring process for the blockchain
 analyzers. With this abstraction, we aim to implement at least three analyzers
-for three existing blockchains. We also implement the computational unit in
+for three existing blockchains. We will also implement the computational unit in
 this phase. The outcome of this phase is the fully functioning off-chain
 component.}
 
 \lle{\textbf{Phase 2: Developing on-chain smart contracts.} Similar to Phase 1, we
 will develop an abstraction for the interface for the service in the form of smart
-contracts. Then we implement this abstraction on at least three different
+contracts. Then we will implement this abstraction on at least three different
 blockchains.}
 
 \lle{\textbf{Phase 3: Deploying and evaluating.} We will deploy the system on the supported
-blockchain and start the evaluation process. To benchmark the system, we develop a
+blockchains and start the evaluation process. To benchmark the system, we will develop a
 sample DApps that could leverage the information of the oracle to make an optimized
 decision. The evaluation will consider the scalability of the blockchain, as
-well as the financial benefit based on the hints of the oracle service.}
+well as the financial benefits based on the hints of the oracle service.}
 
 \lle{\textbf{Risks.} The proposed project is adventurous, as with any research
 proposal, carries with it a certain amount of uncertainty. In this project, some
-use cases of cost-efficient are based on an assumption of the existence of a move
+use cases of cost-efficient are based on the assumption of the existence of a move
 protocol that enables the transferring of smart contracts and objects from one
 blockchain to another. Although such primitive was presented in a recent work
 \cite{fynn2020move} that allows the moving of a smart contract between Ethereum
