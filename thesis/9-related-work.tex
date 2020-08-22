@@ -39,9 +39,9 @@ Kirsch:2008paxos}. Raft \cite{184040}, a Paxos alternative, also implements
 consensus-based SMR, and it is suggested to be easier to understand (than Paxos)
 from an engineering point of view. Despite its complexity, several systems
 have been using Paxos to provide various abstractions such as storage systems
-\cite{Bolosky:20011paxos}, locking services \cite{Mike:2006chubby}, and
+\cite{Bolosky:20011paxos}, locking services \cite{burrows2006chubby}, and
 distributed databases \cite{Baker:2011megastore}. Google Chubby
-\cite{Mike:2006chubby} and Google Spanner \cite{corbett2013spanner} employ
+\cite{burrows2006chubby} and Google Spanner \cite{corbett2013spanner} employ
 an implementation of the Paxos algorithm to achieve consensus and also to
 cater for replication. Zap \cite{Hunt:2010zoo}, the atomic broadcast protocol at
 the core of ZooKeeper, is a modified version of Paxos with a focus on
@@ -65,17 +65,18 @@ authors propose a scalable key-value store based on DHTs, ensuring
 linearizability, but only for requests that access the same key. In the work of
 Marandi et al.~\cite{Marandi:2011dj}, a variant of SMR is proposed in which data
 items are partitioned, but commands have to be totally ordered.
-Spanner~\cite{corbett2013spanner} is a leader-leased Paxos-based system that
-uses TrueTime-accurate clock synchronization and requires special hardware to
-improve geo-distributed read performance. Spanner uses a separate Paxos group
-per partition and synchronized clocks to ensure strong consistency across
-partitions. Although the authors say that Spanner works well with GPS and atomic
-clocks, if clocks become out of synch beyond tolerated bounds, correctness is
-not guaranteed. M$^2$Paxos~\cite{7579738} proposes a scheme where leases are
+% Spanner~\cite{corbett2013spanner} is a leader-leased Paxos-based system that
+% uses TrueTime-accurate clock synchronization and requires special hardware to
+% improve geo-distributed read performance. Spanner uses a separate Paxos group
+% per partition and synchronized clocks to ensure strong consistency across
+% partitions. Although the authors say that Spanner works well with GPS and atomic
+% clocks, if clocks become out of synch beyond tolerated bounds, correctness is
+% not guaranteed. 
+M$^2$Paxos~\cite{7579738} proposes a scheme where leases are
 used instead of partitions owning objects, but assumes full state replication.
 \ssmr{}~\cite{bezerra2014ssmr} ensures consistency across partitions without any
 assumptions about clock synchronization, but relies on a static partitioning of
-the state. P-Store \cite{Schiper:2010pstore} is a genuine partial replication
+the state. P-Store \cite{schiper2010p} is a genuine partial replication
 protocol for wide-area networks. P-Store divides replicas into groups and
 partitiones data between the groups to ensure that all replicas in the same
 group replicate the same data items. When a transaction wants to commit, it sends
@@ -171,7 +172,7 @@ write fails in the presence of concurrent writes.
 Graph partitioning is an interesting problem with many proposed
 solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.
 In this work, we do not introduce a new graph partitioning solution, but instead,
-we use a well-known one (METIS~\cite{Abou-Rjeili:2006}) to partition the state
+we use a well-known one (METIS~\cite{abou2006multilevel}) to partition the state
 of a service implemented with state machine replication. Similarly to
 \dynastar{}, Schism~\cite{curino2010sch} and Clay~\cite{SerafiniTEPAS16} also
 use graph-based partitioning to decide where to place data items in a

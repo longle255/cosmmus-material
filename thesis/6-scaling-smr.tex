@@ -40,7 +40,7 @@ Replication has become a standard approach to fault tolerance: if one server
 fails, another one takes over. In a fully replicated system, every server
 replicates a full copy of the service's state. All replicas use an algorithm
 that ensures data coherence across all these nodes. Although there are many
-replication techniques \cite{Replication:book}, there are two major classes
+replication techniques \cite{charron2010replication}, there are two major classes
 of replication techniques that have become widely known to ensure strong
 consistency: \emph{active replication} and \emph{passive replication}.
 
@@ -62,7 +62,7 @@ services by replication.
 %every command deterministically and in the same order. 
 Some other replication schemes, such as chain replication \cite {chainreplication,
 chainreplication:byzantine}, multi-primary replication, and deferred-update replication
-\cite{sciascia2012sdur, Replication:book, chundi96dur} are based on state machine replication.
+\cite{sciascia2012sdur, charron2010replication, chundi96dur} are based on state machine replication.
 
 \subsubsection{Passive replication} 
 In the \emph{passive replication} (also called \emph{primary-backup}) approach,
@@ -198,22 +198,23 @@ partitions. Those physical shards can be replicated to tolerate failures.
 Despite this, the data held within all the partitions collectively
 represent an entire logical dataset. 
 
+\fxnote{Adding reference for Viewstamped replication}
 To guarantee consistency across multiple replicas of the data, a consensus
-protocol (e.g., Paxos~\cite{Lam98}, Raft~\cite{184040}) is used. 
-Essentially, this protocol works as a quorum
-mechanism. Any change to the dataset requires a majority of replicas to agree to
-the change. Google Spanner~\cite{corbett2013spanner} and Calvin \cite{calvin}
-are two database solutions in this category. Both systems were designed
-to be highly scalable distributed relational databases. The main difference
-between the two systems is that Spanner uses two-phase commit as an agreement
-protocol to synchronize the changes between partition, without the need of
-server coordination before the execution, while Calvin uses a single, global
-consensus protocol per database to synchronize transactions before the execution.
-All involved replicas of Calvin then deterministically execute and commit the
-transaction, without an agreement protocol. The next sections will describe how
-those database systems work. In addition, we will detail Scalable State
-Machine Replication, a system in the third category, which requires both server
-coordination and agreement for providing a strong consistency guarantee.
+protocol (e.g., Paxos~\cite{Lam98}, Raft~\cite{184040}, Viewstamped
+Replication~\cite{oki1988viewstamped}) is used. Essentially, this protocol works
+as a quorum mechanism. Any change to the dataset requires a majority of replicas
+to agree to the change. Google Spanner~\cite{corbett2013spanner} and Calvin
+\cite{calvin} are two database solutions in this category. Both systems were
+designed to be highly scalable distributed relational databases. The main
+difference between the two systems is that Spanner uses two-phase commit as an
+agreement protocol to synchronize the changes between partition, without the
+need of server coordination before the execution, while Calvin uses a single,
+global consensus protocol per database to synchronize transactions before the
+execution. All involved replicas of Calvin then deterministically execute and
+commit the transaction, without an agreement protocol. The next sections will
+describe how those database systems work. In addition, we will detail Scalable
+State Machine Replication, a system in the third category, which requires both
+server coordination and agreement for providing a strong consistency guarantee.
 
 
 
@@ -479,9 +480,10 @@ In summary, the following steps are involved in the processing of a request in
   \centering
         \includegraphics[width=1\linewidth]{figures/coordination-ssmr}
   \end{minipage}
-  \caption{Atomic multicast and S-SMR (for simplicity, there is a single replica per partition)}
+  \caption{Atomic multicast and S-SMR}
   \label{fig:coordination-ssmr}
 \end{figure*}
+\fxnote{fixing figure caption}
 
 \section{Conclusion}
 
@@ -691,7 +693,7 @@ We discuss these techniques in the next chapters.
 % Static techniques choose an immutable assignment of application state variables
 % to partitions prior to executing commands. As an example of a static approach
 % for use in the experiment, we modified the S-SMR system~\cite{bezerra2014ssmr}
-% to use the static METIS~\cite{Abou-Rjeili:2006} partitioning algorithm.  The
+% to use the static METIS~\cite{abou2006multilevel} partitioning algorithm.  The
 % METIS algorithm is optimized to minimize edge-cuts when partitioning a static
 % social graph. In the workload with strong locality, METIS partitions the social
 % graph such that all posts are single partition; in the workload with weak

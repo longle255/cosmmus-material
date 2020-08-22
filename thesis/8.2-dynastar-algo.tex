@@ -3,10 +3,6 @@
 
 \label{sec:dynastar-detailed}
 
-\input{8.3.1-algorithm_client_proxy}
-\input{8.3.2-algorithm_oracle_proxy}
-\input{8.3.3-algorithm_server_proxy}
-\input{8.3.4-algorithm_shared}
 
 Algorithms~\ref{alg:dynastar-client_proxy}, \ref{alg:dynastar-oracle_proxy}, and
 \ref{alg:dynastar-server_proxy} describe the client, oracle, and server processes,
@@ -14,7 +10,7 @@ respectively. We omit the delete command since the coordination involved in the
 create and delete commands are analogous.
 
 \subsubsection{The client process}
-
+\input{8.3.1-algorithm_client_proxy}
 To execute a command $C$, the client atomically multicasts $C$ to the oracle
 (Algorithm \ref{alg:dynastar-client_proxy}). The oracle replies with a prophecy,
 which may already tell the client that $C$ cannot be executed (e.g., it needs a
@@ -24,9 +20,20 @@ partition where $C$ will be executed. The client then waits for the result of
 the execution of $C$.
 
 \subsubsection{The oracle}
-
+\input{8.3.2-algorithm_oracle_proxy}
 When the oracle delivers a request, it distinguishes between two cases (Task 1
 in Algorithm~\ref{alg:dynastar-oracle_proxy}).
+
+
+\begin{figure*}[htp!]
+\begin{minipage}[b]{1\linewidth}
+\centering
+      \includegraphics[width=\linewidth]{figures/dynastar}
+\end{minipage}
+\caption{Execution of a create (C1) and a write without client cache (C2) and with client cache (C3) in \dynastar.}
+\label{fig:oracle_repartition}
+\end{figure*}
+
 \begin{itemize}
 \item If the command is to create a variable $v$, and $v$ does not already
 exist, the oracle chooses a random partition for $v$, multicasts the create
@@ -44,18 +51,8 @@ command. (In case of a tie, one partition is chosen deterministically, among
 those that contain most variables.) Once the destination partition has received
 all variables needed by the command, it executes the command and returns the
 variables to their source partition.
-
 \end{itemize}
 
-
-\begin{figure*}[h!]
-\begin{minipage}[b]{1\linewidth}
-\centering
-      \includegraphics[width=\linewidth]{figures/dynastar}
-\end{minipage}
-\caption{Execution of a create (C1) and a write without client cache (C2) and with client cache (C3) in \dynastar.}
-\label{fig:oracle_repartition}
-\end{figure*}
 
 Upon delivering a create (Task 2), the oracle updates its partition information.
 The exchange of signals between the partition where the variable will be created
@@ -64,9 +61,9 @@ commands will not lead to violations of linearizability (i.e., this is
 essentially the execution of a multi-partition command involving the oracle and
 a partition (Task 3) ~\cite{bezerra2014ssmr}). The oracle also keeps track of
 the workload graph by receiving hints with variables (i.e., vertices in the
-graph) and executing commands (i.e., edges in the graph). These hints can be
+graph) and executing commands (i.e., edges in the graph)(Task 4). These hints can be
 submitted by the clients or by the partitions, which collect data upon executing
-commands and periodically inform the oracle (Task 4). The oracle computes a
+commands and periodically inform the oracle. The oracle computes a
 partitioning plan of the graph and multicasts it to all servers and to itself.
 Upon delivering a new partition plan, the oracle updates its location map
 accordingly (Task 5).
@@ -79,6 +76,7 @@ uses its mapping of the current location of variables and the last computed
 partitioning.
 
 \subsubsection{The server process}
+\input{8.3.3-algorithm_server_proxy}
 
 When a server delivers a command $C$, it first checks if it has all variables
 needed by $C$. If the server has all such variables, it executes $C$ and sends
@@ -99,3 +97,4 @@ server receives all variables, it updates its location map accordingly.
 To determine the destination partition for a command, the servers uses the last
 computed partitioning.
 
+\input{8.3.4-algorithm_shared}

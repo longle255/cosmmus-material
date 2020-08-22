@@ -334,3 +334,17 @@ client sends synced request => wait for reply => no holes
 
 otherwise => holes in the shared buffer.
 
+
+
+
+Single group
+  - Leader process writes 2A on 1 of 4 followers then fails
+    - 1 of 4 followers writes back 2B
+    - All processes (new leader + 3 followers) receives one 2B 
+    - New leader increases ballot number, WRITE-WITH-IMM new 1A
+    - Followers write 1B for new msg
+  - Leader process writes 2A on 3 of 4 followers then fails
+    - 3 of 4 processes write back 2B
+    - 3 of 4 processes receives 3 2B => deliver msg 
+    - if leader receives 2A => deliver msg
+    - if leader does not receive 2A, but receive 3 2B  => TODO: 

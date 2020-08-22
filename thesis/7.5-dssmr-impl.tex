@@ -1,9 +1,17 @@
 \section{Implementation}
 \label{sec:dssmr-implementation}
 
-In this section, we describe \dssmrlibname{}, a library that implements both \ssmr\
-and \dssmr{}, and \dssmrappname{}, a scalable social network application built with
-\dssmrlibname{}. \dssmrlibname\ and \dssmrappname\ were both implemented in Java.
+In this section, we describe \dssmrlibname{}, a library that implements both
+\ssmr\ and \dssmr{}, and \dssmrappname{}, a scalable social network application
+built with \dssmrlibname{}. \dssmrlibname\ and \dssmrappname\ were both
+implemented in Java. \lle{Our \dssmr{} prototype uses the Ridge atomic multicast
+library \cite{bezerra2015ridge}, available as open
+source.\footnote{https://bitbucket.org/kdubezerra/ridge}. Ridge is a
+Paxos-based atomic multicast protocol where each message is initially forwarded
+to a single f distributor, whose responsibility is to propagate the message to
+all other destination. Processes in Ridge alternate in the role of distributor
+to utilize all bandwidth available in the system}
+\fxnote{Adding details of multicast library}
 
 \subsection{\dssmrlibname}
 

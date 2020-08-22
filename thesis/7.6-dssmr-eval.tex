@@ -40,7 +40,7 @@ follow requests and 50\% of unfollow), and Mix (7.5\% post, 3.75\% follow,
 
 %\fxnote{Added figure and text for TP vs Move}
 Figure~\ref{fig:dssmr-move-vs-tp-strong} shows the number of commands that
-involved relocations of objects versus the throughput of the system.
+involved the moving of objects versus the throughput of the system.
 The experiment contained Post commands with the strong-locality workload and four
 partitions. At the beginning of the experiment, all the user
 objects were randomly distributed across all partitions. As a result, most of the
@@ -52,16 +52,15 @@ effect of locality, those user objects that were often accessed together
 gradually converged to the same partitions, minimized the movement of the object
 between partition, and helped to maximize the throughput.
 
-
+\fxnote{Fixing figure title}
 \begin{figure*}[ht!]
 \begin{minipage}[b]{1\linewidth}
 \centering
       \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput}
 \end{minipage}
-\caption{Number of move versus throughput of \dynastar with Post commands, running on strong-locality workload on 4 partitions}
+\caption{Number of commands require moving of objects versus throughput of \dssmr\ with Post commands, running on strong-locality workload on 4 partitions}
 \label{fig:dssmr-move-vs-tp-strong}
 \end{figure*}
-
 % THROUGHPUT
 
 Figure~\ref{fig:dssmr-strongloc} and Table~\ref{tbl:results} depict the
@@ -82,7 +81,7 @@ are no other commands in the Timeline workload.
       \begin{adjustbox}{max width=\textwidth}
       \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
                & \multicolumn{4}{|c|}{Timeline}  &  \multicolumn{4}{|c|}{Post}   &  \multicolumn{4}{|c|}{Follow/unfollow}  &  \multicolumn{4}{|c|}{Mix}    \\ \hline
-               & 1     & 2     & 4     & 8       & 1     & 2     & 4   & 8    & 1     & 2     & 4       & 8           & 1     & 2     & 4     & 8     \\ \hline\hline
+      Number of partitions         & 1     & 2     & 4     & 8       & 1     & 2     & 4   & 8    & 1     & 2     & 4       & 8           & 1     & 2     & 4     & 8     \\ \hline\hline
                & \multicolumn{16}{|c|}{Throughput (commands per second)} \\ \hline
       \ssmr\   & 32561 & 61220 & 75812 & 11867   & 32483 & 2893  & 1882  & 1190  & 32541 & 11476 & 8580    & 3371          & 32151 & 22803 & 16822 & 10657 \\ \hline
       \dssmr\  & 29248 & 56347 & 70717 & 11175   & 19248 & 23667 & 35547 & 54025 & 30215 & 48976 & 54025   & 83880         & 27101 & 45686 & 50671 & 74257 \\ \hline\hline
@@ -96,6 +95,21 @@ are no other commands in the Timeline workload.
       \label{tbl:results}
       \vspace{10mm}
 \end{table*}%
+
+\fxnote{Moving figures close to its description}
+\begin{figure*}[ht!]
+\centering
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-tp}
+\end{subfigure}
+\begin{subfigure}{1\columnwidth}
+      \centering
+      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
+\end{subfigure}
+\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload (throughput in thousands of commands per second, kcps).}
+\label{fig:dssmr-strongloc}
+\end{figure*}
 
 In the Post workload, every command accesses up to all partitions in the system,
 which is the worst case for \ssmr{}: the more partitions are involved in the
@@ -143,20 +157,6 @@ significant increase in throughput and the scalability that \dssmr\ brought to
 the system; with \ssmr{}, the system did not scale with multi-partition
 commands.
 
-
-\begin{figure*}[ht!]
-\centering
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-tp}
-\end{subfigure}
-\begin{subfigure}{1\columnwidth}
-      \centering
-      \includegraphics[width=\textwidth]{./figures/experiments/dssmr/dssmr-strong-locality-lat}
-\end{subfigure}
-\caption{Results of \dssmrappname\ running with \ssmr\ and \dssmr{} with strong-locality workload (throughput in thousands of commands per second, kcps).}
-\label{fig:dssmr-strongloc}
-\end{figure*}
 
 %\fxnote{Added figures and text for CDF of latency}
 In Figure~\ref{fig:dssmr-cdf} we show the cumulative distribution functions
@@ -251,7 +251,7 @@ implementation, may not work well in some cases.
 \centering
       \includegraphics[width=0.6\linewidth]{figures/experiments/dssmr/move-vs-throughput-weak}
 \end{minipage}
-\caption{Number of moves versus throughput of \dssmr{} with Post commands, running on weak-locality workload with 4 partitions.}
+\caption{Number of commands require moving of objects versus throughput of \dssmr{} with Post commands, running on weak-locality workload with 4 partitions.}
 \label{fig:dssmr-move-vs-tp-weak}
 \end{figure*}
 

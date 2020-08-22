@@ -16,7 +16,7 @@ Section~\ref{sec:dssmr-optm}, we introduce a caching mechanism to prevent the or
 from becoming a performance bottleneck.)
 
 \input{7.3.1-algorithm_client_proxy}
-
+\fxnote{Clarifying algorithm}
 \textbf{The client proxy.} To execute a command $C$, the proxy first consults
 the oracle. The oracle knows all state variables and which partition contains
 each of them. Because of this, the oracle may already tell the client whether
@@ -28,9 +28,9 @@ is also returned for a $create(v)$ command when $v$ already exists. For a
 $delete(v)$ command when $v$ already does not exist, an $ok$ prophecy is
 returned. If the command can be executed, the client proxy receives a prophecy
 containing a pair $\langle v, \ppm \rangle$, for every variable $v$ created,
-accessed or deleted by the command. If the prophecy regarding an
-$access(\omega)$ command contains multiple partitions, the client proxy chooses
-one of them, $\ppm_d$, and tries to move all variables in $\omega$ to $\ppm_d$.
+accessed or deleted by the command. \lle{If the prophecy regarding an
+$access(\omega)$ command contains multiple partitions, the client proxy randomly chooses
+one of them,} $\ppm_d$, and tries to move all variables in $\omega$ to $\ppm_d$.
 Then, the command $C$ itself is multicast to $\ppm_d$. As discussed in
 Section~\ref{sec:dssmr-idea}, there is no guarantee that an interleave of
 commands will not happen, even if the client waits for the replies to the move

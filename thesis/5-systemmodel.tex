@@ -41,40 +41,41 @@ failure and synchrony models.
 
 \subsection{Reliable multicast}
 \label{sec:rmcast}
-
-Reliable broadcast provides stronger properties than regular broadcast, by
-ensuring that a message is either delivered to all correct processes or to none.
-To reliably multicast a message $m$ to a set of groups $\gamma$, processes use
+\fxnote{Correcting multicast primitive}
+\lle{Our protocol uses a uniform reliable multicast primitive 
+that allows to multicast messages reliably to a subset of the groups in $\ssm$
+% Reliable broadcast provides stronger properties than regular broadcast, by
+% ensuring that a message is either delivered to all correct processes or to none.
+For each message $m$, $\gamma$ denotes the groups to which the message is reliably multicast.
+By abuse of notation, we write $p \in \gamma$ instead of $\exists g \in \ssm : g \in \gamma \wedge p \in g$}
+To reliably multicast a message $m$ to a set of groups $\gamma$ in $\ssm$, processes use
 primitive \rmcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
 with \rmdel$(m)$.  Reliable multicast has the following properties:
 
 \begin{itemize}
 
-    \item[--] If a correct process \rmcast{}s $m$, then every correct process in
-      $\gamma$ \rmdel{}s $m$ \emph{(validity)}.
+    \item[--] If a correct process \rmcast{}s $m$, then \lle{at least one
+      correct process} $p \in \gamma$ eventually \rmdel{}s $m$ \emph{(validity)}.
 
-    \item[--] If a correct process \rmdel{}s $m$, then every correct process in
-      $\gamma$ eventually \rmdel{}s $m$ \emph{(agreement)}.
+    \item[--] If a correct process $p \in \gamma$ \rmdel{}s $m$, then every correct
+      process $p \in \gamma$ eventually \rmdel{}s $m$ \emph{(uniform agreement)}.
 
-    \item[--] For any message $m$, every process $p$ in $\gamma$ \rmdel{}s $m$
+    \item[--] For any message $m$, every process $p \in \gamma$ \rmdel{}s $m$
       at most once, and only if some process has \rmcast{} $m$ to $\gamma$
-      previously \emph{(integrity)}.
+      previously \emph{(uniform integrity)}.
 
 \end{itemize}
 
 \subsection{Atomic multicast}
 \label{sec:amcast}
-Atomic broadcast, also referred to as total order broadcast, is an extension of
-reliable broadcast that ensures that messages are delivered by all correct
-processes in the same order. Atomic multicast is a generalization of atomic
-broadcast, allows messages to be addressed to a subset of the processes in the
-system. Similarly to atomic broadcast, atomic multicast ensures that the
-destination processes of every message agree either to deliver or to not deliver
-the message, and no two process deliver any two messages in different order. To
-atomically multicast a message $m$ to a set of groups $\gamma$, processes use
-primitive \amcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
-with \amdel$(m)$.  We define delivery order $<$ as follows: $m < m'$ iff there
-exists a process that delivers $m$ before $m'$.
+Atomic multicast allows messages to be addressed to a subset of the processes in
+the system. Atomic multicast ensures that the destination processes of every
+message agree either to deliver or to not deliver the message, and no two
+process deliver any two messages in different order. To atomically multicast a
+message $m$ to a set of groups $\gamma$, processes use primitive
+\amcast$(\gamma, m)$.  Message $m$ is delivered at the destinations with
+\amdel$(m)$.  We define delivery order $<$ as follows: $m < m'$ iff there exists
+a process that delivers $m$ before $m'$.
 
 Atomic multicast ensures the following properties:
 
@@ -136,18 +137,22 @@ because they behave in an intuitive way: they behave as the system had only one
 copy of the object, and all operations modified and read that object atomically.
 In this thesis, we specifically focus on strong consistency.
 
+\fxnote{adding citation for linearizability}
+\fxnote{adding non-blocking property for linearizability}
 Strong consistency commonly refers to the formal concept of either strict
-serializability or linearizability. A system is strictly serializable if the
-outcome of any sequence of operations, as observed by its clients, is equivalent
-to a serialization of those operations in which the temporal ordering of
-non-overlapping operations is respected. (i.e., if an operation \emph{$o_1$} is
-acknowledged by the system before another operation \emph{$o_2$} is proposed by
-some clients, then \emph{$o_1$} comes before \emph{$o_2$} in the equivalent
-serialization). Linearizability is a sub-case of strict serializability in which
-every operation reads or updates a single object. The advantage of
-linearizability is its ``local'' property: it is sufficient for a system to
-linearize operations for each individual object to achieve global
-linearizability.
+serializability or linearizability\cite{linearizability}. A system is strictly
+serializable if the outcome of any sequence of operations, as observed by its
+clients, is equivalent to a serialization of those operations in which the
+temporal ordering of non-overlapping operations is respected. (i.e., if an
+operation \emph{$o_1$} is acknowledged by the system before another operation
+\emph{$o_2$} is proposed by some clients, then \emph{$o_1$} comes before
+\emph{$o_2$} in the equivalent serialization). Linearizability is a sub-case of
+strict serializability in which every operation reads or updates a single
+object. \lle{The advantage of linearizability is its ``local'' and ``non-blocking''
+properties. Linearizability is local meaning that it is sufficient for a system
+to linearize operations for each individual object to achieve global
+linearizability. Linearizability is non-blocking meaning that pending
+operations do not have to wait for other pending operations to complete.}
 
 Linearizability is defined with respect to a sequential
 specification. The \emph{sequential specification} of a service consists of a
@@ -228,7 +233,7 @@ connections/relations between those users by the edges between nodes. Once the
 workload is modeled as graph, \textbf{Graph partitioning} can be used to
 determine how to divide the work and data for efficient concurrent access or
 computation.
-
+\fxnote{Rewriting sentence}
 A weighted (directed) graph \emph{graph} $G$ consists of a set of nodes $V$ and
 a set of edges $E \subset V \times V$ to represent relations between the nodes,
 as well as two cost functions. One function assigns weights to the nodes $c : V
@@ -239,21 +244,21 @@ of two different subgraph is called a \emph{crossing edge}. Graph partitioning
 is a fundamental problem of finding a specified number of distinct subsets of
 the set of vertices of a graph (subgraph). \emph{Balance} is the constraint that
 requires that all subgraph have about equal size. \emph{Total edge cut} is the
-number of crossing edges those subgraphs. Intuitively, a good partitioning is
-the one that minimizes the total edges connecting subgraphs, while maintaining
+number of crossing edges those subgraphs. \lle{Intuitively, a good partitioning is
+the one that minimizes the number of the total edges connecting subgraphs}, while maintaining
 the balance among partitions. This is generally considered to be a NP-hard
-problem \cite{10.1006/jpdc.1997.1404}
+problem \cite{karypis1998multilevelk}
 
 \section{Locality of workloads}
-
+\fxnote{Rewriting sentence}
 \label{sysmodel:locality}
 In order to achieve better partitioning, it's necessary to exploit the locality
 of the workload. Locality is one of the long-known and much-exploited principle in
 computer science. Operating system and databases have been exploiting the
-locality for years \cite{locality:os}. In the scope of this thesis, we define
-the locality of a workloads is the behavior in the data accessing patterns
-produced by the application. The workloads are referred as \emph{strong
-locality} if that can be partitioned in a way that would both (i) allow commands
+locality for years \cite{denning2006locality}. \lle{In the scope of this thesis, we define
+the locality of a workload is characterized by the data accessing patterns
+produced by the application. The workloads have \emph{strong
+locality}} if that can be partitioned in a way that would both (i) allow commands
 to be executed at a single partition only, and (ii) evenly distribute data so
 that load is balanced among partitions. Conversely, workloads that cannot avoid
 multi-partition commands with balanced load among partitions exhibit \emph{weak

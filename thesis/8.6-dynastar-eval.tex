@@ -115,7 +115,7 @@ command.
 
 \begin{figure*}[ht!]
   \centering
-    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-timeline-no-title}
+    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-timeline}
   \caption{Performance of timeline command of social network service. Throughput
   (in thousands of commands per second, kcps) and latency for different
   partitions. Latency for $\approx$75\% peak throughput in milliseconds (bars
@@ -126,7 +126,7 @@ command.
 
 \begin{figure*}[ht!]
   \centering
-    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-mix-no-title}
+    \includegraphics[width=0.6\columnwidth]{figures/experiments/dynastar/chirper-compare-mix}
   \caption{Performance of post command social network service. Throughput (in
   thousands of commands per second, kcps) and latency for different partitions.
   Latency for $\approx$75\% peak throughput in milliseconds (bars show average,
@@ -224,7 +224,7 @@ with an evolving social network. We started the system with the original network
 from Higg dataset. After 200 seconds, we introduced a new celebrity user in the
 workload. The celebrity user posted more frequently, and other users started
 following the celebrity.
-
+\fxnote{Adding missing axis}
 \begin{figure*}[ht!]
   \centering
   \begin{subfigure}{.48\textwidth}
@@ -294,7 +294,7 @@ to their original location after command execution .
 
 
 Table ~\ref{table:dynastar-socialsnapshot} shows the throughput of each
-partition when the system reached the maximum throughput at the time 180.
+partition when the \dynastar system reached the maximum throughput at the time 180.
 Although the objects were evenly distributed among partitions, there was still a
 skew in the load of the system, e.g., partition 1 and 2 served more commands
 than the other partitions. This happened because of the skew in the access
@@ -353,6 +353,7 @@ to 10 million vertices.
 	\label{fig:metis_size_time}
 \end{figure}
 
+\fxnote{Adding missing axis}
 \begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\columnwidth]{figures/experiments/dynastar/chirper-celeb-dynastar-oracle.pdf}

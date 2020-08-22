@@ -5,7 +5,7 @@
 \subsection{Atomic multicast}
 
 Our \dynastar prototype uses the BaseCast atomic multicast protocol
-\cite{Coelho:2017}, available as open
+\cite{coelho2017fast}, available as open
 source.\footnote{https://bitbucket.org/paulo\_coelho/libmcast} Each group of
 servers in BaseCast executes an instance of
 Multi-Paxos.\footnote{http://libpaxos.sourceforge.net/paxos\_projects.php\#libpaxos3}
@@ -19,6 +19,29 @@ BaseCast is a genuine atomic multicast in that only the sender and destination
 replicas of a multicast message communicate to order the multicast message.
 % A genuine atomic multicast is the foundation of scalable systems, since it does
 % not rely on a fixed group of processes and does not involve all processes.
+
+\subsection {Graph partitioning with METIS}
+\fxnote{adding more details of Metis}
+\lle{The default implementation of \dynastar uses
+METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a
+partitioning based on the workload graph. METIS is a graph partitioning method
+based on multilevel $l$-way partitioning algorithms
+\cite{karypis1998multilevelk}, which is able to compute a balanced bipartition.
+The overall sequence of METIS consists of three phases: coarsening, initial
+partitioning, and refining. In the first phase, coarsening, METIS takes a large
+graph and creates successively smaller graphs that are good representations of
+the original graph. METIS then partitioning the smaller graph in the second
+phase. In the third phase, METIS projects and refines the partition of the
+smaller graph onto the original graph. While partitioning a graph, METIS aims to
+reduce the number of multi-partition commands (edge-cuts) while trying to keep
+the various partitions balanced. Recently, METIS has been improved in
+performance especially for power-law graphs \cite{abou2006multilevel}.}
+
+\lle{We configured METIS to allow a 20\% unbalance among partitions. METIS
+repartitions a graph without considering previous partitions. Consequently,
+\dynastar may need to relocate a large number of objects upon a repartitioning.
+Other partitioning techniques could be used to introduce incremental graph
+partitioning \cite{SerafiniTEPAS16}.}
 
 \subsection{\dynastar}
 
@@ -49,17 +72,7 @@ classes:
  \item[--] \emph{OracleStateMachine}: computes the mapping of objects to
   partitions. The oracle can be configured to trigger repartitioning in
   different ways: repartitioning request from application, based on the number
-  of changes to the graph, or based on some interval of time. Our default
-  implementation uses
-  METIS\footnote{http://glaros.dtc.umn.edu/gkhome/views/metis} to provide a
-  partitioning based on the workload graph. While partitioning a graph, METIS
-  aims to reduce the number of multi-partition commands (edge-cuts) while
-  trying to keep the various partitions balanced. We configured METIS to allow
-  a 20\% unbalance among partitions. METIS repartitions a graph without
-  considering previous partitions. Consequently, \dynastar may need to
-  relocate a large number of objects upon a repartitioning. Other partitioning
-  techniques could be used to introduce incremental graph partitioning
-  \cite{SerafiniTEPAS16}.
+  of changes to the graph, or based on some interval of time. 
  \end{itemize}
 
 We note one important implementation detail.  The oracle is multi-threaded: it
@@ -98,7 +111,7 @@ is replicated in all servers, since it is not updated in the benchmark. A
 transaction is a set of commands that access those objects, implemented as
 server procedures.
 
-\subsection{\dynastarappname\ social network service}
+\subsection{Social network application}
 \label{sec:imp:\dynastarappname}
 
 Using \dynastar{}, we have also developed a Twitter-like social network service,
@@ -132,15 +145,13 @@ while posts may require object moves from many partitions.
 \subsection{Alternative system}
 
 We compare \dynastar{} to an optimized version of S-SMR~\cite{bezerra2014ssmr}
-and DS-SMR~\cite{le2016dssmr}, publicly
-available.\footnote{https://bitbucket.org/kdubezerra/eyrie\\
-https://bitbucket.org/usi-dslab/ds-smr} S-SMR scales performance with the number
-of partitions under a variety of workloads. It differs from \dynastar{} in two
-important aspects: multi-partition commands are executed by all involved
-partitions, after the partitions exchange needed state for the execution of the
-command, and S-SMR supports static state partitioning. In our experiments, we
-manually optimize S-SMR's partitioning with knowledge about the workload. In the
-experiments, we refer to this system and configuration as S-SMR*.
+and DS-SMR. S-SMR scales performance with the number of partitions under a
+variety of workloads. It differs from \dynastar{} in two important aspects:
+multi-partition commands are executed by all involved partitions, after the
+partitions exchange needed state for the execution of the command, and S-SMR
+supports static state partitioning. In our experiments, we manually optimize
+S-SMR's partitioning with knowledge about the workload. In the experiments, we
+refer to this system and configuration as S-SMR*.
 %Since all three systems (S-SMR, DS-SMR, and \dynastar) provide a common
 %application-level interface, there was no additional work required to port the
 %social network application.

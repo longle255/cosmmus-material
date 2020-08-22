@@ -1,3 +1,4 @@
+\fxnote{Fixing some notation of algorithm}
 \begin{algorithm}[ht!]
 %\small
 \footnotesize
@@ -5,6 +6,10 @@
 \begin{distribalgo}[1]
 
 %\vspace{1.0mm}
+\INDENT{\emph{Initialization:}}
+	\STATE $changes \leftarrow 0$
+	\STATE $\vvm \leftarrow \emptyset$
+\ENDINDENT
 
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
 	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
@@ -17,7 +22,7 @@
 			\STATE $prophecy \leftarrow \ppm$
 			\COMMENT{prepare client's response}
 			% \STATE $alldest \leftarrow \{oracle\} \cup \{ \ppm \}$
-			\STATE \amcast$(\{oracle, \ppm\}, (\ppm,create(v)))$
+			\STATE \amcast$(\{oracle, \ppm\}, \langle\ppm,create(v)\rangle)$
 %					\COMMENT{send command to partition}
 		\ENDIF
 	\ENDINDENT
@@ -44,11 +49,13 @@
 \INDENT[\textbf{Task 2}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\langle\ppm_v,create(v)\rangle)$}}
 %	\INDENT{\textbf{case} $C$ is a $create(v)$ command:}
 %	\STATE \rmcast$(\ppm_v, \langle signal, C \rangle )$
-	\STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, create(v) \rangle)$
+	% \STATE $\forall x \in \ppm_v$: \rmcast$(x, \langle signal, create(v) \rangle)$
+	\STATE \rmcast$(\{\ppm_v, oracle\}, \langle signal, create(v) \rangle)$
 	\COMMENT{exchange signal...}
 	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
 	\COMMENT{...to coordinate}
-	\STATE $\ppm_v \leftarrow \ppm_v \cup      \{v\}$
+	\STATE $\vvm \leftarrow \vvm \cup \{v\}$
+	\COMMENT{add $v$ to service state}
 % \STATE send $ok$ to the client
 \ENDINDENT
 
@@ -63,11 +70,13 @@
 
 \INDENT[\textbf{Task 4}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(hint(V_h,E_h))$}}
 	\STATE update $G_W$ with $(V_h,E_h)$
-	\STATE $inc(changes)$
+	\STATE $changes \leftarrow changes + 1$
+	\COMMENT{increase number of changes in graph}
 	\IF {$changes \geq threshold$}
 		\STATE $partitioning  \leftarrow$ compute $\ip_1, ..., \ip_m$ from $G_W$
 		% \STATE $alldest \leftarrow \{oracle\} \cup all partitions$
 		\STATE \amcast$(\{oracle, all\_partitions\}, (partitioning))$
+		\STATE $changes \leftarrow 0$
 	\ENDIF
 \ENDINDENT
 
@@ -83,9 +92,13 @@
 
 \vspace{1mm}
 
-$G_W$: the set of all variable and their locations
+$G_W$: the graph represent the service state
+
+$changes$: number of changes in the graph
 
 $partitioning$: the partition configuration of $G_W$
+
+$\vvm$: the service state
 
 
 \caption{Oracle}

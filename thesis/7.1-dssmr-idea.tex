@@ -1,8 +1,13 @@
 \section{General idea}
 \label{sec:dssmr-idea}
 
-Dynamic \ssmr\ (\dssmr) defines a dynamic mapping of variables to partitions.
-Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$. Such
+\fxnote{Correcting the expression}
+\lle{In Dynamic \ssmr\ (\dssmr), the service state, identified by a set of state
+variables $\vvm = \{v_1, ..., v_m\}$, is composed of $k$ partitions, $\ppm_1,
+..., \ppm_k$, where each partition $\ppm_i$ is assigned to server group
+$\ssm_i$. (For brevity, we say that server $s$ belongs to $\ppm_i$ meaning that
+$s \in \ssm_i$). \dssmr\ defines a dynamic mapping of variables to partitions.
+Each variable $v$ is mapped to partition $\ppm$, meaning that $v \in \ppm$.} Such
 a mapping is managed by a partitioning oracle, which is implemented as a
 replicated service run by a group of server processes $\ssm_0$. The oracle
 service allows the mapping of variables to partitions to be retrieved or changed
@@ -11,14 +16,14 @@ $access(\omega)$ is an application command that accesses (reads or writes)
 variables in set $\omega \subseteq \vvm$ (as described in
 Section~\ref{sec:sysmodel}), $create(v)$ creates a new variable $v$ and
 initially maps it to a partition defined by the oracle, $delete(v)$ removes $v$
-from the service state,
-$move(v,\ppm_s,\ppm_d)$ moves variable $v$ from partition $\ppm_s$ to partition
-$\ppm_d$, and $consult(C)$ asks the oracle which variables are accessed by
-command $C$, and which partition contains each of them. The reply from the
-oracle to a $consult$ command is called a $prophecy$. A prophecy usually
-consists of a set of tuples $\langle v, \ppm \rangle$, meaning that variable $v$
-is mapped to partition $\ppm$. The other possible values for a prophecy are $ok$
-and $nok$, which mean that a command can and cannot be executed, respectively.
+from the service state, $move(v,\ppm_s,\ppm_d)$ moves variable $v$ from
+partition $\ppm_s$ to partition $\ppm_d$, and $consult(C)$ asks the oracle which
+variables are accessed by command $C$, and which partition contains each of
+them. The reply from the oracle to a $consult$ command is called a $prophecy$. A
+prophecy usually consists of a set of tuples $\langle v, \ppm \rangle$, meaning
+that variable $v$ is mapped to partition $\ppm$. The other possible values for a
+prophecy are $ok$ and $nok$, which mean that a command can and cannot be
+executed, respectively.
 
 Clients can consult the oracle to know which partitions each command should be
 multicast to, based on which variables are accessed by the command. If the reply
@@ -57,15 +62,16 @@ when a command accesses variables from multiple partitions, as it consists of
 multicasting at least three commands separately: $consult$, $move$ and $access$.
 The partitioning can change between the execution of any two of those commands.
 
+\fxnote{Rewriting sentence}
 To solve this problem, the client multicasts the set of variables accessed along
 with each access command. Upon delivery, each server checks the set of variables
 sent by the client. If all variables in the set belong to the local partition,
 the command is executed; otherwise, a $retry$ message is sent back to the
 client. When the client receives a $retry$ message, it consults the oracle
 again, possibly moving variables across partitions, and then reissues the access
-command. To guarantee termination, if the command fails a certain number of
-times, the client multicasts the command to all partitions and the servers
-execute it as in the original \ssmr{}.
+command. \lle{To guarantee termination, if the command fails a certain number of
+times, the client multicasts the command to all partitions and the servers in every partition
+execute it as in the original \ssmr{}.}
 
 The \dssmr\ client consists of the application logic and a client proxy.
 The application does not see the state variables divided into partitions. When

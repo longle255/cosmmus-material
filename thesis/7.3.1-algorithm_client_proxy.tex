@@ -6,7 +6,7 @@
 \vspace{1.0mm}
 
 \INDENT{To issue a command $C$, the client proxy does:}
-
+\fxnote{Fixing algorithm}
 \vspace{1.0mm}
 
     \INDENT{\textbf{do}}
@@ -31,7 +31,7 @@
                 \STATE $C.dests \leftarrow \{ \ppm_d \}$
             \ENDIF
             \IF{$C$ is $create$ or $delete$}
-                \STATE $C.dests \leftarrow dests \cup \{oracle\}$
+                \STATE \lle{$C.dests \leftarrow C.dests \cup \{oracle\}$}
             \ENDIF
             \STATE \amcast$(C.dests$, $C)$
             \STATE wait for $reply$

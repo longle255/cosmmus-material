@@ -28,7 +28,7 @@ state), making it less likely that complex system behavior will result in bugs.
 State machine replication is a well-known form of software replication, in
 particular of \emph{active replication} to build fault-tolerant services using
 commodity hardware (e.g.,
-\cite{Shvachko:2003,Ghemawat:2003,Mike:2006chubby,MacCormick:2004}). In essence,
+\cite{shvachko2010hadoop,ghemawat2003google,burrows2006chubby,maccormick2004boxwood}). In essence,
 the idea is to model the application as a deterministic state machine whose
 state transitions consist of the execution of client requests \cite{Lam78,
 Sch90}. Then, the service is fully replicated on several servers that
@@ -157,7 +157,7 @@ variables to a single partition. When re-locating a variable, the oracle is
 faced with a choice of which partition to use as a destination. \dynastar
 chooses the partition for relocation (i.e., one that would minimize the number
 of state relocations) by partitioning the workload graph using the
-METIS~\cite{Abou-Rjeili:2006} partitioner. To track object locations without
+METIS~\cite{abou2006multilevel} partitioner. To track object locations without
 compromising scalability, in addition to information about the location of state
 variables in the oracle, each client caches previous consults to the oracle. As
 a result, the oracle is only contacted the first time a client accesses a

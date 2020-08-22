@@ -45,6 +45,10 @@
 \newcommand{\dynastarlibname}{DynaStar}
 \newcommand{\dynastarappname}{Chirper}
 
+\newcommand{\mynote}[3]{
+   \fbox{\bfseries\sffamily\scriptsize#1}
+   {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
+\newcommand{\lle}[1]{\mynote{Long}{#1}{Cerulean}}
 
 \newcommand{\tsc}{\ensuremath{t^{cli}_{start}}}
 \newcommand{\tec}{\ensuremath{t^{cli}_{end}}}

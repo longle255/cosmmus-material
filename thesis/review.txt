@@ -1,0 +1,6 @@
+Have two optimization implemented:
+  - Yes
+Moving all objects to same partition is inefficient: 
+  - In the experiment of DS-SMR, 
+Does Fig. 4.4 show the result of DS-SMR or Dynastar:
+  - Fig. 4.4 shows the result of DS-SMR
