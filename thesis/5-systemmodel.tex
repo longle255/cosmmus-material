@@ -8,7 +8,7 @@ linearizability).
 \section{System model}
 
 Unless mentioned otherwise, we make the following assumptions about processes,
-failure and synchrony models.
+failures and system synchrony.
 
 
 \begin{itemize}
@@ -30,7 +30,7 @@ failure and synchrony models.
   \item \textbf{Synchrony model.} Consensus cannot be solved deterministically
   in an asynchronous system with faults, as established by the FLP impossibility
   result~\cite{FLP85}. So, we consider a system that is \emph{partially
-  synchronous}~\cite{DLS88}: it is initially asynchronous and eventually becomes
+  synchronous}~\cite{DLS88}: the system is initially asynchronous and eventually becomes
   synchronous. When the system is asynchronous, there are no bounds on the time
   it takes for messages to be transmitted and actions to be executed; when the
   system  is synchronous, such bounds exist but are unknown to the processes.
@@ -43,7 +43,7 @@ failure and synchrony models.
 \label{sec:rmcast}
 \fxnote{Correcting multicast primitive}
 \lle{Our protocol uses a uniform reliable multicast primitive 
-that allows to multicast messages reliably to a subset of the groups in $\ssm$
+that allows to multicast messages reliably to a subset of the groups in $\ssm$.
 % Reliable broadcast provides stronger properties than regular broadcast, by
 % ensuring that a message is either delivered to all correct processes or to none.
 For each message $m$, $\gamma$ denotes the groups to which the message is reliably multicast.
@@ -71,7 +71,7 @@ with \rmdel$(m)$.  Reliable multicast has the following properties:
 Atomic multicast allows messages to be addressed to a subset of the processes in
 the system. Atomic multicast ensures that the destination processes of every
 message agree either to deliver or to not deliver the message, and no two
-process deliver any two messages in different order. To atomically multicast a
+processes deliver any two messages in different order. To atomically multicast a
 message $m$ to a set of groups $\gamma$, processes use primitive
 \amcast$(\gamma, m)$.  Message $m$ is delivered at the destinations with
 \amdel$(m)$.  We define delivery order $<$ as follows: $m < m'$ iff there exists
@@ -131,7 +131,7 @@ An object that can be concurrently accessed by many processes is called a
 concurrent object \cite{linearizability}. Interleaving accesses to the same
 object can sometimes lead to unexpected behaviors. The effect of this issue can
 be captured by defining a consistency criterion over the shared object, which
-specifies the level in which operations can interleave in accessing the object.
+specifies how operations can interleave in accessing the object.
 Informally, systems that provide strong consistency are easier to interact with,
 because they behave in an intuitive way: they behave as the system had only one
 copy of the object, and all operations modified and read that object atomically.
@@ -140,18 +140,18 @@ In this thesis, we specifically focus on strong consistency.
 \fxnote{adding citation for linearizability}
 \fxnote{adding non-blocking property for linearizability}
 Strong consistency commonly refers to the formal concept of either strict
-serializability or linearizability\cite{linearizability}. A system is strictly
+serializability or linearizability~\cite{linearizability}. A system is strictly
 serializable if the outcome of any sequence of operations, as observed by its
 clients, is equivalent to a serialization of those operations in which the
-temporal ordering of non-overlapping operations is respected. (i.e., if an
+temporal ordering of non-overlapping operations is respected (i.e., if an
 operation \emph{$o_1$} is acknowledged by the system before another operation
 \emph{$o_2$} is proposed by some clients, then \emph{$o_1$} comes before
 \emph{$o_2$} in the equivalent serialization). Linearizability is a sub-case of
 strict serializability in which every operation reads or updates a single
-object. \lle{The advantage of linearizability is its ``local'' and ``non-blocking''
-properties. Linearizability is local meaning that it is sufficient for a system
+object. \lle{Linearizability is a ``local'' and ``non-blocking'' property. 
+Linearizability is local in that it is sufficient for a system
 to linearize operations for each individual object to achieve global
-linearizability. Linearizability is non-blocking meaning that pending
+linearizability. Linearizability is non-blocking in that pending
 operations do not have to wait for other pending operations to complete.}
 
 Linearizability is defined with respect to a sequential
@@ -172,7 +172,7 @@ in real-time if the response of $C_1$ occurs before the invocation of $C_2$.
 \section{State machine replication}
 \label{sec:smr}
 State machine replication, also called active replication, is a common approach
-to building fault-tolerant systems\cite{Lam78, Sch90}. State machines model
+to building fault-tolerant systems~\cite{Lam78, Sch90}. State machines model
 deterministic applications. They atomically execute commands issued by clients.
 This results in a modification of the internal state of the state machine and
 also in the production of an output to a client. An execution of a state machine
@@ -215,7 +215,7 @@ partition the service's state (also known as \emph{sharding}) and replicate each
 partition (e.g., \cite{Glendenning:2011kj,Marandi:2011dj}). The idea is to
 divide the state of a service in multiple partitions so that most commands
 access one partition only and are equally distributed among partitions.
-Unfortunately, most services cannot be ''perfectly partitioned``, that is, the
+Unfortunately, most services cannot be ``perfectly partitioned,'' that is, the
 service state cannot be divided in a way that commands access one partition
 only. As a consequence, partitioned systems must cope with multi-partition
 commands. In the next chapter, we review some approaches in the second category,
@@ -225,40 +225,40 @@ Google Spanner \cite{corbett2013spanner}, and some other techniques.
 
 \section{Graph partitioning problem}
 
-In computer system, graphs are widely used to describe the dependencies of the
+In computer systems, graphs are widely used to describe the dependencies of the
 data within a computation. All applications can model their data and/or workload
-using graph. For example, in a social network application, the workload could be
+using a graph. For example, in a social network application, the workload could be
 modeled as a weighted graph, the users are represented by nodes and the
 connections/relations between those users by the edges between nodes. Once the
-workload is modeled as graph, \textbf{Graph partitioning} can be used to
+workload is modeled as a graph, graph partitioning can be used to
 determine how to divide the work and data for efficient concurrent access or
 computation.
 \fxnote{Rewriting sentence}
-A weighted (directed) graph \emph{graph} $G$ consists of a set of nodes $V$ and
+A weighted (directed) graph $G$ consists of a set of nodes $V$ and
 a set of edges $E \subset V \times V$ to represent relations between the nodes,
 as well as two cost functions. One function assigns weights to the nodes $c : V
 \rightarrow R_{>0}$ and a second function $\omega : E \rightarrow R$ assigns
-costs to the edges. All graphs contain subgraphs. A subgraph is a graph whose
+costs to the edges. A subgraph is a graph whose
 node and edge set are subsets of another graph. An edge that connects vertices
 of two different subgraph is called a \emph{crossing edge}. Graph partitioning
 is a fundamental problem of finding a specified number of distinct subsets of
 the set of vertices of a graph (subgraph). \emph{Balance} is the constraint that
 requires that all subgraph have about equal size. \emph{Total edge cut} is the
-number of crossing edges those subgraphs. \lle{Intuitively, a good partitioning is
+number of edges crossing those subgraphs. \lle{Intuitively, a good partitioning is
 the one that minimizes the number of the total edges connecting subgraphs}, while maintaining
-the balance among partitions. This is generally considered to be a NP-hard
+the balance among partitions. This is generally considered an NP-hard
 problem \cite{karypis1998multilevelk}
 
-\section{Locality of workloads}
+\section{Workload locality}
 \fxnote{Rewriting sentence}
 \label{sysmodel:locality}
-In order to achieve better partitioning, it's necessary to exploit the locality
-of the workload. Locality is one of the long-known and much-exploited principle in
+In order to achieve a good partitioning, it is necessary to exploit the locality
+of a workload. Locality is one of the long-known and much-exploited principles in
 computer science. Operating system and databases have been exploiting the
 locality for years \cite{denning2006locality}. \lle{In the scope of this thesis, we define
-the locality of a workload is characterized by the data accessing patterns
-produced by the application. The workloads have \emph{strong
-locality}} if that can be partitioned in a way that would both (i) allow commands
+the locality of a workload as the data access patterns
+produced by the application. A workload has \emph{strong
+locality}} if it can be partitioned in a way that would both (i) allow commands
 to be executed at a single partition only, and (ii) evenly distribute data so
 that load is balanced among partitions. Conversely, workloads that cannot avoid
 multi-partition commands with balanced load among partitions exhibit \emph{weak
