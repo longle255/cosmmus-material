@@ -28,7 +28,7 @@ processors, there is no deterministic algorithm providing termination
 \cite{FLP85}. One solution to ensure that processes make progress is to augment the asynchronous system with failure detectors \cite{aguilera:2000failure}.
 Chandra and Toueg \cite{CT96} propose a class of algorithms that use failure
 detectors to solve consensus. Another solution is to introduce synchrony and
-assume a known delay to the system's communication \cite{Aspnes:2003vp}.
+assume a known delay to the system's communication \cite{aspnes2003randomized}.
 
 Traditional consensus-based SMR repeatedly runs multiple instances of a consensus
 protocol to allow replicas to reach an agreed order of commands. The best-known
@@ -40,7 +40,7 @@ consensus-based SMR, and it is suggested to be easier to understand (than Paxos)
 from an engineering point of view. Despite its complexity, several systems
 have been using Paxos to provide various abstractions such as storage systems
 \cite{Bolosky:20011paxos}, locking services \cite{burrows2006chubby}, and
-distributed databases \cite{Baker:2011megastore}. Google Chubby
+distributed databases \cite{baker2011megastore}. Google Chubby
 \cite{burrows2006chubby} and Google Spanner \cite{corbett2013spanner} employ
 an implementation of the Paxos algorithm to achieve consensus and also to
 cater for replication. Zap \cite{Hunt:2010zoo}, the atomic broadcast protocol at
@@ -157,7 +157,7 @@ to scale better, but services that require linearizability cannot be implemented
 with such techniques. Some applications do not require strong consistency for
 most of their operations, and can weaken the consistency guarantees, for example, to eventual
 consistency (e.g., Facebook's TAO \cite{facebookTAO}). Eventual consistency
-\cite{Gustavsson:2002eventual} means that the correct replicas will eventually
+\cite{gustavsson2002self} means that the correct replicas will eventually
 converge to a common state, even though some intermediate states might diverge
 to a certain extent. Some other systems try to combine the benefits of weak and
 strong consistency models by supporting both.  In Gemini \cite{Li2012geo},
@@ -170,7 +170,7 @@ write fails in the presence of concurrent writes.
 \section{Graph partitioning in performance scaling}
 
 Graph partitioning is an interesting problem with many proposed
-solutions~\cite{Abou-Rjeili:2006,hendrickson2000graph,kernighan1970efficient,7004087}.
+solutions~\cite{abou2006multilevel,hendrickson2000graph,kernighan1970efficient,7004087}.
 In this work, we do not introduce a new graph partitioning solution, but instead,
 we use a well-known one (METIS~\cite{abou2006multilevel}) to partition the state
 of a service implemented with state machine replication. Similarly to

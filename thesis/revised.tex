@@ -1,0 +1,49 @@
+\documentclass[]{article}
+\usepackage{pdfpages}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{natbib}
+\usepackage{graphicx}
+
+
+\title{Scaling State Machine Replication}
+\author{$1^{st}$ Revision}
+\date{August 2020}
+
+
+\begin{document}
+
+\maketitle
+
+I wish to thank the members of the dissertation committee for the time they
+dedicated to this thesis and for their constructive comments.
+
+\section*{List of corrections}
+
+\begin{itemize}
+\item Revising Chapter 1 for grammatical issues (\href[page=25]{./thesis.pdf}{page 1}).
+\item Correcting validation property of the reliable multicast and atomic
+multicast primitives (\href[page=32]{./thesis.pdf}{page 8}).
+\item Adding ``non-blocking'' property for linearizability (\href[page=34]{./thesis.pdf}{page 10}).
+\item Adding citation for strong consistency and linearizability (\href[page=34]{./thesis.pdf}{page 10}).
+\item Rewriting sentence that describes ``good partitioning''(\href[page=36]{./thesis.pdf}{page 12}).
+\item Rewriting sentence that describes ``locality of a workload''(\href[page=36]{./thesis.pdf}{page 12}).
+\item Adding reference for Viewstamped replication (\href[page=41]{./thesis.pdf}{page 17}).
+\item Correcting caption of Figure 3.8 (\href[page=48]{./thesis.pdf}{page 24}).
+\item Correcting the expression that describes application state (\href[page=51]{./thesis.pdf}{page 27}).
+\item Rewriting sentence that describes the termination guarantee (\href[page=53]{./thesis.pdf}{page 29}).
+\item Correcting algorithm 1: DS-SMR Client Proxy (\href[page=54]{./thesis.pdf}{page 30, line 20}).
+\item Clarifying client algorithm when choosing a target partition (\href[page=55]{./thesis.pdf}{page 31}).
+\item Adding details of the multicast library that was used by DS-SMR (\href[page=61]{./thesis.pdf}{page 37}).
+\item Moving Figure 4.5 close to its description (\href[page=66]{./thesis.pdf}{page 42}).
+\item Correcting multiple notations and expression in the Algorithm 5: Oracle of DynaStar (\href[page=75]{./thesis.pdf}{page 51}).
+\item Correcting multiple notations and expression in the Algorithm 5: Server process of DynaStar (\href[page=78]{./thesis.pdf}{page 54}).
+\item Adding details of the graph partitioning library METIS that was used by DynaStar (\href[page=81]{./thesis.pdf}{page 57}).
+\item Adding missing axis of Figure 5.5 (\href[page=89]{./thesis.pdf}{page 65}).
+\item Adding missing axis of Figure 5.6 (\href[page=90]{./thesis.pdf}{page 66}).
+\item Adding missing references, removing DOI and URL from references for
+consistent format(\href[page=109]{./thesis.pdf}{Bibliography}).
+
+\end{itemize}
+
+\end{document}

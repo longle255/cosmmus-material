@@ -60,8 +60,8 @@ services by replication.
 %(i.e., linearizability) by regulating how client commands are propagated to and
 %executed by the replicas: every non-faulty replica must receive and execute
 %every command deterministically and in the same order. 
-Some other replication schemes, such as chain replication \cite {chainreplication,
-chainreplication:byzantine}, multi-primary replication, and deferred-update replication
+Some other replication schemes, such as chain replication \cite{van2004chain,
+van2012byzantine}, multi-primary replication, and deferred-update replication
 \cite{sciascia2012sdur, charron2010replication, chundi96dur} are based on state machine replication.
 
 \subsubsection{Passive replication} 
@@ -75,7 +75,7 @@ primary. Unlike the active replication approach, passive replication does not
 waste resource on redundant execution of requests, and allows non-deterministic
 requests. However, a failure on the leader will affect the latency of a command.
 
-In~\cite{pedone:replication}, the authors presented a
+In~\cite{wiesmann2000understanding}, the authors presented a
 framework to compare and distinguish replication protocols in databases
 and distributed systems (Figure~\ref{fig:replication:org}). This model
 classifies replication protocols by five generic steps of replication as
@@ -227,7 +227,7 @@ server coordination and agreement for providing a strong consistency guarantee.
 
 
 In general, we can model partitioned replication protocols by
-extending the five-phase functional model in \cite{pedone:replication} to
+extending the five-phase functional model in \cite{wiesmann2000understanding} to
 include the coordination between components in a partitioned replicated system
 (see Figure \ref{fig:replication:coordination}). Those phases are:
 

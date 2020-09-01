@@ -50,12 +50,13 @@ For each message $m$, $\gamma$ denotes the groups to which the message is reliab
 By abuse of notation, we write $p \in \gamma$ instead of $\exists g \in \ssm : g \in \gamma \wedge p \in g$}
 To reliably multicast a message $m$ to a set of groups $\gamma$ in $\ssm$, processes use
 primitive \rmcast$(\gamma, m)$.  Message $m$ is delivered at the destinations
-with \rmdel$(m)$.  Reliable multicast has the following properties:
+with \rmdel$(m)$.  Reliable multicast has the following properties \cite{hadzilacos1994modular}:
 
 \begin{itemize}
 
-    \item[--] If a correct process \rmcast{}s $m$, then \lle{at least one
-      correct process} $p \in \gamma$ eventually \rmdel{}s $m$ \emph{(validity)}.
+    \item[--] If a correct process \rmcast{}s $m$, then \lle{some correct
+      process $p \in \gamma$ eventually \rmdel{}s $m$ or no process in that
+      group is correct\emph{(validity)}}.
 
     \item[--] If a correct process $p \in \gamma$ \rmdel{}s $m$, then every correct
       process $p \in \gamma$ eventually \rmdel{}s $m$ \emph{(uniform agreement)}.
@@ -81,13 +82,14 @@ Atomic multicast ensures the following properties:
 
 \begin{itemize}
 
-    \item[--] If a correct process \amcast{}s $m$ to group $\gamma$, every
-    correct process in $\gamma$ \amdel{}s $m$ \emph{(validity)}.
+    \item[--] If a correct process \amcast{}s $m$, then \lle{some correct
+      process $p \in \gamma$ eventually \amdel{}s $m$ or no process in that
+      group is correct\emph{(validity)}}.
 
-    \item[--] If a process in $\gamma$ \amdel{}s $m$, then every correct process
-    in $\gamma$ \amdel{}s $m$ \emph{(uniform agreement)}.
+      \item[--] If a correct process $p \in \gamma$ \amdel{}s $m$, then every correct
+      process $p \in \gamma$ eventually \amdel{}s $m$ \emph{(uniform agreement)}.
 
-    \item[--] For any message $m$, every process \amdel{}s $m$ at most once, and
+    \item[--] For any message $m$, every process $p \in \gamma$ \amdel{}s $m$ at most once, and
       only if some process has \amcast{} $m$ previously \emph{(integrity)}.
 
     \item[--] If a process \amcast{}s $m$ and then $m'$ to group $\gamma$, then
