@@ -1,5 +1,5 @@
 \fxnote{Fixing some notation of algorithm}
-\begin{algorithm}[ht!]
+\begin{algorithm}[htbp!]
 %\small
 \footnotesize
 
@@ -9,6 +9,7 @@
 \INDENT{\emph{Initialization:}}
 	\STATE $changes \leftarrow 0$
 	\STATE $\vvm \leftarrow \emptyset$
+	\STATE $\llm=\{ \ppm=\{v:v \in \vvm\} : \ppm \in \{\ppm_1,...,\ppm_k\} \} \leftarrow \emptyset$
 \ENDINDENT
 
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
@@ -55,6 +56,7 @@
 	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
 	\COMMENT{...to coordinate}
 	\STATE $\vvm \leftarrow \vvm \cup \{v\}$
+	\STATE $\llm\{\ppm\} \leftarrow \llm\{\ppm\} \cup \{v\}$
 	\COMMENT{add $v$ to service state}
 % \STATE send $ok$ to the client
 \ENDINDENT
@@ -73,17 +75,17 @@
 	\STATE $changes \leftarrow changes + 1$
 	\COMMENT{increase number of changes in graph}
 	\IF {$changes \geq threshold$}
-		\STATE $partitioning  \leftarrow$ compute $\ip_1, ..., \ip_m$ from $G_W$
+		\STATE $\llm_{optimized}  \leftarrow$ compute $\{\ppm=\{v:v \in \vvm\} : \ppm \in \{\ppm_1,...,\ppm_k\}\}$ from $G_W$
 		% \STATE $alldest \leftarrow \{oracle\} \cup all partitions$
-		\STATE \amcast$(\{oracle, all\_partitions\}, (partitioning))$
+		\STATE \amcast$(\{oracle, all\_partitions\}, (\llm_{optimized}))$
 		\STATE $changes \leftarrow 0$
 	\ENDIF
 \ENDINDENT
 
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{partitioning})$}}
-	\STATE apply $partitioning$
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{\llm_{optimized}})$}}
+	\STATE $\llm \leftarrow \llm_{optimized}$
 \ENDINDENT
 
 \vspace{1.5mm}
@@ -96,9 +98,11 @@ $G_W$: the graph represent the service state
 
 $changes$: number of changes in the graph
 
-$partitioning$: the partition configuration of $G_W$
+% $partitioning$: the partition configuration of $G_W$
 
 $\vvm$: the service state
+
+$\llm$: the location mapping of state variables
 
 
 \caption{Oracle}

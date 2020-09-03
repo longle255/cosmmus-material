@@ -1,5 +1,5 @@
 \fxnote{Fixing some notation of algorithm}
-\begin{algorithm}[htp!]
+\begin{algorithm}[htbp!]
 %\small
 \footnotesize
 
@@ -40,7 +40,7 @@
 			\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
 			\COMMENT{send variables}
 			% \STATE wait until $\forall v \in vars \in rcvd\_msgs : v \in vars$
-			\STATE wait until $\langle vars, C \rangle \in rcvd\_msgs$
+			\STATE wait until $\exists \langle vars, C \rangle \in rcvd\_msgs$
 		\ENDIF
 	\ENDIF
 \ENDINDENT
@@ -59,21 +59,15 @@
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(partitioning)$}}
-	\STATE \textbf{for} each $\pqm \in \ppm_v \in partitioning$ \textbf{do}
-	% \INDENT
-		\IF{$\ppm$ is $\pqm$}
-			\STATE $vars \leftarrow partitioning(\pqm) \setminus v:v \in \vvm_p$
-			\IF {$\forall v \in var, \ppm_i \in partitioning:$ \\ \hfill $\exists \langle vars, \ppm_i \rangle \in rcvd\_msgs :v \in vars$}
-				\STATE apply $partitioning$
-			\ENDIF
-		\ELSE
-			% \rmcast$(\pqm, v:v \in \pqm, C)$
-			\STATE $vars \leftarrow partitioning(\pqm) \cap v:v \in \vvm_p$
-			\STATE $\forall\,x\!\in\!\pqm$: send$(\langle vars, \ppm \rangle )$ to $x$
-			\COMMENT{send objs in $\pqm$}
-		\ENDIF
-	% \ENDINDENT
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\llm_{optimized})$}}
+	\FOR {each $\pqm \in \llm_{optimized} \setminus \{\ppm\}$}
+		\STATE $vars_{\pqm} \leftarrow \llm_{optimized}(\pqm) \cap v:v \in \vvm_p$
+		\COMMENT{variables of $\pqm$ that are in $\ppm$}	
+		\STATE send$(\pqm, \langle vars_{\pqm}, \ppm \rangle )$
+		\COMMENT{send variables from $\ppm$ to $\pqm$}	
+	\ENDFOR
+	\STATE $vars_{\ppm} \leftarrow \llm_{optimized}(\ppm) \cap v:v \notin \vvm_p$
+	\STATE wait until $\forall v \in vars_{\ppm}: \exists \langle v, \ppm \rangle \in rcvd\_msgs$
 \ENDINDENT
 
 \vspace{1.0mm}
@@ -87,7 +81,7 @@
 
 \vspace{1mm}
 
-$partitioning$: the partition configuration from the $oracle$
+$\llm_{optimized}$: the optimized partition configuration from the $oracle$
 
 $\vvm_p$: the subset of service state $\vvm$ in partition $\ppm$
 
