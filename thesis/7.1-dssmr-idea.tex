@@ -1,7 +1,7 @@
 \section{General idea}
 \label{sec:dssmr-idea}
 
-\fxnote{Correcting the expression}
+% \fxnote{Correcting the expression}
 \lle{In Dynamic \ssmr\ (\dssmr), the service state, identified by a set of state
 variables $\vvm = \{v_1, ..., v_m\}$, is composed of $k$ partitions, $\ppm_1,
 ..., \ppm_k$, where each partition $\ppm_i$ is assigned to server group
@@ -62,7 +62,7 @@ when a command accesses variables from multiple partitions, as it consists of
 multicasting at least three commands separately: $consult$, $move$ and $access$.
 The partitioning can change between the execution of any two of those commands.
 
-\fxnote{Rewriting sentence}
+% \fxnote{Rewriting sentence}
 To solve this problem, the client multicasts the set of variables accessed along
 with each access command. Upon delivery, each server checks the set of variables
 sent by the client. If all variables in the set belong to the local partition,

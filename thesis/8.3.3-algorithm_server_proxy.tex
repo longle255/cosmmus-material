@@ -1,4 +1,4 @@
-\fxnote{Fixing some notation of algorithm}
+% \fxnote{Fixing some notation of algorithm}
 \begin{algorithm}[htbp!]
 %\small
 \footnotesize
@@ -26,7 +26,8 @@
 		\COMMENT{$\ppm_s$ $\in dests$ will send variables}
 
 		\IF[$\ppm$ is the target partition:] {$\ppm = \ppm_d$}
-			\STATE wait until $\forall v \in \omega \setminus \vvm_p: \exists \langle vars, C \rangle \in rcvd\_msgs :v \in vars$
+			\STATE $vars \leftarrow \omega \setminus \vvm_p$
+			\STATE wait until $\forall v \in vars: \exists \langle v, C \rangle \in rcvd\_msgs$
 			% \STATE wait until $\omega \setminus \ppm \subseteq \bigcup \{ vars | \langle vars, C \rangle \in rcvd\_msgs \}$
 			\COMMENT{wait for needed variables}
 			\STATE execute command $C$
@@ -63,7 +64,7 @@
 	\FOR {each $\pqm \in \llm_{optimized} \setminus \{\ppm\}$}
 		\STATE $vars_{\pqm} \leftarrow \llm_{optimized}(\pqm) \cap v:v \in \vvm_p$
 		\COMMENT{variables of $\pqm$ that are in $\ppm$}	
-		\STATE send$(\pqm, \langle vars_{\pqm}, \ppm \rangle )$
+		\STATE \rmcast$(\pqm, \langle vars_{\pqm}, \ppm \rangle )$
 		\COMMENT{send variables from $\ppm$ to $\pqm$}	
 	\ENDFOR
 	\STATE $vars_{\ppm} \leftarrow \llm_{optimized}(\ppm) \cap v:v \notin \vvm_p$

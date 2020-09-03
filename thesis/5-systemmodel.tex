@@ -41,7 +41,7 @@ failures and system synchrony.
 
 \subsection{Reliable multicast}
 \label{sec:rmcast}
-\fxnote{Correcting multicast primitive}
+% \fxnote{Correcting multicast primitive}
 \lle{Our protocol uses a uniform reliable multicast primitive 
 that allows to multicast messages reliably to a subset of the groups in $\ssm$.
 % Reliable broadcast provides stronger properties than regular broadcast, by
@@ -139,8 +139,8 @@ because they behave in an intuitive way: they behave as the system had only one
 copy of the object, and all operations modified and read that object atomically.
 In this thesis, we specifically focus on strong consistency.
 
-\fxnote{adding citation for linearizability}
-\fxnote{adding non-blocking property for linearizability}
+% \fxnote{adding citation for linearizability}
+% \fxnote{adding non-blocking property for linearizability}
 Strong consistency commonly refers to the formal concept of either strict
 serializability or linearizability~\cite{linearizability}. A system is strictly
 serializable if the outcome of any sequence of operations, as observed by its
@@ -235,7 +235,7 @@ connections/relations between those users by the edges between nodes. Once the
 workload is modeled as a graph, graph partitioning can be used to
 determine how to divide the work and data for efficient concurrent access or
 computation.
-\fxnote{Rewriting sentence}
+% \fxnote{Rewriting sentence}
 A weighted (directed) graph $G$ consists of a set of nodes $V$ and
 a set of edges $E \subset V \times V$ to represent relations between the nodes,
 as well as two cost functions. One function assigns weights to the nodes $c : V
@@ -252,7 +252,7 @@ the balance among partitions. This is generally considered an NP-hard
 problem \cite{karypis1998multilevelk}
 
 \section{Workload locality}
-\fxnote{Rewriting sentence}
+% \fxnote{Rewriting sentence}
 \label{sysmodel:locality}
 In order to achieve a good partitioning, it is necessary to exploit the locality
 of a workload. Locality is one of the long-known and much-exploited principles in
