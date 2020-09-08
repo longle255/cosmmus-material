@@ -42,6 +42,8 @@
 \newcommand{\parts}{partition}
 \newcommand{\coloralgo}{Yellow}
 
+\newcommand{\libname}{\mbox{$libRdmaMCast$}\xspace}
+
 \newcommand{\mynote}[3]{
    \fbox{\bfseries\sffamily\scriptsize#1}
    {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
@@ -57,7 +59,6 @@
 \newcommand{\WRITE}{\textsl{WRITE}}
 \newcommand{\READ}{\textsl{READ}}
 \newcommand{\buffer}{\mathcal{B}}
-\newcommand{\proto}{\mbox{$ramcast$}\xspace}
 
 % \newcommand{\StatexIndent}[1][3]{%
 %   \setlength\@tempdima{\algorithmicindent}%
@@ -90,14 +91,19 @@
 % \thispagestyle{empty}
 % \onecolumn
 % \input{algo}
-\input{protocol}
+\input{0-abstract}
+\input{1-intro}
+\input{2-system-model}
+\input{3-background}
+\input{4-libramcast}
+\input{5-implementation}
+\input{6-evaluation}
+\input{7-related-work}
+\input{8-conclusion}
 
 %\pagebreak
-
-% why did you have this vvv ?
-%\bibliographystyle{splncs03}
-
-% \bibliographystyle{abbrv}
-% \bibliography{references}
+\bibliographystyle{ieeetr}
+\bibliography{references}
+\newpage
 
 \end{document}

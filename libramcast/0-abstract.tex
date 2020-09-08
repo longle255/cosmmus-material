@@ -1,0 +1,10 @@
+\begin{abstract}
+Atomic multicast allows messages to be addressed to a subset of the processes in
+the system. Atomic multicast ensures that the destination processes of every
+message agree either to deliver or to not deliver the message, and no two
+processes deliver any two messages in different order. We implement atomic
+multicast by carefully leveraging RDMA, which enables a computer to access a
+remote computer’s memory directly, without OS involvement on either side—by
+combining a set of techniques from message passing and shared memory. This
+implementation is significantly faster than prior systems.
+\end{abstract}
