@@ -9,7 +9,8 @@
 \INDENT{\emph{Initialization:}}
 	\STATE $changes \leftarrow 0$
 	\STATE $\vvm \leftarrow \emptyset$
-	\STATE $\llm=\{ \ppm=\{v:v \in \vvm\} : \ppm \in \{\ppm_1,...,\ppm_k\} \} \leftarrow \emptyset$
+	% \STATE $\llm=\{ \ppm=\{v:v \in \vvm\} : \ppm \in \{\ppm_1,...,\ppm_k\} \} \leftarrow \emptyset$
+	\STATE $\llm \leftarrow \emptyset$
 \ENDINDENT
 
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(exec(C))$}}
@@ -56,8 +57,9 @@
 	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
 	\COMMENT{...to coordinate}
 	\STATE $\vvm \leftarrow \vvm \cup \{v\}$
-	\STATE $\llm\{\ppm\} \leftarrow \llm\{\ppm\} \cup \{v\}$
 	\COMMENT{add $v$ to service state}
+	% \STATE $\llm\{\ppm\} \leftarrow \llm\{\ppm\} \cup \{v\}$
+	\STATE $\llm \leftarrow \llm \cup \{\langle v, \ppm_v \rangle\}$
 % \STATE send $ok$ to the client
 \ENDINDENT
 
@@ -75,17 +77,17 @@
 	\STATE $changes \leftarrow changes + 1$
 	\COMMENT{increase number of changes in graph}
 	\IF {$changes \geq threshold$}
-		\STATE $\llm_{optimized}  \leftarrow$ compute $\{\ppm=\{v:v \in \vvm\} : \ppm \in \{\ppm_1,...,\ppm_k\}\}$ from $G_W$
+		\STATE $\llm_{opt}  \leftarrow$ optimize($\llm, G_W$)
 		% \STATE $alldest \leftarrow \{oracle\} \cup all partitions$
-		\STATE \amcast$(\{oracle, all\_partitions\}, (\llm_{optimized}))$
+		\STATE \amcast$(\{oracle, all\_partitions\}, \llm_{opt})$
 		\STATE $changes \leftarrow 0$
 	\ENDIF
 \ENDINDENT
 
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{\llm_{optimized}})$}}
-	\STATE $\llm \leftarrow \llm_{optimized}$
+\INDENT[\textbf{Task 5}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\mathit{\llm_{opt}})$}}
+	\STATE $\llm \leftarrow \llm_{opt}$
 \ENDINDENT
 
 \vspace{1.5mm}
@@ -98,7 +100,7 @@ $G_W$: the graph represent the service state
 
 $changes$: number of changes in the graph
 
-% $partitioning$: the partition configuration of $G_W$
+$optimize$: the function to calculate new optimized partitioning from $G_W$ and $\llm$
 
 $\vvm$: the service state
 

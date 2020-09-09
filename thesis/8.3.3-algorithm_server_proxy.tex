@@ -7,14 +7,14 @@
 
 
 \INDENT{\emph{Initialization:}}
-\STATE $\vvm_p \leftarrow \emptyset$
+\STATE $\vvm_{\ppm} \leftarrow \emptyset$
 \STATE $rcvd\_msgs \leftarrow \emptyset$
 \ENDINDENT
 
 \INDENT[\textbf{Task 1}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(C)$}}
 	\STATE $\omega \leftarrow vars(C)$
 	\COMMENT{variables accessed by $C$}
-	\IF[\textbf{Task 1a}]{$\omega \subseteq \vvm_p$}
+	\IF[\textbf{Task 1a}]{$\omega \subseteq \vvm_{\ppm}$}
 		\STATE execute command $C$
 		\STATE send response to the client
 	\ELSE[\textbf{Task 1b}]
@@ -26,7 +26,7 @@
 		\COMMENT{$\ppm_s$ $\in dests$ will send variables}
 
 		\IF[$\ppm$ is the target partition:] {$\ppm = \ppm_d$}
-			\STATE $vars \leftarrow \omega \setminus \vvm_p$
+			\STATE $vars \leftarrow \omega \setminus \vvm_{\ppm}$
 			\STATE wait until $\forall v \in vars: \exists \langle v, C \rangle \in rcvd\_msgs$
 			% \STATE wait until $\omega \setminus \ppm \subseteq \bigcup \{ vars | \langle vars, C \rangle \in rcvd\_msgs \}$
 			\COMMENT{wait for needed variables}
@@ -36,7 +36,7 @@
 			\STATE \rmcast$(\ppm_s, \langle vars, C\rangle)$
 			\COMMENT{return the variables}
 		\ELSE[if $\ppm$ is not the target partition:]
-			\STATE $vars \leftarrow \omega \cap \vvm_p$
+			\STATE $vars \leftarrow \omega \cap \vvm_{\ppm}$
 			\COMMENT{all needed variables in $\ppm$}
 			\STATE \rmcast$(\ppm_d, \langle vars, C \rangle)$
 			\COMMENT{send variables}
@@ -55,19 +55,22 @@
 	\COMMENT{exchange signal}
 	\STATE wait until $\langle signal, create(v) \rangle \in rcvd\_msgs$
 	\COMMENT{...coordinate}
-	\STATE $\vvm_p \leftarrow \vvm_p \cup \{v\}$
+	\STATE $\vvm_{\ppm} \leftarrow \vvm_{\ppm} \cup \{v\}$
 	\STATE send $ok$ to the client
 \ENDINDENT
 
 \vspace{1.0mm}
-\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\llm_{optimized})$}}
-	\FOR {each $\pqm \in \llm_{optimized} \setminus \{\ppm\}$}
-		\STATE $vars_{\pqm} \leftarrow \llm_{optimized}(\pqm) \cap v:v \in \vvm_p$
+\INDENT[\textbf{Task 3}]{\colorbox{\coloralgo}{\textbf{when} \amdel$(\llm_{opt})$}}
+	% \STATE $vars_{\ppm} = \{v:v \in L\}$ 
+	\FOR {each $\pqm \in \{\ppm_1,..., \ppm_k\} \wedge \pqm \neq \ppm$}
+		% \STATE $vars_{\pqm} \leftarrow \llm_{opt}(\pqm) \cap v:v \in \vvm_{\ppm}$
+		\STATE $vars_{\pqm} \leftarrow \{v : \langle v, \pqm \rangle \in \llm_{opt} \wedge v \in \vvm_\ppm \}$
 		\COMMENT{variables of $\pqm$ that are in $\ppm$}	
-		\STATE \rmcast$(\pqm, \langle vars_{\pqm}, \ppm \rangle )$
+		\STATE \rmcast$(\pqm, \langle vars_{\pqm}, \pqm \rangle )$
 		\COMMENT{send variables from $\ppm$ to $\pqm$}	
 	\ENDFOR
-	\STATE $vars_{\ppm} \leftarrow \llm_{optimized}(\ppm) \cap v:v \notin \vvm_p$
+	\STATE $vars_{\ppm} \leftarrow \{v : \langle v, \ppm \rangle \in \llm_{opt} \wedge v \not\in \vvm_\ppm \}$
+	% \STATE $vars_{\ppm} \leftarrow \llm_{opt}(\ppm) \cap v:v \notin \vvm_{\ppm}$
 	\STATE wait until $\forall v \in vars_{\ppm}: \exists \langle v, \ppm \rangle \in rcvd\_msgs$
 \ENDINDENT
 
@@ -82,9 +85,9 @@
 
 \vspace{1mm}
 
-$\llm_{optimized}$: the optimized partition configuration from the $oracle$
+$\llm_{opt}$: the optimized partition configuration from the $oracle$
 
-$\vvm_p$: the subset of service state $\vvm$ in partition $\ppm$
+$\vvm_{\ppm}$: the subset of service state $\vvm$ in partition $\ppm$
 
 % \vspace{1.0mm}
 % \INDENT{\colorbox{\coloralgo}{\textbf{function} hint$(vars)$}}
