@@ -29,7 +29,6 @@
   write data in remote replicas.
 \end{itemize}
 
-
 \subsection{Memory management}
 
 \begin{figure}[ht!]
@@ -48,7 +47,7 @@ memory and exclusive memory spaces. All processes have remote access
 has has remote-write permission to a given node’s log at any point in time
 during the protocol.
 
-The shared memory space is a circular buffer of fixed-size entries with a
+The shared memory space is a circular buffer of fixed-size of two entries with a
 sequential index. Client keep a copy of the remote head and tail pointer. Client
 increase remote tail after writing to the shared memory. Server process update
 the head pointer on client after delivering message by piggying back the new
@@ -60,6 +59,7 @@ connected QPs to detect new message.
 For each message $m$ written in the shared memory, there is a corresponding cell
 in the exclusive memory space reserved for timestamps of $m$
 
+\libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
 
 \subsection{Replication}
 
@@ -112,15 +112,19 @@ Once $P$ receives timestamps of all involved groups and acknowledgements from
 the majority of processes of each group, it can order the message $m$ and starts
 deliver it.
 
+After delivering a message, a process will keep that message in its local buffer.
+Upon receiving acknowledgements from all the processes in the candidate
+quorum, the message will be removed from the buffer.
+
 \subsection{Leader election}
 
 \libname assumes the existence of an unreliable failure detector. If a leader is
-slow or crashes, the failure detector will detect this and elect new leader.
-When a process becomes a leader, it needs to perform several steps to ensure it
-is the only leader of its groups. Those steps are: (1) increasing ballot number,
-in which that process becomes leader. (2) sending 1A message to all processes
-with new ballot number, and wait for the response of majority (3) ensure the
-logs of all processes are up-to-date
+slow or crashes, the failure detector will detect this and elect new leader from
+the candidate quorums. When a process becomes a leader, it needs to perform
+several steps to ensure it is the only leader of its groups. Those steps are:
+(1) increasing ballot number, in which that process becomes leader. (2) sending
+1A message to all processes with new ballot number, and wait for the response of
+majority (3) ensure the logs of all processes are up-to-date
 
 Firstly, the new leader must choose a new ballot number that is higher than all
 ballot numbers before. A process only reply to the message or timestamp that has
@@ -148,7 +152,6 @@ With the pending instances (the instances in the pending list without
 timestamps, or has not received majority of acks), leader can just rewrite new
 timestamp value with its new ballot number. In this case leader issues a RDMA
 WRITE-WITH-IMM which triggers a completion event at the receivers side.
-
 
 
 % not necessary
