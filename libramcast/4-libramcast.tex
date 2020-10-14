@@ -118,6 +118,8 @@ quorum, the message will be removed from the buffer.
 
 \subsection{Leader election}
 
+\input{algo-leader-election.tex}
+
 \libname assumes the existence of an unreliable failure detector. If a leader is
 slow or crashes, the failure detector will detect this and elect new leader from
 the candidate quorums. When a process becomes a leader, it needs to perform
@@ -127,31 +129,54 @@ several steps to ensure it is the only leader of its groups. Those steps are:
 majority (3) ensure the logs of all processes are up-to-date
 
 Firstly, the new leader must choose a new ballot number that is higher than all
-ballot numbers before. A process only reply to the message or timestamp that has
-a ballot number higher than its current value. The new ballot number will be
-included in each timestamp $ts$ of this leader later.
+ballot numbers before for its group. A process only reply to the message or
+timestamp that has a ballot number higher than its current value. The new ballot
+number will be included in each timestamp $ts$ of this leader later.
 
-Then the new leader needs to get the access to the exclusive memory space on (1)
-the followers of its local group, and (2) the leaders of other groups. In order
-to act as a leader, a node must get the write permission from majority of other
+The new leader needs to get the access to the exclusive memory space on (1) the
+followers of its local group, and (2) the leaders of other groups. In order to
+act as a leader, a node must get the write permission from majority of other
 processes in its group. In addition, to tolerate failure of the leaders of other
 groups, the new leader also need to get the write permission from majority of
 processes of other groups. The new leader request the access by issuing a RDMA
-Send (\lle{this could be a \rwrite}) that includes a new ballot number, the
-sequence number of the most recent deliver message. When a process receives this
-message, it checks if the ballot number is higher than its current ballot value,
-then revokes access of the old leader, and send a reply to the new leader with
-its current sequence number
+Send (\lle{this could be a \rwrite}) 1A message that includes a new ballot
+number all involved processes. Upon receiving such message, a process first
+checks if the proposed ballot number is higher than the current ballot number it
+stored. In such case, the process revokes access of the old leader, and replies
+to the new leader with an 1B message that also contains the status of all
+message it is processing (i.e., messages that are pending and messages that has
+been fulfilled and are waiting to be delivered)
 
-Finally, once the new leader receives reply from majority processes, it must
-ensure all remote logs are up-to-date with its own. If the sequence number of
-leader is smaller than follower, the leader should know that for missing
-instances, it can read the agreed timestamps from followers.
+Once the new leader receives 1B reply from majority processes of each group, it
+must ensure all remote logs are up-to-date with its own. If a message m is
+fulfilled in some processes, the leader stores it in a settled list. If a
+message is not fulfilled in any process, there are two cases: i)  the message
+does not have the timestamp or enough acknowledgements from quorum of processes
+of the group that has failed leader on any process ii) it does have such data on
+some processes.\lle{sloppy sentence}
 
-With the pending instances (the instances in the pending list without
-timestamps, or has not received majority of acks), leader can just rewrite new
-timestamp value with its new ballot number. In this case leader issues a RDMA
-WRITE-WITH-IMM which triggers a completion event at the receivers side.
+
+% If the
+% sequence number of leader is smaller than follower, the leader should know that
+% for missing instances, it can read the agreed timestamps from followers.
+
+% the
+% sequence number of the most recent delivered message to all involved processes.
+% When a process receives this message, it checks if the ballot number is higher
+% than its current ballot number, then revokes access of the old leader, and send a
+% reply to the new leader with its current sequence number.
+
+
+
+% Finally, once the new leader receives reply from majority processes, it must
+% ensure all remote logs are up-to-date with its own. If the sequence number of
+% leader is smaller than follower, the leader should know that for missing
+% instances, it can read the agreed timestamps from followers.
+
+% With the pending instances (the instances in the pending list without
+% timestamps, or has not received majority of acks), leader can just rewrite new
+% timestamp value with its new ballot number. In this case leader issues a RDMA
+% WRITE-WITH-IMM which triggers a completion event at the receivers side.
 
 
 % not necessary
