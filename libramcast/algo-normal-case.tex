@@ -13,8 +13,8 @@
 	\COMMENT{set of message already ordered, to be delivered}
 	\STATE $pending_{ts} \leftarrow \emptyset$
 	\COMMENT{set of pending slots for timestamps}
-	\STATE $pending_{ack} \leftarrow \emptyset$
-	\COMMENT{set of pending slots for acknowledgements}
+	% \STATE $pending_{ack} \leftarrow \emptyset$
+	% \COMMENT{set of pending slots for acknowledgements}
 	\STATE $bal \leftarrow 0$
 	\COMMENT{ballot number}
 	\STATE $seq \leftarrow 0$
@@ -68,12 +68,12 @@
 		\STATE $pending \leftarrow pending \cup \{m\}$
 		\COMMENT{include m in pending messages set}
 		% \COMMENT{polling timestamp of leader of its own group}
-		\STATE $pending_{ack} \leftarrow pending_{ack} \cup \{\langle m_{id}, G \rangle \mid \forall G, G \in m.dest \}$
+		\STATE $pending_{ts} \leftarrow pending_{ts} \cup \{\langle m_{id}, G \rangle \mid \forall G, G \in m.dest \}$
 	\ENDUPON
 	\vspace{2.0mm}
 
 	\WHEN{true}
-		\IF[\textbf{Task 5} ]{$ \exists \langle m_{id}, G \rangle \in pending_{ack} : ts_G \neq 0 $}
+		\IF[\textbf{Task 5} ]{$ \exists \langle m_{id}, G \rangle \in pending_{ts} : ts_G \neq 0 $}
 			\STATE $ts \leftarrow max(ts, ts_G)$
             		\COMMENT{Lamport’s rule to update logical clocks}
             		\FORALL {$p \in m.dest$}
@@ -81,11 +81,11 @@
             			\COMMENT{remote-write P's ack to memory of all involved processes}
             		\ENDFOR
 
-			\STATE $pending_{ack} \leftarrow pending_{ack}$ \textbackslash $\{ \langle m_{id}, G \rangle \}$
+			% \STATE $pending_{ack} \leftarrow pending_{ack}$ \textbackslash $\{ \langle m_{id}, G \rangle \}$
             		\STATE $pending_{ts} \leftarrow pending_{ts} \cup \{ \langle m_{id}, G, c_w \rangle \}$
             		\COMMENT{include $\langle ts_l, c_w, m \rangle$ in pending timestamps set}
 
-			\WHILE{$\exists \langle m_{id}, G, c_w \rangle \in pending_{ts} : c_w = curSeq + 1$}
+			\WHILE[refer to note]{$\exists \langle m_{id}, G, c_w \rangle \in pending_{ts} : c_w = curSeq + 1$}
             			\STATE $pending_{ts} \leftarrow pending_{ts}$ \textbackslash $\{\langle m_{id}, G \rangle\}$
             			\COMMENT{remove $\langle m_{id}, G \rangle$ from ts pending set}
             			\STATE  $curSeq = curSeq + 1$

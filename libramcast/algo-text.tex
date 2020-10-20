@@ -1,0 +1,99 @@
+%!TEX root =  main.tex
+\begin{algorithm*}
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\INIT
+	\STATE $ts \leftarrow 0$
+	\COMMENT{P's logical clock}
+	\STATE $pending \leftarrow \emptyset$
+	\COMMENT{set of messages to be ordered}
+	\STATE $ordered \leftarrow \emptyset$
+	\COMMENT{set of messages already ordered, to be delivered}
+	% \STATE $pending_{ts} \leftarrow \emptyset$
+	% \COMMENT{set of pending slots for timestamps}
+	% \STATE $pending_{ack} \leftarrow \emptyset$
+	% \COMMENT{set of pending slots for acknowledgements}
+	\STATE $bal \leftarrow 0$
+	\COMMENT{ballot number}
+	\STATE $seq \leftarrow 0$
+	\COMMENT{sequence number}
+	% \STATE $curSeq \leftarrow 0$
+	% \COMMENT{P's current sequence number}
+	% \STATE $\buffer \leftarrow NULL$
+	% \COMMENT{P's local buffer}
+	\vspace{2.0mm}
+\ENDINIT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{to a-mcast message m	:}}	
+	\FORALL[\textbf{Task 1}] {process $p$ in the destination $m.dst$}
+		\STATE{remote-write m to memory of $p$}
+	\ENDFOR
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{leader process $P_L$ of group $G$}}
+	\UPON{receiving message $m$ in local buffer}
+		\STATE{increase local clock $ts$}
+		\STATE{increase sequence number $seq$}
+		\STATE{$dest$ = set of all processes in $G$ and all leaders of involved groups}
+		\FORALL{process $p$ in the $dest$}
+			\STATE{remote-write $P_l$'s timestamp that composed of local clock $ts$, ballot $bal$ and sequence $seq$ to all process $p$}
+		\ENDFOR
+	\ENDUPON
+	\vspace{1.0mm}
+
+	\UPON{receiving timestamp $[ ts_l, bal_l, seq_l ]$ of a leader $P_l$ in local buffer}
+		\STATE{increase sequence number $seq$}
+		\FORALL{process $p$ in the $G$}
+			\STATE{remote-write $P_l$'s timestamp $[ts_l, bal_l, seq]$ to all process $p$}
+		\ENDFOR
+		\STATE{update $P_L$ local clock = $max(ts, ts_l)$}
+	\ENDUPON
+	\vspace{1.0mm}
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{\colorbox{\coloralgo}{any process $P$ of group $G$}}
+	\UPON{receiving message $m$ in local buffer}
+		\STATE{add $m$ to set of pending messages $pending$}
+		% \STATE{$acks_m$ = set of acknowledgements from all involved processes of $m$}
+		% \STATE{$ts_m$ = set of timestamps from all involved groups of $m$}
+		% \STATE{add $ack_m$ to the set of pending acknowledgements $pending_{ack}$}
+		% \STATE{add $ts_m$ to the set of pending timestamps $pending_{ts}$}
+		\WHEN{is running}
+			\FORALL{message $m$ in the set of pending messages $pending$}
+				\UPON{receiving timestamp $[ ts_l, bal_l, seq_l ]$ of group $G$ of $m$ in local buffer}
+					\STATE{update $P$ local clock = $max(ts, ts_l)$}
+					\FORALL[] {process $q$ in the destination $m.dst$}
+						\STATE{remote-write $[P, ack, bal_l]$ to memory of $q$}
+					\ENDFOR					
+				\ENDUPON
+
+				\WHILE{exist message $m \in pending$ so that m is fulfilled}
+					\STATE $finalTs_m$: the largest timestamp populated by all leaders
+					\STATE remove m from $pending$ set
+					\STATE add $\langle m, finalTS_m \rangle$ to $ordered$ set
+				\ENDWHILE
+
+				\WHILE{exist message $m \in ordered$ so that m's final timestamp less then timestamps of all messages in $pending$ and on $ordered$}
+					\STATE $finalTs_m$: the largest timestamp populated by all leaders
+					\STATE remove $m$ from $ordered$ set
+					\STATE deliver $m$
+				\ENDWHILE
+
+			\ENDFOR			
+		\ENDWHEN
+	\ENDUPON
+	\vspace{1.0mm}
+\ENDINDENT
+
+\vspace{2.0mm}
+
+
+\caption{Normal case execution}
+\label{alg:normal_case}
+\end{distribalgo}
+\end{algorithm*}
