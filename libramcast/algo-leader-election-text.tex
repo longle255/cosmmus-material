@@ -1,0 +1,119 @@
+%!TEX root =  main.tex
+\begin{algorithm*}
+  \footnotesize
+  
+  \begin{distribalgo}[1]
+  
+  \INIT
+    \STATE $\Pi \leftarrow \{p_1, p_2, ..., p_n\}$
+    \COMMENT{Set of all processes in the system}    
+    \STATE $\Gamma \leftarrow \{G_1, G_2, ..., G_n\}$
+    \COMMENT{Set of process groups in the system}    
+    \STATE $\beta \leftarrow \emptyset$
+    \COMMENT{Map of ballot numbers stored for each group}
+    \STATE $\Delta \leftarrow \emptyset$
+    \COMMENT{Map of leader process of each group}
+    \STATE $M \leftarrow \emptyset$
+    \COMMENT{Map of messages and their status on each group}
+    \vspace{2.0mm}
+  \ENDINIT
+  \vspace{2.0mm}
+  
+  \INDENT{\colorbox{\coloralgo}{elected process $P_L$ of group G:}}
+    % \FORALL {$M \in \Gamma$}
+    %   \STATE $pending[g] \leftarrow \emptyset$
+    %   \STATE $ordered[g] \leftarrow \emptyset$
+    % \ENDFOR
+
+    \STATE $bal \leftarrow bal + 1$
+    \COMMENT{increase ballot number}
+    \FORALL[\textbf{Task 6}] {$p \in \Pi$}
+      \TRIGGER {$ \langle rdma, \SEND \mid p, [1A, G, P_L, bal] \rangle$}
+      \COMMENT{elected process sends 1A message to all processes of all groups}
+    \ENDFOR
+    \vspace{2.0mm}
+
+    \UPON[\textbf{Task 8} on receive 1B message from process $P$ of group Q]{$\langle \RECV \mid [1B, Q, state] \rangle$}
+      \FORALL {$m \in state$}
+        \STATE $M[m.id] \leftarrow M[m.id] \cup m$
+      \ENDFOR
+    \ENDUPON
+    \STATE{wait until receive 1B messages from quorum of all group $Q \in \Gamma$}
+
+    \STATE{$sync_{settle} \leftarrow \emptyset$}
+    \STATE{$sync_{reacked} \leftarrow \emptyset$}
+    \STATE{$sync_{reset} \leftarrow \emptyset$}
+
+    \FORALL {$m_{id} \in M$}      
+      \IF{m is fulfilled on some process $P \in m.dest$}
+        \STATE{$sync_{settle} \leftarrow sync_{settle} \cup m$}
+      \ELSE[m is not fulfilled on any process $P \in m.dest$]
+        % \STATE{$sync_{settle} \leftarrow sync_{settle} \cup m$}
+        \IF{timestamp of G reaches quorum of acks on some process $P \in m.dest$}
+          \STATE{$sync_{reacked} \leftarrow sync_{reacked} \cup m$}
+        \ELSE[timestamp of G does not reach quorum of acks on any process $P \in m.dest$]
+          \STATE{$sync_{reset} \leftarrow sync_{reset} \cup m$}
+        \ENDIF
+      \ENDIF 
+    \ENDFOR
+
+    \STATE $dest \leftarrow \{\forall p \mid p \in G\} \cup \{\forall p \in G_i \mid p.isLeader\}$
+		\COMMENT{set of all processes in G and all leaders}
+    \TRIGGER {$ \langle rdma, \SEND \mid p, [SYNC, P_L, sync_{settle}, sync_{acked}] \rangle$}
+    \COMMENT{send sync state}
+
+  \ENDINDENT
+  \vspace{2.0mm}
+  
+  \INDENT{\colorbox{\coloralgo}{any process P of group Q:}}
+    \UPON[\textbf{Task 7} on receive 1A message from process $P_L$ of group G with ballot number $bal$]{$\langle \RECV \mid [1A, G, P_L, bal] \rangle$}
+      \IF[if the ballot number is greater than stored ballot number of G]{$ bal > \beta[G]$}
+        \STATE{$\beta[G] \leftarrow bal$}
+        \COMMENT{update the local ballot number for group G}
+        \TRIGGER {$ \langle buffer, \REVOKEPERM \mid \Delta[G] \rangle$}
+        \COMMENT{revoke permission of the previous leader of group G}
+        \STATE{$\Delta[G] \leftarrow P_L$}
+        \COMMENT{update the leader of group G}      
+        \TRIGGER {$ \langle buffer, \GRANTPERM \mid \Delta[G] \rangle$}
+        \COMMENT{revoke permission of the previous leader of group G}
+        \STATE{$state \leftarrow \{ m \mid m \in pending \cup order \wedge Q \in m.dest \}$}
+        % \STATE{$state_o \leftarrow \{ m \mid m \in ordered \wedge Q \in m.dest \}$}        
+        \TRIGGER {$ \langle rdma, \SEND \mid P_L, [1B, Q, state] \rangle$}
+        \COMMENT{send back 1B message with the set of pending and ordered messages}
+      \ENDIF
+    \ENDUPON
+    \vspace{2.0mm}
+
+    \UPON[\textbf{Task 9} on receive SYNC message]{$\langle \RECV \mid [SYNC, P_L, sync_{settle}, sync_{reacked}, sync_{reset}] \rangle$}
+      \FORALL {$m \in sync_{settle}$}
+        \STATE{copy m state to local buffer}
+        \STATE{$ordered \leftarrow ordered \cup m$}
+        \COMMENT{update local state of m and add m to the queue to be delivered}
+      \ENDFOR
+      \FORALL {$m \in sync_{reacked}$}
+        \STATE{copy m state to local buffer}
+        \IF{P is Leader}
+          \STATE{perform \textbf{Task 3}}
+          \COMMENT{re-propagate m's timestamp}
+        \ELSE
+          \STATE{perform \textbf{Task 5}}
+          \COMMENT{re-ack for m's timestamp}
+        \ENDIF
+      \ENDFOR
+      \FORALL {$m \in sync_{reset}$}
+        \IF{P is $P_L$}
+          \STATE{perform \textbf{Task 2}}
+          \COMMENT{rerun whole process for m}
+        \ENDIF
+      \ENDFOR
+    \ENDUPON
+   
+  \ENDINDENT
+  \vspace{2.0mm}
+  
+  
+  \caption{Leader election and recovery}
+  \label{alg:normal_case}
+  \end{distribalgo}
+  \end{algorithm*}
+  

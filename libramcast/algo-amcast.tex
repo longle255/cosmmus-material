@@ -1,0 +1,116 @@
+%!TEX root =  main.tex
+\begin{algorithm*}
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\STATE{Each server contains a buffer $B[c]$ per client $c$}	
+\vspace{1.0mm}
+\INDENT{Each entry $B[c][i]$ contains the following information:}
+	\STATE $msg$: the message $m$ multicast by client $c$
+	\STATE $tmp$: the final timestamp of $m$, computed by the algorithm
+	\STATE $Slot[]$: buffer entry with message at each process
+	\STATE $ptmp[p]$: proposed timestamp for $m$ by leader process $p$
+	\STATE $round[p]$: round in which leader $p$ proposed timestamp
+	\STATE $ackd[p]$: acknowledgement of timestamp in $ptmp[p]$
+\ENDINDENT
+\vspace{1.0mm}
+\STATE{The structure $B[c]$ is shared between all servers and client $c$}
+\vspace{1.0mm}
+\STATE{Each client contains structure $Next[p]$ containing the next entry in the buffer at $p$}
+\vspace{1.0mm}
+
+\INDENT{Each server also $p$ contains:}
+	\STATE{$Leader[g]$ with the identifier of the leader at $g$ (as seen by $p$)}
+	\INDENT{$round$: $p$'s current round in any execution}
+		\STATE{incremented when becomes leader}
+		\STATE{unique per process}
+	\ENDINDENT
+	\STATE{$clock$: logical clock at process $p$}
+\ENDINDENT
+\vspace{1.0mm}
+
+\INDENT{Client $c$ proceeds as follows to multicast message $m$:}
+	\INDENT{for each $q$ in $m.dst$}
+		\STATE{increment $Next[q]$}
+	\ENDINDENT
+	\INDENT{for each $q$ in $m.dst$}
+		\STATE{WRITE $m$ in $@q$ $\rightarrow$ $B[c][Next[q]].msg$}
+		\COMMENT{\textbf{Task 1}}
+		\STATE{WRITE $Next$ in $@q$ $\rightarrow$ $B[c][Next[q]].Slot$}
+		\COMMENT{what is next}
+	\ENDINDENT
+\ENDINDENT
+\vspace{1.0mm}
+
+
+\INDENT[\textbf{Task 2}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] = null)$ and $(p = Leader[g])$}
+	\STATE{increment $clock$}
+	\INDENT{for each process $q$ in ${g \cup ( Leader \cap m.dst )}$}
+		\STATE{$j \leftarrow B[c][i].Slot[q]$}
+		\STATE{WRITE $clock$ in $@q \rightarrow B[c][j].ptmp[p]$}
+		\COMMENT{\textbf{Task 3}}
+		\STATE{WRITE $round$ in $@q \rightarrow B[c][j].round[p]$}
+		\INDENT{if write denied then}
+			\STATE{request permission (Phase 1)}
+			\STATE{re-execute \textbf{Task 2}}
+		\ENDINDENT
+	\ENDINDENT	
+\ENDINDENT
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 4}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] \neq null)$}
+	\STATE{$clock \leftarrow max\{clock, B[c][i].ptmp[p]\}$}
+	\STATE{remove $(m,-,group(p))$ from $pending$}
+	\STATE{include $(m,B[c][i].ptmp[p],group(p))$ in $pending$}
+	\INDENT{for each follower $q$ in $g$ and each process $q$ in group $h$ in $(m.dst \setminus g)$}
+		\STATE{$j \leftarrow B[c][i].Slot[q]$}
+		\STATE{WRITE $ACK$ in $@q \rightarrow B[c][j].ackd[p]$}
+		\COMMENT{\textbf{Task 5}}				
+	\ENDINDENT	
+\ENDINDENT
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 6}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] \neq null)$}
+	\STATE{$clock \leftarrow max\{clock, B[c][i].ptmp[p]\}$}
+	\STATE{remove $(m,-,group(p))$ from $pending$}
+	\STATE{include $(m,B[c][i].ptmp[p],group(p))$ in $pending$}
+	\INDENT{for each follower $q$ in $g$}
+		\STATE{$j \leftarrow B[c][i].Slot[q]$}
+		\STATE{WRITE $B[c][i].ptmp[p]$ in $@q \rightarrow B[c][j].ptmp[p]$}
+		\STATE{WRITE $B[c][i].round[p]$ in $@q \rightarrow B[c][j].round[p]$}		
+		\COMMENT{\textbf{Task 7}}				
+		\INDENT{if write denied then}
+			\STATE{request permission (Phase 1)}
+			\STATE{re-execute \textbf{Task 2}}
+		\ENDINDENT
+	\ENDINDENT	
+\ENDINDENT
+\vspace{1.0mm}
+
+\INDENT[\textbf{Task 8}]{when there is message $m$ in $B[c][i].msg$ such that $m$ is not in $ordered$}
+	\INDENT{for each group $h$ in $m.dst$: there is a quorum $Q$ in $h$ such that }
+		\INDENT{for each $q$ in $Q$: $B[c,i].ackd[q] = ACK$}
+			\STATE{$t_{final} \leftarrow max\{ t | B[c,i].ptmp[Leader[k]] \wedge k \in m.dst \}$}
+			\STATE{include $(m,t_{final})$ in $ordered$}
+			\STATE{remove $(m,-,-)$ from $pending$}		
+		\ENDINDENT
+	\ENDINDENT	
+\ENDINDENT
+\vspace{1.0mm}
+
+
+\INDENT[\textbf{Task 9}]{when there is $(m,t_{final})$ in $ordered$ and }
+	\STATE{there is no $(m',t_{final}')$ in $ordered$ such that $m' < m$ and}
+	\INDENT{there is no $(m',tmp, h)$ in $pending$ such that $tmp < m$}
+		\STATE{deliver $m$}
+		\STATE{remove $(m,-)$ from $ordered$}		
+	\ENDINDENT
+\ENDINDENT
+\vspace{1.0mm}
+
+
+\caption{Algorithm}
+\label{alg:normal_case}
+\end{distribalgo}
+\end{algorithm*}

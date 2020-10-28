@@ -1,0 +1,51 @@
+%!TEX root =  main.tex
+\begin{algorithm*}
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\INDENT{Process $p$ proceeds as follows to request permission $m$:}	
+	\STATE{increment $round$}
+	\INDENT{for each $q$ in $N$}
+		\STATE{send $(request_permission)$ to $q$}
+	\ENDINDENT
+	\INDENT{for each group $h$}
+		\STATE{wait for a quorum of responses $(1B,round,tmp)$ from $h$}
+		\STATE{$(round, tmp) \leftarrow$  the largest round received}
+		\INDENT{if $round=0$}
+			\STATE{propose $p$'s clock}
+		\ENDINDENT
+		\INDENT{else}
+			\STATE{propose $tmp$}
+		\ENDINDENT
+	\ENDINDENT
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{when receive $(request_permission)$ from $q$ in $h$}	
+	\STATE{send $(1B,Round[h],B[c,i].prop[p])$ to $q$}
+	\STATE{$Round[h] \leftarrow round$}
+	\STATE{$Leader[h] \leftarrow q$}
+	\STATE{grant permission to $q$}	
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{when suspect $Leader[group(p)]$ and ($p$ is next leader in $group(p)$)}	
+	\STATE{request permission (Phase 1)}	
+\ENDINDENT
+\vspace{2.0mm}
+
+\INDENT{when $p$ suspects that $c$ has failed}	
+	\STATE{let $i$ be the last entry in $B[c]$ such that $B[c][i].msg \neg null$}	
+	\INDENT{for each $q$ in $m.dst$}
+		\STATE{$j \leftarrow B[c][i].Slot[q]$}
+		\STATE{WRITE $B[c][i].msg$ in $@q \rightarrow B[c][j].msg$}
+		\STATE{WRITE $B[c][i].Slot$ in $@q \rightarrow B[c][j].Slot$}		
+	\ENDINDENT
+\ENDINDENT
+\vspace{2.0mm}
+
+\caption{Request permission}
+\label{alg:normal_case}
+\end{distribalgo}
+\end{algorithm*}

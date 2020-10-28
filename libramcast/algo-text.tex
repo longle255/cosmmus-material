@@ -67,7 +67,7 @@
 			\FORALL{message $m$ in the set of pending messages $pending$}
 				\UPON{receiving timestamp $[ ts_l, bal_l, seq_l ]$ of group $G$ of $m$ in local buffer}
 					\STATE{update $P$ local clock = $max(ts, ts_l)$}
-					\FORALL[] {process $q$ in the destination $m.dst$}
+					\FORALL[] {process $q$ in the destination $m.dst$ and $q$ is not leader of group $G$}
 						\STATE{remote-write $[P, ack, bal_l]$ to memory of $q$}
 					\ENDFOR					
 				\ENDUPON
