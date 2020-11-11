@@ -29,37 +29,49 @@
 	\STATE{$clock$: logical clock at process $p$}
 \ENDINDENT
 \vspace{1.0mm}
+\caption{Data structures}
+\label{alg:data_struct}
+\end{distribalgo}
+\end{algorithm*}
+
+\newcommand{\rdwrite}[3]{WRITE\ensuremath{(@#1\!\rightarrow\!#2, #3)}}	% rdwrite(addr,val) 
+%\newcommand{\rmm}[2]{\ensuremath{@#1\!\rightarrow\!#2}}
+\newcommand{\band}{\textbf{and}}
+
+\begin{algorithm*}
+\footnotesize
+
+\begin{distribalgo}[1]
 
 \INDENT{Client $c$ proceeds as follows to multicast message $m$:}
+%	\INDENT{for each $q$ in $m.dst$}
+%		\STATE{increment $Next[q]$}
+%	\ENDINDENT
+	\STATE for each $q$ in $m.dst$: increment $Next[q]$
 	\INDENT{for each $q$ in $m.dst$}
-		\STATE{increment $Next[q]$}
-	\ENDINDENT
-	\INDENT{for each $q$ in $m.dst$}
-		\STATE{WRITE $m$ in $@q$ $\rightarrow$ $B[c][Next[q]].msg$}
-		\COMMENT{\textbf{Task 1}}
-		\STATE{WRITE $Next$ in $@q$ $\rightarrow$ $B[c][Next[q]].Slot$}
-		\COMMENT{what is next}
+		\STATE \rdwrite{q}{B[c][Next[q]].msg}{$m$}
+%		\COMMENT{\textbf{Task 1}}
+		\STATE \rdwrite{q}{B[c][Next[q]].Slot}{$Next$}
 	\ENDINDENT
 \ENDINDENT
 \vspace{1.0mm}
 
 
-\INDENT[\textbf{Task 2}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] = null)$ and $(p = Leader[g])$}
-	\STATE{increment $clock$}
-	\INDENT{for each process $q$ in ${g \cup ( Leader \cap m.dst )}$}
-		\STATE{$j \leftarrow B[c][i].Slot[q]$}
-		\STATE{WRITE $clock$ in $@q \rightarrow B[c][j].ptmp[p]$}
-		\COMMENT{\textbf{Task 3}}
-		\STATE{WRITE $round$ in $@q \rightarrow B[c][j].round[p]$}
-		\INDENT{if write denied then}
+\WHEN[\textbf{Task 1}]{$\exists c, i:(B[c][i].msg \neq null)$ \band\ $(B[c][i].ptmp[p] = null)$ \band\ $(p = Leader[g])$}
+	\STATE{$clock \leftarrow clock + 1$}
+	\INDENT{for each $q$ in ${g \cup ( Leader \cap m.dst )}$}
+		\STATE $j \leftarrow B[c][i].Slot[q]$
+		\STATE \rdwrite{q}{B[c][j].ptmp[p]}{clock}
+		\STATE \rdwrite{q}{B[c][j].round[p]}{round}
+		\IF{write denied}
 			\STATE{request permission (Phase 1)}
-			\STATE{re-execute \textbf{Task 2}}
-		\ENDINDENT
+			\STATE{re-execute \textbf{Task 1}}
+		\ENDIF
 	\ENDINDENT	
-\ENDINDENT
+\ENDWHEN
 \vspace{1.0mm}
 
-\INDENT[\textbf{Task 4}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] \neq null)$}
+\WHEN[\textbf{Task 2}]{$(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] \neq null)$}
 	\STATE{$clock \leftarrow max\{clock, B[c][i].ptmp[p]\}$}
 	\STATE{remove $(m,-,group(p))$ from $pending$}
 	\STATE{include $(m,B[c][i].ptmp[p],group(p))$ in $pending$}
@@ -68,7 +80,7 @@
 		\STATE{WRITE $ACK$ in $@q \rightarrow B[c][j].ackd[p]$}
 		\COMMENT{\textbf{Task 5}}				
 	\ENDINDENT	
-\ENDINDENT
+\ENDWHEN
 \vspace{1.0mm}
 
 \INDENT[\textbf{Task 6}]{when $(B[c][i].msg \neq null)$ and $(B[c][i].ptmp[p] \neq null)$}
@@ -108,7 +120,6 @@
 	\ENDINDENT
 \ENDINDENT
 \vspace{1.0mm}
-
 
 \caption{Algorithm}
 \label{alg:normal_case}
