@@ -7,7 +7,7 @@
 \INDENT{Process $p$ proceeds as follows to request permission $m$:}	
 	\STATE{increment $round$}
 	\INDENT{for each $q$ in $N$}
-		\STATE{send $(request_permission)$ to $q$}
+		\STATE{send $(\textsf{req\_perm}, round)$ to $q$}
 	\ENDINDENT
 	\INDENT{for each group $h$}
 		\STATE{wait for a quorum of responses $(1B,round,tmp)$ from $h$}

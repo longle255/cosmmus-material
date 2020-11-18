@@ -1,41 +1,5 @@
 %!TEX root =  main.tex
 
-
-\begin{algorithm}
-\footnotesize
-
-\begin{distribalgo}[1]
-
-\STATE{Each server contains a buffer $B[c]$ per client $c$}	
-\vspace{1.0mm}
-\INDENT{Each entry $B[c,i]$ contains the following information:}
-	\STATE $msg$: the message $m$ multicast by client $c$
-	\STATE $tmp$: the final timestamp of $m$, computed by the algorithm
-	\STATE $Slot[]$: buffer entry with message at each process
-	\STATE $tmp[p]$: proposed timestamp for $m$ by leader process $p$
-	\STATE $rnd[p]$: round in which leader $p$ proposed timestamp
-	\STATE $ack[p]$: acknowledgement of timestamp in $tmp[p]$
-\ENDINDENT
-\vspace{1.0mm}
-\STATE{The structure $B[c]$ is shared between all servers and client $c$}
-\vspace{1.0mm}
-\STATE{Each client contains structure $Next[p]$ containing the next entry in the buffer at $p$}
-\vspace{1.0mm}
-
-\INDENT{Each server also $p$ contains:}
-	\STATE{$Leader[g]$ with the identifier of the leader at $g$ (as seen by $p$)}
-	\INDENT{$round$: $p$'s current round in any execution}
-		\STATE{incremented when becomes leader}
-		\STATE{unique per process}
-	\ENDINDENT
-	\STATE{$tmp$: logical timestamp counter at process $p$}
-\ENDINDENT
-\vspace{1.0mm}
-\caption{Data structures}
-\label{alg:data_struct}
-\end{distribalgo}
-\end{algorithm}
-
 \newcommand{\rdwrite}[3]{WRITE\ensuremath{(@#1\!\rightarrow\!#2, #3)}}	% rdwrite(addr,val) 
 %\newcommand{\rmm}[2]{\ensuremath{@#1\!\rightarrow\!#2}}
 \newcommand{\band}{\textbf{and}}
@@ -43,6 +7,45 @@
 \newcommand{\ack}{\textsf{ack}}
 \newcommand{\ordered}{\textsf{ordered}}
 \newcommand{\done}{\textsf{done}}
+\newcommand{\myack}{\textsf{ack}}
+
+\begin{algorithm}
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\STATE{Each server has a shared buffer $M$ with multicast messages and a protected buffer $T$ with message timestamps per client $c$}	
+\vspace{1.0mm}
+\INDENT{Each entry $M[c,i]$ contains the following information:}
+	\STATE $msg$: the message $m$ multicast by client $c$
+	\STATE $tmp$: the timestamp of $m$, computed by the algorithm
+	\STATE $dst$: destination groups $m$ is addressed to
+	\STATE $slot[]$: buffer entry with message at each process
+	\STATE $ack[p]$: acknowledgement of timestamp in $tmp[p]$
+	\STATE $stat$: state of message $m$: \mcast, \ordered\ or \done
+\ENDINDENT
+\vspace{1.0mm}
+\INDENT{Each entry $T[c,i]$ contains the following information:}
+	\STATE $tmp[g]$: timestamp proposed by group $g$
+	\STATE $rnd[g]$: round in which $g$'s leader proposed timestamp
+\ENDINDENT
+\vspace{1.0mm}
+\STATE{Each client has structure $next[p]$ containing the next entry in the buffer at $p$}
+\vspace{1.0mm}
+
+\INDENT{Each server $p$ at group $g$ also has:}
+	\STATE{$Leader[g]$ the identifier of the leader at $g$ (as seen by $p$)}
+%	\INDENT{$round$: $p$'s current round in any execution}
+%		\STATE{incremented when becomes leader}
+%		\STATE{unique per process}
+%	\ENDINDENT
+	\STATE{$clock$: logical timestamp counter at process $p$}
+\ENDINDENT
+\vspace{1.0mm}
+\caption{Data structures}
+\label{alg:data_struct}
+\end{distribalgo}
+\end{algorithm}
 
 \begin{algorithm}
 \footnotesize
@@ -51,9 +54,6 @@
 
 \STATE{Client $c$ multicasts message $m$ to groups in $dst$ as follows:}
 \vspace{1.0mm}
-%	\INDENT{for each $q$ in $m.dst$}
-%		\STATE{increment $Next[q]$}
-%	\ENDINDENT
 	\STATE for each $h$ in $dst$: for each $q$ in $h$: increment $next[q]$
 	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
 		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
@@ -61,19 +61,17 @@
 		\STATE \rdwrite{q}{M[c,next[q]].slot}{next}
 		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
 		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
-%		\COMMENT{\textbf{Task 1}}
 	\ENDINDENT
 \vspace{1.0mm}
 
-
 \STATE Server $p$ in group $g$ executes as follows:
 \vspace{1.0mm}
-\WHEN[\textbf{Task 1}]{$\exists c, k:\!M[c,k].stat =$ \mcast\ \band\ 
-		$p \in Leader$}
-	\STATE increment$(clock)$
-	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,k].dst$}
-		\STATE $i \leftarrow M[c,k].slot[q]$
-		\STATE \rdwrite{q}{T[c,i].tmp[g]}{clock}
+\WHEN[\textbf{Task 1}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
+		$p\!=\!Leader[g]$\hspace{-2mm}}
+	\STATE increment $clock$
+	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
+		\STATE $j \leftarrow M[c,i].slot[q]$
+		\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
 		\IF{write denied}
 			\STATE request permission (Phase 1)
 			\STATE end task
@@ -82,30 +80,22 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 2}]{$\exists c, k\!:\!M[c,k].stat =$ \mcast\ \band \\
-		\hspace{14mm} $T[c,k].tmp[g] \neq \perp$\hspace{-2mm}}
-	\STATE update$(clock, T[c,k].tmp[g])$
-%	\STATE{remove $(m, -, g)$ from $pending$}
-%	\COMMENT{Needed???}
-%	\STATE{include $(m,B[c,i].tmp[p], g)$ in $pending$}
-	\INDENT{for each process $q$ in $M[c,k].dst$}
-		\STATE $i \leftarrow M[c,k].slot[q]$
-		\STATE \rdwrite{q}{M[c,i].ack[p]}{\texttt{ACK}}
+\WHEN[\textbf{Task 2}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
+		\hspace{14mm} $T[c,i].tmp[g]\!\neq\!0$\hspace{-2mm}}
+	\STATE update $clock$ with $T[c,i].tmp[g]$
+	\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}
+		\STATE $j \leftarrow M[c,i].slot[q]$
+		\STATE \rdwrite{q}{M[c,j].ack[p]}{\myack}
 	\ENDINDENT	
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 3}]{$\exists c, k, h\!:\!M[c,k].stat =$ \mcast\ \band \\
-		\hspace{14mm} $T[c,k].tmp[h] \neq \perp$ \band\ $h \neq g$ \hspace{-2mm}}
-	\STATE update$(clock, T[c,k].tmp[h])$
-%	\STATE{remove $(m,-,g)$ from $pending$}
-%	\STATE{include $(m,B[c,i].tmp[p],g)$ in $pending$}
+\WHEN[\textbf{Task 3}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
+		\hspace{14mm} $T[c,i].tmp[h] \neq 0$ \band\ $h \neq g$ \hspace{-2mm}}
+	\STATE update $clock$ with $T[c,i].tmp[g]$
 	\INDENT{for each follower $q$ in $g$}
-		\STATE{$i \leftarrow M[c,k].slot[q]$}
-%		\STATE{WRITE $B[c,i].tmp[p]$ in $@q \rightarrow B[c,j].tmp[p]$}
-		\STATE \rdwrite{q}{T[c,i].tmp[h]}{T[c,k].tmp[h]}
-%%%		\STATE \rdwrite{q}{T[c,i].tmp[h]}{T[c,k].tmp[h]}
-%		\STATE{WRITE $B[c,i].rnd[p]$ in $@q \rightarrow B[c,j].rnd[p]$}		
+		\STATE{$j \leftarrow M[c,i].slot[q]$}
+		\STATE \rdwrite{q}{T[c,j].tmp[h]}{T[c,i].tmp[h]}
 		\INDENT{if write denied then}
 			\STATE{request permission (Phase 1)}
 			\STATE end task
@@ -114,13 +104,13 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 4}]{$\exists c, k, h\!:\!M[c,k].stat =$ \mcast\ \band \\
-	$\exists Q$ in $h$: for each $q$ in $Q$: $M[c,k].ack[q] = \ack$}
-			\STATE $M[c,k].tmp \leftarrow$ \\
-				\hspace{10mm} $max\{ M[c,k].tmp, M[c,k].tmp[Leader[h]] \}$
-			\IF{for each group $h$ in $M[c,k].dst$: $\exists Q$ in $h$: \\
-	\hfill for each $q$ in $Q$: $M[c,k].ack[q] = \ack$}
-						\STATE $M[c,k].stat \leftarrow$ \ordered
+\WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
+	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = \ack$}
+			\STATE $M[c,i].tmp \leftarrow$ \\
+				\hspace{10mm} $max\{ M[c,i].tmp, M[c,i].tmp[Leader[h]] \}$
+			\IF{for each group $h$ in $M[c,i].dst$: $\exists\!$ quorum $Q$ in $h$: \\
+	\hfill for each $q$ in $Q$: $M[c,i].ack[q] = \ack$}
+						\STATE $M[c,i].stat \leftarrow$ \ordered
 			\ENDIF
 %			\STATE{include $(m,t_{final})$ in $ordered$}
 %			\STATE{remove $(m,-,-)$ from $pending$}		
@@ -128,12 +118,11 @@
 \vspace{1.0mm}
 
 
-\WHEN[\textbf{Task 5}]{$\exists c, k\!:\!M[c,k].stat =$ \ordered\ \band \\
-	\hspace{10mm} $\nexists d,l\!:\!M[d,l].stat \in \{ \ordered, \mcast \}$ \band\ \\
-	\hspace{10mm} $M[d,l].tmp < M[c,k].tmp$}
+\WHEN[\textbf{Task 5}]{$\exists c, i\!:\!M[c,i].stat =$ \ordered\ \band \\
+	\hspace{10mm} $\nexists d,j\!:\!M[d,j].stat \in \{ \ordered, \mcast \}$ \band\ \\
+	\hspace{10mm} $M[d,j].tmp < M[c,i].tmp$}
 		\STATE{deliver $m$}
-		\STATE $M[c,k].stat \leftarrow$ \done
-%		\STATE{remove $(m,-)$ from $ordered$}		
+		\STATE $M[c,i].stat \leftarrow$ \done
 \ENDWHEN
 \vspace{1.0mm}
 
