@@ -4,48 +4,78 @@
 
 \begin{distribalgo}[1]
 
-\INDENT{Process $p$ proceeds as follows to request permission $m$:}	
-	\STATE{increment $round$}
-	\INDENT{for each $q$ in $N$}
+\WHEN[\textbf{Task 6}]{suspect $Leader[g]$ and $p$ is $g$'s next leader}	
+	\STATE increment $round$
+	\STATE increment $clock$
+	\INDENT{for each group $h$, for each $q$ in $h$}
 		\STATE{send $(\textsf{req\_perm}, round)$ to $q$}
+
 	\ENDINDENT
-	\INDENT{for each group $h$}
-		\STATE{wait for a quorum of responses $(1B,round,tmp)$ from $h$}
-		\STATE{$(round, tmp) \leftarrow$  the largest round received}
-		\INDENT{if $round=0$}
-			\STATE{propose $p$'s clock}
+	\STATE{wait for quorum $Q$ of responses $(\textsf{granted}, pending)$ from $g$}
+	\INDENT{for each $c,i$ in received $pending$}
+		\STATE let $T[c,i].rnd[g]$ be such that \\
+			\hfill $\nexists j$ such that $T[c,j].rnd[g] > T[c,i].rnd[g]$
+		\STATE \textbf{wait until} $M[c,i].stat = \mcast$
+		\STATE \textbf{if} $T[c,i].rnd[g] > 0$ \textbf{then} $t \leftarrow T[c,i].rnd[g]$
+		\STATE \textbf{else} $t \leftarrow clock$
+		\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
+			\STATE $j \leftarrow M[c,i].slot[q]$
+			\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
+			\STATE \rdwrite{q}{T[c,j].rnd[g]}{round}
+			\STATE \textbf{if} write denied \textbf{then} end task
+		\ENDINDENT	
+%		\IF{$T[c,i].rnd[g] > 0$}
+%			\STATE $t \leftarrow T[c,i].rnd[g]$
+%		\ELSE
+%			\STATE $t \leftarrow clock$
+%		\ENDIF
+		
+%	\INDENT{for each group $h$}
+%		\STATE{wait for a quorum $Q$ of responses $(1B,round,tmp)$ from $h$}
+%		\STATE{$(round, tmp) \leftarrow$  the largest round received}
+%		\INDENT{if $round=0$}
+%			\STATE{propose $p$'s clock}
+%		\ENDINDENT
+%		\INDENT{else}
+%			\STATE{propose $tmp$}
+%		\ENDINDENT
+	\ENDINDENT
+	\STATE{$Leader[g] \leftarrow p$}
+\ENDWHEN
+\vspace{2.0mm}
+
+\WHEN[\textbf{Task 7}]{receive $(\textsf{req\_perm}, round)$ from $q$ in $h$}	
+	\IF{$round > Round[h]$}
+		\STATE{grant permission to $q$}
+		\IF{$h=g$}
+			\STATE $pending \leftarrow \emptyset$
+			\INDENT{for each $c$ and $i$ such that $M[c,i].stat = \mcast$}
+				\STATE $pending \leftarrow pending\ \cup$ \\
+					\hfill $(c,i,T[c,i].tmp[g],T[c,i].rnd[g])$
+			\ENDINDENT
+			\STATE{send $(\textsf{granted},pending)$ to $q$}
+		\ENDIF
+		\STATE{$Round[h] \leftarrow round$}
+		\STATE{$Leader[h] \leftarrow q$}
+	\ENDIF
+\ENDWHEN
+\vspace{2.0mm}
+
+\WHEN[\textbf{Task 8}]{suspect client $c$}	
+	\INDENT{for each $i$ such that $M[c,i].stat = \mcast$}
+		\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}
+			\STATE $j \leftarrow M[c,i].ptr[q]$
+			\STATE \rdwrite{q}{M[c,j].msg}{M[c,i].msg}
+			\STATE \rdwrite{q}{M[c,j].dst}{M[c,i].dst}
+			\STATE \rdwrite{q}{M[c,j].ptr}{M[c,i].ptr}
+			\STATE \rdwrite{q}{M[c,j].tmp}{0}
+			\STATE \rdwrite{q}{M[c,j].stat}{\mcast}
 		\ENDINDENT
-		\INDENT{else}
-			\STATE{propose $tmp$}
-		\ENDINDENT
 	\ENDINDENT
-\ENDINDENT
+\ENDWHEN
 \vspace{2.0mm}
 
-\INDENT{when receive $(request_permission)$ from $q$ in $h$}	
-	\STATE{send $(1B,Round[h],B[c,i].prop[p])$ to $q$}
-	\STATE{$Round[h] \leftarrow round$}
-	\STATE{$Leader[h] \leftarrow q$}
-	\STATE{grant permission to $q$}	
-\ENDINDENT
-\vspace{2.0mm}
-
-\INDENT{when suspect $Leader[group(p)]$ and ($p$ is next leader in $group(p)$)}	
-	\STATE{request permission (Phase 1)}	
-\ENDINDENT
-\vspace{2.0mm}
-
-\INDENT{when $p$ suspects that $c$ has failed}	
-	\STATE{let $i$ be the last entry in $B[c]$ such that $B[c][i].msg \neg null$}	
-	\INDENT{for each $q$ in $m.dst$}
-		\STATE{$j \leftarrow B[c][i].Slot[q]$}
-		\STATE{WRITE $B[c][i].msg$ in $@q \rightarrow B[c][j].msg$}
-		\STATE{WRITE $B[c][i].Slot$ in $@q \rightarrow B[c][j].Slot$}		
-	\ENDINDENT
-\ENDINDENT
-\vspace{2.0mm}
-
-\caption{Request permission}
-\label{alg:normal_case}
+\caption{Handling failures and suspicions}
+\label{alg:failures}
 \end{distribalgo}
 \end{algorithm}

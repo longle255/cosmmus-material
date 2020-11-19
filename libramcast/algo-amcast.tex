@@ -20,7 +20,7 @@
 	\STATE $msg$: the message $m$ multicast by client $c$
 	\STATE $tmp$: the timestamp of $m$, computed by the algorithm
 	\STATE $dst$: destination groups $m$ is addressed to
-	\STATE $slot[]$: buffer entry with message at each process
+	\STATE $ptr[]$: buffer entry with message at each process
 	\STATE $ack[p]$: acknowledgement of timestamp in $tmp[p]$
 	\STATE $stat$: state of message $m$: \mcast, \ordered\ or \done
 \ENDINDENT
@@ -30,16 +30,14 @@
 	\STATE $rnd[g]$: round in which $g$'s leader proposed timestamp
 \ENDINDENT
 \vspace{1.0mm}
-\STATE{Each client has structure $next[p]$ containing the next entry in the buffer at $p$}
+\STATE{Each client has structure $next[p]$ with the next entry in $p$'s buffer}
 \vspace{1.0mm}
 
 \INDENT{Each server $p$ at group $g$ also has:}
-	\STATE{$Leader[g]$ the identifier of the leader at $g$ (as seen by $p$)}
-%	\INDENT{$round$: $p$'s current round in any execution}
-%		\STATE{incremented when becomes leader}
-%		\STATE{unique per process}
-%	\ENDINDENT
-	\STATE{$clock$: logical timestamp counter at process $p$}
+	\STATE $clock$: logical timestamp counter at process $p$
+	\STATE $round$: the round of process $p$, when leader
+	\STATE{$Leader[\ ]$ the identifier of the leader at $g$ (as seen by $p$)}
+	\STATE $Round[\ ]$: last accepted round per group
 \ENDINDENT
 \vspace{1.0mm}
 \caption{Data structures}
@@ -58,7 +56,7 @@
 	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
 		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
 		\STATE \rdwrite{q}{M[c,next[q]].dst}{dst}
-		\STATE \rdwrite{q}{M[c,next[q]].slot}{next}
+		\STATE \rdwrite{q}{M[c,next[q]].ptr}{next}
 		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
 		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
 	\ENDINDENT
@@ -70,46 +68,41 @@
 		$p\!=\!Leader[g]$\hspace{-2mm}}
 	\STATE increment $clock$
 	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
-		\STATE $j \leftarrow M[c,i].slot[q]$
+		\STATE $j \leftarrow M[c,i].ptr[q]$
 		\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
-		\IF{write denied}
-			\STATE request permission (Phase 1)
-			\STATE end task
-		\ENDIF
+		\STATE \rdwrite{q}{T[c,j].rnd[g]}{round}
+		\STATE \textbf{if} write denied \textbf{then} end task
 	\ENDINDENT	
 \ENDWHEN
 \vspace{1.0mm}
 
 \WHEN[\textbf{Task 2}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
-		\hspace{14mm} $T[c,i].tmp[g]\!\neq\!0$\hspace{-2mm}}
+		\hspace{14mm} $T[c,i].rnd[g] = Round[g]$}
 	\STATE update $clock$ with $T[c,i].tmp[g]$
-	\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}
-		\STATE $j \leftarrow M[c,i].slot[q]$
-		\STATE \rdwrite{q}{M[c,j].ack[p]}{\myack}
+	\INDENT{for each $h$ in $M[c,i].dst$, for each $q$ in $h$}
+		\STATE $j \leftarrow M[c,i].ptr[q]$
+		\STATE \rdwrite{q}{M[c,j].ack[p]}{Round[g]}
 	\ENDINDENT	
 \ENDWHEN
 \vspace{1.0mm}
 
 \WHEN[\textbf{Task 3}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
-		\hspace{14mm} $T[c,i].tmp[h] \neq 0$ \band\ $h \neq g$ \hspace{-2mm}}
-	\STATE update $clock$ with $T[c,i].tmp[g]$
+		\hspace{14mm} $T[c,i].rnd[h] = Round[h]$ \band\ $h \neq g$ \hspace{-2mm}}
+	\STATE update $clock$ with $T[c,i].tmp[h]$
 	\INDENT{for each follower $q$ in $g$}
-		\STATE{$j \leftarrow M[c,i].slot[q]$}
+		\STATE{$j \leftarrow M[c,i].ptr[q]$}
 		\STATE \rdwrite{q}{T[c,j].tmp[h]}{T[c,i].tmp[h]}
-		\INDENT{if write denied then}
-			\STATE{request permission (Phase 1)}
-			\STATE end task
-		\ENDINDENT
+		\STATE \textbf{if} write denied \textbf{then} end task
 	\ENDINDENT	
 \ENDWHEN
 \vspace{1.0mm}
 
 \WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
-	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = \ack$}
-			\STATE $M[c,i].tmp \leftarrow$ \\
-				\hspace{10mm} $max\{ M[c,i].tmp, M[c,i].tmp[Leader[h]] \}$
+	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
+			\STATE $M[c,i].tmp \leftarrow$ 
+				 $max\{ M[c,i].tmp, M[c,i].tmp[h] \}$
 			\IF{for each group $h$ in $M[c,i].dst$: $\exists\!$ quorum $Q$ in $h$: \\
-	\hfill for each $q$ in $Q$: $M[c,i].ack[q] = \ack$}
+	\hfill for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
 						\STATE $M[c,i].stat \leftarrow$ \ordered
 			\ENDIF
 %			\STATE{include $(m,t_{final})$ in $ordered$}
@@ -126,7 +119,7 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\caption{Algorithm}
+\caption{Normal case (no failures)}
 \label{alg:normal_case}
 \end{distribalgo}
 \end{algorithm}
