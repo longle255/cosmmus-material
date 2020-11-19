@@ -1,0 +1,152 @@
+\newcommand{\Pend}{\ensuremath{\mathit{ToOrder}}\xspace}
+\newcommand{\Done}{\ensuremath{\mathit{Ordered}}\xspace}
+\newcommand{\Decided}{\ensuremath{\mathit{Decided}}\xspace}
+\newcommand{\Buffer}{\ensuremath{\mathcal{B}}\xspace}
+
+\clearpage
+\section{Proof of correctness}
+
+%\setcounter{proposition}{2}
+\begin{proposition}
+\textit{Uniform integrity}:~For any process $p$ and any message $m$, $p$ a-delivers $m$ at most once, and only if $p\in m.\mathit{dst}$ and $m$ was previously a-multicast.\end{proposition}
+\noindent
+{\sc Proof:} 
+From $p$ to a-deliver $m$ (Task 5), $p$ assessed that for each $h$ in $m.dst$, there is a tuple $(\textsc{sync-hard}, h, x, m)$ in $\Buffer$.
+We show \textsc{sync-hard} tuples for $m$ are included only once in \Buffer.
+There are two cases in which tuple $(\textsc{sync-hard}, h, x, m)$ is included in $\Buffer$.
+In Task 4, $(\textsc{sync-hard}, h, x, m)$ is included in $\Buffer$ upon deciding on tuple $(\textsc{set-hard}, h, x, m)$ if $m$ is local and upon deciding on $(\textsc{sync-hard}, h, x, m)$ if $m$ is global. 
+For the first case to happen, $(\textsc{set-hard}, h, x, m)$ must be included in \Pend\ in Task 1, as the result of the r-delivery of $(\textsc{start},\bot,\bot,m)$.
+From the properties of reliable broadcast, such a message is delivered only once by $p$.
+The second case happens when a \textsc{sync-hard} tuple is in \Pend, which from Task 2, it is included only once.
+From Algorithm 2, it follows immediately that $p$ only a-delivers $m$ if $p$ is part of $m$'s addresses and $m$ is a-multicast.\hfill$\Box$
+
+\begin{lemma}
+If a correct process $p$ in $g$ includes tuple $T$ in \Pend, then eventually processes in $g$ decide on a sequence of tuples that contains $T$.
+\label{lemma:Y}
+\end{lemma}
+\noindent
+{\sc Proof:} 
+Process $p$ includes $T$ in \Pend either in Task 1 or in Task 2.
+In both cases, $T$ was r-delivered by $p$ and from the properties of reliable broadcast, every correct process in $g$ will r-deliver $T$ and include it in \Pend.
+Let $t$ be a time after which all faulty processes have failed.
+Thus, after $t$ there is a time when all \Pend sequences from processes that propose in consensus contain $T$.
+By the uniform integrity property of consensus, $T$ is eventually included in a decision of consensus.\hfill$\Box$
+
+
+\begin{lemma}
+For each correct process $p$ that has tuple $(\textsc{sync-hard}, h, x, m)$ in \Buffer, $p$ eventually replaces the entry by $(\textsc{final}, \bot, ts, m)$ in \Buffer where $ts$ is the maximum timestamp $x$ in the \textsc{sync-hard} tuples that concern $m$.
+\label{lemma:X}
+\end{lemma}
+\noindent
+{\sc Proof:} 
+To include $(\textsc{sync-hard}, h, x, m)$ in \Buffer, $p$ has decided on a sequence that contains either \\
+(a)~a $(\textsc{set-hard}, h, x, m)$ tuple if $m$ is local, or 
+(b)~a $(\textsc{sync-hard}, h, x, m)$ tuple if $m$ is global.
+In case (a), $(\textsc{sync-hard}, h, x, m)$ will be trivially replaced by $(\textsc{final}, \bot, x, m)$ in Task 5.
+In case (b), some process proposed a $\Pend \setminus \Done$ sequence that contains $(\textsc{sync-hard}, h, x, m)$.
+The \textsc{sync-hard} tuple is included in \Pend in Task 2 upon r-delivering tuple $(\textsc{send-hard}, h, x, m)$, which was r-multicast in Task 4, upon the decision of a sequence with $(\textsc{set-hard}, h, x, m)$.
+Thus, $(\textsc{set-hard}, h, x, m)$ was included in \Pend at Task 1, as a result of the r-delivery of $(\textsc{start}, \bot, \bot, m)$, which is r-multicast to all of $m$'s destinations.
+Every group $h$ in $m.dst$ upon r-delivering $(\textsc{start}, \bot, \bot, m)$ adds tuple $(\textsc{set-hard}, h, x, m)$ to \Pend, which from Lemma~\ref{lemma:Y} is eventually included in a consensus decision and results in the r-multicast of $(\textsc{send-hard}, h, x, m)$ to members of $m.dst$.
+When a process r-delivers $(\textsc{send-hard}, h, x, m)$, it adds $(\textsc{sync-hard}, h, x, m)$ to \Pend and, from Lemma~\ref{lemma:Y}, the tuple is decided in an instance of consensus, leading to the inclusion of $(\textsc{sync-hard}, h, x, m)$ in \Buffer.
+Once there is a tuple $(\textsc{sync-hard}, h, x, m)$ in \Buffer for each group $h$ in $m.dst$, $p$ replaces the \textsc{sync-hard} tuples by $(\textsc{final}, \bot, ts, m)$.\hfill$\Box$
+
+\begin{lemma}
+If a correct process $p$ includes $(\textsc{final}, \bot, ts, m)$ in \Buffer, then $p$ eventually a-delivers $m$.
+\label{lemma:Z}
+\end{lemma}
+\noindent
+{\sc Proof sketch:} 
+Assume for a contradiction that $q$ does not a-deliver $m$.
+Thus, there is some tuple $(z,h,y,m')$ in \Buffer such that $m \neq m'$ and $y < ts $.
+We first show that eventually any entry $(z,h,y,m')$ added in \Buffer after $(\textsc{final}, \bot, ts, m)$ is in \Buffer has a timestamp bigger than $ts$.
+Message $m$ only has a \textsc{final} tuple in \Buffer after it received \textsc{sync-hard} tuples from all of $m$'s destinations.
+When $q$ includes $(\textsc{sync-hard}, h, x, m)$ in \Buffer in Task 4, $q$ updates $C_h$ such that it contains the maximum between it current value and $x$.
+Since the next \textsc{set-hard} event that $q$ handles for a message $m''$ will increment $C_h$, it follows that $m''$ will have a timestamp bigger than $ts$.
+
+We now show that every message that contains a timestamp smaller than $m$'s final timestamp $ts$ is eventually a-delivered and removed from \Buffer.
+Let $(z,h,y,m')$ be an entry in \Buffer such that $y<ts$.
+Either $z$ is \textsc{final} or it is \textsc{sync-hard} and from Lemma~\ref{lemma:X} $z$ the tuple will eventually be replaced by a \textsc{final} tuple.
+Thus, from Task 5 message $m'$ will be eventually a-delivered and removed from \Buffer, a contradiction.
+We conclude then that $q$ eventually a-delivers $m$.\hfill$\Box$
+
+\setcounter{proposition}{3}
+\begin{proposition}
+\textit{Validity}:~If a correct process $p$ a-multicasts a message $m$, then eventually all correct processes $q \in m.\mathit{dst}$ a-deliver $m$.
+\end{proposition}
+\noindent
+{\sc Proof:} 
+Upon a-multicasting $m$, $p$ r-multicasts $(\textsc{start}, \bot, \bot, m)$ to all processes in $m.dst$ and from the validity and agreement properties of reliable broadcast, every correct $q$ in $m.dst$ will r-deliver $(\textsc{start}, \bot, \bot, m)$ in Task 1.
+By Task 1, $q$ includes $(\textsc{set-hard}, g, \bot, m)$ in \Pend and from Lemma~\ref{lemma:Y}, the tuple is eventually decided in some instance of consensus.
+If $m$ is global, $q$ r-multicasts $(\textsc{send-hard}, g, \bot, m)$ to all processes in $m.dst$; if $m$ is local, $q$ includes $(\textsc{sync-hard}, g, \bot, m)$ in \Buffer.
+In the first case, every correct process $r \in m.dst$ eventually r-delivers $(\textsc{send-hard}, g, \bot, m)$ and includes $(\textsc{sync-hard}, g, \bot, m)$  in \Pend.
+From Lemma~\ref{lemma:Y} the \textsc{sync-hard} tuple is eventually included in a consensus decision and from Task 4 in \Buffer.
+Therefore, eventually \textsc{sync-hard} tuples from every group in $m.dst$ are in \Buffer and $q$ replaces them by $(\textsc{final}, \bot, ts, m)$, where $ts$ is the maximum among the timestamps in the \textsc{sync-hard} tuples.
+From Lemma~\ref{lemma:Z}, $q$ eventually a-delivers $m$.\hfill$\Box$
+
+
+\setcounter{proposition}{4}
+\begin{proposition}
+\textit{Uniform agreement}:~If a process $p$ a-delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ a-deliver $m$.
+\end{proposition}
+\noindent
+{\sc Proof sketch:} 
+For process $p$ to a-deliver $m$, from Task 5 for every group $h$ in $m.dst$, there is a tuple $(\textsc{sync-hard}, h, x, m)$ in \Buffer.
+Moreover, there is no entry $(z, h', y, m')$ in \Buffer such that $m \neq m'$ and $ts < y$, where $ts$ is the maximum timestamp in the \textsc{sync-hard} tuples that concern $m$.
+We consider two cases.
+
+Case (a): $p$ and $q$ are in the same group $g$.
+Process $p$ adds tuples to \Buffer in Task 4 only, and every tuple added to \Buffer, which can be of type \textsc{set-hard} and \textsc{sync-hard}, is created from an entry in \Decided and variable $C_h$.
+Moreover, $C_h$ is modified only in Task 4, based on tuples in \Decided.
+Since $p$ and $q$ decide on the same sequence of consensus values, it follows that unless $q$ fails, it executes the same sequence of steps as $p$ and eventually a-delivers $m$.
+
+Case (b): $p$ and $q$ are in different groups.
+To include $(\textsc{sync-hard}, h, x, m)$ in \Buffer, $p$ has decided on a sequence that includes the tuple, for each group $h \in m.dst$.
+From consensus, some process $r$ proposed a sequence that contains $(\textsc{sync-hard}, h, x, m)$ in \Pend (Task 3).
+So, $r$ r-delivered tuple $(\textsc{send-hard}, h, x, m)$, which was r-multicast to all of $m$'s destinations in Task 4.
+As a consequence, processes in $q$'s group r-deliver message $(\textsc{send-hard}, h, x, m)$ and decide on a sequence that includes $(\textsc{sync-hard}, h, x, m)$.
+We conclude that $r$ adds $(\textsc{sync-hard}, h, x, m)$ to \Buffer, for each of $m$'s destinations $h$.
+From Lemma~\ref{lemma:Z}, $q$ eventually a-delivers $m$.\hfill$\Box$
+
+
+\begin{proposition}
+\textit{Uniform prefix order}:~For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $\lbrace p, q\rbrace \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ a-delivers $m$ and $q$ a-delivers $m'$, then either $p$ a-delivers $m'$ before $m$ or $q$ a-delivers $m$ before $m'$.
+\end{proposition}
+\noindent
+{\sc Proof:} 
+The proposition trivially holds if $p$ and $q$ are in the same group, so assume $p$ is in group $g$ and $q$ is in group $h$ and suppose, by way of contradiction, that $p$ does not a-deliver $m'$ before $m$ nor does $q$ a-deliver $m$ before $m'$. 
+Without loss of generality, suppose that $m.ts < m'.ts$. 
+
+We claim that $q$ inserts $m$ into \Buffer before a-delivering $m'$. 
+In order for $m$ (respectively, $m'$) to be a-delivered by $p$ (resp., $q$), $p$'s (resp., $q$'s) \Buffer must contain tuples $(\textsc{sync-hard}, g, x, m)$ and $(\textsc{sync-hard}, h, y, m)$ (resp., $(\textsc{sync-hard}, g, x', m')$ and $(\textsc{sync-hard}, h, y', m')$).
+From Task 4, for $p$ to include a \textsc{sync-hard} tuple in \Buffer, $p$ must have decided a sequence that contains $(\textsc{sync-hard}, g, x, m)$ (recall that $m$ is a global message).
+%either $(\textsc{set-hard}, g, x, m)$ and $m$ is local or $(\textsc{sync-hard}, g, x, m)$ and m is global.
+Thus, some process in $g$ included $(\textsc{sync-hard}, g, x, m)$ in \Pend, after r-delivering tuple  $(\textsc{send-hard}, g, x, m)$.
+With a similar argument, some process in $g$ included $(\textsc{sync-hard}, g, x', m')$ in \Pend, after r-delivering tuple $(\textsc{send-hard}, g, x', m')$.
+Let $r$ and $s$ be the processes that r-multicast messages $(\textsc{send-hard}, g, x, m)$ and $(\textsc{send-hard}, g, x', m')$, respectively, at Task 4.
+Therefore, $r$ and $s$ decided sequences that include the \textsc{set-hard} tuples.
+Assume that $(\textsc{set-hard}, g, x, m)$ is decided before $(\textsc{set-hard}, g, x', m')$.
+Therefore, before r-multicasting $(\textsc{send-hard}, g, x', m')$, $s$ r-multicast $(\textsc{send-hard}, g, x, m)$.
+From the FIFO properties of reliable multicast, $q$ r-delivered the tuples in the order above and we can show that $(\textsc{sync-hard}, g, x, m)$ appears in \Buffer before $(\textsc{set-hard}, g, x', m')$, which proves our claim.
+
+Consequently, from the claim, $q$ a-delivers $m$ before $m'$ since $m.ts_q < m'.ts_q$, a contradiction that concludes the proof.
+\hfill$\Box$
+
+\begin{proposition}
+\textit{Uniform acyclic order}:~The relation $<$ is acyclic.
+\end{proposition}
+\noindent
+{\sc Proof sketch:} 
+Suppose, by way of contradiction, that there exist messages $m_1, ..., m_k$ such that $m_1 < m_2 < ... < m_k < m_1$. 
+From Task 5, processes a-deliver messages following the order of their final timestamps.
+Thus, there must be processes $p$ and $q$ such that the final timestamps they assign to $m_1$, $m_1.ts_p$ and  $m_1.ts_q$, satisfy $m_1.ts_p < m_1.ts_q$, a contradiction since both $p$ and $q$ receive the same \textsc{sync-hard} tuples used to calculate $m_1$'s final timestamp in Task 5.
+
+
+\hfill$\Box$
+
+\begin{theorem}
+Algorithm~1 implements atomic multicast.
+\end{theorem}
+\noindent
+{\sc Proof:} 
+This follows directly from Propositions 3 through 7.\hfill$\Box$
+
