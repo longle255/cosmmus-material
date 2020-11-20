@@ -52,14 +52,15 @@
 
 \STATE{Client $c$ multicasts message $m$ to groups in $dst$ as follows:}
 \vspace{1.0mm}
-	\STATE for each $h$ in $dst$: for each $q$ in $h$: increment $next[q]$
-	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
-		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
-		\STATE \rdwrite{q}{M[c,next[q]].dst}{dst}
-		\STATE \rdwrite{q}{M[c,next[q]].ptr}{next}
-		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
-		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
-	\ENDINDENT
+	\STATE for each $h$ in $dst$, for each $q$ in $h$: increment $ptr[q]$
+	\STATE $Relay(c,msg,dst,ptr)$
+%	\INDENT{for each $h$ in $dst$}
+%		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
+%		\STATE \rdwrite{q}{M[c,next[q]].dst}{dst}
+%		\STATE \rdwrite{q}{M[c,next[q]].ptr}{next}
+%		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
+%		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
+%	\ENDINDENT
 \vspace{1.0mm}
 
 \STATE Server $p$ in group $g$ executes as follows:

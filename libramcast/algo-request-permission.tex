@@ -7,23 +7,33 @@
 \WHEN[\textbf{Task 6}]{suspect $Leader[g]$ and $p$ is $g$'s next leader}	
 	\STATE increment $round$
 	\STATE increment $clock$
-	\INDENT{for each group $h$, for each $q$ in $h$}
-		\STATE{send $(\textsf{req\_perm}, round)$ to $q$}
-
-	\ENDINDENT
-	\STATE{wait for quorum $Q$ of responses $(\textsf{granted}, pending)$ from $g$}
-	\INDENT{for each $c,i$ in received $pending$}
-		\STATE let $T[c,i].rnd[g]$ be such that \\
-			\hfill $\nexists j$ such that $T[c,j].rnd[g] > T[c,i].rnd[g]$
-		\STATE \textbf{wait until} $M[c,i].stat = \mcast$
-		\STATE \textbf{if} $T[c,i].rnd[g] > 0$ \textbf{then} $t \leftarrow T[c,i].rnd[g]$
-		\STATE \textbf{else} $t \leftarrow clock$
-		\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
-			\STATE $j \leftarrow M[c,i].slot[q]$
-			\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
-			\STATE \rdwrite{q}{T[c,j].rnd[g]}{round}
-			\STATE \textbf{if} write denied \textbf{then} end task
-		\ENDINDENT	
+	\INDENT{\textbf{for} each group $h$}
+		\STATE{\textbf{for} each $q$ in $h$: send $(\textsf{req\_perm}, round)$ to $q$}
+		\STATE{\textbf{wait} for responses $(\textsf{granted}, pend)$ from quorum $Q$ in $h$}
+		\STATE $bag \leftarrow$ union of all received $pend$ from $h$
+		\INDENT{\textbf{for} each $(c,msg,\star,\star,\star,\star)$ in $bag$}
+%		\INDENT{for each $(c,msg,dst,ptr,tmp,rnd)$ in received $pend$}
+			\STATE let $(c,msg,dst,ptr,tmp,rnd)$ in $bag$ be such that \\
+				\hfill $\nexists (c,msg,\star,\star,\star,rnd')$ in $bag$ \band\ $rnd' > rnd$
+%			\STATE \textbf{wait until} $M[c,i].stat = \mcast$
+		\STATE $Relay(c,msg,dst,ptr)$
+		\IF{$g=h$}
+			\STATE \textbf{if} $rnd > 0$ \textbf{then} $t \leftarrow tmp$ \textbf{else} $t \leftarrow clock$
+%			\STATE \textbf{else} $t \leftarrow clock$
+			\INDENT{\textbf{for} each $q$ in $g$ \band\ each leader $q$ in $dst$}
+%				\STATE $j \leftarrow ptr[q]$
+				\STATE \rdwrite{q}{T[c,ptr[q]].tmp[g]}{t}
+				\STATE \rdwrite{q}{T[c,ptr[q]].rnd[g]}{round}
+				\STATE \textbf{if} write denied \textbf{then} end task
+			\ENDINDENT	
+		\ELSE
+			\INDENT{for each $q$ in $g$}
+%				\STATE{$j \leftarrow ptr[q]$}
+				\STATE \rdwrite{q}{T[c,ptr[q]].tmp[h]}{tmp}
+				\STATE \textbf{if} write denied \textbf{then} end task
+			\ENDINDENT	
+		\ENDIF
+		\ENDINDENT
 %		\IF{$T[c,i].rnd[g] > 0$}
 %			\STATE $t \leftarrow T[c,i].rnd[g]$
 %		\ELSE
@@ -47,14 +57,13 @@
 \WHEN[\textbf{Task 7}]{receive $(\textsf{req\_perm}, round)$ from $q$ in $h$}	
 	\IF{$round > Round[h]$}
 		\STATE{grant permission to $q$}
-		\IF{$h=g$}
-			\STATE $pending \leftarrow \emptyset$
-			\INDENT{for each $c$ and $i$ such that $M[c,i].stat = \mcast$}
-				\STATE $pending \leftarrow pending\ \cup$ \\
-					\hfill $(c,i,T[c,i].tmp[g],T[c,i].rnd[g])$
-			\ENDINDENT
-			\STATE{send $(\textsf{granted},pending)$ to $q$}
-		\ENDIF
+		\STATE $pend \leftarrow \emptyset$
+		\INDENT{for each $c$ and $i$ such that \\
+				\hfill $M[c,i].stat = \mcast$ \band\ $h \in M[c,i].dst$}
+			\STATE $pend \leftarrow pend \cup (c,M[c,i].msg,M[c,i].dst,$ \\ 
+				\hfill $M[c,i].ptr,T[c,i].tmp[g],T[c,i].rnd[g])$
+		\ENDINDENT
+		\STATE{send $(\textsf{granted},pend)$ to $q$}
 		\STATE{$Round[h] \leftarrow round$}
 		\STATE{$Leader[h] \leftarrow q$}
 	\ENDIF
@@ -63,16 +72,27 @@
 
 \WHEN[\textbf{Task 8}]{suspect client $c$}	
 	\INDENT{for each $i$ such that $M[c,i].stat = \mcast$}
-		\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}
-			\STATE $j \leftarrow M[c,i].ptr[q]$
-			\STATE \rdwrite{q}{M[c,j].msg}{M[c,i].msg}
-			\STATE \rdwrite{q}{M[c,j].dst}{M[c,i].dst}
-			\STATE \rdwrite{q}{M[c,j].ptr}{M[c,i].ptr}
-			\STATE \rdwrite{q}{M[c,j].tmp}{0}
-			\STATE \rdwrite{q}{M[c,j].stat}{\mcast}
-		\ENDINDENT
+		\STATE $Relay(c,M[c,i].msg,M[c,i].dst,M[c,i].ptr)$
+%		\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}
+%			\STATE $j \leftarrow M[c,i].ptr[q]$
+%			\STATE \rdwrite{q}{M[c,j].msg}{M[c,i].msg}
+%			\STATE \rdwrite{q}{M[c,j].dst}{M[c,i].dst}
+%			\STATE \rdwrite{q}{M[c,j].ptr}{M[c,i].ptr}
+%%			\STATE \rdwrite{q}{M[c,j].tmp}{0}
+%			\STATE \rdwrite{q}{M[c,j].stat}{\mcast}
+%		\ENDINDENT
 	\ENDINDENT
 \ENDWHEN
+\vspace{2.0mm}
+
+\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
+	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
+		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
+		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
+		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
+		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
+	\ENDINDENT
+\ENDINDENT
 \vspace{2.0mm}
 
 \caption{Handling failures and suspicions}
