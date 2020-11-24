@@ -14,30 +14,30 @@
 
 \begin{distribalgo}[1]
 
-\STATE{Each server has a shared buffer $M$ with multicast messages and a protected buffer $T$ with message timestamps per client $c$}	
+\STATE{Each server has a shared buffer $M$, with multicast messages, and a protected buffer $T$, with message timestamps, per client $c$}	
 \vspace{1.0mm}
 \INDENT{Each entry $M[c,i]$ contains the following information:}
 	\STATE $msg$: the message $m$ multicast by client $c$
-	\STATE $tmp$: the timestamp of $m$, computed by the algorithm
+	\STATE $tmp$: the timestamp of $m$, initially 0
 	\STATE $dst$: destination groups $m$ is addressed to
-	\STATE $ptr[]$: buffer entry with message at each process
-	\STATE $ack[p]$: acknowledgement of timestamp in $tmp[p]$
-	\STATE $stat$: state of message $m$: \mcast, \ordered\ or \done
+	\STATE $ptr[p]$: position of $m$ in the buffer at $p$
+	\STATE $ack[g]$: acknowledgement of timestamp in $tmp[g]$
+	\STATE $stat$: state of $m$: $\perp$ (initially), \mcast, \ordered\ or \done
 \ENDINDENT
 \vspace{1.0mm}
 \INDENT{Each entry $T[c,i]$ contains the following information:}
 	\STATE $tmp[g]$: timestamp proposed by group $g$
-	\STATE $rnd[g]$: round in which $g$'s leader proposed timestamp
+	\STATE $rnd[g]$: round $g$'s leader, initially 0
 \ENDINDENT
 \vspace{1.0mm}
-\STATE{Each client has structure $next[p]$ with the next entry in $p$'s buffer}
+\STATE{Each client has structure $ptr[p]$ with the next entry in $p$'s buffer}
 \vspace{1.0mm}
 
 \INDENT{Each server $p$ at group $g$ also has:}
-	\STATE $clock$: logical timestamp counter at process $p$
-	\STATE $round$: the round of process $p$, when leader
-	\STATE{$Leader[\ ]$ the identifier of the leader at $g$ (as seen by $p$)}
-	\STATE $Round[\ ]$: last accepted round per group
+	\STATE $clock$: logical timestamp counter at $p$, initially 0
+	\STATE $round$: the round of $p$, when leader, initially 0
+	\STATE $Leader[g]$ the leader at $g$ (as seen by $p$), initially 0
+	\STATE $Round[g]$: last accepted round at $g$, initially 0
 \ENDINDENT
 \vspace{1.0mm}
 \caption{Data structures}
@@ -45,6 +45,7 @@
 \end{distribalgo}
 \end{algorithm}
 
+\clearpage
 \begin{algorithm}
 \footnotesize
 
@@ -52,7 +53,9 @@
 
 \STATE{Client $c$ multicasts message $m$ to groups in $dst$ as follows:}
 \vspace{1.0mm}
-	\STATE for each $h$ in $dst$, for each $q$ in $h$: increment $ptr[q]$
+	\INDENT[\textbf{Task 1}]{for each $h$ in $dst$, for each $q$ in $h$}
+		\STATE increment $ptr[q]$
+	\ENDINDENT
 	\STATE $Relay(c,msg,dst,ptr)$
 %	\INDENT{for each $h$ in $dst$}
 %		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
@@ -65,7 +68,7 @@
 
 \STATE Server $p$ in group $g$ executes as follows:
 \vspace{1.0mm}
-\WHEN[\textbf{Task 1}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
+\WHEN[\textbf{Task 2}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
 		$p\!=\!Leader[g]$\hspace{-2mm}}
 	\STATE increment $clock$
 	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
@@ -77,7 +80,7 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 2}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
+\WHEN[\textbf{Task 3}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
 		\hspace{14mm} $T[c,i].rnd[g] = Round[g]$}
 	\STATE update $clock$ with $T[c,i].tmp[g]$
 	\INDENT{for each $h$ in $M[c,i].dst$, for each $q$ in $h$}
@@ -87,7 +90,7 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 3}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
+\WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
 		\hspace{14mm} $T[c,i].rnd[h] = Round[h]$ \band\ $h \neq g$ \hspace{-2mm}}
 	\STATE update $clock$ with $T[c,i].tmp[h]$
 	\INDENT{for each follower $q$ in $g$}
@@ -98,7 +101,7 @@
 \ENDWHEN
 \vspace{1.0mm}
 
-\WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
+\WHEN[\textbf{Task 5}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
 	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
 			\STATE $M[c,i].tmp \leftarrow$ 
 				 $max\{ M[c,i].tmp, M[c,i].tmp[h] \}$
@@ -112,7 +115,7 @@
 \vspace{1.0mm}
 
 
-\WHEN[\textbf{Task 5}]{$\exists c, i\!:\!M[c,i].stat =$ \ordered\ \band \\
+\WHEN[\textbf{Task 6}]{$\exists c, i\!:\!M[c,i].stat =$ \ordered\ \band \\
 	\hspace{10mm} $\nexists d,j\!:\!M[d,j].stat \in \{ \ordered, \mcast \}$ \band\ \\
 	\hspace{10mm} $M[d,j].tmp < M[c,i].tmp$}
 		\STATE{deliver $m$}

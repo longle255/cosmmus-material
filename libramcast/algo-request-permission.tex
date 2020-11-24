@@ -4,7 +4,7 @@
 
 \begin{distribalgo}[1]
 
-\WHEN[\textbf{Task 6}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
+\WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
 	\STATE increment $round$
 	\STATE increment $clock$
 	\INDENT{\textbf{for} each group $h$}
@@ -13,7 +13,7 @@
 \ENDWHEN
 
 \vspace{2.0mm}		
-\WHEN[\textbf{Task 7}]{receive responses $(\textsf{granted}, pend)$ from \\
+\WHEN[\textbf{Task 8}]{receive responses $(\textsf{granted}, pend)$ from \\
 			\hspace{6mm} quorum $Q$ in $h$, including $p$'s response if $h=g$}
 		\STATE $bag \leftarrow$ union of all received $pend$ from $h$
 		\INDENT{\textbf{for} each $(c,msg,\star,\star,\star,\star)$ in $bag$}
@@ -21,7 +21,7 @@
 			\STATE let $(c,msg,dst,ptr,tmp,rnd)$ in $bag$ be such that \\
 				\hfill $\nexists (c,msg,\star,\star,\star,rnd')$ in $bag$ \band\ $rnd' > rnd$
 %			\STATE \textbf{wait until} $M[c,i].stat = \mcast$
-		\STATE $Relay(c,msg,dst,ptr)$
+%		\STATE $Relay(c,msg,dst,ptr)$
 		\IF{$g=h$}
 			\STATE \textbf{if} $rnd > 0$ \textbf{then} $t \leftarrow tmp$ \textbf{else} $t \leftarrow clock$
 %			\STATE \textbf{else} $t \leftarrow clock$
@@ -58,7 +58,7 @@
 \ENDWHEN
 \vspace{2.0mm}
 
-\WHEN[\textbf{Task 8}]{receive $(\textsf{req\_perm}, round)$ from $q$ in $h$}	
+\WHEN[\textbf{Task 9}]{receive $(\textsf{req\_perm}, round)$ from $q$ in $h$}	
 	\IF{$round > Round[h]$}
 		\STATE{grant permission to $q$}
 		\STATE $pend \leftarrow \emptyset$
@@ -74,7 +74,7 @@
 \ENDWHEN
 \vspace{2.0mm}
 
-\WHEN[\textbf{Task 9}]{suspect client $c$}	
+\WHEN[\textbf{Task 10}]{suspect client $c$}	
 	\INDENT{for each $i$ such that $M[c,i].stat = \mcast$}
 		\STATE $Relay(c,M[c,i].msg,M[c,i].dst,M[c,i].ptr)$
 %		\INDENT{for each $h$ in $M[c,i].dst$: for each $q$ in $h$}

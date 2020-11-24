@@ -1,8 +1,16 @@
+%!TEX root =  main.tex
+
 \section{RDMA Atomic Multicast}
 \label{sec:rdma-atomic-multicast}
-\subsection{Overview of \libname}
 
-\subsection{Architecture}
+\subsection{Overview}
+
+\subsection{RDMA}
+
+Remote Direct Memory Access (RDMA) allows a host to access the memory of another host without involving the processor at the other host. RDMA enables low-latency communication by bypassing the OS kernel and by implementing several layers of the network stack in hardware.
+RDMA supports many operations: Send/Receive, Write/Read, and Atomics (compare-and-swap, fetch-and- increment). Because of their lower latency, we use only RDMA Writes and Reads. RDMA has several transports; we use Reliable Connection (RC) to provide in-order reliable delivery.
+
+RDMA connection endpoints are called Queue Pairs (QPs). Each QP is associated to a Completion Queue (CQ). Operations are posted to QPs as Work Requests (WRs). The RDMA hardware consumes the WR, performs the operation, and posts a Work Completion (WC) to the CQ. Applications make local memory available for remote access by registering local virtual memory regions (MRs) with the RDMA driver. Both QPs and MRs can have different access modes (e.g., read-only or read-write). The access mode is specified when initializing the QP or registering the MR, but can be changed later. MRs can overlap: the same memory can be registered multiple times, yielding multiple MRs, each with its own access mode. In this way, different remote machines can have different access rights to the same memory. The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.
 
 
 \begin{figure}[ht!]

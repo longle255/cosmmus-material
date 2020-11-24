@@ -1,2 +1,64 @@
+%!TEX root =  main.tex
+
+\clearpage
 \section{Background}
 \label{sec:background}
+
+In this section, we first state the underlying assumptions about the system model (\S\ref{sec:system-model}) and then define the atomic multicast communication primitive (\S\ref{sec:amcast}).
+
+\subsection{System model}
+\label{sec:system-model}
+
+We assume a hybrid distributed system model in which processes can use both message-passing and shared-memory \cite{Aguilera2019}.
+The system is composed of a set of client and server processes, which communicate by exchanging messages or accessing portions of each other's memory.
+Processes are \emph{correct}, if they do not fail, or \emph{faulty}, otherwise. 
+In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
+Our protocols ensure safety under both asynchronous and synchronous execution periods. 
+To ensure liveness, we assume the system is \emph{partially synchronous} \cite{DLS88}, 
+that is, it is initially asynchronous and eventually becomes synchronous. The time when the 
+system becomes synchronous is called the \emph{Global Stabilization Time (GST)}, and it is unknown to the processes.
+Before GST, there are no bounds on communication and processing delays; after GST, such bounds exist but are unknown. 
+
+A process can share memory regions with other processes and define permissions for those shared memory regions. 
+Process $q$ can read and write a register $v$ in $p$'s memory region $mr$ with operations $\textsf{read}(p,v)$ and $\textsf{write}(p,v,value)$, respectively.
+A permission associated with memory region $mr$ defines disjoint sets of processes $R_{mr}, W_{mr}, RW_{mr}$ that can read, write, or read-write the registers in region $mr$. 
+Process $q$ has permission to read (respectively, write and read-write) $v$ in $p$'s $mr$ if $q \in R_{mr}$ (resp. $W_{mr}, RW_{mr}$).
+A process can initially assign permission for its shared memory regions and later change these permissions.
+
+Processes can also communicate by exchanging messages over a set of directed links using primitives \textsf{send}$(p, m)$ and \textsf{receive}$(m)$, where $p$ is the addressee of message $m$.
+We assume messages are unique.
+Communication links are reliable in that every message sent by a process $p$ to another process $q$ is guaranteed to be eventually delivered by $q$ if both $p$ and $q$ are correct.
+Moreover, a message is received at most once, and only if it was previously sent.
+
+
+\subsection{Problem statement}
+\label{sec:amcast}
+
+Let $\Pi = \{p_1, p_2, ...\}$ be the set of server processes.
+We define $\Gamma \in 2^{\Pi}$ as the set of process groups in the system. 
+Groups are disjoint and each group contains $2f+1$ processes, where $f$ is the maximum number of faulty processes per group.  
+The assumption of disjoint groups has little practical implication since it does not prevent collocating processes that are members of different groups on the same machine.
+A set of $f + 1$ processes in group $g$ is a \emph{quorum} in $g$.
+
+A process atomically multicasts a message $m$ to groups in $m.dst$ by invoking primitive multicast($m$), where $m.dst$ is a special field in $m$ with $m$'s destinations; a process delivers $m$ with primitive deliver($m$). 
+We define the relation $<$ on the set of messages processes deliver as follows: $m < m'$ iff there exists a process that delivers $m$ before $m'$. 
+
+Atomic multicast ensures the following properties: 
+\begin{itemize}
+\item \textit{validity}:~if a correct process $p$ multicasts a message $m$, then eventually all correct processes $q \in g$, where $g \in m.\mathit{dst}$, r-deliver $m$.
+\item \textit{integrity}:~for any process $p$ and any message $m$, $p$ r-delivers $m$ at most once, and only if $p \in g$, $g \in m.\mathit{dst}$, and $m$ was previously r-multicast.
+\item \textit{uniform agreement}:~if a process $p$ a-delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ a-deliver $m$.
+\item \textit{uniform prefix order}:~for any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ a-delivers $m$ and $q$ a-delivers $m'$, then either $p$ a-delivers $m'$ before $m$ or $q$ a-delivers $m$ before $m'$.
+\item \textit{uniform acyclic order}:~the relation $<$ is acyclic.
+\end{itemize}
+Atomic broadcast is a special case of atomic multicast in which every message is addressed to all groups.
+
+We require atomic multicast protocols to be \emph{genuine}~\cite{GS01b}: 
+an algorithm ${\cal A}$ solving reliable or atomic multicast is genuine
+if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ in $R$, if $p$ sends or receives a message, then some message $m$ is multicast, and either (a)~$p$ is the process that multicasts $m$ or (b)~$p \in g$ and $g \in m.dst$.
+
+
+
+
+
+
