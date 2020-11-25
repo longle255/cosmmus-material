@@ -1,16 +1,9 @@
 %!TEX root =  main.tex
 
-\section{RDMA Atomic Multicast}
+\section{RamCast: RDMA-based Atomic Multicast}
 \label{sec:rdma-atomic-multicast}
 
 \subsection{Overview}
-
-\subsection{RDMA}
-
-Remote Direct Memory Access (RDMA) allows a host to access the memory of another host without involving the processor at the other host. RDMA enables low-latency communication by bypassing the OS kernel and by implementing several layers of the network stack in hardware.
-RDMA supports many operations: Send/Receive, Write/Read, and Atomics (compare-and-swap, fetch-and- increment). Because of their lower latency, we use only RDMA Writes and Reads. RDMA has several transports; we use Reliable Connection (RC) to provide in-order reliable delivery.
-
-RDMA connection endpoints are called Queue Pairs (QPs). Each QP is associated to a Completion Queue (CQ). Operations are posted to QPs as Work Requests (WRs). The RDMA hardware consumes the WR, performs the operation, and posts a Work Completion (WC) to the CQ. Applications make local memory available for remote access by registering local virtual memory regions (MRs) with the RDMA driver. Both QPs and MRs can have different access modes (e.g., read-only or read-write). The access mode is specified when initializing the QP or registering the MR, but can be changed later. MRs can overlap: the same memory can be registered multiple times, yielding multiple MRs, each with its own access mode. In this way, different remote machines can have different access rights to the same memory. The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.
 
 
 \begin{figure}[ht!]
@@ -37,7 +30,7 @@ RDMA connection endpoints are called Queue Pairs (QPs). Each QP is associated to
   write data in remote replicas.
 \end{itemize}
 
-\subsection{Memory management}
+\subsubsection{Memory management}
 
 \begin{figure}[ht!]
   \centering
@@ -69,7 +62,7 @@ in the exclusive memory space reserved for timestamps of $m$
 
 \libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
 
-\subsection{Replication}
+\subsection{Normal case execution}
 
 \begin{figure}[ht!]
   \centering
@@ -84,7 +77,6 @@ in the exclusive memory space reserved for timestamps of $m$
 \end{figure}
 
 \input{algo-amcast}
-\input{algo-request-permission}
 % \input{algo-normal-case}
 
 The normal operation protocol is involved when there is an existence of a sole
@@ -126,9 +118,9 @@ After delivering a message, a process will keep that message in its local buffer
 Upon receiving acknowledgements from all the processes in the candidate
 quorum, the message will be removed from the buffer.
 
-\subsection{Leader election}
+\subsection{Handling failures}
 
-\input{algo-leader-election.tex}
+%\input{algo-leader-election.tex}
 
 \libname assumes the existence of an unreliable failure detector. If a leader is
 slow or crashes, the failure detector will detect this and elect new leader from
@@ -165,6 +157,7 @@ does not have the timestamp or enough acknowledgements from quorum of processes
 of the group that has failed leader on any process ii) it does have such data on
 some processes.\lle{sloppy sentence}
 
+\input{algo-request-permission}
 
 % If the
 % sequence number of leader is smaller than follower, the leader should know that

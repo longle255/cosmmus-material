@@ -39,8 +39,20 @@
 	\STATE $Leader[g]$ the leader at $g$ (as seen by $p$), initially 0
 	\STATE $Round[g]$: last accepted round at $g$, initially 0
 \ENDINDENT
-\vspace{1.0mm}
-\caption{Data structures}
+
+\vspace{2.0mm}
+
+\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
+	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
+		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
+		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
+		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
+		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
+	\ENDINDENT
+\ENDINDENT
+\vspace{2.0mm}
+
+\caption{Data structures and procedures}
 \label{alg:data_struct}
 \end{distribalgo}
 \end{algorithm}

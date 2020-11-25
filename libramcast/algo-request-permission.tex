@@ -89,16 +89,6 @@
 \ENDWHEN
 \vspace{2.0mm}
 
-\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
-	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
-		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
-		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
-		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
-		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
-	\ENDINDENT
-\ENDINDENT
-\vspace{2.0mm}
-
 \caption{Handling failures and suspicions}
 \label{alg:failures}
 \end{distribalgo}

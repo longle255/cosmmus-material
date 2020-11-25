@@ -4,7 +4,7 @@
 \section{Background}
 \label{sec:background}
 
-In this section, we first state the underlying assumptions about the system model (\S\ref{sec:system-model}) and then define the atomic multicast communication primitive (\S\ref{sec:amcast}).
+In this section, we present the system model (\S\ref{sec:system-model}), define the atomic multicast communication problem (\S\ref{sec:amcast}), and quickly overview RDMA, the key enabling technology used in this work (\S\ref{sec:rdma}).
 
 \subsection{System model}
 \label{sec:system-model}
@@ -23,7 +23,7 @@ A process can share memory regions with other processes and define permissions f
 Process $q$ can read and write a register $v$ in $p$'s memory region $mr$ with operations $\textsf{read}(p,v)$ and $\textsf{write}(p,v,value)$, respectively.
 A permission associated with memory region $mr$ defines disjoint sets of processes $R_{mr}, W_{mr}, RW_{mr}$ that can read, write, or read-write the registers in region $mr$. 
 Process $q$ has permission to read (respectively, write and read-write) $v$ in $p$'s $mr$ if $q \in R_{mr}$ (resp. $W_{mr}, RW_{mr}$).
-A process can initially assign permission for its shared memory regions and later change these permissions.
+A process can initially assign permissions for its shared memory regions and later change these permissions.
 
 Processes can also communicate by exchanging messages over a set of directed links using primitives \textsf{send}$(p, m)$ and \textsf{receive}$(m)$, where $p$ is the addressee of message $m$.
 We assume messages are unique.
@@ -57,6 +57,28 @@ We require atomic multicast protocols to be \emph{genuine}~\cite{GS01b}:
 an algorithm ${\cal A}$ solving reliable or atomic multicast is genuine
 if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ in $R$, if $p$ sends or receives a message, then some message $m$ is multicast, and either (a)~$p$ is the process that multicasts $m$ or (b)~$p \in g$ and $g \in m.dst$.
 
+
+\subsection{Remote Direct Memory Access}
+\label{sec:rdma}
+
+Remote Direct Memory Access (RDMA) allows a server to access the memory of a remote server without involving the remote server's processor. 
+RDMA provides low-latency communication by bypassing the OS kernel and by implementing the network layer in hardware.
+RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
+Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{x}.
+In RamCast's normal operation, processes communicate using remote write operations only.
+We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
+
+RDMA has several transports; we use with Reliable Connection (RC) to provide in-order reliable delivery.
+
+RDMA connection endpoints are called Queue Pairs (QPs). Each QP is associated to a Completion Queue (CQ). 
+Operations are posted to QPs as Work Requests (WRs). 
+The RDMA hardware consumes the WR, performs the operation, and posts a Work Completion (WC) to the CQ. 
+Applications make local memory available for remote access by registering local virtual memory regions (MRs) with the RDMA driver. 
+Both QPs and MRs can have different access modes (e.g., read-only or read-write). 
+The access mode is specified when initializing the QP or registering the MR, but can be changed later. 
+MRs can overlap: the same memory can be registered multiple times, yielding multiple MRs, each with its own access mode. 
+In this way, different remote machines can have different access rights to the same memory. 
+The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.
 
 
 
