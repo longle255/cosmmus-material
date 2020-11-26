@@ -1,13 +1,10 @@
 %!TEX root =  main.tex
 
-\newcommand{\rdwrite}[3]{WRITE\ensuremath{(@#1\!\rightarrow\!#2, #3)}}	% rdwrite(addr,val) 
-%\newcommand{\rmm}[2]{\ensuremath{@#1\!\rightarrow\!#2}}
+\newcommand{\rdwrite}[3]{\textsf{write}\ensuremath{(#1, #2, #3)}}	% rdwrite(addr,val) 
 \newcommand{\band}{\textbf{and}}
-\newcommand{\mcast}{\textsf{mcast}}
-\newcommand{\ack}{\textsf{ack}}
-\newcommand{\ordered}{\textsf{ordered}}
-\newcommand{\done}{\textsf{done}}
-\newcommand{\myack}{\textsf{ack}}
+\newcommand{\mcast}{\textsc{mcast}}
+\newcommand{\ordered}{\textsc{ordered}}
+\newcommand{\done}{\textsc{done}}
 
 \begin{algorithm}
 \footnotesize
@@ -18,7 +15,7 @@
 \vspace{1.0mm}
 \INDENT{Each entry $M[c,i]$ contains the following information:}
 	\STATE $msg$: the message $m$ multicast by client $c$
-	\STATE $tmp$: the timestamp of $m$, initially 0
+	\STATE $tmp$: the timestamp of $m$, initially $(0,0)$
 	\STATE $dst$: destination groups $m$ is addressed to
 	\STATE $ptr[p]$: position of $m$ in the buffer at $p$
 	\STATE $ack[g]$: acknowledgement of timestamp in $tmp[g]$
@@ -30,12 +27,12 @@
 	\STATE $rnd[g]$: round $g$'s leader, initially 0
 \ENDINDENT
 \vspace{1.0mm}
-\STATE{Each client has structure $ptr[p]$ with the next entry in $p$'s buffer}
+\STATE{Each client $c$ has structure $ptr[p]$ with the next available entry in $p$'s buffers $M[c,-]$ and $T[c,-]$}
 \vspace{1.0mm}
 
 \INDENT{Each server $p$ at group $g$ also has:}
-	\STATE $clock$: logical timestamp counter at $p$, initially 0
-	\STATE $round$: the round of $p$, when leader, initially 0
+	\STATE $clock$: logical timestamp counter at $p$, initially $(0,p)$
+	\STATE $round$: the round of $p$, when leader, initially $(0,p)$
 	\STATE $Leader[g]$ the leader at $g$ (as seen by $p$), initially 0
 	\STATE $Round[g]$: last accepted round at $g$, initially 0
 \ENDINDENT
@@ -51,6 +48,22 @@
 	\ENDINDENT
 \ENDINDENT
 \vspace{2.0mm}
+\INDENT{\textbf{procedure} $increment((cnt,pid))$}
+	\STATE $cnt \leftarrow cnt + 1$
+	\STATE return $(cnt,pid)$
+\ENDINDENT
+\vspace{2.0mm}
+
+\vspace{2.0mm}
+\INDENT{\textbf{procedure} $max((cnt_1,pid_1),(cnt_2,pid_2))$}
+	\IF{$cnt_1 > cnt_2$ \textbf{or} $(cnt_1=cnt_2\ \band\ pid_1 > pid_2)$}
+		\STATE return $(cnt_1,pid_1)$
+	\ELSE
+		\STATE return $(cnt_2,pid_2)$
+	\ENDIF
+\ENDINDENT
+\vspace{2.0mm}
+
 
 \caption{Data structures and procedures}
 \label{alg:data_struct}
@@ -63,15 +76,15 @@
 
 \begin{distribalgo}[1]
 
-\STATE{Client $c$ multicasts message $m$ to groups in $dst$ as follows:}
+\STATE{Client $c$ multicasts message $m$ to groups in $m.dst$ as follows:}
 \vspace{1.0mm}
-	\INDENT[\textbf{Task 1}]{for each $h$ in $dst$, for each $q$ in $h$}
-		\STATE increment $ptr[q]$
+	\INDENT[\textbf{Task 1}]{for each $h$ in $m.dst$, for each $q$ in $h$}
+		\STATE $ptr[q] \leftarrow ptr[q] + 1$
 	\ENDINDENT
-	\STATE $Relay(c,msg,dst,ptr)$
+	\STATE $Relay(c,msg,m.dst,ptr)$
 %	\INDENT{for each $h$ in $dst$}
 %		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
-%		\STATE \rdwrite{q}{M[c,next[q]].dst}{dst}
+%		\STATE \rdwrite{q}{M[c,next[q]].dst}{m.dst}
 %		\STATE \rdwrite{q}{M[c,next[q]].ptr}{next}
 %		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
 %		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
@@ -82,7 +95,7 @@
 \vspace{1.0mm}
 \WHEN[\textbf{Task 2}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
 		$p\!=\!Leader[g]$\hspace{-2mm}}
-	\STATE increment $clock$
+	\STATE $clock \leftarrow increment(clock)$
 	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
 		\STATE $j \leftarrow M[c,i].ptr[q]$
 		\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
@@ -94,7 +107,7 @@
 
 \WHEN[\textbf{Task 3}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
 		\hspace{14mm} $T[c,i].rnd[g] = Round[g]$}
-	\STATE update $clock$ with $T[c,i].tmp[g]$
+	\STATE $clock \leftarrow max(clock,T[c,i].tmp[g])$
 	\INDENT{for each $h$ in $M[c,i].dst$, for each $q$ in $h$}
 		\STATE $j \leftarrow M[c,i].ptr[q]$
 		\STATE \rdwrite{q}{M[c,j].ack[p]}{Round[g]}
@@ -104,7 +117,7 @@
 
 \WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
 		\hspace{14mm} $T[c,i].rnd[h] = Round[h]$ \band\ $h \neq g$ \hspace{-2mm}}
-	\STATE update $clock$ with $T[c,i].tmp[h]$
+	\STATE $clock \leftarrow max(clock,T[c,i].tmp[g])$
 	\INDENT{for each follower $q$ in $g$}
 		\STATE{$j \leftarrow M[c,i].ptr[q]$}
 		\STATE \rdwrite{q}{T[c,j].tmp[h]}{T[c,i].tmp[h]}
@@ -116,7 +129,7 @@
 \WHEN[\textbf{Task 5}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
 	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
 			\STATE $M[c,i].tmp \leftarrow$ 
-				 $max\{ M[c,i].tmp, M[c,i].tmp[h] \}$
+				 $max(M[c,i].tmp, T[c,i].tmp[h])$
 			\IF{for each group $h$ in $M[c,i].dst$: $\exists\!$ quorum $Q$ in $h$: \\
 	\hfill for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
 						\STATE $M[c,i].stat \leftarrow$ \ordered

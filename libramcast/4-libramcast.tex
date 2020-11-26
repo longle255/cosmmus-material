@@ -3,14 +3,43 @@
 \section{RamCast: RDMA-based Atomic Multicast}
 \label{sec:rdma-atomic-multicast}
 
+In this section, we explain the general design and architecture of \libname (\S\ref{sec:overview}), then detail \libname's atomic multicast algorithm in the normal case without failures (\S\ref{sec:normalcase}), and in the presence of failures (\S\ref{sec:failurecase}).
+
 \subsection{Overview}
+\label{sec:overview}
+
+Figure~\ref{fig:arch} depicts the architecture of \libname.
+We coordinate the execution within each group using the leader-follower model (i.e., also known as primary-backup model).
+Each server process of \libname organizes its memory in memory regions: a shared
+memory region and a protected memory spaces. All processes have remote access
+(read/write) to the shared memory space. 
+Only one process (leader) of each group
+has has remote-write permission to a given node's log at any point in time
+during the protocol.
+
+The shared memory space is a circular buffer of fixed-size of two entries with a
+sequential index. Client keep a copy of the remote head and tail pointer. Client
+increase remote tail after writing to the shared memory. Server process update
+the head pointer on client after delivering message by piggying back the new
+value in the response.
+
+Each process $p$ periodically polls the memory cell at Head position of each
+connected QPs to detect new message.
+
+For each message $m$ written in the shared memory, there is a corresponding cell
+in the exclusive memory space reserved for timestamps of $m$
+
+\libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
+
+
 
 
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/architecture}
-  \caption{Architecture of \libname. Processes have shared and exclusive memory that can be accessed by RDMA primitives. Exclusive memory access needs permission. A client proposes new message by writing to the shared memory of all processes. Leader processes writes their proposed timestamps to exclusive memory. Follower processes write their acknowledgement to the shared memory}
-  \label{fig:normal_operation_time}
+  \caption{Architecture of \libname.}
+%Processes have shared and exclusive memory that can be accessed by RDMA primitives. Exclusive memory access needs permission. A client proposes new message by writing to the shared memory of all processes. Leader processes writes their proposed timestamps to exclusive memory. Follower processes write their acknowledgement to the shared memory}
+  \label{fig:arch}
 \end{figure}
 
 
@@ -42,27 +71,13 @@
 \end{figure}
 
 
-Each process of \libname organizes its memory with two memory regions: shared
-memory and exclusive memory spaces. All processes have remote access
-(read/write) to the shared memory space. Only one process (leader) of each group
-has has remote-write permission to a given node’s log at any point in time
-during the protocol.
 
-The shared memory space is a circular buffer of fixed-size of two entries with a
-sequential index. Client keep a copy of the remote head and tail pointer. Client
-increase remote tail after writing to the shared memory. Server process update
-the head pointer on client after delivering message by piggying back the new
-value in the response.
 
-Each process $p$ periodically polls the memory cell at Head position of each
-connected QPs to detect new message.
 
-For each message $m$ written in the shared memory, there is a corresponding cell
-in the exclusive memory space reserved for timestamps of $m$
 
-\libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
 
 \subsection{Normal case execution}
+\label{sec:normalcase}
 
 \begin{figure}[ht!]
   \centering
@@ -119,6 +134,7 @@ Upon receiving acknowledgements from all the processes in the candidate
 quorum, the message will be removed from the buffer.
 
 \subsection{Handling failures}
+\label{sec:failurecase}
 
 %\input{algo-leader-election.tex}
 

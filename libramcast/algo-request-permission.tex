@@ -5,15 +5,15 @@
 \begin{distribalgo}[1]
 
 \WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
-	\STATE increment $round$
-	\STATE increment $clock$
+	\STATE $round \leftarrow increment(round)$
+	\STATE $clock \leftarrow increment(clock)$
 	\INDENT{\textbf{for} each group $h$}
-		\STATE{\textbf{for} each $q$ in $h$: send $(\textsf{req\_perm}, round)$ to $q$}
+		\STATE{\textbf{for} each $q$ in $h$: \textsf{send}$(\textsc{req\_perm}, round)$ to $q$}
 	\ENDINDENT	
 \ENDWHEN
 
 \vspace{2.0mm}		
-\WHEN[\textbf{Task 8}]{receive responses $(\textsf{granted}, pend)$ from \\
+\WHEN[\textbf{Task 8}]{receive responses $(\textsc{granted}, pend)$ from \\
 			\hspace{6mm} quorum $Q$ in $h$, including $p$'s response if $h=g$}
 		\STATE $bag \leftarrow$ union of all received $pend$ from $h$
 		\INDENT{\textbf{for} each $(c,msg,\star,\star,\star,\star)$ in $bag$}
@@ -58,7 +58,7 @@
 \ENDWHEN
 \vspace{2.0mm}
 
-\WHEN[\textbf{Task 9}]{receive $(\textsf{req\_perm}, round)$ from $q$ in $h$}	
+\WHEN[\textbf{Task 9}]{receive $(\textsc{req\_perm}, round)$ from $q$ in $h$}	
 	\IF{$round > Round[h]$}
 		\STATE{grant permission to $q$}
 		\STATE $pend \leftarrow \emptyset$
@@ -67,7 +67,7 @@
 			\STATE $pend \leftarrow pend \cup (c,M[c,i].msg,M[c,i].dst,$ \\ 
 				\hfill $M[c,i].ptr,T[c,i].tmp[g],T[c,i].rnd[g])$
 		\ENDINDENT
-		\STATE{send $(\textsf{granted},pend)$ to $q$}
+		\STATE{send $(\textsc{granted},pend)$ to $q$}
 		\STATE{$Round[h] \leftarrow round$}
 		\STATE{$Leader[h] \leftarrow q$}
 	\ENDIF
