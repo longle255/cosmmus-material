@@ -14,6 +14,7 @@ set style fill pattern 0 border rgb "black"
 # set title "Throughput for a single group at maximum load"
 set ylabel "Throughput (kmps)" offset 1
 set yrange [0 : 250]
+unset xtics
 set ytics 50
 set xlabel "Message size"
 set key samplen 3.5 spacing 1.2 font ",12"
@@ -22,7 +23,6 @@ set key top right
 plot './data-aggregated/ramcast/tp-vs-kpaxos.dat' index 0 using ($2/1000):xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
      './data-aggregated/kpaxos/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 2 lc rgb '#888888' t "Kernel Paxos", \
      './data-aggregated/wbcast/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 3 lc rgb '#888888' t "WbCast", \
-     './data-aggregated/wbcast/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 4 lc rgb '#888888' t "TODO:Fastcast", \
 
 system("pstopdf ./graphs/figure-compare-single-group-throughput.eps -o ./graphs/figure-compare-single-group-throughput.pdf && rm ./graphs/figure-compare-single-group-throughput.eps")
 

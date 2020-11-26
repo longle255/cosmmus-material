@@ -22,6 +22,5 @@ set key top right
 
 plot './data-aggregated/ramcast/xl170/multi-dest-tp.dat' using 2:xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
      './data-aggregated/wbcast/multi-dest-tp.dat' index 0 using 2:xtic(1) fs pattern 2 lc rgb '#888888' t "WBCast", \
-     './data-aggregated/wbcast/multi-dest-tp.dat' index 1 using 2:xtic(1) fs pattern 3 lc rgb '#888888' t "TODO:FastCast"
 
 system("pstopdf ./graphs/figure-multi-dest-compare-throughput.eps -o ./graphs/figure-multi-dest-compare-throughput.pdf && rm ./graphs/figure-multi-dest-compare-throughput.eps")

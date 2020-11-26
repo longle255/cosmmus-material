@@ -19,9 +19,9 @@ set xlabel "Number of partitions"
 set key samplen 3.5 spacing 1.2 font ",12"
 set key top left
 
-plot './data-aggregated/single-dest-tp.dat' using 2:xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
+plot './data-aggregated/ramcast/single-dest-tp.dat' using 2:xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
      './data-aggregated/wbcast/single-dest-tp.dat' index 0 using 2:xtic(1) fs pattern 2 lc rgb '#888888' t "WBCast", \
-     './data-aggregated/wbcast/single-dest-tp.dat' index 1 using 2:xtic(1) fs pattern 3 lc rgb '#888888' t "TODO:FastCast"
+
 
 
 system("pstopdf ./graphs/figure-genuine-compare-throughput.eps -o ./graphs/figure-genuine-compare-throughput.pdf && rm ./graphs/figure-genuine-compare-throughput.eps")
