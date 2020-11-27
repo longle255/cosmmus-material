@@ -5,31 +5,65 @@
 
 In this section, we explain the general design and architecture of \libname (\S\ref{sec:overview}), then detail \libname's atomic multicast algorithm in the normal case without failures (\S\ref{sec:normalcase}), and in the presence of failures (\S\ref{sec:failurecase}).
 
-\subsection{Overview}
+\subsection{Building blocks}
 \label{sec:overview}
 
+\libname leverages two ideas, Skeen's folklore atomic multicast algorith \cite{BJ87b} and Protected Memory Paxos \cite{Aguilera2019}.
+Skeen's algorithm orders messages multicast to multiple processes consistently but it does not tolerate failures.
+Protected Memory Paxos takes advantage of RDMA permissions to improve the efficiency of Paxos \cite{L98}. 
+Like Paxos, it implements atomic broadcast, that is, it assumes a single group of processes.
+Combining these ideas coherently and efficiently is not trivial, as we discuss in this section,
+after briefly presenting Skeen's algorithm and Protected Memory Paxos.
+
+%\subsubsection{Skeen's atomic multicast}
+
+In Skeen's algorithm, each process and assigns timestamps to multicast messages based on a logical clock~\cite{Lam78}.
+The correctness of the algorithm stems from two basic properties:
+(i)~processes in the destination of a multicast message first assign tentative timestamps to the message and eventually agree on the message's final timestamp; and
+(ii)~processes deliver messages according to their final timestamp.
+These properties are implemented as follow.
+
+\begin{itemize}
+\item[(i)] To multicast a message $m$ to a set of processes, $p$ sends $m$ to the destinations.
+Upon receiving $m$, each destination updates its logical clock, assigns a tentative timestamp to $m$, stores $m$ and its timestamp in a buffer, and sends $m$'s timestamp to all destinations.
+Upon receiving timestamps from all destinations in $m.dst$, a process computes $m$'s final timestamp as the maximum among all received tentative timestamps for $m$.
+\item[(ii)]Messages are delivered respecting the order of their final timestamp.
+A process $p$ delivers $m$ when it can ascertain that $m$'s final timestamp is smaller than the final timestamp of any messages $p$ will deliver after $m$ (intuitively, this holds because logical clocks are monotonically increasing).
+\end{itemize}
+
+%\subsubsection{Protected Memory Paxos}
+
+In Paxos, in order for the leader to order a message $m$, it assigns $m$ to a consensus instance and proposes that $m$ be accepted in the proposed instance.
+In the normal case, where there is a single leader, the followers accept the proposed message and reply to leader.
+Protected Memory Paxos optimizes this procedure by granting to the leader exclusive write permission to the memory of the followers.
+If another process becomes leader, then it takes the exclusive permission.
+The idea is that the leader writes the proposed message in the memory of the followers.
+If the leader succeeds to write the message in the memory of a quorum of followers, then it is because no other leader took over.
+This happens because if another leader took over, then it has taken the permission of the original leader.
+
+\subsection{Overall design and architecture}
+
 Figure~\ref{fig:arch} depicts the architecture of \libname.
-We coordinate the execution within each group using the leader-follower model (i.e., also known as primary-backup model).
-Each server process of \libname organizes its memory in memory regions: a shared
-memory region and a protected memory spaces. All processes have remote access
-(read/write) to the shared memory space. 
-Only one process (leader) of each group
-has has remote-write permission to a given node's log at any point in time
-during the protocol.
+Processes within each group coordinate using the leader-follower model, like in Paxos and Protected Memory Paxos.
+Each server process has a fixed-size circular buffer per client, analogously to other RDMA-based systems \cite{FaRM, Mu, DARE, APUS}.
+A circular buffer in \libname is divided into two parts, a message buffer $M$, and a timestamp buffer $T$.
+Message buffer $M$ is a shared memory region that can be read and written by any other processes, including the client process the buffer is associated with.
+Timestamp buffer $T$ is protected and can only be written by the leader of each group; the buffer can be read by any process.
+Each entry in $M$, with a multicast message $m$, has a corresponding entry in $T$, with $m$'s timestamp.
 
-The shared memory space is a circular buffer of fixed-size of two entries with a
-sequential index. Client keep a copy of the remote head and tail pointer. Client
-increase remote tail after writing to the shared memory. Server process update
-the head pointer on client after delivering message by piggying back the new
-value in the response.
+%Each server process organizes its memory in regions: a shared
+%memory region and a protected memory region. All processes have remote access
+%(read/write) to the shared memory space. 
+%Only one leader of each group
+%has remote-write permission to a given node's log at any point in time
+%during the protocol.
 
-Each process $p$ periodically polls the memory cell at Head position of each
-connected QPs to detect new message.
-
-For each message $m$ written in the shared memory, there is a corresponding cell
-in the exclusive memory space reserved for timestamps of $m$
-
-\libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
+Clients keep a copy of the remote head and tail pointer of their buffer at each server. 
+A client increases the remote tail after writing to the shared memory. 
+The server process updates the head pointer on the client buffer after handling the message by piggybacking the new value in the response.
+Each process $p$ periodically polls the memory cell at the head position of each
+connected QPs to detect new messages.
+%\libname maintain quorums of ``candidate'' processes of each group to be the leader of that group.
 
 
 
@@ -59,7 +93,10 @@ in the exclusive memory space reserved for timestamps of $m$
   write data in remote replicas.
 \end{itemize}
 
-\subsubsection{Memory management}
+\subsection{Data structures and memory layout}
+
+
+\input{ds-structs}
 
 \begin{figure}[ht!]
   \centering
@@ -79,17 +116,6 @@ in the exclusive memory space reserved for timestamps of $m$
 \subsection{Normal case execution}
 \label{sec:normalcase}
 
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=1\linewidth]{figures/timeline-simple}
-  \caption{Normal case execution of \libname. Step 1: client writes message to all
-          involves processes. Step 2: leader of each group in the destination
-          propose and write a timestamp to all followers and other leaders
-          memory. Step 3: leaders propagate the timestamp written by other
-          leaders, followers write their acks for local timestamp on all other
-          processes}
-  \label{fig:normal_operation_time}
-\end{figure}
 
 \input{algo-amcast}
 % \input{algo-normal-case}
@@ -102,6 +128,18 @@ propagating timestamps from other groups to followers of its local group.
 A client process $C$ multicasts a message $m$ to a set of target groups in
 $m.dst$ by performing a \rwrite to the same memory entry on the shared memory of
 each process $p_i$ belongs to $m.dst$. (Task 1 algorithm~\ref{alg:normal_case})
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\linewidth]{figures/timeline-simple}
+  \caption{Normal case execution of \libname. Step 1: client writes message to all
+          involves processes. Step 2: leader of each group in the destination
+          propose and write a timestamp to all followers and other leaders
+          memory. Step 3: leaders propagate the timestamp written by other
+          leaders, followers write their acks for local timestamp on all other
+          processes}
+  \label{fig:normal_operation_time}
+\end{figure}
 
 Once leader process $L$ in group $g$ \lread the message $m$, it computes a
 group-wise timestamp $ts$ and writes that proposed timestamp $ts$ to the memory
