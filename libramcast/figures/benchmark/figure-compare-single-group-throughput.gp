@@ -14,7 +14,7 @@ set style fill pattern 0 border rgb "black"
 # set title "Throughput for a single group at maximum load"
 set ylabel "Throughput (kmps)" offset 1
 set yrange [0 : 250]
-unset xtics
+#unset xtics
 set ytics 50
 set xlabel "Message size"
 set key samplen 3.5 spacing 1.2 font ",12"

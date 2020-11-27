@@ -73,6 +73,13 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
 \subsection{Multicast results: performance vs. number of destinations}
 \label{sec:evaluation:multicast}
 
+The last set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 machines.
+The first experiment comprises executions in which clients send single-group 64-byte messages in setups with 1, 2, 4, and 8 groups.
+Figure~\ref{fig:multicast-single-group} (top) shows the aggregated throughput results when the system is saturated. 
+\libname outperforms WbCast by a large margin with 227  and 63 thousand messages per second, respectively, for 1 group, and around 1800 and 500 thousand messages per second for 8 groups.
+These results also enhance the benefit of genuine atomic multicast algorithms and show that the throughput grows linearly with the number of groups for single-group messages. 
+Since groups do not exchange any information when dealing with single-group messages, the latency CDF is the same for a single client, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-group} (bottom).
+
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
     \centering
@@ -82,15 +89,20 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
   \end{subfigure}
-  \caption{Multicast performance of \libname and WbCast for single group messages: throughput (top) and latency cumulative distribution function of a \libname's (middle) and WbCast's single client (bottom)}
-  \label{fig:tpcc_repartitioning2}
+  \caption{Multicast performance of \libname and WbCast for single group messages: throughput (top) and latency cumulative distribution function of a \libname's single client (bottom)}
+  \label{fig:multicast-single-group}
 \end{figure}
+
+The next experiment evaluates how the protocols behave regarding multi-group messages. 
+In setups with 1, 2, 4, and 8 groups, clients send 64-byte messages addressed to all the groups.
+\libname's maximum throughput is greater than WbCast's in every configuration with 233, 145, 80, and 40 thousand messages per second for 1, 2, 4, and 8 destination groups against 63, 50, 35, and 27 thousand for WbCast, as shown in Figure~\ref{fig:multicast-multi-group} (top).
+The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-multi-group} (middle) shows that the latency CDF for \libname with values of 23, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
+The equivalent values for WbCast are 214, 445, 673, and 1055~microseconds, representing 10 to 7 times slower delivery times when compared to \libname's.
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
     \centering
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-throughput}
-  \label{fig:tpcc_repartitioning}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
@@ -100,5 +112,6 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-wbcast}
   \end{subfigure}
-  \caption{Performance comparison of \libname and WbCast for multi-groups message; throughput (top) and latency cumulative distribution function of \libname (middle) and WbCast (bottom)}
+  \caption{Performance comparison of \libname and WbCast for multi-groups message: throughput (top) and latency cumulative distribution function of \libname's (middle) and WbCast's single client (bottom)}
+  \label{fig:multicast-multi-group}
 \end{figure}
