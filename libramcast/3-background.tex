@@ -64,7 +64,7 @@ if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ 
 Remote Direct Memory Access (RDMA) allows a server to access the memory of a remote server without involving the remote server's processor. 
 RDMA provides low-latency communication by bypassing the OS kernel and by implementing the network layer in hardware.
 RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
-Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{x}.
+Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{Kalia2014}.
 In RamCast's normal operation, processes communicate using remote write operations only.
 We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
 
