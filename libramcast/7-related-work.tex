@@ -1,2 +1,86 @@
 \section{Related work}
 \label{sec:related-work}
+
+\subsubsection*{Atomic multicast}
+Atomic multicast is a well-studied problem. Skeen’s algorithm
+\cite{birman1987reliable} is possibly the first atomic multicast algorithm.
+Processes in Skeen assign timestamps to messages ensure that destinations agree on the
+final timestamp assigned to each message, and deliver messages following this
+timestamp order. Even though it is not fault-tolerant, it is genuine: processes
+only communicate if they actually are in the destinations of the messages. Later
+timestamp-based genuine atomic multicast algorithms is often implemented using a
+fault-tolerant version of Skeen’s protocol. Fast Paxos \cite{coelho2017fast}
+optimizes the protocol by optimistically assuming a spontaneous message
+ordering. If that assumption is violated, Fast Paxos reverts to the basic Paxos
+protocol. WbCast \cite{gotsman2019white} improves the latencies of
+fault-tolerant version of Skeen’s protocol by combining Paxos and Skeen’s
+protocol together into a single coherent protocol.
+
+Ring-based protocols \cite{delporte2000fault, bezerra2015ridge,
+marandi2012multi} proposed different approach to achieve high throughput by
+propagating messages along a predefined ring overlay and ensure atomic multicast
+properties by relying on this topology. However, ring-based algorithms are
+non-genuine: involved processes communicate with processes outside of the
+destination groups to deliver messages. The time complexity of these algorithms is
+proportional to the number of destination groups.
+
+\subsubsection*{RDMA systems}
+
+Remote Direct Memory Access (RDMA) \cite{kalia2016design} is an interface that
+allows servers to read and write the memory of a remote server directly. Over
+the years, RDMA has become an active area of research for its high throughput,
+low latency, and low CPU overhead. RDMA techniques have been implemented in
+various architectures, including Infiniband \cite{pfister2001introduction}, RoCE
+\cite{beck2011performance}, and iWRAP \cite{rashti200710}. RDMA has already been
+explored and applied for variety of application, from key/value stores
+\cite{FaRM, kalia2014using, mitchell2013using, wei2015fast}, databases
+\cite{binnig2015end, huang2019rdma}, and distributed file systems
+\cite{islam2012high, li2009early, wu2003pvfs}. Pilaf \cite{mitchell2013using} is
+a distributed in-memory key-value store that implements client-lookup operations
+with one-sided RDMA reads. In contrast, HERD \cite{kalia2014using} clients use
+one-sided RDMA writes to send requests to servers which poll their receive RDMA
+buffers to process requests. FaRM \cite{FaRM} proposes a distributed computing
+platform, which provides the transactional interface for applications to access
+the shared memory. NVFS \cite{islam2012high} provides a novel design of HDFS
+with byte-addressable NVM and RDMA network. Octopus \cite{lu2017octopus} is a
+distributed, shared persistent memory file system that combines RDMA and NVM's
+new features by redesigning the software. Beside, many optimization guidelines
+was proposed by Kalia et al. \cite{kalia2016design} to enhance performance of
+RDMA system. In this work, we have applied many of the mentioned best practices
+in the implementation of \libname.
+
+
+\subsubsection*{RDMA-based consensus}
+
+RDMA still has received limited attention so far in connection with consensus
+protocols. Only few replication protocols enable crash-tolerant on RDMA systems
+have been proposed. DARE \cite{DARE}, one of the first RDMA-based replicated
+state machine introduced, aims to optimize for low latency in replica
+communication. The consensus leader in DARE replicates requests to its follower
+by RDMA one-side Read/Write operations, and makes use of permissions when
+changing leaders. APUS \cite{APUS} improves upon DARE’s throughput. APUS
+combines RDMA with Paxos and focuses on scalability with the number of
+connections and replicas. APUS is based on intercepting inbound socket calls, so
+it does not require modifying applications for integration. Derecho
+\cite{jha2019derecho} provides an RDMA-enabled state machine replication while
+structuring applications into groups, subgroups, and shards. Derecho only needs
+a leader for group reconfiguration. 
+
+However, these protocols focus on building consensus on top of RDMA primitives.
+To our knowledge, there is no previous work that solved atomic multicast with
+RDMA.
+
+
+% \section{State machine replication}
+
+% State machine replication (SMR) was first introduced by Lamport in \cite{Lam78}. Schneider \cite{Sch90} then presented a more systematic
+% approach to the design and implementation of SMR protocols. Since then, SMR has
+% become a well-known approach to replication and has been extensively studied,
+% both in academia (e.g., \cite{Kapritsos:2012um, Kotla:2004ep, santos2013htsmr,
+% Mencius}) and in the industry (e.g., \cite{corbett2013spanner}). SMR provides strong consistency guarantees, which
+% come from total order and deterministic execution of commands. Traditional SMR
+% relies on a consensus protocol to define a common order among replicas for the execution of 
+% commands. Deterministic execution is usually ensured by having every replica
+% execute the set of ordered commands sequentially.
+
+% % 
