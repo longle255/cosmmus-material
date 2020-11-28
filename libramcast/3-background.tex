@@ -61,26 +61,30 @@ if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ 
 \subsection{Remote Direct Memory Access}
 \label{sec:rdma}
 
-Remote Direct Memory Access (RDMA) allows a server to access the memory of a remote server without involving the remote server's processor. 
-RDMA provides low-latency communication by bypassing the OS kernel and by implementing the network layer in hardware.
-RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
-Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{Kalia2014}.
+%<<<<<<< HEAD
+%Remote Direct Memory Access (RDMA) allows a server to access the memory of a remote server without involving the remote server's processor. 
+%RDMA provides low-latency communication by bypassing the OS kernel and by implementing the network layer in hardware.
+%RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
+%Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{Kalia2014}.
+%=======
+Remote Direct Memory Access (RDMA) is a hardware-based protocol that enables direct data access between the memory of remote machines without the involvement of the Operating System (OS) and processor. 
+RDMA implements dedicated network stack implemented in its hardware, provides both low-latency and high-bandwidth by bypassing the OS kernel supports zero-copy net-working.
+RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduces an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
+Beside, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
+%>>>>>>> 86c76bc4e0440ef88f14c280c5b91aba070576a1
 In RamCast's normal operation, processes communicate using remote write operations only.
 We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
 
-RDMA has several transports; we use with Reliable Connection (RC) to provide in-order reliable delivery.
-
-RDMA connection endpoints are called Queue Pairs (QPs). Each QP is associated to a Completion Queue (CQ). 
-Operations are posted to QPs as Work Requests (WRs). 
-The RDMA hardware consumes the WR, performs the operation, and posts a Work Completion (WC) to the CQ. 
-Applications make local memory available for remote access by registering local virtual memory regions (MRs) with the RDMA driver. 
+RDMA provides three transport modes: Reliable Connection (RC), Unreliable Connection (UC) and Unreliable Datagram (UD). 
+While RC and UC are connection oriented and support only one-to-one data transmission, UD supports both one-to-one and one-to-many without establishing connections.
+RC ensures data transmission is reliable and correct in the network layer, while UC doesn’t have such guarantee.
+In this work, we use RC to provide in-order reliable delivery.
+To establish a connection between two remote hosts, the RDMA-enabled network card (RNIC) on each host creates a logical RDMA endpoint known as a Queue Pair (QP), including a send queue and a receive queue for storing data transfer requests. 
+Operations are posted to QPs as Work Requests (WRs) to be consumed and executed by the RNIC. 
+When an RDMA operation is completed, a completion event is pushed to a Completion Queue (CQ).
+Each host makes local memory regions (MR) available for remote access by asking its OS to pin the memory pages that would used by the RNIC.
 Both QPs and MRs can have different access modes (e.g., read-only or read-write). 
-The access mode is specified when initializing the QP or registering the MR, but can be changed later. 
-MRs can overlap: the same memory can be registered multiple times, yielding multiple MRs, each with its own access mode. 
+The hosts specify the access mode when initializing the QP or registering the MR, but the access mode can be dynamically update later. 
+The host can register the same memory for different MRs. Each MR then has its own access mode.
 In this way, different remote machines can have different access rights to the same memory. 
-The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.
-
-
-
-
-
+% The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.
