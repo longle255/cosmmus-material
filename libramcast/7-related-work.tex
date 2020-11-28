@@ -4,17 +4,20 @@
 \subsubsection*{Atomic multicast}
 Atomic multicast is a well-studied problem. Skeen’s algorithm
 \cite{birman1987reliable} is possibly the first atomic multicast algorithm.
-Processes in Skeen assign timestamps to messages ensure that destinations agree on the
-final timestamp assigned to each message, and deliver messages following this
-timestamp order. Even though it is not fault-tolerant, it is genuine: processes
-only communicate if they actually are in the destinations of the messages. Later
-timestamp-based genuine atomic multicast algorithms is often implemented using a
-fault-tolerant version of Skeen’s protocol. Fast Paxos \cite{coelho2017fast}
-optimizes the protocol by optimistically assuming a spontaneous message
-ordering. If that assumption is violated, Fast Paxos reverts to the basic Paxos
-protocol. WbCast \cite{gotsman2019white} improves the latencies of
-fault-tolerant version of Skeen’s protocol by combining Paxos and Skeen’s
-protocol together into a single coherent protocol.
+Processes in Skeen assign timestamps to messages ensure that destinations agree
+on the final timestamp assigned to each message, and deliver messages following
+this timestamp order. The precise way in which these properties are ensured
+varies from one algorithm to another. Even though it is not fault-tolerant, it
+is genuine: processes only communicate if they actually are in the destinations
+of the messages. Later timestamp-based genuine atomic multicast algorithms is
+often implemented using a fault-tolerant version of Skeen’s protocol. Fast Paxos
+\cite{coelho2017fast} optimizes the protocol by optimistically assuming a
+spontaneous message ordering and deliver messages in 4$\delta$. If that
+assumption is violated, Fast Paxos reverts to the basic Paxos protocol and
+deliver messages in 6$\delta$. WbCast \cite{gotsman2019white} improves the
+latencies of fault-tolerant version of Skeen’s protocol by combining Paxos and
+Skeen’s protocol together into a single coherent protocol, and has
+collision-free latency of 3$\delta$.
 
 Ring-based protocols \cite{delporte2000fault, bezerra2015ridge,
 marandi2012multi} proposed different approach to achieve high throughput by
