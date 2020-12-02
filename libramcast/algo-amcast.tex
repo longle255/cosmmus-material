@@ -29,10 +29,10 @@
 \vspace{1.0mm}
 \WHEN[\textbf{Task 2}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
 		$p\!=\!Leader[g]$\hspace{-2mm}}
-	\STATE $clock \leftarrow increment(clock)$
+	\STATE $clock \leftarrow clock + 1$
 	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
 		\STATE $j \leftarrow M[c,i].ptr[q]$
-		\STATE \rdwrite{q}{T[c,j].tmp[g]}{clock}
+		\STATE \rdwrite{q}{T[c,j].tmp[g]}{\langle clock, g \rangle}
 		\STATE \rdwrite{q}{T[c,j].rnd[g]}{round}
 		\STATE \textbf{if} write denied \textbf{then} end task
 	\ENDINDENT	
@@ -41,7 +41,7 @@
 
 \WHEN[\textbf{Task 3}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
 		\hspace{14mm} $T[c,i].rnd[g] = Round[g]$}
-	\STATE $clock \leftarrow max(clock,T[c,i].tmp[g])$
+	\STATE $clock \leftarrow max(clock, time(T[c,i].tmp[g]))$
 	\INDENT{for each $h$ in $M[c,i].dst$, for each $q$ in $h$}
 		\STATE $j \leftarrow M[c,i].ptr[q]$
 		\STATE \rdwrite{q}{M[c,j].ack[p]}{Round[g]}
@@ -51,7 +51,7 @@
 
 \WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
 		\hspace{14mm} $T[c,i].rnd[h] = Round[h]$ \band\ $h \neq g$ \hspace{-2mm}}
-	\STATE $clock \leftarrow max(clock,T[c,i].tmp[g])$
+	\STATE $clock \leftarrow max(clock, time(T[c,i].tmp[g]))$
 	\INDENT{for each follower $q$ in $g$}
 		\STATE{$j \leftarrow M[c,i].ptr[q]$}
 		\STATE \rdwrite{q}{T[c,j].tmp[h]}{T[c,i].tmp[h]}
@@ -81,8 +81,17 @@
 		\STATE $M[c,i].stat \leftarrow$ \done
 \ENDWHEN
 \vspace{1.0mm}
+\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
+	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
+		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
+		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
+		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
+		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
+	\ENDINDENT
+\ENDINDENT
+\vspace{2.0mm}
 
-\caption{Normal case (no failures)}
+\caption{Normal case (stable leader)}
 \label{alg:normal_case}
 \end{distribalgo}
 \end{algorithm}

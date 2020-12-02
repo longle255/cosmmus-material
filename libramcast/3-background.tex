@@ -77,14 +77,14 @@ We refrain from using remote read operations, and resort to send and receive ope
 
 RDMA provides three transport modes: Reliable Connection (RC), Unreliable Connection (UC) and Unreliable Datagram (UD). 
 While RC and UC are connection oriented and support only one-to-one data transmission, UD supports both one-to-one and one-to-many without establishing connections.
-RC ensures data transmission is reliable and correct in the network layer, while UC doesn’t have such guarantee.
+RC ensures data transmission is reliable and correct in the network layer, while UC does not have such a guarantee.
 In this work, we use RC to provide in-order reliable delivery.
 To establish a connection between two remote hosts, the RDMA-enabled network card (RNIC) on each host creates a logical RDMA endpoint known as a Queue Pair (QP), including a send queue and a receive queue for storing data transfer requests. 
 Operations are posted to QPs as Work Requests (WRs) to be consumed and executed by the RNIC. 
 When an RDMA operation is completed, a completion event is pushed to a Completion Queue (CQ).
-Each host makes local memory regions (MR) available for remote access by asking its OS to pin the memory pages that would used by the RNIC.
-Both QPs and MRs can have different access modes (e.g., read-only or read-write). 
-The hosts specify the access mode when initializing the QP or registering the MR, but the access mode can be dynamically update later. 
+Each host makes local memory regions (MR) available for remote access by asking its OS to pin the memory pages that would be used by the RNIC.
+Both QPs and MRs can have different access modes (i.e., read-only or read-write). 
+The hosts specify the access mode when initializing the QP or registering the MR, but the access mode can be dynamically updated later. 
 The host can register the same memory for different MRs. Each MR then has its own access mode.
 In this way, different remote machines can have different access rights to the same memory. 
 % The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.

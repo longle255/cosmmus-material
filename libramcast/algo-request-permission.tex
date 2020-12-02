@@ -5,8 +5,8 @@
 \begin{distribalgo}[1]
 
 \WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
-	\STATE $round \leftarrow increment(round)$
-	\STATE $clock \leftarrow increment(clock)$
+%\WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
+	\STATE $round \leftarrow \langle time(round)+1,g \rangle$
 	\INDENT{\textbf{for} each group $h$}
 		\STATE{\textbf{for} each $q$ in $h$: \textsf{send}$(\textsc{req\_perm}, round)$ to $q$}
 	\ENDINDENT	
@@ -15,6 +15,7 @@
 \vspace{2.0mm}		
 \WHEN[\textbf{Task 8}]{receive responses $(\textsc{granted}, pend)$ from \\
 			\hspace{6mm} quorum $Q$ in $h$, including $p$'s response if $h=g$}
+		\STATE $clock \leftarrow clock + 1$
 		\STATE $bag \leftarrow$ union of all received $pend$ from $h$
 		\INDENT{\textbf{for} each $(c,msg,\star,\star,\star,\star)$ in $bag$}
 %		\INDENT{for each $(c,msg,dst,ptr,tmp,rnd)$ in received $pend$}
@@ -23,7 +24,7 @@
 %			\STATE \textbf{wait until} $M[c,i].stat = \mcast$
 %		\STATE $Relay(c,msg,dst,ptr)$
 		\IF{$g=h$}
-			\STATE \textbf{if} $rnd > 0$ \textbf{then} $t \leftarrow tmp$ \textbf{else} $t \leftarrow clock$
+			\STATE \textbf{if} $rnd > 0$ \textbf{then} $t \leftarrow tmp$ \textbf{else} $t \leftarrow \langle clock,g \rangle$
 %			\STATE \textbf{else} $t \leftarrow clock$
 			\INDENT{\textbf{for} each $q$ in $g$ \band\ each leader $q$ in $dst$}
 %				\STATE $j \leftarrow ptr[q]$

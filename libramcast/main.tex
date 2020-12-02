@@ -42,7 +42,13 @@
 \newcommand{\parts}{partition}
 \newcommand{\coloralgo}{Yellow}
 
-\newcommand{\libname}{\mbox{$RamCast$}\xspace}
+\newcommand{\rdwrite}[3]{\textsf{write}\ensuremath{(#1, #2, #3)}}	% rdwrite(addr,val) 
+\newcommand{\band}{\textbf{and}}
+\newcommand{\mcast}{\textsc{mcast}}
+\newcommand{\ordered}{\textsc{ordered}}
+\newcommand{\done}{\textsc{done}}
+
+\newcommand{\libname}{\mbox{RamCast}\xspace}
 
 \newcommand{\mynote}[3]{
    \fbox{\bfseries\sffamily\scriptsize#1}

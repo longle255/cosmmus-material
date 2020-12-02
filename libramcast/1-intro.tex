@@ -1,2 +1,30 @@
+%!TEX root =  main.tex
 \section{Introduction}
 \label{sec:introduction}
+
+Today's online services are expected to operate uninterruptedly despite failures.
+Many such services must also be capable to absorb ever-increasing demand without performance hiccups.
+Services that match these expectations are deemed highly available and scalable.
+Many years of intense research in the area of dependable distributed systems have deepened the understanding of how to design systems that can tolerate failures and scale performance.
+A golden rule in the design of such systems is that abstractions can significantly reduce complexity, and avoid design and programming errors.
+For example, state machine replication, a \emph{de facto} standard to fault tolerance, requires replicas to order requests.
+But ordering requests in a distributed system prone to failures is challenging \cite{FLP85}.
+By relying of atomic broadcast, an abstraction equivalent to consensus \cite{HT93,CT96}, system designers can decompose ordering from execution in state machine replication, as atomic broadcast provides reliable and ordered delivery of messages.
+
+Atomic multicast is a group communication abstraction that generalizes atomic broadcast
+commonly prescribed as support to scalable and reliable systems.
+Atomic multicast (not to be confused with network-level IP multicast) provides a distributed system with the ability to propagate messages to one or more groups of replicas with reliability and order guarantees.
+Reliability means that all non-faulty replicas will receive the message; order ensures that replicas will receive messages 
+
+
+Atomic multicast is a communication building block that allows messages to be propagated to groups of processes with reliability and order guarantees.
+Intuitively, all non-faulty processes addressed by a message must deliver the message and processes must agree on the order of delivered messages.
+Atomic multicast offers strong communication guarantees and should not be confused with network-level communication primitives (e.g., IP-multicast), which offer ``best-effort" guarantees.
+%In fact, atomic multicast is implemented using primitives that offer weaker guarantees (e.g., point-to-point communication).
+Because messages can be multicast to different sets of destinations and interleave in non-obvious ways, implementing message order in a distributed setting is challenging.
+Some atomic multicast protocols address this challenge by ordering all messages using a fixed group of processes or involving all groups, regardless of the destination of the messages.
+To be efficient, however, an atomic multicast algorithm must be \emph{genuine}: only the message sender and destination processes should communicate to propagate and order a multicast message~\cite{GS01b}.
+%
+%These solutions, however, defeat the purpose of atomic multicast since every group is involved in the ordering of messages, regardless of the groups addressed by a message.
+A genuine atomic multicast is the foundation of scalable systems, since it does not depend on a fixed group of processes and does not involve all processes.
+%, a system can increase the number of groups (i.e., resources) to handle more client requests and expect to will have limited performance advantage to the application.
