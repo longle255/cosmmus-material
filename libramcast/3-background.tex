@@ -82,6 +82,7 @@ In this work, we use RC to provide in-order reliable delivery.
 To establish a connection between two remote hosts, the RDMA-enabled network card (RNIC) on each host creates a logical RDMA endpoint known as a Queue Pair (QP), including a send queue and a receive queue for storing data transfer requests. 
 Operations are posted to QPs as Work Requests (WRs) to be consumed and executed by the RNIC. 
 When an RDMA operation is completed, a completion event is pushed to a Completion Queue (CQ).
+Operations can be made \emph{unsignaled} by setting a flag in the WR; these verbs do not generate a completion event, and the application detects completion using application-specific methods.
 Each host makes local memory regions (MR) available for remote access by asking its OS to pin the memory pages that would be used by the RNIC.
 Both QPs and MRs can have different access modes (i.e., read-only or read-write). 
 The hosts specify the access mode when initializing the QP or registering the MR, but the access mode can be dynamically updated later. 
