@@ -14,11 +14,11 @@ set style line 6  lt 6 lw 1.5 pt 6 ps 1
 set style line 7  lt 7 lw 1.5 pt 7 ps 1
 
 
-set title "Performance of different protocols and verbs"
+# set title "Performance of different protocols and verbs"
 set ylabel "Latency (us)"
 set yrange [1 : 256]
 set logscale y 2
-set xlabel "Package Size (bytes)" offset 1
+set xlabel "Message Size (bytes)" offset 1
 set xtics ("64" 0, "512" 1, "1k" 2, "2k" 3, "4k" 4, "8k" 5, "16k" 6, "32k" 7)
 # unset xtics
 set key samplen 3.5 spacing 1.2 font ",8"
