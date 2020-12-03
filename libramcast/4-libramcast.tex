@@ -44,8 +44,9 @@ If the leader succeeds to write the message in the memory of a quorum of followe
 This happens because if a leader takes over, then it revokes the permission of the previous leader.
 
 Just like Paxos, to ensure that the new leader makes decisions that are consistent with the decisions of the previous leader, each leader associates a \emph{round} to its proposed message.
-A round is a tuple $\langle rnd, pid \rangle$, where $rnd$ is a scalar and $pid$ is the process unique identifier, used to make rounds unique across the system.
-The very first leader, say process $p$, uses round $\langle 0, p \rangle$.
+%A round is a tuple $\langle rnd, pid \rangle$, where $rnd$ is a scalar and $pid$ is the process unique identifier, used to make rounds unique across the system.
+Rounds are unique across the system.
+%The very first leader, say process $p$, uses round $\langle 0, p \rangle$.
 When process $q$ becomes leader, upon suspecting $p$'s failure, $q$ must pick a round that is bigger than $p$'s round.
 Process $q$ then proceeds in two steps.
 First, $q$ needs to acquire permission from a quorum of processes, which it does by contacting all processes and providing its chosen round.
@@ -83,7 +84,7 @@ connected QPs to detect new messages.
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/architecture2}
-  \caption{\libname's memory layout and execution steps: in step 1, the client writes the message in the memory of all destination processes; in step 2 the leader of each destination group proposes and writes a timestamp for the message in the memory of its followers and other leaders; in step 3 the leaders propagate the timestamp written by other leaders, and the followers acknowledge the proposed timestamps.}
+  \caption{\libname's memory layout and execution steps: in step 1, the client writes a multicast message in the memory of all destination processes; in step 2 the leader of each destination group proposes and writes a timestamp for the message in the memory of its followers and other leaders; in step 3 the leaders propagate the timestamp written by other leaders, and the followers acknowledge the proposed timestamps. The message is delivered after step 3.}
 %Processes have shared and exclusive memory that can be accessed by RDMA primitives. Exclusive memory access needs permission. A client proposes new message by writing to the shared memory of all processes. Leader processes writes their proposed timestamps to exclusive memory. Follower processes write their acknowledgement to the shared memory}
   \label{fig:arch}
 \end{figure}
@@ -96,6 +97,7 @@ connected QPs to detect new messages.
   \item \emph{Normal execution.} The normal protocol execution (detailed in \S\ref{sec:normalcase}) is invoked when there is a sole leader per group with support of at least a majority of processes in its group. A leader is responsible for proposing the group's timestamp for the new message, and propagating timestamps from other groups to followers of its local group.
   \item \emph{Failure handling.} Upon detecting the failure of a leader, processes in a group elect a new leader. The new leader must ensure that its execution is consistent with the execution of the previous leader (detailed in \S\ref{sec:failurecase}).
   \item \emph{Leader election.} \libname requires processes to detect a slow or crashed leader, and elect a new leader. Leader election is not assumed to be perfect: the protocol ensures safety despite multiple leaders in a group. To ensure progress, though, eventually every group should elect a single operational and stable leader \cite{Aguilera2019,L98}.
+Stable leader election can be implemented in the partially synchronous model \cite{Aguilera2001}.
 \end{itemize}
 
 \subsection{Data structures}
@@ -143,7 +145,7 @@ To multicast a message $m$ (Task 1 in Algorithm \ref{alg:normal_case}), a client
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/execution}
-  \caption{Normal case execution of \libname.}
+  \caption{Normal case execution of \libname. To avoid cluttering the figure, we show the execution of only one follower per group.}
   \label{fig:normal_operation_time}
 \end{figure}
 
@@ -159,7 +161,7 @@ This is enough to ensure that the timestamp has been also updated by the leader,
 
 \textbf{[Long will check this]} When a process reads a timestamp written by a remote leader (Task 4), it updates its local clock with the timestamp, and writes the timestamp in the memory of each follower.
 This task is executed by the leader of a group only, since only the leader is updated with remote timestamps (see Task 2).
-The reason why only the leader of a group is updated with timestamps proposed by remote leaders in the message destination, is to ensure that any timestamps assigned by the leader are consistent with any other timestamps assigned by the group, similarly to other leader-follower-based protocols \cite{WB, Zab}.
+The reason why only the leader of a group is updated with timestamps proposed by remote leaders in the message destination, is to ensure that any timestamps assigned by the leader are consistent with any other timestamps assigned by the group, similarly to other leader-follower-based protocols \cite{gotsman2019white, Junqueira2011}.
 %Once each involved process $P$ belongs to $m.dst$ \lread message $m$ in its
 %local buffer, $P$ mark the message as pending, and starts polling from it
 %exclusive memory for timestamps of $m$ (Task 4 algorithm~\ref{alg:normal_case}).

@@ -1,6 +1,4 @@
 %!TEX root =  main.tex
-
-\clearpage
 \section{Background}
 \label{sec:background}
 
@@ -67,8 +65,8 @@ if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ 
 %RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
 %Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{Kalia2014}.
 %=======
-Remote Direct Memory Access (RDMA) is a hardware-based protocol that enables direct data access between the memory of remote machines without the involvement of the Operating System (OS) and processor. 
-RDMA implements dedicated network stack implemented in its hardware, provides both low-latency and high-bandwidth by bypassing the OS kernel supports zero-copy net-working.
+Remote Direct Memory Access (RDMA) is a hardware-based protocol that enables direct data access between the memory of remote machines without the involvement of the operating system and processor. 
+RDMA implements the network stack in hardware, provides both low-latency and high-bandwidth by bypassing the kernel and supporting zero-copy networking.
 RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduces an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
 Beside, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
 %>>>>>>> 86c76bc4e0440ef88f14c280c5b91aba070576a1

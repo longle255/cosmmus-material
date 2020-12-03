@@ -15,7 +15,7 @@ often implemented using a fault-tolerant version of Skeen’s protocol. Fast Pax
 spontaneous message ordering and deliver messages in 4$\delta$. If that
 assumption is violated, Fast Paxos reverts to the basic Paxos protocol and
 deliver messages in 6$\delta$. WbCast \cite{gotsman2019white} improves the
-latencies of fault-tolerant version of Skeen’s protocol by combining Paxos and
+latencies of fault-tolerant version of Skeen's protocol by combining Paxos and
 Skeen’s protocol together into a single coherent protocol, and has
 collision-free latency of 3$\delta$.
 
