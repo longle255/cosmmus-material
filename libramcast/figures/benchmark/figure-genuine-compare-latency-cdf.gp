@@ -12,7 +12,7 @@ set xrange [0:50]
 set xtics 10
 set ytics 0.2 
 set key center right
-set key samplen 2.5 spacing 1.2 font ",10"
+set key samplen 2.5 spacing 1.2 font ",11"
 set xlabel "Latency (us)"
 
 set style line 1 lt 1 lw 0.8 pt 1 ps 0.5 pointinterval 30

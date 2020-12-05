@@ -12,11 +12,11 @@ set style histogram gap 1
 set style fill pattern 0 border rgb "black"
 
 # set title "Throughput for single-group messages at maximum load"
-set ylabel "Throughput (kcps)" offset 1
+set ylabel "Throughput (Kmps)" offset 1
 set yrange [0 : 1800]
 set ytics 300
-set xlabel "Number of partitions"
-set key samplen 3.5 spacing 1.2 font ",12"
+set xlabel "Number of groups"
+set key samplen 3.5 spacing 1.2 font ",11"
 set key top left
 
 plot './data-aggregated/ramcast/single-dest-tp.dat' using 2:xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \

@@ -1,5 +1,5 @@
 set terminal postscript eps enhanced color solid lw 1.5 "Times-Roman" 16
-set output './graphs/figure-performance-vs-size-single-group.eps'
+
 
 set size 0.7,0.5
 
@@ -19,22 +19,33 @@ set style line 9  lt 9 lw 1 pt 9 ps 1
 
 # set title "Performance with single destination when increasing package size"
 set ylabel "Latency (us)" offset 1
-set yrange [0 : 300]
-set xlabel "Throughput (kmps)" offset 0
-# set logscale x
 set xrange [0 : 250]
 set xtics 50
-set key samplen 3.5 spacing 1.2 font ",12"
-set key top right
+set xlabel "Throughput (Kmps)" offset 0
+# set logscale x
 
+set key samplen 3.5 spacing 1.2 font ",11"
+set key top left
+
+set yrange [0 : 50]
+set ytics 10
+set output './graphs/figure-performance-vs-size-single-group-up-to-4k.eps'
 plot './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-98b.dat' using 2:3 with linespoints ls 1 title "64B", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-512b.dat' using 2:3 with linespoints ls 2 title "512B", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-1024b.dat' using 2:3 with linespoints ls 3 title "1KB ", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-2048b.dat' using 2:3 with linespoints ls 4 title "2KB ", \
-     './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-4096b.dat' using 2:3 with linespoints ls 5 title "4KB ", \
+     './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-4096b.dat' using 2:3 with linespoints ls 5 title "4KB "
+
+set yrange [0 : 300]
+set ytics 50
+set key top right
+set xrange [0 : 250]
+set output './graphs/figure-performance-vs-size-single-group-from-4k.eps'
+plot './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-4096b.dat' using 2:3 with linespoints ls 5 title "4KB ", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-8192b.dat' using 2:3 with linespoints ls 6 title "8KB ", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-16384b.dat' using 2:3 with linespoints ls 7 title "16KB", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-32768b.dat' using 2:3 with linespoints ls 8 title "32KB", \
      './data-aggregated/ramcast/xl170/1-dest-tp-vs-lat-vs-size-vs-load-65536b.dat' using 2:3 with linespoints ls 9 title "64KB",
 
-system("pstopdf ./graphs/figure-performance-vs-size-single-group.eps -o ./graphs/figure-performance-vs-size-single-group.pdf && rm ./graphs/figure-performance-vs-size-single-group.eps")
+system("pstopdf ./graphs/figure-performance-vs-size-single-group-up-to-4k.eps -o ./graphs/figure-performance-vs-size-single-group-up-to-4k.pdf && rm ./graphs/figure-performance-vs-size-single-group-up-to-4k.eps")
+system("pstopdf ./graphs/figure-performance-vs-size-single-group-from-4k.eps -o ./graphs/figure-performance-vs-size-single-group-from-4k.pdf && rm ./graphs/figure-performance-vs-size-single-group-from-4k.eps")

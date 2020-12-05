@@ -14,7 +14,7 @@ set xtics 50
 set ytics 0.2 
 set key center right
 set xlabel "Ramcast Latency (us)"
-
+set key samplen 3.5 spacing 1.2 font ",11"
 set style line 1 lt 1 lw 0.8 pt 1 ps 0.5 pointinterval 30
 set style line 2 lt 2 lw 0.8 pt 2 ps 0.5 pointinterval 30
 set style line 3 lt 3 lw 0.8 pt 3 ps 0.5 pointinterval 30
