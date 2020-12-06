@@ -35,6 +35,21 @@ operations. Noted that if an operation ended with an error (e.g., a leader's
 write permission is revoked), it will generate a CE even if it was posted to use
 unsignaled completion.
 
+\paragraph{Atomic message delivery}
+In a shared memory context, when a process reads multiple entries that are
+updated by a remote process, it is important that the reader process does not
+read incomplete data that has not been fully updated by the writer process,
+e.g., processes in \libname continually monitor the their shared buffer for new
+messages and may be reading an incomplete entry. We resolve this issue using
+standard techniques used in previous works \cite{APUS,FaRM,kalia2014using,
+islam2012high} that adds an extra canary byte at the end of each log entry. This
+approach leverages the left-to-right ordering of RDMA Writes. As long as this
+variable is non-zero, the ordering guarantees that the log entry is complete.
+Before writing a message to remote host, a process in \libname sets the entry’s
+canary byte to the checksum of the entry. A remote process always first checks
+the checksum value in the canary byte and wait for the checksum to match the
+entry.
+
 The source code of \libname is publicly
 available\footnote{\url{https://github.com/longle255/libRamcastV3}}. We compared
 \libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments
