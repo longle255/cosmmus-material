@@ -1,4 +1,5 @@
-\section{Experimental Evaluation}
+%!TEX root =  main.tex
+\section{Experimental evaluation}
 \label{sec:experimental-evaluation}
 
 In this section, we present the experimental results of \libname, comparing to Kernel Paxos 
@@ -34,14 +35,14 @@ Figure~\ref{fig:1group_message_size} (top) shows that messages up to 4KB long do
 As the message size increases, the maximum throughput decreases with 35 thousand messages per second for 64KB messages.
 The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (bottom) exhibits minimum latency variation for messages with up to 4KB, around 20 microseconds.
 
-\begin{figure}[htp!]
+\begin{figure*}[htp!]
   \begin{subfigure}{\columnwidth}
     \centering
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-up-to-4k}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-up-to-4k}
+    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-up-to-4k}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
@@ -49,11 +50,11 @@ The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_mes
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-from-4k}
+    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-from-4k}
   \end{subfigure}
   \caption{\libname performance with different message sizes: throughput versus latency (top) and latency cumulative distribution function measured when the system is saturated (bottom)}
   \label{fig:1group_message_size}
-\end{figure}
+\end{figure*}
 
 \subsection{Broadcast results}
 \label{sec:evaluation:broadcast}

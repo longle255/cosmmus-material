@@ -86,7 +86,7 @@ connected QPs to detect new messages.
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/architecture2}
-  \caption{\libname's memory layout and execution steps: in step 1, the client writes a multicast message in the memory of all destination processes; in step 2 the leader of each destination group proposes and writes a timestamp for the message in the memory of its followers and other leaders; in step 3 the leaders propagate the timestamp written by other leaders, and the followers acknowledge the proposed timestamps. The message is delivered after step 3.}
+  \caption{\libname's memory layout. The normal execution proceeds in three steps: in step 1, the client writes a multicast message in the memory of all destination processes; in step 2 the leader of each destination group proposes and writes a timestamp for the message in the memory of its followers and other leaders; in step 3 the leaders propagate the timestamp written by other leaders, and the followers acknowledge the proposed timestamps. The message is delivered after step 3.}
 %Processes have shared and exclusive memory that can be accessed by RDMA primitives. Exclusive memory access needs permission. A client proposes new message by writing to the shared memory of all processes. Leader processes writes their proposed timestamps to exclusive memory. Follower processes write their acknowledgement to the shared memory}
   \label{fig:arch}
 \end{figure}
@@ -156,7 +156,7 @@ We explain next the behavior of each one of the involved tasks.
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/execution}
-  \caption{Normal case execution of \libname. To avoid cluttering, we show the execution of one follower per group only.}
+  \caption{Normal execution of \libname. We show the steps at one follower per group only to avoid cluttering.}
   \label{fig:normal_operation_time}
 \end{figure}
 
@@ -188,43 +188,66 @@ A process delivers an ordered message when it can assert that no other message c
 
 \end{itemize}
 
-\subsection{Handling leader failures}
+\subsection{Handling failures}
 \label{sec:failurecase}
 
 %\input{algo-leader-election.tex}
 
-When a process becomes a leader, it needs to perform
-several steps to ensure it is the only leader of its groups. Those steps are:
-(1) increasing ballot number, in which that process becomes leader. (2) sending
-1A message to all processes with new ballot number, and wait for the response of
-majority (3) ensure the logs of all processes are up-to-date
+When a process becomes a leader, it needs to catch up with the previous leader.
+In the following, we describe how the newly elected leader does this.
+The procedure uses both shared memory and message passing for communication.
+In RDMA, message passing is less efficient than shared memory, but it reduces complexity, as we do not have to handle concurrent access to shared memory.
+Since failures are hopefully rare, we consider that trading performance for simplicity is acceptable.
 
-Firstly, the new leader must choose a new ballot number that is higher than all
-ballot numbers before for its group. A process only reply to the message or
-timestamp that has a ballot number higher than its current value. The new ballot
-number will be included in each timestamp $ts$ of this leader later.
+\begin{itemize}
+\item \emph{Task 7.} 
+When a process that will become the next leader of the group suspects the current leader, it determines its \emph{first undecided entry (FUE)} per client in its buffers. 
+Then, the new leader chooses a round and sends a catch-up message to every process in the system.
+Since, entry $i$ in the new leader's buffer may correspond to a different entry at another process, the new leader must convert its FUE into one that is meaningful for the contacted process.
 
-The new leader needs to get the access to the exclusive memory space on (1) the
-followers of its local group, and (2) the leaders of other groups. In order to
-act as a leader, a node must get the write permission from majority of other
-processes in its group. In addition, to tolerate failure of the leaders of other
-groups, the new leader also need to get the write permission from majority of
-processes of other groups. The new leader request the access by issuing a RDMA
-Send (\lle{this could be a \rwrite}) 1A message that includes a new ballot
-number all involved processes. Upon receiving such message, a process first
-checks if the proposed ballot number is higher than the current ballot number it
-stored. In such case, the process revokes access of the old leader, and replies
-to the new leader with an 1B message that also contains the status of all
-message it is processing (i.e., messages that are pending and messages that has
-been fulfilled and are waiting to be delivered)
+\item \emph{Task 8.} 
+A process will consider a catch-up message from new leader $q$ in group $h$ if $q$ has picked a round bigger than the current round for $h$ (this is a requirement from Paxos, to ensure that a new leader will not decide on a value different than a previously decided value).
 
-Once the new leader receives 1B reply from majority processes of each group, it
-must ensure all remote logs are up-to-date with its own. If a message m is
-fulfilled in some processes, the leader stores it in a settled list. If a
-message is not fulfilled in any process, there are two cases: i)  the message
-does not have the timestamp or enough acknowledgements from quorum of processes
-of the group that has failed leader on any process ii) it does have such data on
-some processes.\lle{sloppy sentence}
+
+\item \emph{Task 9.} 
+
+\end{itemize}
+
+Finally, we also consider the case of faulty clients, who may fail to update all message destinations.
+
+\begin{itemize}
+
+\item \emph{Task 10.} 
+When a process detects the failure of a client, it relays all the messages multicast by the faulty client that have not been ordered yet, that is, only messages in the \mcast state need to be relayed.
+
+\end{itemize}
+
+%Firstly, the new leader must choose a new ballot number that is higher than all
+%ballot numbers before for its group. A process only reply to the message or
+%timestamp that has a ballot number higher than its current value. The new ballot
+%number will be included in each timestamp $ts$ of this leader later.
+%
+%The new leader needs to get the access to the exclusive memory space on (1) the
+%followers of its local group, and (2) the leaders of other groups. In order to
+%act as a leader, a node must get the write permission from majority of other
+%processes in its group. In addition, to tolerate failure of the leaders of other
+%groups, the new leader also need to get the write permission from majority of
+%processes of other groups. The new leader request the access by issuing a RDMA
+%Send (\lle{this could be a \rwrite}) 1A message that includes a new ballot
+%number all involved processes. Upon receiving such message, a process first
+%checks if the proposed ballot number is higher than the current ballot number it
+%stored. In such case, the process revokes access of the old leader, and replies
+%to the new leader with an 1B message that also contains the status of all
+%message it is processing (i.e., messages that are pending and messages that has
+%been fulfilled and are waiting to be delivered)
+%
+%Once the new leader receives 1B reply from majority processes of each group, it
+%must ensure all remote logs are up-to-date with its own. If a message m is
+%fulfilled in some processes, the leader stores it in a settled list. If a
+%message is not fulfilled in any process, there are two cases: i)  the message
+%does not have the timestamp or enough acknowledgements from quorum of processes
+%of the group that has failed leader on any process ii) it does have such data on
+%some processes.\lle{sloppy sentence}
 
 \input{algo-request-perm-v2}
 
