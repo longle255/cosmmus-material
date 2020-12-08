@@ -3,10 +3,11 @@
 \section{RamCast: RDMA-based Atomic Multicast}
 \label{sec:rdma-atomic-multicast}
 
-In this section, we explain the general design and architecture of \libname (\S\ref{sec:overview}), then detail \libname's atomic multicast algorithm in the normal case without failures (\S\ref{sec:normalcase}), and in the presence of failures (\S\ref{sec:failurecase}).
+In this section, we recall the basic abstractions that inspired \libname (\S\ref{sec:bblocks}) and present its design and algorithms. 
+We start with an overview of the protocol (\S\ref{sec:overview}), then detail \libname's data structures (\S\ref{sec:ds-structs}) and algorithms in the normal case without failures (\S\ref{sec:normalcase}) and in the presence of failures (\S\ref{sec:failurecase}).
 
 \subsection{Building blocks}
-\label{sec:overview}
+\label{sec:bblocks}
 
 \libname leverages two ideas, Skeen's atomic multicast algorithm \cite{BJ87b} and Protected Memory Paxos \cite{Aguilera2019}.
 Skeen's algorithm orders messages multicast to multiple processes consistently but it does not tolerate failures.
@@ -55,6 +56,7 @@ Second, $q$ must check other processes have already accepted any values.
 If so, $q$ must propose the value that has been accepted in the largest round; otherwise, $q$ can propose any values.
 
 \subsection{Overall design and architecture}
+\label{sec:overview}
 
 Figure~\ref{fig:arch} depicts the various components and memory layout of \libname.
 Processes within each group coordinate using the leader-follower model, like in Paxos and Protected Memory Paxos.
@@ -104,15 +106,20 @@ Stable leader election can be implemented in the partially synchronous model \ci
 \label{sec:ds-structs}
 
 Algorithm~\ref{alg:data_struct} presents the data structures used by processes in \libname.
-Every server process has a shared circular buffer $M[c,-]$ per client, where in each entry the client writes a multicast message $msg$, the groups $dst$ the message is addressed to, and a vector $ptr[p]$ with an entry per process $p$ with the address of the entry in $p$'s memory. The address vector is used by other processes to access the entry in $p$'s memory.
-Servers compute the message's timestamp $tmp$, based on the timestamps proposed by the leader of each destination group, and the acknowledgement $ack[p]$ from each follower $p$ in the leader's group.
-A timestamp is a tuple $(cnt,pid)$, where $cnt$ is a scalar and $pid$ is a process identifier, used to break ties.
+Every server process has a shared buffer $M$ per client $c$, where entry $M[c,i]$ contains the $i$-th message $msg$ multicast by client $c$, the groups $dst$ the message is addressed to, and an address vector $ptr$, where $ptr[g,p]=j$ means that at process $p$ in group $g$ message $msg$ is stored in $M[c,j]$. 
+The address vector is used by a process to know where to write in the memory of another process addressed by the message.
+Servers compute the message's timestamp $tmp$, based on the timestamps proposed by the leader of each destination group, and the acknowledgements from the members of the leader's group, stored in vector $ack$.
+%A timestamp is a tuple $(cnt,pid)$, where $cnt$ is a scalar and $pid$ is a process identifier, used to break ties.
 A multicast message state $stat$ can be null ($\perp$), pending a final timestamp (\mcast), assigned a final timestamp (\ordered) or delivered (\done).
 
-To compute a message's timestamp, each server process has a protected circular buffer $T$, where the $i$-th entry $T[c,i]$ matches the corresponding entry $M[c,i]$ in the shared circular buffer $M$ associated with $c$.
-The entry contains a timestamp $tmp[g]$ per group $g$ in the message's destination, proposed by the current leader in $g$, and the round $rnd[g]$ when the leader proposed the message.\footnote{Timestamps and rounds are tuples $\langle cnt,pid \rangle$, where $cnt$ is a scalar and $pid$ is a process identifier. It follows that $\langle cnt,pid \rangle > \langle cnt',pid' \rangle$ iff $cnt > cnt'$, or $cnt = cnt'$ and $pid > pid'$.}
+To compute a message's timestamp, each server process has a protected buffer $T$, where the $i$-th entry $T[c,i]$ matches the corresponding entry $M[c,i]$ in the shared circular buffer $M$ associated with $c$.
+The entry contains a timestamp vector $tmp$ and a round vector $rnd$, each one with an entry per group $g$; $tmp[g]$ contains the timestamp proposed by the current leader in $g$ in round $rnd[g]$.
+Timestamps and rounds are tuples $\langle cnt,pid \rangle$, where $cnt$ is a scalar and $pid$ is a process identifier. It follows that $\langle cnt,pid \rangle > \langle cnt',pid' \rangle$ iff $cnt > cnt'$, or $cnt = cnt'$ and $pid > pid'$.
 
-Process $p$'s local state includes a logical timestamp counter, $p$'s current round, vector $Leader[g]$ with $p$'s view on the current leader of group $g$, and the last round $Round[g]$ that $p$ accepted for group $g$.
+To multicast a message, a client writes the message in the shared buffer of each process in the groups addressed by the message.
+To know in which entry the multicast message must be written, the client keep an address vector $ptr$ with an entry per group and per process in the group.
+
+Process $p$'s local state includes a $clock$, used to compute logical timestamps, $p$'s current round, used when $p$ is the leader of the group, vector $Leader$ with $p$'s view on the current leader of each group, and vector $Round$, where entry $Round[g]$ contains the largest round the process has accepted from $Leader[g]$.
 
 \input{ds-structs}
 
@@ -139,46 +146,49 @@ Process $p$'s local state includes a logical timestamp counter, $p$'s current ro
 \input{algo-amcast}
 % \input{algo-normal-case}
 
-Algorithm \ref{alg:normal_case} presents \libname's normal execution, when the leaders of the groups a message is addressed to are operational and stable.
-To multicast a message $m$ (Task 1 in Algorithm \ref{alg:normal_case}), a client $c$ first calculates the next available entry in its circular buffer stored in the memory of every process addressed by $m$, and then invokes the $Relay$ procedure (Algorithm~\ref{alg:data_struct}), which copies the message, its destination, and the address vector for $m$ in the circular buffer of every process addressed by $m$.
+Algorithm \ref{alg:normal_case} presents \libname's normal execution, when a message is addressed to groups whose leaders are operational and stable.
+Figure~\ref{fig:normal_operation_time} illustrates one normal execution.
+We explain next the behavior of each one of the involved tasks.
+
+\begin{itemize}
+\item \emph{Task 1.} To multicast message $m$, client $c$ first calculates the next available entry in the buffer of every process addressed by $m$. Then, $c$ invokes the $Relay$ procedure, which copies the message, its destination, and the address vector for $m$ in the message buffer of every process addressed by $m$.
 
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=1\linewidth]{figures/execution}
-  \caption{Normal case execution of \libname. To avoid cluttering the figure, we show the execution of only one follower per group.}
+  \caption{Normal case execution of \libname. To avoid cluttering, we show the execution of one follower per group only.}
   \label{fig:normal_operation_time}
 \end{figure}
 
-Once leader process $L$ in group $g$ reads $m$ in its message buffer (Task 2), it computes a
-group-wise timestamp for $m$ and writes the proposed timestamp to the corresponding entry
-in the protected timestamp buffer of (1) all follower processes in the leader's group $g$, and (2) all leader processes 
+\item \emph{Task 2.} Once leader process $L$ in group $g$ reads $m$ in its message buffer, it computes a
+group-wise timestamp for $m$ and writes the proposed timestamp 
+in the protected timestamp buffer of all follower processes in the leader's group $g$, and all leader processes 
 of other groups in the destination of $m$.
 If a remote write is denied, then $L$ ends the task since another process in $g$ became leader.
 
-When a follower detects that a multicast message has been assigned a timestamp by the group leader (Task 3), it updates its clock, to ensure that timestamps from a group are monotonically increasing (necessary in case the process becomes leader) and acknowledges that it has read this timestamp to every process in the destination of the message.
-The follower detects the leader proposed timestamp by checking whether the round of the timestamp matches the round associated with the group leader. 
-This is enough to ensure that the timestamp has been also updated by the leader, since the round is updated later in Task 2 (we discuss in Section~\ref{sec:implementation} how this is ensured in RDMA).
+\item \emph{Task 3.} When a follower detects that a multicast message has been assigned a timestamp by the group leader, it updates its clock, to ensure that timestamps from a group are monotonically increasing (necessary in case the process becomes leader).
+Then, the follower acknowledges that it has read this timestamp by writing the round used by the leader in its entry in the $ack$ vector of every process in the destination of the message.
+The follower detects the leader proposed timestamp by checking whether the round of the timestamp matches the round associated with the  leader. 
+This assumes that both the timestamp and the round have been updated by the leader.
+We discuss in Section~\ref{sec:implementation} how we ensure this in RDMA.
 
-\textbf{[Long will check this]} When a process reads a timestamp written by a remote leader (Task 4), it updates its local clock with the timestamp, and writes the timestamp in the memory of each follower.
-This task is executed by the leader of a group only, since only the leader is updated with remote timestamps (see Task 2).
-The reason why only the leader of a group is updated with timestamps proposed by remote leaders in the message destination, is to ensure that any timestamps assigned by the leader are consistent with any other timestamps assigned by the group, similarly to other leader-follower-based protocols \cite{gotsman2019white, Junqueira2011}.
+\item \emph{Task 4.} 
+When the leader $L$ in $g$ reads a timestamp written by a leader in another group, $L$ updates its local clock with the timestamp, to ensure that any future proposed timestmaps will be bigger, and writes the read timestamp in the memory of each one of its followers.
+This task is executed by the leader of a group only, since only the leader is updated with timestamps from the leader of another group (see Task 2).
+The reason why only the leader of a group is updated is to ensure that any timestamps assigned by the leader are consistent with any other timestamps assigned by the group, similarly to other leader-follower-based protocols \cite{gotsman2019white, Junqueira2011}.
 %Once each involved process $P$ belongs to $m.dst$ \lread message $m$ in its
 %local buffer, $P$ mark the message as pending, and starts polling from it
 %exclusive memory for timestamps of $m$ (Task 4 algorithm~\ref{alg:normal_case}).
 
-Upon \lread a timestamp $ts$ of message $m$ from leader of local group, a
-process $P$ writes its acknowledgement $ack$ for that timestamp to the shared
-memory of all other involved processes, and start polling from its memory for
-acknowledgements from other processes. (Task 4 algorithm~\ref{alg:normal_case}).
-Once $P$ receives timestamps of all involved groups and acknowledgements from
-the majority of processes of each group, it can order the message $m$ and starts
-deliver it.
+\item \emph{Task 5.} 
+When a message has a timestamp proposed by a leader from each destination group of the message, and a quorum of processes in each destination group agree with the proposed timestamp, the message become ordered.
 
-After delivering a message, a process will keep that message in its local buffer.
-Upon receiving acknowledgements from all the processes in the candidate
-quorum, the message will be removed from the buffer.
+\item \emph{Task 6.} 
+A process delivers an ordered message when it can assert that no other message can be assigned a smaller timestamp.
 
-\subsection{Handling failures}
+\end{itemize}
+
+\subsection{Handling leader failures}
 \label{sec:failurecase}
 
 %\input{algo-leader-election.tex}
@@ -216,7 +226,7 @@ does not have the timestamp or enough acknowledgements from quorum of processes
 of the group that has failed leader on any process ii) it does have such data on
 some processes.\lle{sloppy sentence}
 
-\input{algo-request-permission}
+\input{algo-request-perm-v2}
 
 % If the
 % sequence number of leader is smaller than follower, the leader should know that

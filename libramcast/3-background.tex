@@ -32,9 +32,8 @@ Moreover, a message is received at most once, and only if it was previously sent
 \subsection{Problem statement}
 \label{sec:amcast}
 
-Let $\Pi = \{p_1, p_2, ...\}$ be the set of server processes.
-We define $\Gamma \in 2^{\Pi}$ as the set of process groups in the system. 
-Groups are disjoint and each group contains $2f+1$ processes, where $f$ is the maximum number of faulty processes per group.  
+Let $\Pi$ be the set of server processes in the system and $\Gamma \in 2^{\Pi}$ the set of process groups in the system, where $|\Gamma| = k$.
+Groups are disjoint and each group contains $n = 2f+1$ processes, where $f$ is the maximum number of faulty processes per group.  
 The assumption of disjoint groups has little practical implication since it does not prevent collocating processes that are members of different groups on the same machine.
 A set of $f + 1$ processes in group $g$ is a \emph{quorum} in $g$.
 
