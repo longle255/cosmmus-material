@@ -52,7 +52,7 @@ Atomic broadcast is a special case of atomic multicast in which every message is
 
 We require atomic multicast protocols to be \emph{genuine}~\cite{GS01b}: 
 an algorithm ${\cal A}$ solving reliable or atomic multicast is genuine
-if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ in $R$, if $p$ sends or receives a message, then some message $m$ is multicast, and either (a)~$p$ is the process that multicasts $m$ or (b)~$p \in g$ and $g \in m.dst$.
+if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ in $R$, if $p$ \hl{reads a message in its buffer or writes a message remotely}, then some message $m$ is multicast, and either (a)~$p$ is the process that multicasts $m$ or (b)~$p \in g$ and $g \in m.dst$.
 
 
 \subsection{Remote Direct Memory Access}
@@ -67,7 +67,7 @@ if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ 
 Remote Direct Memory Access (RDMA) is a hardware-based protocol that enables direct data access between the memory of remote machines without the involvement of the operating system and processor. 
 RDMA implements the network stack in hardware, provides both low-latency and high-bandwidth by bypassing the kernel and supporting zero-copy networking.
 RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduces an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
-Beside, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
+Besides, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
 %>>>>>>> 86c76bc4e0440ef88f14c280c5b91aba070576a1
 In RamCast's normal operation, processes communicate using remote write operations only.
 We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
@@ -84,5 +84,5 @@ Each host makes local memory regions (MR) available for remote access by asking 
 Both QPs and MRs can have different access modes (i.e., read-only or read-write). 
 The hosts specify the access mode when initializing the QP or registering the MR, but the access mode can be dynamically updated later. 
 The host can register the same memory for different MRs. Each MR then has its own access mode.
-In this way, different remote machines can have different access rights to the same memory. 
+In this way, different remote machines can have different access rights to the same memory region. 
 % The same effect can be obtained by using different access flags for the QPs used to communicate with remote machines.

@@ -20,7 +20,7 @@ after briefly presenting Skeen's algorithm and Protected Memory Paxos.
 
 \subsubsection{Skeen's atomic multicast}
 
-In Skeen's algorithm, each process and assigns unique timestamps to multicast messages based on a logical clock~\cite{Lam78}.
+In Skeen's algorithm, each process assigns unique timestamps to multicast messages based on a logical clock~\cite{Lam78}.
 The correctness of the algorithm stems from two basic properties:
 (i)~processes in the destination of a multicast message first assign tentative timestamps to the message and eventually agree on the message's final timestamp; and
 (ii)~processes deliver messages according to their final timestamp.
@@ -51,7 +51,7 @@ Rounds are unique across the system.
 When process $q$ becomes leader, upon suspecting $p$'s failure, $q$ must pick a round that is bigger than $p$'s round.
 Process $q$ then proceeds in two steps.
 First, $q$ needs to acquire permission from a quorum of processes, which it does by contacting all processes and providing its chosen round.
-Processes grant write permission to $q$ if the provided round is bigger than the round of the process that current holds write permission.
+Processes grant write permission to $q$ if the provided round is bigger than the round of the process that currently holds the write permission.
 Second, $q$ must check other processes have already accepted any values.
 If so, $q$ must propose the value that has been accepted in the largest round; otherwise, $q$ can propose any values.
 
@@ -60,8 +60,8 @@ If so, $q$ must propose the value that has been accepted in the largest round; o
 
 Figure~\ref{fig:arch} depicts the various components and memory layout of \libname.
 Processes within each group coordinate using the leader-follower model, like in Paxos and Protected Memory Paxos.
-Each server process has a fixed-size circular buffer per client, analogously to other RDMA-based systems \cite{FaRM, Mu, DARE, APUS}.
-A circular buffer in \libname is divided into two parts, a message buffer $M$, and a timestamp buffer $T$.
+Each server process has a fixed-size buffer per client, analogously to other RDMA-based systems \cite{FaRM, Mu, DARE, APUS}.
+A buffer in \libname is divided into two parts, a message buffer $M$, and a timestamp buffer $T$.
 Message buffer $M$ is a shared memory region that can be read and written by any other processes, including the client process the buffer is associated with.
 Timestamp buffer $T$ is protected and can only be written by the leader of each group; the buffer can be read by any processes.
 Each entry in $M$, with a multicast message $m$, has a corresponding entry in $T$, with $m$'s timestamp.
@@ -112,7 +112,7 @@ Servers compute the message's timestamp $tmp$, based on the timestamps proposed 
 %A timestamp is a tuple $(cnt,pid)$, where $cnt$ is a scalar and $pid$ is a process identifier, used to break ties.
 A multicast message state $stat$ can be null ($\perp$), pending a final timestamp (\mcast), assigned a final timestamp (\ordered) or delivered (\done).
 
-To compute a message's timestamp, each server process has a protected buffer $T$, where the $i$-th entry $T[c,i]$ matches the corresponding entry $M[c,i]$ in the shared circular buffer $M$ associated with $c$.
+To compute a message's timestamp, each server process has a protected buffer $T$, where the $i$-th entry $T[c,i]$ matches the corresponding entry $M[c,i]$ in the shared buffer $M$ associated with $c$.
 The entry contains a timestamp vector $tmp$ and a round vector $rnd$, each one with an entry per group $g$; $tmp[g]$ contains the timestamp proposed by the current leader in $g$ in round $rnd[g]$.
 Timestamps and rounds are tuples $\langle cnt,pid \rangle$, where $cnt$ is a scalar and $pid$ is a process identifier. It follows that $\langle cnt,pid \rangle > \langle cnt',pid' \rangle$ iff $cnt > cnt'$, or $cnt = cnt'$ and $pid > pid'$.
 
@@ -249,7 +249,7 @@ When a process detects the failure of a client, it relays all the messages multi
 %of the group that has failed leader on any process ii) it does have such data on
 %some processes.\lle{sloppy sentence}
 
-\input{algo-request-perm-v2}
+\input{algo-request-permission}
 
 % If the
 % sequence number of leader is smaller than follower, the leader should know that
