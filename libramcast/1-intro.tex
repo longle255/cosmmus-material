@@ -15,7 +15,8 @@ In order to both scale performance and tolerate failures, service state is typic
 Atomic multicast is a group communication abstraction that generalizes atomic broadcast by allowing requests to be propagated to groups of processes (in this case shards) with reliability and order guarantees.
 Intuitively, all non-faulty processes addressed by a request must deliver the request and processes must agree on the order of delivered requests.
 Atomic multicast offers strong communication guarantees and should not be confused with network-level communication primitives (e.g., IP-multicast), which offer ``best-effort" guarantees.
-Because messages can be multicast to different sets of destinations and interleave in non-obvious ways, implementing message order in a distributed setting is challenging.
+
+Since messages can be multicast to different sets of destinations and interleave in non-obvious ways, implementing message order in a distributed setting is challenging.
 Some atomic multicast protocols address this challenge by ordering all messages using a fixed group of processes or involving all groups, regardless of the destination of the messages.
 To be efficient, however, an atomic multicast algorithm must be \emph{genuine}: only the message sender and destination processes should communicate to propagate and order a multicast message~\cite{GS01b}.
 A genuine atomic multicast is the foundation of scalable and fault-tolerant systems, since it does not depend on a fixed group of processes, and ensures reliable communication \cite{Coelho2017}.
