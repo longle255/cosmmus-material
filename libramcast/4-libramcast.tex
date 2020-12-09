@@ -201,8 +201,9 @@ Since failures are hopefully rare, we consider that trading performance for simp
 
 \begin{itemize}
 \item \emph{Task 7.} 
-When a process that will become the next leader of the group suspects the current leader, it determines its \emph{first undecided entry (FUE)} per client in its buffers. 
-Then, the new leader chooses a round and sends a catch-up message to every process in the system.
+When a process that will become the next leader of the group suspects the current leader, it determines its \emph{first undecided entry (FUE)} per client in its shared buffers.
+An entry is undecided if its state is equal to \mcast. 
+Then, the new leader chooses a round and sends a catch-up message to every server process in the system.
 Since, entry $i$ in the new leader's buffer may correspond to a different entry at another process, the new leader must convert its FUE into one that is meaningful for the contacted process.
 
 \item \emph{Task 8.} 
@@ -213,12 +214,13 @@ A process will consider a catch-up message from new leader $q$ in group $h$ if $
 
 \end{itemize}
 
-Finally, we also consider the case of faulty clients, who may fail to update all message destinations.
+Finally, we also consider the case of faulty clients, who may fail to update all destinations of a multicast message.
 
 \begin{itemize}
 
 \item \emph{Task 10.} 
-When a process detects the failure of a client, it relays all the messages multicast by the faulty client that have not been ordered yet, that is, only messages in the \mcast state need to be relayed.
+When a process detects the failure of a client, it relays all the messages multicast by the faulty client that have not been ordered yet.
+This means that only messages in the \mcast\ state need to be relayed.
 
 \end{itemize}
 
