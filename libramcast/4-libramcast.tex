@@ -196,7 +196,7 @@ A process delivers an ordered message when it can assert that no other message c
 When a process becomes a leader, it needs to catch up with the previous leader.
 In the following, we describe how the newly elected leader does this.
 The procedure uses both shared memory and message passing for communication.
-In RDMA, message passing is less efficient than shared memory, but it reduces complexity, as we do not have to handle concurrent access to shared memory.
+In RDMA, message passing is less efficient than shared memory, but it reduces complexity, as we do not have to handle concurrent accesses to shared memory.
 Since failures are hopefully rare, we consider that trading performance for simplicity is acceptable.
 
 \begin{itemize}
@@ -249,7 +249,7 @@ When a process detects the failure of a client, it relays all the messages multi
 %of the group that has failed leader on any process ii) it does have such data on
 %some processes.\lle{sloppy sentence}
 
-\input{algo-request-permission}
+\input{algo-request-perm-v2}
 
 % If the
 % sequence number of leader is smaller than follower, the leader should know that
