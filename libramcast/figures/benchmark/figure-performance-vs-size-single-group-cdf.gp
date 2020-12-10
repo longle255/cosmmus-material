@@ -7,20 +7,20 @@ set grid ytics
 set grid xtics
 
 # ps: point size
-set style line 1 lt 1 lw 1 pt 1 ps 0.5 pointinterval 3
-set style line 2 lt 2 lw 1 pt 2 ps 0.5 pointinterval 3
-set style line 3 lt 3 lw 1 pt 3 ps 0.5 pointinterval 3
-set style line 4 lt 4 lw 1 pt 4 ps 0.5 pointinterval 3
-set style line 5 lt 5 lw 1 pt 5 ps 0.5 pointinterval 30
-set style line 6 lt 6 lw 1 pt 6 ps 0.5 pointinterval 30
-set style line 7 lt 7 lw 1 pt 7 ps 0.5 pointinterval 30
-set style line 8 lt 8 lw 1 pt 8 ps 0.5 pointinterval 30
-set style line 9 lt 9 lw 1 pt 9 ps 0.5 pointinterval 30
+set style line 1 lt 1 lw 1 pt 1 ps 1.0 pointinterval 3
+set style line 2 lt 2 lw 1 pt 2 ps 1.0 pointinterval 3
+set style line 3 lt 3 lw 1 pt 3 ps 1.0 pointinterval 3
+set style line 4 lt 4 lw 1 pt 4 ps 1.0 pointinterval 3
+set style line 5 lt 5 lw 1 pt 5 ps 1.0 pointinterval 30
+set style line 6 lt 6 lw 1 pt 6 ps 1.0 pointinterval 30
+set style line 7 lt 7 lw 1 pt 7 ps 1.0 pointinterval 30
+set style line 8 lt 8 lw 1 pt 8 ps 1.0 pointinterval 30
+set style line 9 lt 9 lw 1 pt 9 ps 1.0 pointinterval 30
 
 # set title "Latency CDF with single destination when increasing package size"
 
 set ytics 0.2 
-set key samplen 3.5 spacing 1.2 font ",11"
+set key samplen 3.5 spacing 1.2 font ",13"
 set key center right
 set xlabel "Latency(us)"
 unset key

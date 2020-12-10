@@ -17,7 +17,7 @@ set ylabel "Throughput (Kmps)" offset 1
 set yrange [0 : 250]
 set ytics 50
 set xlabel "Number of groups"
-set key samplen 3.5 spacing 1.2 font ",11"
+set key samplen 3.5 spacing 1.2 font ",13"
 set key top right
 
 plot './data-aggregated/ramcast/xl170/multi-dest-tp.dat' using 2:xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
