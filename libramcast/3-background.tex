@@ -51,9 +51,8 @@ Atomic multicast ensures the following properties:
 Atomic broadcast is a special case of atomic multicast in which every message is addressed to all groups.
 
 We require atomic multicast protocols to be \emph{genuine}~\cite{GS01b}: 
-an algorithm ${\cal A}$ solving reliable or atomic multicast is genuine
-if and only if for any admissible run $R$ of ${\cal A}$ and for any process $p$ in $R$, if $p$ \hl{reads a message in its buffer or writes a message remotely}, then some message $m$ is multicast, and either (a)~$p$ is the process that multicasts $m$ or (b)~$p \in g$ and $g \in m.dst$.
-
+an atomic multicast algorithm is genuine if in any run in which a message $m$ is 
+multicast, then for every process $p$ that participates in ordering $m$, $p$ is the process that multicasts $m$ or $p \in g$ and $g \in m.dst$.
 
 \subsection{Remote Direct Memory Access}
 \label{sec:rdma}

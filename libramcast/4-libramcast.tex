@@ -207,21 +207,26 @@ Then, the new leader chooses a round and sends a catch-up message to every serve
 Since, entry $i$ in the new leader's buffer may correspond to a different entry at another process, the new leader must convert its FUE into one that is meaningful for the contacted process.
 
 \item \emph{Task 8.} 
-A process will consider a catch-up message from new leader $q$ in group $h$ if $q$ has picked a round bigger than the current round for $h$ (this is a requirement from Paxos, to ensure that a new leader will not decide on a value different than a previously decided value).
+A process $p$ will consider a catch-up message from new leader $q$ in group $h$ if $q$ has picked a round bigger than the current round for $h$. 
+This is a requirement from Paxos, to ensure that a new leader will not decide on a value different than a previously decided value.
+If the catch-up message can be considered, then $p$ grants permission to the shared buffer $T$ to $q$, collects all entries that have been requested by $q$, and sends them to $q$.
+Finally, $p$ updates $h$'s round and leader.
 
-
-\item \emph{Task 9.} 
-
+\item \emph{Task 9.}
+When the new leader receives responses for a catch-up request from a quorum of processes in a group, it handles each entry $i$ for every client $c$ received as follows.
+First, the process selects the response with the largest round. 
+From Paxos, this ensures that the timestamp in this response either has been decided or will eventually be decided.
+The next steps depend on whether the process received the responses from its own group or not.
+It the process received the responses from its own group, then it selects the largely received timestamp, if any, or chooses own from its clock. In either case, the process proposes the timestamp to all other members of its group and the leaders of the other involved groups.
+If the process received the responses from another group, then it forwards the received timestamp to the followers in its group.
 \end{itemize}
 
-Finally, we also consider the case of faulty clients, who may fail to update all destinations of a multicast message.
+We also consider the case of faulty clients, who may fail to update all destinations of a multicast message.
 
 \begin{itemize}
-
 \item \emph{Task 10.} 
 When a process detects the failure of a client, it relays all the messages multicast by the faulty client that have not been ordered yet.
 This means that only messages in the \mcast\ state need to be relayed.
-
 \end{itemize}
 
 %Firstly, the new leader must choose a new ballot number that is higher than all
@@ -283,6 +288,22 @@ This means that only messages in the \mcast\ state need to be relayed.
 \subsection{Extensions}
 \label{sec:extensions}
 
-How to deliver single-group messages more quickly, after the write from the leader of the group
+We now discuss how to speed up the execution of messages multicast to a single group of processes and how to reuse entries in the client buffers (i.e., essentially, how to turn them into circular buffers).
+
+Since only one process at a time can hold permission to write in the timestamp buffer of processes, if a leader manages to write its proposed timestamp for a multicast message (Task 2) in a quorum of processes, it knows that the timestamp proposed has been accepted by the followers and can change the message's state to \ordered.
+Thus, at the leader the message is ready to be delivered without the acknowledgements from the followers.
+We use this optimization to speed up the delivery of single-group messages at the leader.
 
 How to garbage collect entries in the shared buffers
+
+
+
+
+
+
+
+
+
+
+
+

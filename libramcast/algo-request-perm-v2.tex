@@ -40,16 +40,22 @@
 \vspace{2.0mm}		
 \WHEN[\textbf{Task 9}]{\textsf{receive} $(\textsc{my\_state}, pend)$ from quorum $Q$ in $h$,\\
 			\hspace{6mm} including $p$'s response if $g=h$}
-		\STATE $clock \leftarrow clock + 1$
 		\STATE $bag \leftarrow$ union of all received $pend$ from $h$
+		\STATE let $maxts$ be the largest timestamp $tmp$ in $bag$
+		\STATE $clock \leftarrow max(clock, time(maxts))$
 		\INDENT{\textbf{for} each $(c,i,-,-,-,-,-)$ in $bag$}
 %		\INDENT{for each $(c,msg,dst,ptr,tmp,rnd)$ in received $pend$}
 			\STATE let $(c,i,msg,dst,ptr,tmp,rnd)$ in $bag$ be such that \\
-				\hfill $\nexists (c,i,msg,-,-,-,rnd')$ in $bag$ \band\ $rnd' > rnd$
+				\hfill $\nexists (c,i,-,-,-,-,rnd')$ in $bag$ \band\ $rnd' > rnd$
 %			\STATE \textbf{wait until} $M[c,i].stat = \mcast$
 %		\STATE $Relay(c,msg,dst,ptr)$
 		\IF{$g=h$}
-			\STATE \textbf{if} $rnd > 0$ \textbf{then} $t \leftarrow tmp$ \textbf{else} $t \leftarrow \langle clock,g \rangle$
+			\IF{$rnd > 0$}
+				\STATE $t \leftarrow tmp$
+			\ELSE
+				\STATE $clock \leftarrow clock + 1$
+				\STATE $t \leftarrow \langle clock,g \rangle$
+			\ENDIF
 %			\STATE \textbf{else} $t \leftarrow clock$
 			\INDENT{\textbf{for} each $q$ in $g$ \band\ each leader $q$ in $dst$}
 %				\STATE $j \leftarrow ptr[q]$
