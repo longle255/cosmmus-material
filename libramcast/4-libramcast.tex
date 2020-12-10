@@ -220,7 +220,7 @@ When the new leader receives responses for a catch-up request from a quorum of p
 First, the process selects the response with the largest round. 
 From Paxos, this ensures that the timestamp in this response either has been decided or will eventually be decided.
 The next steps depend on whether the process received the responses from its own group or not.
-It the process received the responses from its own group, then it selects the largely received timestamp, if any, or chooses own from its clock. In either case, the process proposes the timestamp to all other members of its group and the leaders of the other involved groups.
+It the process received the responses from its own group, then it selects the largely received timestamp, if any, or chooses from its own clock. In either case, the process proposes the timestamp to all other members of its group and the leaders of the other involved groups.
 If the process received the responses from another group, then it forwards the received timestamp to the followers in its group.
 \end{itemize}
 
