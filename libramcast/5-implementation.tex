@@ -8,50 +8,51 @@
 
 We implemented a prototype of \libname in Java using the jVerbs,\footnote{DiSNI
 library \url{https://github.com/zrlio/disni}} an
-open-source user-level networking library developed by IBM for support of RDMA
+open-source user-level networking library developed by IBM that supports RDMA
 communication~\cite{stuedi2013jverbs}. jVerbs offers low latencies to applications running inside a Java
 Virtual Machine by exposing RDMA network hardware resources directly to the JVM.
+The source code of \libname is publicly available.\footnote{Link not yet available due to double blind review.}
+%The source code of \libname is publicly available.\footnote{\url{https://github.com/longle255/libRamcastV3}}
 
 In \libname, we applied a number of optimizations to further decrease latency
 and improve the performance. When establishing the connections between hosts, we
-use two-side operation (e.g. send and receive) to exchange memory addresses, and
-use the one-side Writes for data transfer. As the two-side operation is only
-used for control information at the start up and in the case of failures, it is
-small and do not add much latency. The one-side operation for the actual
-transfers makes the overall data transfer efficient. In RDMA, Writes and Sends
+use two-side operations (e.g., send and receive) to exchange memory addresses, and
+use the one-side writes for data transfer. As the two-side operation is only
+used for control information at the start up and in the case of failures, the exchanged data is
+small and does not add much overhead. The one-side operation for the actual
+transfers makes the overall data transfer efficient. In RDMA, writes and sends
 with payloads below a limit specified by devices may be written to the work
-request (WR) as inlined data, thus the RNIC doesn't need to fetch that payload
-via a DMA read. In \libname, we inline all Writes whose payload is lower than
-the inline limit. 
+request (WR) as inlined data, thus the RNIC does not need to fetch that payload
+via a DMA read. In \libname, we inline all writes whose payload is lower than
+the inline limit (i.e., 256 bytes).
 
-Normally, the RNICs actively poll an completion event (CE) from the CQ to ensure
-a Write resides in remote memory. Polling CE is time consuming as it involves
-synchronization between the RNICs on both sides of a CQ \cite{APUS}. We thus
+Normally, the RNICs actively poll a completion event (CE) from the CQ to ensure
+a write resides in remote memory. Polling CE is time consuming as it involves
+synchronization between the RNICs on both sides of a CQ \cite{APUS}. Thus,
+for multi-group messages, we
 employ \emph{selective signaling} \cite{Kalia2014} to reduce this overhead by
-only checking for an CE after pushing a number of Writes. When using a
-selectively signaled work requests of size $n$, up to $n-1$ consecutive
+only checking for an CE after pushing a number of writes. When using a
+selectively signaled writes with requests of size $n$, up to $n-1$ consecutive
 operations can be unsignaled, i.e., a CE will not be pushed for these
 operations. Note that if an operation ended with an error (e.g., a leader's
 write permission is revoked), it will generate a CE even if it was posted to use
 unsignaled completion.
 
-\paragraph{Atomic message delivery}
+%\paragraph{Atomic message delivery}
 In a shared memory context, when a process reads multiple entries that are
 updated by a remote process, it is important that the reader process does not
 read incomplete data that has not been fully updated by the writer process,
-e.g., processes in \libname continually monitor the their shared buffer for new
-messages and may be reading an incomplete entry. We resolve this issue using
-standard techniques used in previous works \cite{APUS,FaRM,kalia2014using,
-islam2012high} that adds an extra canary byte at the end of each log entry. This
-approach leverages the left-to-right ordering of RDMA Writes. As long as this
-variable is non-zero, the ordering guarantees that the log entry is complete.
-Before writing a message to remote host, a process in \libname sets the entry’s
+(e.g., processes in \libname continually monitor the their shared buffer for new
+messages and may be reading an incomplete entry). We resolve this issue by
+adding an extra canary byte at the end of each entry, as used in previous works \cite{APUS,FaRM,kalia2014using,
+islam2012high}. This
+approach leverages the left-to-right ordering of RDMA writes. As long as this
+variable is non-zero, the ordering guarantees that the entry is complete.
+Before writing a message to remote host, a process in \libname sets the entry's
 canary byte to the checksum of the entry. A remote process always first checks
-the checksum value in the canary byte and wait for the checksum to match the
+the checksum value in the canary byte and waits for the checksum to match the
 entry.
 
-The source code of \libname is publicly available.\footnote{Link not yet available due to double blind review.}
-%The source code of \libname is publicly available.\footnote{\url{https://github.com/longle255/libRamcastV3}}
 
 %We compared
 %\libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments

@@ -2,31 +2,26 @@
 \section{Experimental evaluation}
 \label{sec:experimental-evaluation}
 
-In this section, we present the experimental results of \libname, comparing to Kernel Paxos 
-%, an implementation of Multi-Paxos that reduces communication overhead by avoiding system calls and TCP/IP stack \cite{esposito2018kernel} 
-and WbCast. % \cite{gotsman2019white}, another genuine atomic multicast protocol that takes as low as 3 message delays to deliver a message.
-In Section~\ref{sec:evaluation:setup}, we describe the environment where we conducted our experiments and the parameters given to the different protocols.
-In Section~\ref{sec:evaluation:micro}, we show the micro-benchmark results with different message sizes.
-In Section~\ref{sec:evaluation:broadcast}, we exhibit the results for broadcast (i.e., multicast with a single group).
-In Section~\ref{sec:evaluation:multicast}, we show throughput scales with the number of multicast groups for each protocol.
+In this section, we present Kernel Paxos and WbCast, the two protocols we compare \libname to (\S\ref{sec:comp}) and
+describe the environment where we conducted our experiments (\S\ref{sec:evaluation:setup}).
+We conducted three sets of experiments:
+in the first set, we seek to understand the effects of message size on \libname (\S\ref{sec:evaluation:micro});
+in the second set, we compare Kernel Paxos and WbCast when messages are multicast to a single group (\S\ref{sec:evaluation:broadcast});
+finally, we compare the performance of the protocols when messages are multicast to multiple groups (\S\ref{sec:evaluation:multicast}).
 
 \subsection{Competing protocols}
+\label{sec:comp}
 
-We compared
-\libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments
-with multiple groups and with Kernel Paxos~\cite{esposito2018kernel} in
-experiments with a single group.
+Kernel Paxos~\cite{esposito2018kernel} is a Multi-Paxos implementation that improves the performance of the original libpaxos library.\footnote{\url{https://bitbucket.org/sciasciad/libpaxos}}
+The main idea is to reduce system calls by running Paxos logic directly into the Linux kernel and avoiding the TCP/IP stack. 
+We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}} and deployed a single group with three replicas.
+We compare \libname to Kernel Paxos because both systems avoid the overhead of the communication stack.
+%We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.
 
-%\subsubsection*{White-Box Atomic Multicast}
-White-Box Atomic Multicast, or WbCast, is a genuine atomic multicast protocol that can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
- WbCast provides a C-language implementation\footnote{\url{https://github.com/imdea-software/atomic-multicast}} that uses libevent for communication.
- We extended the code to split client and server and included additional statistics information.
-
-%\subsubsection*{Kernel Paxos}
-Kernel Paxos is a Multi-Paxos implementation that improves the performance of the original libpaxos library.\footnote{\url{https://bitbucket.org/sciasciad/libpaxos}}
-The main idea is to reduce system calls running Paxos logic directly into the Linux kernel and avoid the TCP/IP stack using raw sockets. 
-We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}} to deploy a single group with three replicas and compared the performance to \libname's.
-We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.
+White-Box Atomic Multicast~\cite{gotsman2019white}, or WbCast, is a genuine atomic multicast protocol that delivers exceptional performance, thanks to a highly optimized protocol.
+%can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
+ WbCast provides a C-language implementation that uses libevent for communication.\footnote{\url{https://github.com/imdea-software/atomic-multicast}}
+ We extended the code to split client and server, and included additional statistics information.
 
 
 \subsection{Environment setup and configuration parameters}
@@ -40,13 +35,14 @@ In all our experiments, there are client and server processes.
 Clients send requests in a closed-loop, i.e., each client multicasts a message to servers and waits for a response before multicasting the next message. 
 In every protocol, each group has 3 processes with in-memory storage.
 
-We defined three experimental setups:
-in~\S\ref{sec:evaluation:micro} we deployed \libname with a single group and increasing message size;
-\S\ref{sec:evaluation:broadcast} compares \libname with Kernel Paxos and WbCast in a broadcast (single-group) deployment;
-\S\ref{sec:evaluation:multicast} presents a scenario with eight groups contrasting \libname and WbCast with an increasing number of clients and destination groups.
+%We defined three experimental setups:
+%in~\S\ref{sec:evaluation:micro} we deployed \libname with a single group and increasing message size;
+%\S\ref{sec:evaluation:broadcast} compares \libname with Kernel Paxos and WbCast in a broadcast (single-group) deployment;
+%\S\ref{sec:evaluation:multicast} presents a scenario with eight groups contrasting \libname and WbCast with an increasing number of clients and destination groups.
 
-\subsection{Micro-benchmark: increasing message size}
+\subsection{The impact of message size}
 \label{sec:evaluation:micro}
+
 In this experiment, conducted on XL170 nodes, we measure \libname throughput and latency for different message sizes.
 For each message size, from 64 bytes to 64 Kilobytes, we increase the number of clients until the system is saturated, i.e., throughput stops improving while latency raises.
 Figure~\ref{fig:1group_message_size} (left) shows that messages up to 4KB long do not impact the overall system throughput, with nearly 250 thousand messages delivered each second. 
@@ -74,7 +70,7 @@ The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_mes
   \label{fig:1group_message_size}
 \end{figure*}
 
-\subsection{Broadcast results}
+\subsection{The performance single-group messages}
 \label{sec:evaluation:broadcast}
 
 This experiment assesses how each protocol behaves in a scenario with a single group of three replicas for 64-byte and 1-kilobyte messages.
@@ -97,7 +93,7 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
 \end{figure}
 
 
-\subsection{Multicast results: performance vs. number of destinations}
+\subsection{The performance single-group messages}
 \label{sec:evaluation:multicast}
 
 The last set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 machines.
