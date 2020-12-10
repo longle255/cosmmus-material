@@ -1,2 +1,9 @@
 \section{Conclusion}
 \label{sec:conclusion}
+
+Atomic multicast is a fundamental communication abstraction in the design of scalable and highly available strongly consistent distributed systems.
+This paper presents \libname, the first genuine atomic multicast protocol tailor-made for the shared-memory model.
+In addition to introducing a novel algorithm that leverages the permission mechanism of RDMA's write operations to reduce the number of communication steps, we also have implemented and evaluated the protocol under a large range of parameters.
+The results show that \libname outperforms both a kernel-space atomic broadcast and a recent state-of-the-art message-passing genuine atomic multicast algorithm.
+
+
