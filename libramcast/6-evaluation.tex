@@ -31,28 +31,28 @@ in~\S\ref{sec:evaluation:micro} we deployed \libname with a single group and inc
 \label{sec:evaluation:micro}
 In this experiment, conducted on XL170 nodes, we measure \libname throughput and latency for different message sizes.
 For each message size, from 64 bytes to 64 Kilobytes, we increase the number of clients until the system is saturated, i.e., throughput stops improving while latency raises.
-Figure~\ref{fig:1group_message_size} (top) shows that messages up to 4KB long do not impact the overall system throughput, with nearly 250 thousand messages delivered each second. 
+Figure~\ref{fig:1group_message_size} (left) shows that messages up to 4KB long do not impact the overall system throughput, with nearly 250 thousand messages delivered each second. 
 As the message size increases, the maximum throughput decreases with 35 thousand messages per second for 64KB messages.
-The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (bottom) exhibits minimum latency variation for messages with up to 4KB, around 20 microseconds.
+The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 4KB, around 10 microseconds.
 
 \begin{figure*}[htp!]
   \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-up-to-4k}
+    \advance\leftskip+0.08cm
+    \includegraphics[width=0.97\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-up-to-4k}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-up-to-4k}
+    \advance\leftskip+0.07cm
+    \includegraphics[width=0.96\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-up-to-4k}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
-    \centering
+    \advance\leftskip-0.1cm
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-from-4k}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-from-4k}
+    \advance\leftskip+0.57cm
+    \includegraphics[width=0.96\columnwidth]{figures/benchmark/graphs/figure-performance-vs-size-single-group-cdf-from-4k}
   \end{subfigure}
-  \caption{\libname performance with different message sizes: throughput versus latency (top) and latency cumulative distribution function measured when the system is saturated (bottom)}
+  \caption{\libname performance with different message sizes: throughput versus latency (left) and latency cumulative distribution function for a single client (right)}
   \label{fig:1group_message_size}
 \end{figure*}
 
@@ -67,7 +67,7 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
-    \centering
+    \advance\leftskip-0.1cm
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-compare-single-group-throughput}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
@@ -91,8 +91,8 @@ Since groups do not exchange any information when dealing with single-group mess
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-throughput}
+    \advance\leftskip-0.25cm
+    \includegraphics[width=1.01\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-throughput}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
@@ -110,7 +110,7 @@ The equivalent values for WbCast are 214, 445, 673, and 1055~microseconds, repre
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
-    \centering
+    \advance\leftskip-0.1cm
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-throughput}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}

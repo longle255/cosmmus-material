@@ -23,8 +23,8 @@ set style line 5 lt 5 lw 2.5 pt 5 ps 0.5 pointinterval 30
 set style line 6 lt 6 lw 2.5 pt 6 ps 0.5 pointinterval 30
 set style line 7 lt 7 lw 2.5 pt 7 ps 0.5 pointinterval 30
 
-plot 'data-aggregated/ramcast/cdf-1client-64B-vs-kpaxos.dat' using 1:2 with linespoints ls 1 title "RamCast - 64B",\
-     'data-aggregated/ramcast/cdf-1client-1KB-vs-kpaxos.dat' using 1:2 with linespoints ls 2 title "RamCast - 1KB",\
+plot 'data-aggregated/ramcast/broadcast-opt/cdf-1client-64B-vs-kpaxos.dat' using 1:2 with linespoints ls 1 title "RamCast - 64B",\
+     'data-aggregated/ramcast/broadcast-opt/cdf-1client-1KB-vs-kpaxos.dat' using 1:2 with linespoints ls 2 title "RamCast - 1KB",\
      'data-aggregated/kpaxos/cdf-1client-64B.dat' using 1:2 with linespoints ls 3 title "Kernel Paxos - 64B",\
      'data-aggregated/kpaxos/cdf-1client-1KB.dat' using 1:2 with linespoints ls 4 title "Kernel Paxos - 1KB",\
      'data-aggregated/wbcast/cdf-1c-64B-1dest.dat' using 2:3 with linespoints ls 5 title "WBCast - 64B",\
