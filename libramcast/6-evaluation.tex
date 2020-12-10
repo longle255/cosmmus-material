@@ -47,7 +47,7 @@ In this experiment, conducted on XL170 nodes, we measure \libname throughput and
 For each message size, from 64 bytes to 64 Kilobytes, we increase the number of clients until the system is saturated, i.e., throughput stops improving while latency raises.
 Figure~\ref{fig:1group_message_size} (left) shows that messages up to 4KB long do not impact the overall system throughput, with nearly 250 thousand messages delivered each second. 
 As the message size increases, the maximum throughput decreases with 35 thousand messages per second for 64KB messages.
-The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 10 microseconds.
+The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 8 microseconds at $95^{th}$ percentile. At 4KB messages, the latency slightly go up to around 10 microseconds
 
 \begin{figure*}[htp!]
   \begin{subfigure}{\columnwidth}
