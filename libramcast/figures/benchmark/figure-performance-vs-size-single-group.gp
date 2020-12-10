@@ -24,7 +24,7 @@ set xtics 50
 set xlabel "Throughput (Kmps)" offset 0
 # set logscale x
 
-set key samplen 3.5 spacing 1.2 font ",11"
+set key samplen 3.5 spacing 1.2 font ",13"
 set key top left
 
 set yrange [0 : 30]

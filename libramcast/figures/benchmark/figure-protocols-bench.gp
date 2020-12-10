@@ -21,7 +21,7 @@ set logscale y 2
 set xlabel "Message size" offset 1
 set xtics ("64B" 0, "512B" 1, "1KB" 2, "2KB" 3, "4KB" 4, "8KB" 5, "16KB" 6, "32KB" 7)
 # unset xtics
-set key samplen 3.5 spacing 1.2 font ",11"
+set key samplen 3.5 spacing 1.2 font ",13"
 set key bottom right
 
 plot './data-aggregated/ramcast/r320/protocol-bench-tcp-bench.dat' using 0:($3/2) with linespoints ls 1 title "TCP/IP", \
