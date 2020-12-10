@@ -47,7 +47,7 @@ In this experiment, conducted on XL170 nodes, we measure \libname throughput and
 For each message size, from 64 bytes to 64 Kilobytes, we increase the number of clients until the system is saturated, i.e., throughput stops improving while latency raises.
 Figure~\ref{fig:1group_message_size} (left) shows that messages up to 4KB long do not impact the overall system throughput, with nearly 250 thousand messages delivered each second. 
 As the message size increases, the maximum throughput decreases with 35 thousand messages per second for 64KB messages.
-The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 4KB, around 10 microseconds.
+The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 10 microseconds.
 
 \begin{figure*}[htp!]
   \begin{subfigure}{\columnwidth}
@@ -77,7 +77,7 @@ This experiment assesses how each protocol behaves in a scenario with a single g
 Figure~\ref{fig:broadcast} (top) shows that, for 64-byte messages, \libname outperforms the competitors with approximately 200 thousand messages per second. 
 Kernel Paxos comes close with 170 thousand messages per second, while WbCast saturates sooner, with less than 60 thousand messages per second.
 For larger messages, \libname kept the same performance, while the other protocols had the throughput reduced by half.
-Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. The median latency for WbCast with small messages and a single client is nine times greater than the same measurement for our protocol.
+Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. The median latency for WbCast with small messages and a single client is twenty times greater than the same measurement for our protocol.
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
@@ -99,7 +99,7 @@ Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. 
 The last set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 machines.
 The first experiment comprises executions in which clients send single-group 64-byte messages in setups with 1, 2, 4, and 8 groups.
 Figure~\ref{fig:multicast-single-group} (top) shows the aggregated throughput results when the system is saturated. 
-\libname outperforms WbCast by a large margin with 227  and 63 thousand messages per second, respectively, for 1 group, and around 1800 and 500 thousand messages per second for 8 groups.
+\libname outperforms WbCast by a large margin with 227 and 63 thousand messages per second, respectively, for 1 group, and around 1800 and 500 thousand messages per second for 8 groups.
 These results also enhance the benefit of genuine atomic multicast algorithms and show that the throughput grows linearly with the number of groups for single-group messages. 
 Since groups do not exchange any information when dealing with single-group messages, the latency CDF is the same for a single client, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-group} (bottom).
 
@@ -119,8 +119,8 @@ Since groups do not exchange any information when dealing with single-group mess
 The next experiment evaluates how the protocols behave regarding multi-group messages. 
 In setups with 1, 2, 4, and 8 groups, clients send 64-byte messages addressed to all the groups.
 \libname's maximum throughput is greater than WbCast's in every configuration with 233, 145, 80, and 40 thousand messages per second for 1, 2, 4, and 8 destination groups against 63, 50, 35, and 27 thousand for WbCast, as shown in Figure~\ref{fig:multicast-multi-group} (top).
-The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-multi-group} (middle) shows that the latency CDF for \libname with values of 23, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
-The equivalent values for WbCast are 214, 445, 673, and 1055~microseconds, representing 10 to 7 times slower delivery times when compared to \libname's.
+The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-multi-group} (middle) shows that the latency CDF for \libname with values of 8, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
+The equivalent values for WbCast are 214, 445, 673, and 1055~microseconds, representing 20 to 7 times slower delivery times when compared to \libname's.
 
 \begin{figure}[htp!]
   \begin{subfigure}{\columnwidth}
