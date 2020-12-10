@@ -40,8 +40,8 @@ In our environment, RDMA read and write operations have similar performance, unl
 \libname uses remote writes only and avoids remote reads.
 There are two reasons for this design.
 First, most writes are small (e.g., acknowledgments) and can be inlined.
-Second, a process detects a write in shared memory with busy-polling reads, and reading from a process's own memory is much faster than reading from the memory of a remote process.
-Consequently, process $p$ can read process $q$'s write more efficiently when $q$ issues a remote write on $p$'s memory and $p$ issues busy-polling reads on its own memory.  
+Second, a process detects a write in shared memory with busy-polling reads, and reading from a process's own memory is faster than reading from the memory of another process.
+Consequently, process $p$ can read process $q$'s write more efficiently when $q$ issues a (remote) write on $p$'s memory and $p$ issues busy-polling reads on its own memory.  
 
 \begin{figure}[htp!]
     \centering
@@ -52,7 +52,7 @@ Consequently, process $p$ can read process $q$'s write more efficiently when $q$
 
 In order to deliver performance that largely outperforms the most efficient message-passing atomic multicast protocols, \libname combines ideas from Skeen's genuine atomic multicast algorithm \cite{BJ87b}, a blocking algorithm that has been used as the basis for fault-tolerant atomic multicast protocols (e.g., \cite{Coelho2017,gotsman2019white}), the leader-follower replication model, explored by atomic multicast and broadcast protocols (e.g., \cite{gotsman2019white,Junqueira2011,Mu}), and Remote Direct Memory Access technology, recently used to boost the performance of distributed systems (e.g., \cite{Aguilera2019,kalia2014using, kalia2016design, mitchell2013using}).
 
-In addition to introducing \libname, the first shared-memory genuine atomic multicast algorithm, we have implemented and evaluated \libname under a large range of parameters. 
+In addition to introducing \libname, the first shared-memory genuine atomic multicast algorithm, we have implemented and evaluated \libname under various conditions. 
 MORE DATA HERE FROM THE EXPERIMENTAL EVALUATION
 
 The remainder of the paper is structured as follows.

@@ -2,14 +2,14 @@
 \section{Implementation}
 \label{sec:implementation}
 
-This section presents implementation details and introduces competitor protocols.
+%This section presents implementation details and introduces competitor protocols.
+%
+%\subsubsection*{\libname}
 
-\subsubsection*{\libname}
-
-We implemented a prototype of \libname in Java using the jVerbs\footnote{DiSNI
-library \url{https://github.com/zrlio/disni}}\cite{stuedi2013jverbs}, an
+We implemented a prototype of \libname in Java using the jVerbs,\footnote{DiSNI
+library \url{https://github.com/zrlio/disni}} an
 open-source user-level networking library developed by IBM for support of RDMA
-communication. jVerbs offers low latencies to applications running inside a Java
+communication~\cite{stuedi2013jverbs}. jVerbs offers low latencies to applications running inside a Java
 Virtual Machine by exposing RDMA network hardware resources directly to the JVM.
 
 In \libname, we applied a number of optimizations to further decrease latency
@@ -51,18 +51,20 @@ the checksum value in the canary byte and wait for the checksum to match the
 entry.
 
 The source code of \libname is publicly
-available\footnote{\url{https://github.com/longle255/libRamcastV3}}. We compared
-\libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments
-with multiple groups and with Kernel Paxos~\cite{esposito2018kernel} in
-experiments with a single group.
+available.\footnote{\url{https://github.com/longle255/libRamcastV3}}
 
-\subsubsection*{White-Box Atomic Multicast}
-White-Box Atomic Multicast, or WbCast, is a genuine atomic multicast protocol that can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
- WbCast provides a C-language implementation\footnote{\url{https://github.com/imdea-software/atomic-multicast}} that uses libevent for communication.
- We extended the code to split client and server and included additional statistics information.
-
-\subsubsection*{Kernel Paxos}
-Kernel Paxos is a Multi-Paxos implementation that improves the performance of the original libpaxos library~\footnote{\url{https://bitbucket.org/sciasciad/libpaxos}}.
-The main idea is to reduce system calls running Paxos logic directly into the Linux kernel and avoid the TCP/IP stack using raw sockets. 
-We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}} to deploy a single group with three replicas and compared the performance to \libname's.
-We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.
+%We compared
+%\libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments
+%with multiple groups and with Kernel Paxos~\cite{esposito2018kernel} in
+%experiments with a single group.
+%
+%\subsubsection*{White-Box Atomic Multicast}
+%White-Box Atomic Multicast, or WbCast, is a genuine atomic multicast protocol that can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
+% WbCast provides a C-language implementation\footnote{\url{https://github.com/imdea-software/atomic-multicast}} that uses libevent for communication.
+% We extended the code to split client and server and included additional statistics information.
+%
+%\subsubsection*{Kernel Paxos}
+%Kernel Paxos is a Multi-Paxos implementation that improves the performance of the original libpaxos library~\footnote{\url{https://bitbucket.org/sciasciad/libpaxos}}.
+%The main idea is to reduce system calls running Paxos logic directly into the Linux kernel and avoid the TCP/IP stack using raw sockets. 
+%We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}} to deploy a single group with three replicas and compared the performance to \libname's.
+%We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.
