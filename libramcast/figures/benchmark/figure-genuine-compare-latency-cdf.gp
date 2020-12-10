@@ -8,8 +8,8 @@ set grid xtics
 
 
 # set title "Latency CDF for single group messages with single client"
-set xrange [0:50]
-set xtics 10
+set xrange [5:10]
+set xtics 1
 set ytics 0.2 
 set key center right
 set key samplen 2.5 spacing 1.2 font ",11"
@@ -23,10 +23,10 @@ set style line 5 lt 5 lw 2.5 pt 5 ps 0.5 pointinterval 30
 set style line 6 lt 6 lw 2.5 pt 6 ps 0.5 pointinterval 30
 set style line 7 lt 7 lw 2.5 pt 7 ps 0.5 pointinterval 30
 
-plot 'data-aggregated/ramcast/xl170/genuine-latency-cdf-1.dat' using 1:2 with linespoints ls 1 title "1 group",\
-     'data-aggregated/ramcast/xl170/genuine-latency-cdf-2.dat' using 1:2 with linespoints ls 2 title "2 groups",\
-     'data-aggregated/ramcast/xl170/genuine-latency-cdf-4.dat' using 1:2 with linespoints ls 3 title "4 groups",\
-     'data-aggregated/ramcast/xl170/genuine-latency-cdf-8.dat' using 1:2 with linespoints ls 4 title "8 groups",\
+plot 'data-aggregated/ramcast/xl170/broadcast-opt/genuine-latency-cdf-1.dat' using 1:2 with linespoints ls 1 title "1 group",\
+     'data-aggregated/ramcast/xl170/broadcast-opt/genuine-latency-cdf-2.dat' using 1:2 with linespoints ls 2 title "2 groups",\
+     'data-aggregated/ramcast/xl170/broadcast-opt/genuine-latency-cdf-4.dat' using 1:2 with linespoints ls 3 title "4 groups",\
+     'data-aggregated/ramcast/xl170/broadcast-opt/genuine-latency-cdf-8.dat' using 1:2 with linespoints ls 4 title "8 groups",\
 
 
 system("pstopdf ./graphs/figure-genuine-compare-latency-cdf.eps -o ./graphs/figure-genuine-compare-latency-cdf.pdf && rm ./graphs/figure-genuine-compare-latency-cdf.eps")
