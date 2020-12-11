@@ -6,7 +6,7 @@
 %
 %\subsubsection*{\libname}
 
-We implemented a prototype of \libname in Java using the jVerbs,\footnote{DiSNI
+We implemented a prototype of \libname in Java using jVerbs,\footnote{DiSNI
 library \url{https://github.com/zrlio/disni}} an
 open-source user-level networking library developed by IBM that supports RDMA
 communication~\cite{stuedi2013jverbs}. jVerbs offers low latencies to applications running inside a Java
@@ -15,16 +15,17 @@ The source code of \libname is publicly available.\footnote{Link not yet availab
 %The source code of \libname is publicly available.\footnote{\url{https://github.com/longle255/libRamcastV3}}
 
 In \libname, we applied a number of optimizations to further decrease latency
-and improve the performance. When establishing the connections between hosts, we
-use two-side operations (e.g., send and receive) to exchange memory addresses, and
-use the one-side writes for data transfer. As the two-side operation is only
-used for control information at the start up and in the case of failures, the exchanged data is
-small and does not add much overhead. The one-side operation for the actual
+and improve performance. When establishing the connections between hosts, we
+use two-sided operations (e.g., send and receive) to exchange memory addresses, and
+use the one-sided writes for data transfer. As the two-sided operation is only
+used for control information at the start up and in the case of failures, this procedure
+does not affect performance of normal execution.
+The one-sided operation for the actual
 transfers makes the overall data transfer efficient. In RDMA, writes and sends
 with payloads below a limit specified by devices may be written to the work
 request (WR) as inlined data, thus the RNIC does not need to fetch that payload
 via a DMA read. In \libname, we inline all writes whose payload is lower than
-the inline limit (i.e., 256 bytes).
+the inline limit (i.e., 64 bytes).
 
 Normally, the RNICs actively poll a completion event (CE) from the CQ to ensure
 a write resides in remote memory. Polling CE is time consuming as it involves

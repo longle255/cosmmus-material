@@ -36,10 +36,10 @@ Upon receiving timestamps from all destinations in $m.dst$, a process computes $
 A process $p$ delivers $m$ when it can ascertain that $m$'s final timestamp is smaller than the final timestamp of any messages $p$ will deliver after $m$ (intuitively, this holds because logical clocks are monotonically increasing).
 \end{itemize}
 
-\subsubsection{Paxos and Protected Memory Paxos}
+\subsubsection{Protected Memory Paxos}
 
-In Paxos, in order for the leader to order a message $m$, it assigns $m$ to a consensus instance and proposes that $m$ be accepted in the proposed instance.
-In the normal case, where there is a single leader, the followers accept the proposed message and reply to leader.
+In Paxos \cite{L98}, in order for the leader to order a message $m$, it assigns $m$ to a consensus instance and proposes that $m$ be accepted in the proposed instance.
+In the normal case, where there is a single leader, the followers accept the proposed message and reply to the leader.
 Protected Memory Paxos optimizes this procedure by granting to the leader exclusive write permission to the memory of the followers.
 If another process becomes leader, then it takes the exclusive permission.
 The idea is that the leader writes the proposed message in the memory of the followers.
@@ -54,7 +54,7 @@ When process $q$ becomes leader, upon suspecting $p$'s failure, $q$ must pick a 
 Process $q$ then proceeds in two steps.
 First, $q$ needs to acquire permission from a quorum of processes, which it does by contacting all processes and providing its chosen round.
 Processes grant write permission to $q$ if the provided round is bigger than the round of the process that currently holds the write permission.
-Second, $q$ must check other processes have already accepted any values.
+Second, $q$ must check whether other processes have already accepted any values.
 If so, $q$ must propose the value that has been accepted in the largest round; otherwise, $q$ can propose any values.
 
 \subsection{\libname design and architecture}
@@ -64,9 +64,9 @@ Figure~\ref{fig:arch} depicts the various components and memory layout of \libna
 Processes within each group coordinate using the leader-follower model, like in Paxos and Protected Memory Paxos.
 Each server process has a fixed-size buffer per client, analogously to other RDMA-based systems \cite{FaRM, Mu, DARE, APUS}.
 A buffer in \libname is divided into two parts, a message buffer $M$, and a timestamp buffer $T$.
-Message buffer $M$ is a shared memory region that can be read and written by any other processes, including the client process the buffer is associated with.
+Message buffer $M$ is a shared memory region that can be read and written by any processes, including the client process the buffer is associated with.
 Timestamp buffer $T$ is protected and can only be written by the leader of each group; the buffer can be read by any processes.
-Each entry in $M$, with a multicast message $m$, has a corresponding entry in $T$, with $m$'s timestamp.
+Each slot in $M$, with a multicast message $m$, has a corresponding slot in $T$, with $m$'s timestamp.
 
 %Each server process organizes its memory in regions: a shared
 %memory region and a protected memory region. All processes have remote access
@@ -97,9 +97,10 @@ connected QPs to detect new messages.
 
 \libname consists of the following main components:
 \begin{itemize}
-  \item \emph{Memory management.} Processes separate their memory into two regions: a shared buffer and a protected buffer (detailed in \S\ref{sec:ds-structs}). While all processes have access to read and write the shared buffer of a process, only the leader of each group has permission to write the protected buffer of a process. Each process grants and revokes write permission to its protected buffer, to ensure only one leader of each group has write access at a time.
-  \item \emph{RDMA communication.} This component provides functions to read and write remote memory, used by the normal operation component, and to send and receive messages, used by the failure handling module.
-  \item \emph{Normal execution.} The normal protocol execution (detailed in \S\ref{sec:normalcase}) is invoked when there is a sole leader per group with support of at least a majority of processes in its group. A leader is responsible for proposing the group's timestamp for the new message, and propagating timestamps from other groups to followers of its local group.
+  \item \emph{Memory management.} This component handles the shared buffer and the protected buffer (detailed in \S\ref{sec:ds-structs}). While all processes have read and write access to the shared buffer of a process, only the leader of each group has write permission to the protected buffer of a process. 
+  %Each process grants and revokes write permission to its protected buffer, to ensure only one leader of each group has write access at a time.
+  \item \emph{RDMA communication.} This component provides functions to read and write remote memory, used by the normal execution component, and to send and receive messages, used by the failure handling module.
+  \item \emph{Normal execution.} The normal protocol execution (detailed in \S\ref{sec:normalcase}) is invoked when there is a sole leader per group with support of at least a majority of processes in its group. A leader is responsible for proposing the group's timestamp for the new message, and propagating timestamps from other groups to followers of its own group.
   \item \emph{Failure handling.} Upon detecting the failure of a leader, processes in a group elect a new leader. The new leader must ensure that its execution is consistent with the execution of the previous leader (detailed in \S\ref{sec:failurecase}).
   \item \emph{Leader election.} \libname requires processes to detect a slow or crashed leader, and elect a new leader. Leader election is not assumed to be perfect: the protocol ensures safety despite multiple leaders in a group. To ensure progress, though, eventually every group should elect a single operational and stable leader \cite{Aguilera2019,L98}.
 Stable leader election can be implemented in the partially synchronous model \cite{Aguilera2001}.
@@ -109,20 +110,22 @@ Stable leader election can be implemented in the partially synchronous model \ci
 \label{sec:ds-structs}
 
 Algorithm~\ref{alg:data_struct} presents the data structures used by processes in \libname.
-Every server process has a shared buffer $M$ per client $c$, where entry $M[c,i]$ contains the $i$-th message $msg$ multicast by client $c$, the groups $dst$ the message is addressed to, and an address vector $ptr$, where $ptr[g,p]=j$ means that at process $p$ in group $g$ message $msg$ is stored in $M[c,j]$. 
+Every server process has a shared buffer $M$ per client $c$, where slot $M[c,i]$ contains the $i$-th message $msg$ multicast by client $c$, the groups $dst$ the message is addressed to, and an address vector $ptr$, where $ptr[g,p]=j$ means that at process $p$ in group $g$ message $msg$ is stored in slot $M[c,j]$. 
 The address vector is used by a process to know where to write in the memory of another process addressed by the message.
 Servers compute the message's timestamp $tmp$, based on the timestamps proposed by the leader of each destination group, and the acknowledgements from the members of the leader's group, stored in vector $ack$.
 %A timestamp is a tuple $(cnt,pid)$, where $cnt$ is a scalar and $pid$ is a process identifier, used to break ties.
 A multicast message state $stat$ can be null ($\perp$), pending a final timestamp (\mcast), assigned a final timestamp (\ordered) or delivered (\done).
 
-To compute a message's timestamp, each server process has a protected buffer $T$, where the $i$-th entry $T[c,i]$ matches the corresponding entry $M[c,i]$ in the shared buffer $M$ associated with $c$.
-The entry contains a timestamp vector $tmp$ and a round vector $rnd$, each one with an entry per group $g$; $tmp[g]$ contains the timestamp proposed by the current leader in $g$ in round $rnd[g]$.
-Timestamps and rounds are tuples $\langle cnt,pid \rangle$, where $cnt$ is a scalar and $pid$ is a process identifier. It follows that $\langle cnt,pid \rangle > \langle cnt',pid' \rangle$ iff $cnt > cnt'$, or $cnt = cnt'$ and $pid > pid'$.
+To compute a message's timestamp, each server process has a protected buffer $T$, where the $i$-th slot $T[c,i]$ matches the corresponding slot $M[c,i]$ in the shared buffer $M$ associated with $c$.
+The slot contains a timestamp vector $tmp$ and a round vector $rnd$, each one with an entry per group $g$; $tmp[g]$ contains the timestamp proposed by the current leader in $g$ in round $rnd[g]$.
+Timestamps and rounds are tuples $\langle cnt,pid \rangle$, where $cnt$ is a scalar and $pid$ is a process identifier. 
+It follows that $\langle cnt,pid \rangle > \langle cnt',pid' \rangle$ iff $cnt > cnt'$, or $cnt = cnt'$ and $pid > pid'$.
+We further assume that $time(\langle cnt,pid \rangle)=cnt$.
 
 To multicast a message, a client writes the message in the shared buffer of each process in the groups addressed by the message.
-To know in which entry the multicast message must be written, the client keep an address vector $ptr$ with an entry per group and per process in the group.
+To know in which entry the multicast message must be written, the client keeps an address vector $ptr$ with an entry per group and per process in the group.
 
-Process $p$'s local state includes a $clock$, used to compute logical timestamps, $p$'s current round, used when $p$ is the leader of the group, vector $Leader$ with $p$'s view on the current leader of each group, and vector $Round$, where entry $Round[g]$ contains the largest round the process has accepted from $Leader[g]$.
+Process $p$'s local state includes a $clock$, used to compute logical timestamps, $p$'s current round, used when $p$ is the leader of the group, vector $Leader$ with $p$'s view on the current leader of each group, and vector $Round$, where entry $Round[g]$ contains the largest round $p$ has accepted from $Leader[g]$.
 
 \input{ds-structs}
 
@@ -145,16 +148,12 @@ Process $p$'s local state includes a $clock$, used to compute logical timestamps
 \subsection{Normal execution}
 \label{sec:normalcase}
 
-
-\input{algo-amcast}
-% \input{algo-normal-case}
-
 Algorithm \ref{alg:normal_case} presents \libname's normal execution, when a message is addressed to groups whose leaders are operational and stable.
 Figure~\ref{fig:normal_operation_time} illustrates one normal execution.
-We explain next the behavior of each one of the involved tasks.
+We explain next the behavior of each one of the tasks in Algorithm \ref{alg:normal_case}.
 
 \begin{itemize}
-\item \emph{Task 1.} To multicast message $m$, client $c$ first calculates the next available entry in the buffer of every process addressed by $m$. Then, $c$ invokes the $Relay$ procedure, which copies the message, its destination, and the address vector for $m$ in the message buffer of every process addressed by $m$.
+\item \emph{Task 1.} To multicast message $m$, client $c$ first calculates the next available slot in the buffer of every process addressed by $m$. Then, $c$ invokes the $Relay$ procedure, which copies the message, its destination, and the address vector for $m$ in the message buffer of every process addressed by $m$.
 
 \begin{figure}[ht!]
   \centering
@@ -173,7 +172,7 @@ If a remote write is denied, then $L$ ends the task since another process in $g$
 Then, the follower acknowledges that it has read this timestamp by writing the round used by the leader in its entry in the $ack$ vector of every process in the destination of the message.
 The follower detects the leader proposed timestamp by checking whether the round of the timestamp matches the round associated with the  leader. 
 This assumes that both the timestamp and the round have been updated by the leader.
-We discuss in Section~\ref{sec:implementation} how we ensure this in RDMA.
+We discuss in Section~\ref{sec:implementation} how we ensure this with RDMA.
 
 \item \emph{Task 4.} 
 When the leader $L$ in $g$ reads a timestamp written by a leader in another group, $L$ updates its local clock with the timestamp, to ensure that any future proposed timestmaps will be bigger, and writes the read timestamp in the memory of each one of its followers.
@@ -184,19 +183,22 @@ The reason why only the leader of a group is updated is to ensure that any times
 %exclusive memory for timestamps of $m$ (Task 4 algorithm~\ref{alg:normal_case}).
 
 \item \emph{Task 5.} 
-When a message has a timestamp proposed by a leader from each destination group of the message, and a quorum of processes in each destination group agree with the proposed timestamp, the message become ordered.
+When a message has a timestamp proposed by a leader from each destination group of the message, and a quorum of processes in each destination group agree with the proposed timestamp, the message becomes ordered.
 
 \item \emph{Task 6.} 
-A process delivers an ordered message when it can assert that no other message can be assigned a smaller timestamp.
+A process delivers an ordered message when it can assert that no other messages can be assigned a smaller timestamp.
 
 \end{itemize}
+
+\input{algo-amcast}
+% \input{algo-normal-case}
 
 \subsection{Handling failures}
 \label{sec:failurecase}
 
 %\input{algo-leader-election.tex}
 
-When a process becomes a leader, it needs to catch up with the previous leader.
+When a process becomes leader, it needs to catch up with the previous leader.
 In the following, we describe how the newly elected leader does this.
 The procedure uses both shared memory and message passing for communication.
 In RDMA, message passing is less efficient than shared memory, but it reduces complexity, as we do not have to handle concurrent accesses to shared memory.
@@ -204,24 +206,25 @@ Since failures are hopefully rare, we consider that trading performance for simp
 
 \begin{itemize}
 \item \emph{Task 7.} 
-When a process that will become the next leader of the group suspects the current leader, it determines its \emph{first undecided entry (FUE)} per client in its shared buffers.
-An entry is undecided if its state is equal to \mcast. 
+When a process that will become the next leader of the group suspects the current leader, it determines its \emph{first undecided slot (FUS)} per client in its shared buffers.
+A slot is undecided if its state is equal to \mcast. 
 Then, the new leader chooses a round and sends a catch-up message to every server process in the system.
-Since, entry $i$ in the new leader's buffer may correspond to a different entry at another process, the new leader must convert its FUE into one that is meaningful for the contacted process.
+Since slot $i$ in the new leader's buffer may correspond to a different slot at another process, the new leader must convert its FUS into one that is meaningful for the contacted process.
 
 \item \emph{Task 8.} 
-A process $p$ will consider a catch-up message from new leader $q$ in group $h$ if $q$ has picked a round bigger than the current round for $h$. 
+A process $p$ will consider a catch-up message from new leader $q$ in group $h$ if $q$ has picked a round bigger than the current round for $h$ at $p$.
 This is a requirement from Paxos, to ensure that a new leader will not decide on a value different than a previously decided value.
-If the catch-up message can be considered, then $p$ grants permission to the shared buffer $T$ to $q$, collects all entries that have been requested by $q$, and sends them to $q$.
+If the catch-up message can be considered, then $p$ grants permission to the shared buffer $T$ to $q$, collects all information requested by $q$, and sends it to $q$.
 Finally, $p$ updates $h$'s round and leader.
 
 \item \emph{Task 9.}
 When the new leader receives responses for a catch-up request from a quorum of processes in a group, it handles each entry $i$ for every client $c$ received as follows.
 First, the process selects the response with the largest round. 
-From Paxos, this ensures that the timestamp in this response either has been decided or will eventually be decided.
+From Paxos, this ensures that if a timestamp has been chosen, it can only be the one with the largest round.
 The next steps depend on whether the process received the responses from its own group or not.
-It the process received the responses from its own group, then it selects the largely received timestamp, if any, or chooses from its own clock. In either case, the process proposes the timestamp to all other members of its group and the leaders of the other involved groups.
-If the process received the responses from another group, then it forwards the received timestamp to the followers in its group.
+If the process received the responses from its own group, then it picks the timestamp in the selected response, if any, or picks a timestamp using its own clock. 
+In either case, the process proposes the picked timestamp to all other members of its group and the leaders of the other involved groups.
+If the process received the responses from another group, then it forwards the timestamp in the selected response to the followers in its group.
 \end{itemize}
 
 We also consider the case of faulty clients, who may fail to update all destinations of a multicast message.
@@ -297,14 +300,14 @@ Since only one process at a time can hold permission to write in the timestamp b
 Thus, at the leader the message is ready to be delivered without the acknowledgements from the followers.
 We use this optimization to speed up the delivery of single-group messages at the leader.
 
-A client can recycle a buffer entry when the entry will not be needed by any processes.
+A client can recycle a buffer slot when the slot will not be needed by any processes.
 This is the case when all message destinations have delivered the message (i.e., message state is \done).
-Therefore, periodically, all message destinations inform the client about the entry with their \emph{Last Delivered Message (LDM)}.
+Therefore, periodically, all message destinations inform the client about the slot with their \emph{Last Delivered Message (LDM)}.
 The client then computes the \emph{Last Stable Group Message (LSGM)} as the lowest LDM received in the group.
 The client can safely update the pointer to the tail of its buffer to the LSGM.
 This procedure, although simple, requires feedback from all processes in a group.
 To tolerate failures, processes must checkpoint their state.
-When $f+1$ processes in a group have checkpointed a state that includes the $i$-th entry, then the group's LSGM can be updated to $i$.
+When $f+1$ processes in a group have checkpointed a state that includes the $i$-th slot, then the group's LSGM can be updated to $i$.
 
 
 

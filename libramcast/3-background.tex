@@ -2,7 +2,7 @@
 \section{Background}
 \label{sec:background}
 
-In this section, we present the system model (\S\ref{sec:system-model}), define the atomic multicast communication problem (\S\ref{sec:amcast}), and quickly overview RDMA, the key enabling technology used in this work (\S\ref{sec:rdma}).
+In this section, we present the system model (\S\ref{sec:system-model}), define the atomic multicast communication problem (\S\ref{sec:amcast}), and quickly overview RDMA, the key technology used by \libname (\S\ref{sec:rdma}).
 
 \subsection{System model}
 \label{sec:system-model}
@@ -34,7 +34,8 @@ Moreover, a message is received at most once, and only if it was previously sent
 
 Let $\Pi$ be the set of server processes in the system and $\Gamma \in 2^{\Pi}$ the set of process groups in the system, where $|\Gamma| = k$.
 Groups are disjoint and each group contains $n = 2f+1$ processes, where $f$ is the maximum number of faulty processes per group.  
-The assumption of disjoint groups has little practical implication since it does not prevent collocating processes that are members of different groups on the same machine.
+The assumption about disjoint groups has little practical implication since it does not prevent collocating processes that are members of different groups on the same machine.
+Yet, it is important since atomic multicast requires stronger assumptions when groups intersect~\cite{GS01b}.
 A set of $f + 1$ processes in group $g$ is a \emph{quorum} in $g$.
 
 A process atomically multicasts a message $m$ to groups in $m.dst$ by invoking primitive multicast($m$), where $m.dst$ is a special field in $m$ with $m$'s destinations; a process delivers $m$ with primitive deliver($m$). 
@@ -42,10 +43,10 @@ We define the relation $<$ on the set of messages processes deliver as follows: 
 
 Atomic multicast ensures the following properties: 
 \begin{itemize}
-\item \textit{validity}:~if a correct process $p$ multicasts a message $m$, then eventually all correct processes $q \in g$, where $g \in m.\mathit{dst}$, r-deliver $m$.
-\item \textit{integrity}:~for any process $p$ and any message $m$, $p$ r-delivers $m$ at most once, and only if $p \in g$, $g \in m.\mathit{dst}$, and $m$ was previously r-multicast.
-\item \textit{uniform agreement}:~if a process $p$ a-delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ a-deliver $m$.
-\item \textit{uniform prefix order}:~for any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ a-delivers $m$ and $q$ a-delivers $m'$, then either $p$ a-delivers $m'$ before $m$ or $q$ a-delivers $m$ before $m'$.
+\item \textit{validity}:~if a correct process $p$ multicasts a message $m$, then eventually all correct processes $q \in g$, where $g \in m.\mathit{dst}$, deliver $m$.
+\item \textit{integrity}:~for any process $p$ and any message $m$, $p$ delivers $m$ at most once, and only if $p \in g$, $g \in m.\mathit{dst}$, and $m$ was previously multicast.
+\item \textit{uniform agreement}:~if a process $p$ delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ deliver $m$.
+\item \textit{uniform prefix order}:~for any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.
 \item \textit{uniform acyclic order}:~the relation $<$ is acyclic.
 \end{itemize}
 Atomic broadcast is a special case of atomic multicast in which every message is addressed to all groups.
@@ -57,22 +58,15 @@ multicast, then for every process $p$ that participates in ordering $m$, $p$ is 
 \subsection{Remote Direct Memory Access}
 \label{sec:rdma}
 
-%<<<<<<< HEAD
-%Remote Direct Memory Access (RDMA) allows a server to access the memory of a remote server without involving the remote server's processor. 
-%RDMA provides low-latency communication by bypassing the OS kernel and by implementing the network layer in hardware.
-%RDMA supports message-passing operations (e.g., send, receive), shared-memory operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). 
-%Previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{Kalia2014}.
-%=======
-Remote Direct Memory Access (RDMA) is a hardware-based protocol that enables direct data access between the memory of remote machines without the involvement of the operating system and processor. 
-RDMA implements the network stack in hardware, provides both low-latency and high-bandwidth by bypassing the kernel and supporting zero-copy networking.
-RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduces an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
+Remote Direct Memory Access (RDMA) is a protocol that enables direct data access to the memory of a remote machine without involving the operating system and processor of the remote machine. 
+RDMA implements the network stack in hardware, and provides both low latency and high bandwidth by bypassing the kernel and supporting zero-copy communication.
+RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduce an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
 Besides, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
-%>>>>>>> 86c76bc4e0440ef88f14c280c5b91aba070576a1
 In RamCast's normal operation, processes communicate using remote write operations only.
 We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
 
 RDMA provides three transport modes: Reliable Connection (RC), Unreliable Connection (UC) and Unreliable Datagram (UD). 
-While RC and UC are connection oriented and support only one-to-one data transmission, UD supports both one-to-one and one-to-many without establishing connections.
+While RC and UC are connection-oriented and support only one-to-one data transmission, UD supports both one-to-one and one-to-many transmission without establishing connections.
 RC ensures data transmission is reliable and correct in the network layer, while UC does not have such a guarantee.
 In this work, we use RC to provide in-order reliable delivery.
 To establish a connection between two remote hosts, the RDMA-enabled network card (RNIC) on each host creates a logical RDMA endpoint known as a Queue Pair (QP), including a send queue and a receive queue for storing data transfer requests. 

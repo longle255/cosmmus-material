@@ -1,5 +1,5 @@
 %!TEX root =  main.tex
-\begin{algorithm}
+\begin{algorithm}[t]
 \footnotesize
 
 \begin{distribalgo}[1]
@@ -7,25 +7,25 @@
 \WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
 %\WHEN[\textbf{Task 7}]{suspect $Leader[g]$ \band\ $p$ is $g$'s next leader}	
 	\FOR{each $c$}
-		\STATE $\mathit{FUE}[c] \leftarrow i$, where $M[c,i]$ is the first undecided entry %($M[c,i] = \mcast)$
+		\STATE $\mathit{FUS}[c] \leftarrow i$, where $M[c,i]$ is the first undecided entry %($M[c,i] = \mcast)$
 	\ENDFOR
 	\STATE $round \leftarrow \langle time(round)+1,g \rangle$
 	\INDENT{\textbf{for} each $h$ in $\Gamma$}
 		\INDENT{\textbf{for} each $q$}
-			\STATE \textbf{for} each $c$: $\mathit{xFUE}[c] \leftarrow M[c,\mathit{FUE}[c]].ptr[h,q]$
-			\STATE \textsf{send} $(\textsc{catch\_up}, \mathit{xFUE}, round)$ to $q$
+			\STATE \textbf{for} each $c$: $\mathit{xFUS}[c] \leftarrow M[c,\mathit{FUS}[c]].ptr[h,q]$
+			\STATE \textsf{send} $(\textsc{catch\_up}, \mathit{xFUS}, round)$ to $q$
 		\ENDINDENT
 	\ENDINDENT
 \ENDWHEN
 
 \vspace{2.0mm}
-\WHEN[\textbf{Task 8}]{\textsf{receive} $(\textsc{catch\_up}, \mathit{FUE}, round)$ from $q$ in $h$ \band\ \\
+\WHEN[\textbf{Task 8}]{\textsf{receive} $(\textsc{catch\_up}, \mathit{FUS}, round)$ from $q$ in $h$ \band\ \\
 			\hspace{38mm} $round > Round[h]$}	
 		\STATE{grant permission to $q$}
 		\STATE $pend \leftarrow \emptyset$
 		\FOR{each $c$}
 			\STATE let $j$ be the last entry in $M$ such that $M[c,j] \neq \perp$
-			\FOR{$i$ in $\mathit{FUE}[c]..j$}
+			\FOR{$i$ in $\mathit{FUS}[c]..j$}
 				\IF{$h \in M[c,i].dst$}
 					\STATE $pend \leftarrow pend \cup (c,i,M[c,i].msg,M[c,i].dst,$ \\ 
 						\hfill $M[c,i].ptr,T[c,i].tmp[g],T[c,i].rnd[g])$

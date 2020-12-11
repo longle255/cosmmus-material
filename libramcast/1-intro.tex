@@ -3,9 +3,9 @@
 \label{sec:introduction}
 
 Today's online services are expected to operate uninterruptedly despite server failures.
-Many such services must also be capable of handling ever-increasing demand without performance hiccups.
+Many such services must also handle ever-increasing demand without performance hiccups.
 Services that match these expectations are deemed highly available and scalable.
-Many years of intense research in the area of dependable distributed systems have deepened the understanding of how to design systems that can tolerate failures.
+Many years of research in dependable distributed systems have deepened the understanding of how to design systems that can tolerate failures.
 A golden rule in the design of such systems is that abstractions can significantly reduce complexity, and avoid design and programming errors.
 For example, state machine replication, a \emph{de facto} standard to fault tolerance, requires replicas to order requests.
 But ordering requests in a distributed system prone to failures is difficult \cite{FLP85}.
@@ -17,7 +17,7 @@ Intuitively, all non-faulty processes addressed by a request must deliver the re
 Atomic multicast offers strong communication guarantees and should not be confused with network-level communication primitives (e.g., IP-multicast), which offer ``best-effort" guarantees.
 
 Since messages can be multicast to different sets of destinations and interleave in non-obvious ways, implementing message order in a distributed setting is challenging.
-Some atomic multicast protocols address this challenge by ordering all messages using a fixed group of processes or involving all groups, regardless of the destination of the messages.
+Some atomic multicast protocols address this challenge by ordering all messages using a fixed group of processes, regardless of the destination of the messages.
 To be efficient, however, an atomic multicast algorithm must be \emph{genuine}: only the message sender and destination processes should communicate to propagate and order a multicast message~\cite{GS01b}.
 A genuine atomic multicast is the foundation of scalable and fault-tolerant systems, since it does not depend on a fixed group of processes, and ensures reliable communication \cite{Coelho2017}.
 
@@ -33,10 +33,11 @@ In particular, if every process revokes the write permission of other processes 
 Protocols can leverage this property to optimize performance \cite{Aguilera2019}.
 
 Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance.
-Figure~\ref{fig:perfcomp} compares the performance of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
+Figure~\ref{fig:perfcomp} compares the latency of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
 RDMA's primitives largely outperform TCP/IP communication because they bypass the network stack.
 Shared-memory RDMA primitives deliver superior performance than message-passing primitives, although the advantage depends on the message size.
-In our environment, RDMA read and write operations have similar performance, unless the write can ``inline" data (i.e., with 64-byte messages in our case)---this happens because the interface adapter has the data available and does not need to retrieve data from the memory.
+In our environment, RDMA read and write operations have similar performance, unless the write can ``inline" data (i.e., with 64-byte messages in our case).
+This happens because the interface adapter has the data available and does not need to retrieve data from the memory.
 \libname uses remote writes only and avoids remote reads.
 There are two reasons for this design.
 First, most writes are small (e.g., acknowledgments) and can be inlined.
@@ -60,6 +61,6 @@ The remainder of the paper is structured as follows.
 Section~\ref{sec:background} presents the system model, a formal definition of the atomic multicast problem, and the basics of Remote Direct Memory Access.
 Section~\ref{sec:rdma-atomic-multicast} details the \libname protocol.
 We start with a short description of the ideas that have inspired \libname, then describe its normal behavior, in the absence of failures, and how it handles failures.
-Section~\ref{sec:implementation} describes our prototype, and Section~\ref{sec:experimental-evaluation} presents the performance evaluation.
+Section~\ref{sec:implementation} presents our prototype, and Section~\ref{sec:experimental-evaluation} details its performance.
 Section~\ref{sec:related-work} surveys related work and Section~\ref{sec:conclusion} concludes the paper.
 
