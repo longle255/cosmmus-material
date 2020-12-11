@@ -39,19 +39,18 @@ write permission is revoked), it will generate a CE even if it was posted to use
 unsignaled completion.
 
 %\paragraph{Atomic message delivery}
-In a shared memory context, when a process reads multiple entries that are
-updated by a remote process, it is important that the reader process does not
+In a shared memory context, when a process reads entries that are
+updated by another process, it is important that the reader process does not
 read incomplete data that has not been fully updated by the writer process,
-(e.g., processes in \libname continually monitor the their shared buffer for new
+(e.g., processes in \libname continually monitor their shared buffer for new
 messages and may be reading an incomplete entry). We resolve this issue by
-adding an extra canary byte at the end of each entry, as used in previous works \cite{APUS,FaRM,kalia2014using,
-islam2012high}. This
-approach leverages the left-to-right ordering of RDMA writes. As long as this
-variable is non-zero, the ordering guarantees that the entry is complete.
-Before writing a message to remote host, a process in \libname sets the entry's
-canary byte to the checksum of the entry. A remote process always first checks
-the checksum value in the canary byte and waits for the checksum to match the
-entry.
+adding an extra canary value at the end of each entry, as used in previous works 
+\cite{APUS,FaRM,kalia2014using, islam2012high, Mu}. 
+%This approach leverages the left-to-right ordering of RDMA writes. When this
+%variable becomes non-zero, the ordering guarantees that the entry is complete.
+Before writing a message to remote host, a process in \libname adds the checksum of the
+entry to the end of the entry. A remote process always first checks
+the checksum value and waits for the checksum to match the entry.
 
 
 %We compared
