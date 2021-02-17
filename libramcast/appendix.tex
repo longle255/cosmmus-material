@@ -145,11 +145,11 @@ From Lemma~\ref{lemma:Z}, $q$ eventually a-delivers $m$.\hfill$\Box$
 
 
 \begin{proposition}
-\textit{Uniform prefix order}:~For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $\lbrace p, q\rbrace \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ a-delivers $m$ and $q$ a-delivers $m'$, then either $p$ a-delivers $m'$ before $m$ or $q$ a-delivers $m$ before $m'$.
+\textit{Uniform prefix order}:~For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $\lbrace p, q\rbrace \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.
 \end{proposition}
 \noindent
 {\sc Proof:} 
-The proposition trivially holds if $p$ and $q$ are in the same group, so assume $p$ is in group $g$ and $q$ is in group $h$ and suppose, by way of contradiction, that $p$ does not a-deliver $m'$ before $m$ nor does $q$ a-deliver $m$ before $m'$. 
+The proposition trivially holds if $p$ and $q$ are in the same group, so assume $p$ is in group $g$ and $q$ is in group $h$ and suppose, by way of contradiction, that $p$ does not deliver $m'$ before $m$ nor does $q$ deliver $m$ before $m'$. 
 Without loss of generality, suppose that $m.ts < m'.ts$. 
 
 We claim that $q$ inserts $m$ into \Buffer before a-delivering $m'$. 
@@ -175,8 +175,8 @@ The relation $<$ is acyclic.}
 \noindent
 {\sc Proof sketch:} 
 Suppose, by way of contradiction, that there exist messages $m_1, ..., m_k$ such that $m_1 < m_2 < ... < m_k < m_1$. 
-From Task 5, processes a-deliver messages following the order of their final timestamps.
-Thus, there must be processes $p$ and $q$ such that the final timestamps they assign to $m_1$, $m_1.ts_p$ and  $m_1.ts_q$, satisfy $m_1.ts_p < m_1.ts_q$, a contradiction since both $p$ and $q$ receive the same \textsc{sync-hard} tuples used to calculate $m_1$'s final timestamp in Task 5.
+From Task 6, processes deliver messages following the order of their final timestamps.
+Thus, there must be processes $p$ and $q$ such that the final timestamps they assign to $m_1$, $m_1.ts_p$ and  $m_1.ts_q$, satisfy $m_1.ts_p < m_1.ts_q$, a contradiction since both $p$ and $q$ have the same timestamps for each group in $dst$ in Task 6.
 
 
 \hfill$\Box$
