@@ -78,7 +78,23 @@ It follows from Task 1 that $p$ is a destination of $m$ and $m$ was multicast by
 %We conclude then that $q$ eventually a-delivers $m$.\hfill$\Box$
 
 \begin{lemma}
-If a correct process $p$ has a message $m$ in its $M$ buffer in the \ordered\ state, then $p$ eventually delivers $m$.
+If all correct processes in the destination of an atomically multicast message $m$ have $m$ in their $M$ buffer in the \mcast\ state, then they eventually set $m$ to the \ordered\ state.
+\label{lemma:X}
+\end{lemma}
+\noindent
+{\sc Proof:} 
+We claim that for each $h \in dst$, $q$ will have a timestamp for $h$ that is acknowledged by a quorum of processes in $h$.
+By the leader election oracle and the fact that each group has a majority of correct processes, group $h$ eventually has a stable correct leader $l$.
+Either $l$ (a) executes Task 2 and proposes its clock value as $h$'s timestamp or (b) executes Task 7 to replace a suspected leader.
+In (b), $l$ sends a \textsc{catch\_up} message to all processes and will receive for each group $g \in dst$ the timestamp proposed in $g$, if any, and the corresponding acknowledgements from processes in $g$.
+For the case where $h=g$, $l$ will pick the timestamp decided by a previous leader or choose one if no timestamp has been decided (Task 9).
+Thus, in both cases (a) and (b), the leader writes the chosen timestamp in the $M$ buffer of each process in $h$ and in the leaders of other groups in $dst$.
+From Task 3, every follower in $h$ will acknowledge this timestamp in the buffer of each process in the destination of $m$.
+From Task 4, when $l$ has a timestamp from $g \neq h$, $l$ writes the timestamp in the buffer of its followers, which concludes the claim.
+Therefore, eventually $q$ has a timestamp for every group in $dst$, can compute $m$'s final timestamp, and set $m$'s state as \ordered.
+
+\begin{lemma}
+If a correct process $p$ has an atomically multicast message $m$ in its $M$ buffer in the \ordered\ state, then $p$ eventually delivers $m$.
 \label{lemma:Z}
 \end{lemma}
 \noindent
@@ -106,17 +122,7 @@ We conclude then that $q$ eventually delivers $m$.\hfill$\Box$
 {\sc Proof:} 
 Upon multicasting $m$, $c$ relays $m$ to groups in $dst$ (see Task 1).
 The Relay procedure then copies $m$ to the $M$ buffer of every correct process $q$ in groups in $dst$ and sets its state to \mcast.
-
-We claim that for each $h \in dst$, $q$ will have a timestamp for $h$ that is acknowledged by a quorum of processes in $h$.
-By the leader election oracle and the fact that each group has a majority of correct processes, group $h$ eventually has a stable correct leader $l$.
-Either $l$ (a) executes Task 2 and proposes its clock value as $h$'s timestamp or (b) executes Task 7 to replace a suspected leader.
-In (b), $l$ sends a \textsc{catch\_up} message to all processes and will receive for each group $g \in dst$ the timestamp proposed in $g$, if any, and the corresponding acknowledgements from processes in $g$.
-For the case where $h=g$, $l$ will pick the timestamp decided by a previous leader or choose one if no timestamp has been decided (Task 9).
-Thus, in both cases (a) and (b), the leader writes the chosen timestamp in the $M$ buffer of each process in $h$ and in the leaders of other groups in $dst$.
-From Task 3, every follower in $h$ will acknowledge this timestamp in the buffer of each process in the destination of $m$.
-From Task 4, when $l$ has a timestamp from $g \neq h$, $l$ writes the timestamp in the buffer of its followers, which concludes the claim.
-
-Therefore, eventually $q$ has a timestamp for every group in $dst$, can compute $m$'s final timestamp, and set $m$'s state as \ordered.
+From Lemma~\ref{lemma:X}, it follows that every correct process $p$ set $m$'s state to \ordered.
 From Lemma~\ref{lemma:Z}, $q$ eventually delivers $m$.\hfill$\Box$
 
 
@@ -127,21 +133,16 @@ From Lemma~\ref{lemma:Z}, $q$ eventually delivers $m$.\hfill$\Box$
 \noindent
 {\sc Proof sketch:} 
 For process $p$ to deliver $m$, from Task 6, $p$ has a timestamp for every group $h$ in $dst$ in the $M$ buffer such that $ts$ is the largest among these timestamps.
-Moreover, there is no message $m'$ in the buffer $m \neq m'$, such that $ts < y$, where $y$ is a timestamp assigned to $m'$.
-We consider two cases.
+Moreover, there is no message $m'$ in the buffer such that $m \neq m'$, $ts < y$, where $y$ is a timestamp assigned to $m'$, and $m'$ is not ordered.
 
-Case (a): $p$ and $q$ are in the same group $g$.
-Process $p$ adds tuples to \Buffer in Task 4 only, and every tuple added to \Buffer, which can be of type \textsc{set-hard} and \textsc{sync-hard}, is created from an entry in \Decided and variable $C_h$.
-Moreover, $C_h$ is modified only in Task 4, based on tuples in \Decided.
-Since $p$ and $q$ decide on the same sequence of consensus values, it follows that unless $q$ fails, it executes the same sequence of steps as $p$ and eventually a-delivers $m$.
+We first show by contradiction that $q$ eventually has $m$ in its $M$ buffer.
+Let $c$ be the client that multicasts $m$.
+If $c$ is correct then, $c$ writes $m$ in $q$'s buffer, so consider that $c$ fails before it can write $m$ in $q$'s buffer.
+Since $p$ delivers $m$, it has a quorum of acknowledges from each group in $dst$.
+Any quorum includes at least one correct process, which from Task 10, eventually suspects $c$ and relays $m$ to all processes in $dst$, including $q$, a contradiction.
 
-Case (b): $p$ and $q$ are in different groups.
-To include $(\textsc{sync-hard}, h, x, m)$ in \Buffer, $p$ has decided on a sequence that includes the tuple, for each group $h \in m.dst$.
-From consensus, some process $r$ proposed a sequence that contains $(\textsc{sync-hard}, h, x, m)$ in \Pend (Task 3).
-So, $r$ r-delivered tuple $(\textsc{send-hard}, h, x, m)$, which was r-multicast to all of $m$'s destinations in Task 4.
-As a consequence, processes in $q$'s group r-deliver message $(\textsc{send-hard}, h, x, m)$ and decide on a sequence that includes $(\textsc{sync-hard}, h, x, m)$.
-We conclude that $r$ adds $(\textsc{sync-hard}, h, x, m)$ to \Buffer, for each of $m$'s destinations $h$.
-From Lemma~\ref{lemma:Z}, $q$ eventually a-delivers $m$.\hfill$\Box$
+It follows from Lemma~\ref{lemma:X} that $q$ eventually sets the state of $m$ to \ordered\ in its buffer, and 
+from Lemma~\ref{lemma:Z} that $q$ eventually delivers $m$.\hfill$\Box$
 
 
 \begin{proposition}
