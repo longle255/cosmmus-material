@@ -8,15 +8,14 @@
 \clearpage
 \section{Proof of correctness}
 
-%\setcounter{proposition}{2}
 \begin{proposition}
 \textit{(Uniform integrity)~For any message $m$, every process $p$ delivers $m$ at most once, and only if $p$ is a destination of $m$ and $m$ was previously multicast.}
 \end{proposition}
-%\vspace{2mm}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
 Process $p$ delivers $m$ at Task 6 if $m$'s state is \ordered. 
-After delivering $m$, $p$ sets its state to \done, and thus $m$ cannot be delivered more than once.
+After delivering $m$, $p$ sets $m$'s state to \done, and thus $m$ cannot be delivered more than once.
 
 Let $c$ be the client that multicasts $m$ to groups in $dst$, and let $p$ be in group $g$. 
 From Task 6, $p$ only delivers $m$ if it is in $p$'s $M$ buffer and $m$'s state is \ordered. 
@@ -77,33 +76,39 @@ It follows from Task 1 that $p$ is a destination of $m$ and $m$ was multicast by
 %Thus, from Task 5 message $m'$ will be eventually a-delivered and removed from \Buffer, a contradiction.
 %We conclude then that $q$ eventually a-delivers $m$.\hfill$\Box$
 
+\vspace{2mm}
 \begin{lemma}
 If all correct processes in the destination of an atomically multicast message $m$ have $m$ in their $M$ buffer in the \mcast\ state, then they eventually set $m$ to the \ordered\ state.
 \label{lemma:X}
 \end{lemma}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
-We claim that for each $h \in dst$, $q$ will have a timestamp for $h$ that is acknowledged by a quorum of processes in $h$.
+Let $m$ be addressed to groups in $dst$ and $q$ be a correct process addressed by $m$.
+We claim that for each $h \in dst$, $q $ will have a timestamp for $h$ that is acknowledged by a quorum of processes in $h$.
 By the leader election oracle and the fact that each group has a majority of correct processes, group $h$ eventually has a stable correct leader $l$.
-Either $l$ (a) executes Task 2 and proposes its clock value as $h$'s timestamp or (b) executes Task 7 to replace a suspected leader.
-In (b), $l$ sends a \textsc{catch\_up} message to all processes and will receive for each group $g \in dst$ the timestamp proposed in $g$, if any, and the corresponding acknowledgements from processes in $g$.
+Either (a) $l$ executes Task 2 and proposes its clock value as $h$'s timestamp or (b) $l$ executes Task 7 to replace a suspected leader.
+In (b), $l$ sends a \textsc{catch\_up} message to all processes and will receive for each group $g \in dst$ the timestamp proposed in $g$, if any, and the corresponding acknowledgements from processes in $g$ (Task 8).
 For the case where $h=g$, $l$ will pick the timestamp decided by a previous leader or choose one if no timestamp has been decided (Task 9).
 Thus, in both cases (a) and (b), the leader writes the chosen timestamp in the $M$ buffer of each process in $h$ and in the leaders of other groups in $dst$.
 From Task 3, every follower in $h$ will acknowledge this timestamp in the buffer of each process in the destination of $m$.
 From Task 4, when $l$ has a timestamp from $g \neq h$, $l$ writes the timestamp in the buffer of its followers, which concludes the claim.
 Therefore, eventually $q$ has a timestamp for every group in $dst$, can compute $m$'s final timestamp, and set $m$'s state as \ordered.
 
+\pagebreak
 \begin{lemma}
 If a correct process $p$ has an atomically multicast message $m$ in its $M$ buffer in the \ordered\ state, then $p$ eventually delivers $m$.
 \label{lemma:Z}
 \end{lemma}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
 Assume for a contradiction that $q$ does not deliver $m$.
-Thus, there is some message $m'$ in the buffer such that $m \neq m'$ and $m'$'s timestamp is smaller than $m$'s and $m'$ is not \ordered.
-We first show that eventually any message added in the buffer after $m$ becomes \ordered\ has a timestamp bigger than $m$'s timestamp.
-Message $m$ only becomes ordered after it has timestamps from all of $m$'s destinations.
-When $q$ reads a timestamp $x$ for $m$ from some group, $q$ updates its clock such that it contains the maximum between its current value and $x$.
+Thus, there is some message $m'$ in the buffer such that $m \neq m'$, $m'$'s timestamp is smaller than $m$'s timestamp, and $m'$'s state is not \done.
+
+We first show that any message added in the buffer after $m$ becomes \ordered\ has a timestamp bigger than $m$'s timestamp.
+Message $m$ only becomes ordered after it has timestamps from all groups in $m$'s destinations $dst$.
+When $q$ reads a timestamp $x$ for $m$ from some group in $dst$, $q$ updates its clock such that it contains the maximum between its current value and $x$.
 Since the next event that $q$ handles for a message $m''$ will increment its clock, it follows that $m''$ will have a timestamp bigger than $x$.
 
 We now show that every message that contains a timestamp smaller than $m$'s final timestamp $ts$ is eventually delivered and its state set to \done.
@@ -116,22 +121,23 @@ We conclude then that $q$ eventually delivers $m$.\hfill$\Box$
 \vspace{2mm}
 \setcounter{proposition}{1}
 \begin{proposition}
-\textit{(Validity)~If a correct client $c$ multicasts a message $m$, then eventually all correct processes $p$ in $m$'s destination $dst$ deliver $m$.}
+\textit{(Validity)~If a correct client $c$ multicasts a message $m$, then eventually every correct process $p$ in $m$'s destination $dst$ delivers $m$.}
 \end{proposition}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
 Upon multicasting $m$, $c$ relays $m$ to groups in $dst$ (see Task 1).
-The Relay procedure then copies $m$ to the $M$ buffer of every correct process $q$ in groups in $dst$ and sets its state to \mcast.
+The Relay procedure then copies $m$ to the $M$ buffer of every correct process $p$ in groups in $dst$ and sets its state to \mcast.
 From Lemma~\ref{lemma:X}, it follows that every correct process $p$ set $m$'s state to \ordered.
-From Lemma~\ref{lemma:Z}, $q$ eventually delivers $m$.\hfill$\Box$
+From Lemma~\ref{lemma:Z}, $p$ eventually delivers $m$.\hfill$\Box$
 
 \vspace{2mm}
-%\setcounter{proposition}{4}
 \begin{proposition}
   \textit{(Uniform agreement)~If a process $p$ delivers a message $m$, then eventually all correct processes $q$ in $m$'s destination $dst$ deliver $m$.}
 \end{proposition}
+\vspace{2mm}
 \noindent
-{\sc Proof sketch:} 
+{\sc Proof:} 
 For process $p$ to deliver $m$, from Task 6, $p$ has a timestamp for every group $h$ in $dst$ in the $M$ buffer such that $ts$ is the largest among these timestamps.
 Moreover, there is no message $m'$ in the buffer such that $m \neq m'$, $ts < y$, where $y$ is a timestamp assigned to $m'$, and $m'$ is not ordered.
 
@@ -146,12 +152,13 @@ from Lemma~\ref{lemma:Z} that $q$ eventually delivers $m$.\hfill$\Box$
 
 \vspace{2mm}
 \begin{proposition}
-  \textit{(Uniform prefix order)~For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $\lbrace p, q\rbrace \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.}
+  \textit{(Uniform prefix order)~For any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $\lbrace p, q\rbrace \subseteq \mathit{dst} \cap \mathit{dst'}$, where $dst$ and $dst'$ are the groups addressed by $m$ and $m'$, respectively, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.}
 \end{proposition}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
 The proposition trivially holds if $p$ and $q$ are in the same group, so assume $p$ is in group $g$ and $q$ is in group $h$ and suppose, by way of contradiction, that $p$ does not deliver $m'$ before $m$ nor does $q$ deliver $m$ before $m'$. 
-Without loss of generality, suppose that $m.ts < m'.ts$. 
+Without loss of generality, suppose that $m$'s timestamp $ts$ is smaller than $m'$'s timestamp $ts'$. 
 
 We claim that $q$ inserts $m$ into the $M$ buffer before delivering $m'$. 
 In order for $m$ (respectively, $m'$) to be delivered by $p$ (resp., $q$), $p$'s (resp., $q$'s) $M$ buffer must contain a timestamp $ts_g$ from group $g$ and $ts_h$ from group $h$ (resp., $ts_g'$ from group $g$ and $ts_h'$ from group $h$).
@@ -170,24 +177,26 @@ Therefore, from Task 4, $l_h$ will write to the $M$ buffer of every follower in 
 %Therefore, before r-multicasting $(\textsc{send-hard}, g, x', m')$, $s$ r-multicast $(\textsc{send-hard}, g, x, m)$.
 %From the FIFO properties of reliable multicast, $q$ r-delivered the tuples in the order above and we can show that $(\textsc{sync-hard}, g, x, m)$ appears in \Buffer before $(\textsc{set-hard}, g, x', m')$, which proves our claim.
 
-Consequently, from the claim, $q$ a-delivers $m$ before $m'$ since $m.ts < m'.ts$, a contradiction that concludes the proof.
+Consequently, from the claim, $q$ delivers $m$ before $m'$ since $m.ts < m'.ts$, a contradiction that concludes the proof.
 \hfill$\Box$
 
 \vspace{2mm}
 \begin{proposition}
 \textit{(Uniform acyclic order)~Let relation $<$ be defined such that $m < m'$ iff there exists a process that delivers $m$ before $m'$.  The relation $<$ is acyclic.}
 \end{proposition}
+\vspace{2mm}
 \noindent
-{\sc Proof sketch:} 
+{\sc Proof:} 
 Suppose, by way of contradiction, that there exist messages $m_1, ..., m_k$ such that $m_1 < m_2 < ... < m_k < m_1$. 
 From Task 6, processes deliver messages following the order of their final timestamps.
-Thus, there must be processes $p$ and $q$ such that the final timestamps they assign to $m_1$, $m_1.ts_p$ and  $m_1.ts_q$, satisfy $m_1.ts_p < m_1.ts_q$, a contradiction since both $p$ and $q$ have the same timestamps for each group in $dst$ in Task 6.
+Thus, there must be processes $p$ and $q$ such that the final timestamps they assign to $m_1$, $ts_p$ and  $ts_q$, satisfy $ts_p < ts_q$, a contradiction since both $p$ and $q$ have the same timestamps for each group in $dst$ in Task 6.
 \hfill$\Box$
 
 \vspace{2mm}
 \begin{theorem}
 RamCast implements atomic multicast.
 \end{theorem}
+\vspace{2mm}
 \noindent
 {\sc Proof:} 
 This follows directly from Propositions 1 through 5.\hfill$\Box$
