@@ -1,0 +1,92 @@
+packages rdma-core ibverbs-utils libtool libibverbs-dev librdmacm-dev maven rdmacm-utils
+
+soft roce https://community.mellanox.com/docs/DOC-2184
+verify rdma https://www.rdmamojo.com/2015/01/24/verify-rdma-working/
+
+sudo apt install rdma-core
+sudo apt install ibverbs-utils
+
+sudo rxe_cfg add eth1
+sudo rxe_cfg add enp4s0
+sudo rxe_cfg add enp1s0d1
+
+cluster: sudo rxe_cfg add enp1s0
+sudo rxe_cfg start
+sudo rxe_cfg
+ibv_devices
+ibv_devinfo
+
+ibv_rc_pingpong -g 0 -d rxe0 -i 1
+ibv_rc_pingpong -g 0 -d rxe0 -i 1 192.168.4.1
+
+ibv_rc_pingpong -g 0 -d rxe0 -i 1
+ibv_rc_pingpong -g 0 -d rxe0 -i 1 192.168.4.1
+
+rping -s -a 192.168.4.1 -v
+rping -c -a 192.168.4.1 -v 
+
+
+ibv_rc_pingpong -g 0 -d rxe0 -i 1 -n 10000 -s 2048
+ibv_rc_pingpong -g 0 -d rxe0 -i 1 192.168.4.1 -n 10000 -s 2048
+
+ibv_rc_pingpong -g 0 -d rxe0 -i 1 192.168.3.5 -n 10000 -s 1024
+
+
+ibv_rc_pingpong --ib-dev=mlx4_0 --ib-port=2 --gid-idx=0 -n 1000000 -s 4096
+ibv_rc_pingpong --ib-dev=mlx4_0 --ib-port=2 --gid-idx=0 -n 1000000 -s 4096 192.168.4.1 
+ 
+export LD_LIBRARY_PATH=/usr/local/lib:/host/Documents/Workspace/PhD/ScalableSMR/apus/APUS/.local/lib
+java -cp '/host/Documents/Workspace/PhD/ScalableSMR/disni/target/*' com.ibm.disni.examples.ReadServer -a 192.168.4.1
+java -cp '/host/Documents/Workspace/PhD/ScalableSMR/disni/target/*' com.ibm.disni.examples.ReadClient -a 192.168.4.1
+java -cp '/home/long/apps/ScalableSMR/disni/target/*' com.ibm.disni.examples.ReadServer -a 192.168.4.1
+java -cp '/home/long/apps/ScalableSMR/disni/target/*' com.ibm.disni.examples.ReadClient -a 192.168.4.1
+
+
+java -cp '/home/long/apps/ScalableSMR/disni/target/test-classes:/home/long/apps/ScalableSMR/disni/target/classes:/home/long/apps/ScalableSMR/dependencies/*' com.ibm.disni.benchmarks.RDMAvsTcpBenchmarkServer -a 192.168.3.5 -k 10000
+java -cp '/home/long/apps/ScalableSMR/disni/target/test-classes:/home/long/apps/ScalableSMR/disni/target/classes:/home/long/apps/ScalableSMR/dependencies/*' com.ibm.disni.benchmarks.RDMAvsTcpBenchmarkClient -a 192.168.3.5 -k 10000
+
+disni
+./autogen.sh
+./configure --with-jdk=/usr/lib/jvm/java-8-openjdk-amd64
+./configure ./configure --prefix=/home/long/.local --with-jdk=/home/long/softwares/jdk1.8.0_101
+make
+sudo make install
+
+RoCE vs iWARP http://www.mellanox.com/related-docs/whitepapers/WP_RoCE_vs_iWARP.pdf
+
+rdma brief
+https://zcopy.wordpress.com/2010/10/08/quick-concepts-part-1-%E2%80%93-introduction-to-rdma/
+
+
+Dare
+https://spcl.inf.ethz.ch/Research/Parallel_Programming/DARE/
+
+
+IBM Java rdma
+https://github.com/zrlio/disni  https://developer.ibm.com/code/open/projects/direct-storage-and-networking-interface-disni/
+
+https://github.com/zrlio/darpc
+https://www.ibm.com/support/knowledgecenter/SSYKE2_7.0.0/com.ibm.java.lnx.70.doc/diag/understanding/rdma_jverbs.html
+https://www.ibm.com/support/knowledgecenter/en/SSYKE2_7.0.0/com.ibm.java.lnx.70.doc/user/rdma_jsor_enable.html
+
+Performance compare 
+https://stackoverflow.com/questions/33098306/java-sockets-on-rdma-jsor-vs-jverbs-performance-in-infiniband
+
+Install Soft RoCE
+http://alokprasad7.blogspot.com/2017/12/installing-softroce-on-two-vms-on.html
+
+
+
+apus:
+error: dereferencing pointer to incomplete type 'BIO {aka struct bio_st}'
+=> sudo apt-get install libssl1.0-dev
+
+lib/XNRW/include/ThreadPool.h: In member function ‘void XNRW::ThreadPool::addTask(Func&&, Args&& ...)’:                                                           │done
+lib/XNRW/include/ThreadPool.h:30:14: error: ‘bind’ is not a member of ‘std’
+=> vim lib/XNRW/include/ThreadPool.h
+    add #include <functional>
+
+
+
+java -cp '/home/long/apps/ScalableSMR/disni/target/test-classes:/home/long/apps/ScalableSMR/disni/target/classes:/home/long/apps/ScalableSMR/dependencies/*' com.ibm.disni.benchmarks.ReadClient -a 192.168.4.1 -k 1000000 -s 4096
+java -cp '/home/long/apps/ScalableSMR/disni/target/test-classes:/home/long/apps/ScalableSMR/disni/target/classes:/home/long/apps/ScalableSMR/dependencies/*' com.ibm.disni.benchmarks.ReadServer -a 192.168.4.1 -k 1000000 -s 4096

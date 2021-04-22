@@ -1,0 +1,97 @@
+%!TEX root =  main.tex
+%\newcommand{\rdwrite}[3]{\textsf{write}\ensuremath{(#1, #2, #3)}}      % rdwrite(addr,val)
+%\newcommand{\band}{\textbf{and}}
+%\newcommand{\mcast}{\textsc{mcast}}
+%\newcommand{\ordered}{\textsc{ordered}}
+%\newcommand{\done}{\textsc{done}}
+
+\begin{algorithm}[t]
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\STATE{Client $c$ multicasts message $m$ to groups in $m.dst$ as follows:}
+\vspace{1.0mm}
+	\INDENT[\textbf{Task 1}]{for each $h$ in $m.dst$, for each $q$ in $h$}
+		\STATE $ptr[q] \leftarrow ptr[q] + 1$
+	\ENDINDENT
+	\STATE $Relay(c,msg,m.dst,ptr)$
+%	\INDENT{for each $h$ in $dst$}
+%		\STATE \rdwrite{q}{M[c,next[q]].msg}{m}
+%		\STATE \rdwrite{q}{M[c,next[q]].dst}{m.dst}
+%		\STATE \rdwrite{q}{M[c,next[q]].ptr}{next}
+%		\STATE \rdwrite{q}{M[c,next[q]].tmp}{0}
+%		\STATE \rdwrite{q}{M[c,next[q]].stat}{\mcast}
+%	\ENDINDENT
+\vspace{1.0mm}
+
+\STATE Server $p$ in group $g$ executes as follows:
+\vspace{1.0mm}
+\WHEN[\textbf{Task 2}]{$\exists c,i:\!M[c,i].stat\!=\!\mcast$\ \band\ 
+		$p\!=\!Leader[g]$\hspace{-2mm}}
+	\STATE $clock \leftarrow clock + 1$
+	\INDENT{for each follower $q$ in $g$ \band\ each leader $q$ in $M[c,i].dst$}
+		\STATE $j \leftarrow M[c,i].ptr[q]$
+		\STATE \rdwrite{q}{T[c,j].tmp[g]}{\langle clock, g \rangle}
+		\STATE \rdwrite{q}{T[c,j].rnd[g]}{round}
+		\STATE \textbf{if} write denied \textbf{then} end task
+	\ENDINDENT	
+\ENDWHEN
+\vspace{1.0mm}
+
+\WHEN[\textbf{Task 3}]{$\exists c, i\!:\!M[c,i].stat\!=\!\mcast$\ \band \\
+		\hspace{14mm} $T[c,i].rnd[g] = Round[g]$}
+	\STATE $clock \leftarrow max(clock, time(T[c,i].tmp[g]))$
+	\INDENT{for each $h$ in $M[c,i].dst$, for each $q$ in $h$}
+		\STATE $j \leftarrow M[c,i].ptr[q]$
+		\STATE \rdwrite{q}{M[c,j].ack[p]}{Round[g]}
+	\ENDINDENT	
+\ENDWHEN
+\vspace{1.0mm}
+
+\WHEN[\textbf{Task 4}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band \\
+		\hspace{14mm} $T[c,i].rnd[h] = Round[h]$ \band\ $h \neq g$ \hspace{-2mm}}
+	\STATE $clock \leftarrow max(clock, time(T[c,i].tmp[g]))$
+	\INDENT{for each follower $q$ in $g$}
+		\STATE{$j \leftarrow M[c,i].ptr[q]$}
+		\STATE \rdwrite{q}{T[c,j].tmp[h]}{T[c,i].tmp[h]}
+		\STATE \textbf{if} write denied \textbf{then} end task
+	\ENDINDENT	
+\ENDWHEN
+\vspace{1.0mm}
+
+\WHEN[\textbf{Task 5}]{$\exists c, i, h\!:\!M[c,i].stat =$ \mcast\ \band\ $\exists\!$ quorum $Q$ in $h$: \\
+	\hspace{5mm} for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
+			\STATE $M[c,i].tmp \leftarrow$ 
+				 $max(M[c,i].tmp, T[c,i].tmp[h])$
+			\IF{for each group $h$ in $M[c,i].dst$: $\exists\!$ quorum $Q$ in $h$: \\
+	\hfill for each $q$ in $Q$: $M[c,i].ack[q] = Round[h]$}
+						\STATE $M[c,i].stat \leftarrow$ \ordered
+			\ENDIF
+%			\STATE{include $(m,t_{final})$ in $ordered$}
+%			\STATE{remove $(m,-,-)$ from $pending$}		
+\ENDWHEN
+\vspace{1.0mm}
+
+
+\WHEN[\textbf{Task 6}]{$\exists c, i\!:\!M[c,i].stat =$ \ordered\ \band \\
+	\hspace{10mm} $\nexists d,j\!:\!M[d,j].stat \in \{ \ordered, \mcast \}$ \band\ \\
+	\hspace{10mm} $M[d,j].tmp < M[c,i].tmp$}
+		\STATE{deliver $m$}
+		\STATE $M[c,i].stat \leftarrow$ \done
+\ENDWHEN
+\vspace{1.0mm}
+\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
+	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
+		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
+		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
+		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
+		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
+	\ENDINDENT
+\ENDINDENT
+\vspace{2.0mm}
+
+\caption{Normal case (stable leader)}
+\label{alg:normal_case}
+\end{distribalgo}
+\end{algorithm}

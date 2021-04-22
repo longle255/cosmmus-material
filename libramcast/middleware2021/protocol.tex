@@ -1,0 +1,124 @@
+\section{The Multicast Protocol}
+
+\subsection{Memory management}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\linewidth]{figures/memory}
+  \caption{Memory layout of \proto. Each process has shared and exclusive memory
+  space. All other processes can access shared memory. Only leader can access
+  exclusive memory }
+  \label{fig:normal_operation_time}
+\end{figure}
+
+Each process of \proto organizes its memory with two memory regions: shared
+memory and exclusive memory spaces. All processes have remote access
+(read/write) to the shared memory space. Only one process (leader) of each group
+has has remote-write permission to a given node’s log at any point in time
+during the protocol.
+
+The shared memory space is a circular buffer of fixed-size entries with a
+sequential index. Client keep a copy of the remote head and tail pointer. Client
+increase remote tail after writing to the shared memory. Server process update
+the head pointer on client after delivering message by piggying back the new
+value in the response.
+
+Each process $p$ periodically polls the memory cell at Head position of each
+connected QPs to detect new message.
+
+For each message $m$ written in the shared memory, there is a corresponding cell
+in the exclusive memory space reserved for timestamps of $m$
+
+\subsection{Normal case}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\linewidth]{figures/timeline-simple}
+  \caption{Normal case execution of \proto. Step 1: client writes message to all
+          involves processes. Step 2: leader of each group in the destination
+          propose and write a timestamp to all followers and other leaders
+          memory. Step 3: leaders propagate the timestamp written by other
+          leaders, followers write their acks for local timestamp on all other
+          processes}
+  \label{fig:normal_operation_time}
+\end{figure}
+
+\input{algo-normal-case}
+
+The normal operation protocol is involved when there is an existence of a sole
+leader per group that has the support of at least a majority of processes of
+that group. A leader is responsible for proposing timestamp for new message, and
+propagating timestamps from other groups to followers of its local group.
+
+A client process $C$ multicasts a message $m$ to a set of target groups in
+$m.dst$ by performing a \rwrite to the same memory entry on the shared memory of
+each process $p_i$ belongs to $m.dst$. (Task 1 algorithm~\ref{alg:normal_case})
+
+Once leader process $L$ in group $g$ \lread the message $m$, it computes a
+group-wise timestamp $ts$ and writes that proposed timestamp $ts$ to the memory
+cell reserved for $m$ in the exclusive memory space of: (1) all follower
+processes $f$ belongs to $g$. (2) all leader processes $L_i$ of other groups
+$g_i$ belongs to $m.dst$ The proposed timestamp $ts$ consists of three
+components: the ballot number $bal$ in which $L$ is the leader of group $g$, the
+sequence number $sel$ is the consensus instance of message $m$ in group $g$, and
+$v$ is $L$'s logical clock value. (Task 2 algorithm~\ref{alg:normal_case})
+
+Upon \lread a timestamp $ts$ of message $m$ from leader processes of other
+groups, a leader $L$ propagates that timestamp to its group by performing
+\rwrite $ts$ to the exclusive memory space for $m$ in all follower processes of
+its local group. (Task 3 algorithm~\ref{alg:normal_case})
+
+Once each involved process $P$ belongs to $m.dst$ \lread message $m$ in its
+local buffer, $P$ mark the message as pending, and starts polling from it
+exclusive memory for timestamps of $m$ (Task 4 algorithm~\ref{alg:normal_case}).
+
+Upon \lread a timestamp $ts$ of message $m$ from leader of local group, a
+process $P$ writes its acknowledgement $ack$ for that timestamp to the shared
+memory of all other involved processes, and start polling from its memory for
+acknowledgements from other processes. (Task 4 algorithm~\ref{alg:normal_case}).
+Once $P$ receives timestamps of all involved groups and acknowledgements from
+the majority of processes of each group, it can order the message $m$ and starts
+deliver it.
+
+\subsection{Leader election}
+
+\proto assumes the existence of an unreliable failure detector. If a leader is
+slow or crashes, the failure detector will detect this and elect new leader.
+When a process becomes a leader, it needs to perform several steps to ensure it
+is the only leader of its groups. Those steps are: (1) increasing ballot number,
+in which that process becomes leader. (2) sending 1A message to all processes
+with new ballot number, and wait for the response of majority (3) ensure the
+logs of all processes are up-to-date
+
+Firstly, the new leader must choose a new ballot number that is higher than all
+ballot numbers before. A process only reply to the message or timestamp that has
+a ballot number higher than its current value. The new ballot number will be
+included in each timestamp $ts$ of this leader later.
+
+Then the new leader needs to get the access to the exclusive memory space on (1)
+the followers of its local group, and (2) the leaders of other groups. In order
+to act as a leader, a node must get the write permission from majority of other
+processes in its group. In addition, to tolerate failure of the leaders of other
+groups, the new leader also need to get the write permission from majority of
+processes of other groups. The new leader request the access by issuing a RDMA
+Send (\lle{this could be a \rwrite}) that includes a new ballot number, the
+sequence number of the most recent deliver message. When a process receives this
+message, it checks if the ballot number is higher than its current ballot value,
+then revokes access of the old leader, and send a reply to the new leader with
+its current sequence number
+
+Finally, once the new leader receives reply from majority processes, it must
+ensure all remote logs are up-to-date with its own. If the sequence number of
+leader is smaller than follower, the leader should know that for missing
+instances, it can read the agreed timestamps from followers.
+
+With the pending instances (the instances in the pending list without
+timestamps, or has not received majority of acks), leader can just rewrite new
+timestamp value with its new ballot number. In this case leader issues a RDMA
+WRITE-WITH-IMM which triggers a completion event at the receivers side.
+
+
+
+% not necessary
+% if the sequence number of leader is bigger than follower, the follower can do a
+% \rread of missing timestamps from leader's memory.

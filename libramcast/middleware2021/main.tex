@@ -1,0 +1,140 @@
+\documentclass[sigconf]{acmart}
+
+%\usepackage{times}
+%\usepackage{fullpage}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage[noend]{distribalgo}
+\usepackage{fixme}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{adjustbox}
+%\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+%\usepackage[dvipsnames]{xcolor}
+%\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{color,soul}
+
+\newcommand{\ex}{$\mathcal{E}$}
+\newcommand{\pp}{$\mathcal{P}$}
+\newcommand{\ppm}{\mathcal{P}}
+\newcommand{\pqm}{\mathcal{Q}}
+\newcommand{\oom}{\mathcal{O}}
+\newcommand{\oo}{$\mathcal{O}$}
+\newcommand{\cc}{$\mathcal{C}$}
+\newcommand{\ccm}{\mathcal{C}}
+\newcommand{\kk}{$\mathcal{K}$}
+%\newcommand{\vv}{$\mathcal{V}$}
+\newcommand{\vvm}{\mathcal{V}}
+\newcommand{\vvt}{$\mathcal{V}$}
+\newcommand{\rr}{$\mathcal{R}$}
+\newcommand{\rrm}{\mathcal{R}}
+\newcommand{\sst}{$\mathcal{S}$}
+\newcommand{\ssm}{\mathcal{S}}
+\newcommand{\ip}{\mathcal{I}}
+
+\newcommand{\rmcast}{r-mcast}
+\newcommand{\rmdel}{r-deliver}
+\newcommand{\amcast}{a-mcast}
+\newcommand{\amdel}{a-deliver}
+\newcommand{\parts}{partition}
+\newcommand{\coloralgo}{Yellow}
+
+\newcommand{\rdwrite}[3]{\textsf{write}\ensuremath{(#1, #2, #3)}}	% rdwrite(addr,val) 
+\newcommand{\band}{\textbf{and}}
+\newcommand{\mcast}{\textsc{mcast}}
+\newcommand{\ordered}{\textsc{ordered}}
+\newcommand{\done}{\textsc{done}}
+
+\newcommand{\libname}{\mbox{RamCast}\xspace}
+
+\newcommand{\mynote}[3]{
+   \fbox{\bfseries\sffamily\scriptsize#1}
+   {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}
+\newcommand{\fp}[1]{\mynote{Fernando}{#1}{Red}}
+\newcommand{\lle}[1]{\mynote{Long}{#1}{Cerulean}}
+
+\newcommand{\red}[1]{\textit{\textcolor{red}{#1}}}
+
+
+\newcommand{\rwrite}{\mbox{\textsl{r-write}}\xspace}
+\newcommand{\lread}{\mbox{\textsl{l-read}}\xspace}
+\newcommand{\rread}{\mbox{\textsl{r-read}}\xspace}
+\newcommand{\WRITE}{\textsl{WRITE}}
+\newcommand{\READ}{\textsl{READ}}
+\newcommand{\SEND}{\textsl{SEND}}
+\newcommand{\RECV}{\textsl{RECV}}
+\newcommand{\REVOKEPERM}{\textsl{REVOKE PERMISSION}}
+\newcommand{\GRANTPERM}{\textsl{GRANT PERMISSION}}
+\newcommand{\buffer}{\mathcal{B}}
+
+% \newcommand{\StatexIndent}[1][3]{%
+%   \setlength\@tempdima{\algorithmicindent}%
+%   \Statex\hskip\dimexpr#1\@tempdima\relax}
+% \algdef{S}[WHILE]{WhileNoDo}[1]{\algorithmicwhile\ #1}%
+
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+%%% % do not change these values
+%%% \baselineskip 12pt
+%%% \textheight 9in
+%%% \textwidth 6.5in
+%%% \oddsidemargin 0in
+%%% \topmargin 0in
+%%% \headheight 0in
+%%% \headsep 0in
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmcopyright}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{10.1145/1122445.1122456}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+\acmConference[Middleware '21]{Middleware '21: ACM/IFIP Middleware conference}{December 06--10, 2021}{Quebec, Canada}
+\acmBooktitle{Middleware '21: ACM/IFIP Middleware conference, December 06--10, 2021, Quebec, Canada}
+%\acmPrice{15.00}
+%\acmISBN{978-1-4503-XXXX-X/18/06}
+
+\begin{document}
+
+\title{RamCast: RDMA-based Atomic Multicast}
+% \author{Long Hoang Le, Enrique Fynn, Mojtaba Eslahi-Kelorazi, Robert Soul\'{e} and Fernando Pedone \\
+% \small {\em  Universit\`{a} della Svizzera italiana (USI)} \\
+% \small {\em Lugano, Switzerland} \\ [2mm]
+%% \small Submission type: Research
+% }
+\date{}
+
+\author{
+Anonymous author(s), Regular paper \#XXX
+}
+
+\input{0-abstract}
+
+\maketitle
+
+\input{1-intro}
+\input{3-background}
+\input{4-libramcast}
+\input{5-implementation}
+\input{6-evaluation}
+\input{7-related-work}
+\input{8-conclusion}
+
+\clearpage
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\input{appendix}
+
+\end{document}

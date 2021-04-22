@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Notes</title>
+        <style>
+/* From extension zhuangtongfa.material-theme */
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body {
+  box-sizing: border-box;
+  min-width: 200px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
+  background-color: initial;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  color: initial;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
+  color: inherit;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre code {
+  color: initial;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code > div {
+  background: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table td {
+  border: 1px solid rgba(171, 178, 191, 0.5) !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-active-line:before {
+  border-left: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-line:hover:before {
+  border-left: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-line .code-line:hover:before {
+  border-left: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* Generated from 'node_modules/github-markdown-css/github-markdown.css' */
+@font-face {
+  font-family: octicons-link;
+  src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format("woff");
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  line-height: 1.5;
+  color: #abb2bf;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  background: #282c34;
+  padding-top: 20px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c {
+  color: #6a737d;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-v {
+  color: #005cc5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-e, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-en {
+  color: #6f42c1;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-smi, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-s1 {
+  color: #24292e;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ent {
+  color: #22863a;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-k {
+  color: #d73a49;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-pds, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-pse .pl-s1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-cce, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-sre, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-sra {
+  color: #032f62;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-v, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-smw {
+  color: #e36209;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-bu {
+  color: #b31d28;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ii {
+  color: #fafbfc;
+  background-color: #b31d28;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c2 {
+  color: #fafbfc;
+  background-color: #d73a49;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c2::before {
+  content: "^M";
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-cce {
+  font-weight: bold;
+  color: #22863a;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ml {
+  color: #735c0f;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mh, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mh .pl-en, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ms {
+  font-weight: bold;
+  color: #005cc5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi {
+  font-style: italic;
+  color: #24292e;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mb {
+  font-weight: bold;
+  color: #24292e;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-md {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi1 {
+  color: #22863a;
+  background-color: #f0fff4;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mc {
+  color: #e36209;
+  background-color: #ffebda;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi2 {
+  color: #f6f8fa;
+  background-color: #005cc5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mdr {
+  font-weight: bold;
+  color: #6f42c1;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ba {
+  color: #586069;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sg {
+  color: #959da5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-corl {
+  text-decoration: underline;
+  color: #032f62;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .octicon {
+  display: inline-block;
+  vertical-align: text-top;
+  fill: currentColor;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a {
+  background-color: transparent;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:active, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:hover {
+  outline-width: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
+  font-weight: inherit;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
+  font-weight: bolder;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img {
+  border-style: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
+  font: inherit;
+  margin: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
+  overflow: visible;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body [type=checkbox] {
+  box-sizing: border-box;
+  padding: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body * {
+  box-sizing: border-box;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a {
+  color: #528bff;
+  text-decoration: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:hover {
+  text-decoration: underline;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #dfe2e5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr::before {
+  display: table;
+  content: "";
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body td, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body th {
+  padding: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
+  font-size: 32px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
+  font-size: 12px;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
+  margin: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol {
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol {
+  list-style-type: lower-roman;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dd {
+  margin-left: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .octicon {
+  vertical-align: text-bottom;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-0 {
+  padding-left: 0 !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-1 {
+  padding-left: 4px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-2 {
+  padding-left: 8px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-3 {
+  padding-left: 16px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-4 {
+  padding-left: 24px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-5 {
+  padding-left: 32px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-6 {
+  padding-left: 40px !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body::before {
+  display: table;
+  content: "";
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body > *:first-child {
+  margin-top: 0 !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body > *:last-child {
+  margin-bottom: 0 !important;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .anchor {
+  float: left;
+  padding-right: 4px;
+  margin-left: -20px;
+  line-height: 1;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .anchor:focus {
+  outline: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
+  height: 0.25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: #e1e4e8;
+  border: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
+  /* padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5; */
+  padding: 8.5px 17px;
+  margin: 1.5em 0;
+  font-size: inherit;
+  color: #7c879c;
+  border-color: #4b5362;
+  border-width: 4px;
+  border-left: 5px solid #4b5362;
+  background: transparent;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote > :first-child {
+  margin-top: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #444d56;
+  vertical-align: middle;
+  background-color: #fafbfc;
+  border: solid 1px #c6cbd1;
+  border-bottom-color: #959da5;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #959da5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #f0f0f0;
+  border-bottom: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 .octicon-link {
+  color: #1b1f23;
+  vertical-align: middle;
+  visibility: hidden;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6:hover .anchor {
+  text-decoration: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6:hover .anchor .octicon-link {
+  visibility: visible;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
+  padding-bottom: 0.3em;
+  font-size: 2em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.5em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 {
+  font-size: 1.25em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 {
+  font-size: 1em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 {
+  font-size: 0.875em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
+  font-size: 0.85em;
+  color: #6a737d;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol {
+  padding-left: 2em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li {
+  word-wrap: break-all;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li > p {
+  margin-top: 16px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li + li {
+  margin-top: 0.25em;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl {
+  padding: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl dt {
+  padding: 0;
+  margin-top: 16px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: 600;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th {
+  font-weight: 700;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table td {
+  padding: 6px 13px;
+  /* border: 1px solid #dfe2e5; */
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table tr {
+  /* background-color: #fff; */
+  /* border-top: 1px solid #c6cbd1; */
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table tr:nth-child(2n) {
+  /* background-color: #f6f8fa; */
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img {
+  max-width: 100%;
+  box-sizing: content-box;
+  display: inline-block;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img[align=right] {
+  padding-left: 20px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img[align=left] {
+  padding-right: 20px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: #3a3f4b;
+  border-radius: 3px;
+  color: white;
+  margin: 0 1px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  word-wrap: normal;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre > code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight {
+  margin-bottom: 16px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight pre, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  /* background-color: #f6f8fa; */
+  border-radius: 3px;
+  background-color: #31363f;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre code {
+  display: inline;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+  color: #abb2bf;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .full-commit .btn-outline:not(:disabled):hover {
+  color: #005cc5;
+  border-color: #005cc5;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  line-height: 10px;
+  color: #444d56;
+  vertical-align: middle;
+  background-color: #fafbfc;
+  border: solid 1px #d1d5da;
+  border-bottom-color: #c6cbd1;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #c6cbd1;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body :checked + .radio-label {
+  position: relative;
+  z-index: 1;
+  border-color: #0366d6;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item {
+  list-style-type: none;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item + .task-list-item {
+  margin-top: 3px;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item input {
+  margin: 0 0.2em 0.25em -1.6em;
+  vertical-align: middle;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
+  border-bottom-color: #eee;
+}
+
+/*
+
+Atom One Dark by Daniel Gamage
+Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
+
+base:    #282c34
+mono-1:  #abb2bf
+mono-2:  #818896
+mono-3:  #5c6370
+hue-1:   #56b6c2
+hue-2:   #61aeee
+hue-3:   #c678dd
+hue-4:   #98c379
+hue-5:   #e06c75
+hue-5-2: #be5046
+hue-6:   #d19a66
+hue-6-2: #e6c07b
+
+*/
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #abb2bf;
+  background: #282c34;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-comment,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-quote {
+  color: #5c6370;
+  font-style: italic;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-doctag,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-keyword,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-formula {
+  color: #c678dd;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-section,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-name,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-tag,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-deletion,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-subst {
+  color: #e06c75;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-literal {
+  color: #56b6c2;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-string,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-regexp,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-addition,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-attribute,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-meta-string {
+  color: #98c379;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-built_in,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-class .hljs-title {
+  color: #e6c07b;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-attr,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-variable,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-template-variable,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-type,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-class,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-attr,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-pseudo,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-number {
+  color: #d19a66;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-symbol,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-bullet,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-link,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-meta,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-id,
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-title {
+  color: #61aeee;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-emphasis {
+  font-style: italic;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-strong {
+  font-weight: bold;
+}
+.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-link {
+  text-decoration: underline;
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="notes">Notes</h1>
+<h2 id="todo">Todo</h2>
+<h3 id="implementations">Implementations</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Leader write timestamps to group processes and other involved leader</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Leader propagates timestamps from other leaders to group processes</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Processes write their acks when receive ts</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Processes reads timestamps in order</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> Inlining data in work request for step 2 &amp; 3</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"> Leader wait for all ts to be available before propagating. That reduces the writes on the server.</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"> Client writes slot# where the message is written on other shared buffered, instead of writing absolute addresses.</li>
+</ul>
+<h2 id="notes-1">Notes</h2>
+<ul>
+<li>Followers only receive timestamp from their own leader =&gt; only need to keep counter of leader.</li>
+<li>If leader fails, new leader has to send their counter to follower</li>
+</ul>
+<h2 id="problems--solutions">Problems &amp; Solutions</h2>
+<h3 id="why-do-we-need-to-write-to-leader-first-then-propagate"><em>Why do we need to write to leader first, then propagate?</em></h3>
+<p>Assume P1.1 is leader of group G1, P2.1 is leader of group G2.</p>
+<ul>
+<li>
+<p>P1.1 keeps local timestamp 10</p>
+</li>
+<li>
+<p>P2.1 keeps local timestamp 8</p>
+</li>
+</ul>
+<p>Client wants to multicast message m1 =&gt; writes m1 to all processes of 2 groups</p>
+<ul>
+<li>
+<p>Once P1.1 reads m1, P1.1 picks ts 10, writes to all other processes.</p>
+</li>
+<li>
+<p>Once P2.1 reads m1, P2.1 picks ts 8, writes to all other processes.</p>
+</li>
+</ul>
+<p>All processes send acks to other processes once receive timestamp.</p>
+<p><strong>Before the &quot;write&quot; ts 10 of P1.1 is done on P2.1 (it is done on P2.2, P2.3), new message arrives on group G2.</strong></p>
+<p>P2.1 has not seen ts 10 =&gt; P2.1 picks ts 9, assign to m2, and writes to P2.1, P2.2, P2.3</p>
+<p>It might happen the case: P2.1, P2.2, P2.3 see ts 9 on m2, accept it, send acks to other process of group G2.
+msg format:</p>
+<pre><code><code><div>╔═════╦═════╦════════╦═══════╦════════╦═══════╦════════╦════════╦════════╗
+║  m  ║ ts1 ║ ack1.1 ║ ack1.2║ ack1.3 ║  ts2  ║ ack2.1 ║ ack2.2 ║ ack2.3 ║
+╚═════╩═════╩════════╩═══════╩════════╩═══════╩════════╩════════╩════════╝
+</div></code></code></pre>
+<pre><code><code><div>              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.1*         ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.2          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.3          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+
+
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗  ╔════╦═════╦════════╦════════╦════════╗
+P2.1*         ║ m1 ║ xxx ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝  ╚════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗  ╔════╦═════╦════════╦════════╦════════╗
+P2.2          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝  ╚════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗  ╔════╦═════╦════════╦════════╦════════╗
+P2.3          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝  ╚════╩═════╩════════╩════════╩════════╝
+</div></code></code></pre>
+<ul>
+<li>On P2.1, it has not seen ts 10 on msg m1 =&gt; m2 is the only one get enough acks with ts 9 =&gt; deliver m2</li>
+<li>On P2.2, P2.3: receives all ts and all acks for m1 before m2 arrives =&gt; delive m1.</li>
+</ul>
+<p>════════════════════════════════════════════════════════════════════════════</p>
+<p>How does the propagation timestamp by leader fix that?</p>
+<ul>
+<li>
+<p>P2.2 and P2.3 will not deliver m1 until the ts has been written by P2.1</p>
+</li>
+<li>
+<p>If P2.1 sees ts 10 of m1 first, it then can set ts 11 for m2, instead of 9.</p>
+</li>
+<li>
+<p>If P2.1 sees m2 first, it can set ts 9 for m2, then propagates ts 10 of m1 AFTER propagating 9 of m2.</p>
+</li>
+</ul>
+<p>** it might happen that event P2.1 writes ts 9 of m2 BEFORE ts 10 of m1, P2.2 and P2.3 still could receive 10 before 9
+=&gt; still deliver m1 before m2
+==&gt; P2.2 and P2.3 needs to read ts in the order that P2.1 writes</p>
+<p>=&gt; put a counter for the &quot;write&quot; of P2.1. Everytime P2.1 writes the ts, it include the counter.
+P2.2 and P2.3 read the ts follow the counter order</p>
+<pre><code><code><div>              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.1*         ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.2          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+              ╔════╦═════╦════════╦════════╦════════╦═════╦════════╦════════╦════════╗
+P1.3          ║ m1 ║ 10  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═════╩════════╩════════╩════════╩═════╩════════╩════════╩════════╝
+</div></code></code></pre>
+<p>Case 1: m2 arrives BEFORE P2.1* recieves ts 10</p>
+<pre><code><code><div>              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦═══════╦════════╦════════╦════════╗
+P2.1*         ║ m1 ║ 10,?  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩═══════╩════════╩════════╩════════╝
+              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦═══════╦════════╦════════╦════════╗
+P2.2          ║ m1 ║ 10,6  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩═══════╩════════╩════════╩════════╝
+              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦═══════╦════════╦════════╦════════╗
+P2.3          ║ m1 ║ 10,6  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  9,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩═══════╩════════╩════════╩════════╝
+</div></code></code></pre>
+<p>P2.1* propagate ts 9 for m2 with counter of 5, ts 10 of m1 with c=6
+P2.2 and P2.3 could receive all ts and acks for m1 before receive m2.
+But they will need to wait for counter of value 5.</p>
+<p>Case 1: m2 arrives AFTER P2.1* recieves ts 10</p>
+<pre><code><code><div>              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦════════╦════════╦════════╦════════╗
+P2.1*         ║ m1 ║ 10,?  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  11,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩════════╩════════╩════════╩════════╝
+              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦════════╦════════╦════════╦════════╗
+P2.2          ║ m1 ║ 10,6  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  11,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩════════╩════════╩════════╩════════╝
+              ╔════╦═══════╦════════╦════════╦════════╦═══════╦════════╦════════╦════════╗  ╔════╦════════╦════════╦════════╦════════╗
+P2.3          ║ m1 ║ 10,6  ║ 1.1 ok ║ 1.2 ok ║ 1.3 ok ║  8,4  ║ xxxxxx ║ 2.2 ok ║ 2.3 ok ║  ║ m2 ║  11,5  ║ 2.1 ok ║ 2.2 ok ║ 2.3 ok ║
+              ╚════╩═══════╩════════╩════════╩════════╩═══════╩════════╩════════╩════════╝  ╚════╩════════╩════════╩════════╩════════╝
+</div></code></code></pre>
+<p>P2.2 and P2.3 could receive all ts and acks for m1 before receive m2.
+But they will need to wait for counter of value 5.</p>
+<h2 id="message-size-increases-with-number-of-destinations">Message size increases with number of destinations</h2>
+<p>Message size: adding addresses of all processes in the message increase the size of the message significantly</p>
+<p>Example of a message with 2 groups, 2 processes per group. It cost 2 * 2 * 8 bytes for addresses</p>
+<pre><code><code><div>╔════════╦════════╦════════════════╦═════════════╦═════════════╦═══════════════════════════════════════════════════════════════════════╦════════════╦═══════════════════════════════╦═══════════════════════════════════════════════╗
+║ id=962 ║ len=6  ║ gCount=2       ║ AAA         ║ 0    │ 1    ║ 140665081851888 │ 140501671660992 │ 139704552803616 │ 139799176205904 ║     68     ║   1   |   4   ║   0   |   4   ║     0     │     0     │     0     │     0     ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬═══════════════════════════════╬═══════════════════════════════════════════════╣
+║   4    ║   4    ║     2          ║    6        ║    2 * 2    ║                               8 * 2 * 2                               ║      4     ║    (4+4) * 2                  ║     2 * r * n                                 ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬═══════════════════════════════╬═══════════════════════════════════════════════╣
+║  id    ║ length ║ groupCount (n) ║ message (m) ║ g[0] │ g[1] ║ offset[0][0]    │ offset[0][1]    │ offset[1][0]    │ offset[1][1]    ║ lengthCheck║ ts[0] | cw[0] ║ ts[1] | cw[1] ║ ack[0][0] │ ack[0][1] │ ack[1][0] │ ack[1][1] ║
+╚════════╩════════╩════════════════╩═════════════╩═════════════╩═══════════════════════════════════════════════════════════════════════╩════════════════════════════════════════════╩═══════════════════════════════════════════════╝
+</div></code></code></pre>
+<p>FIX:</p>
+<p>Client find a way to write the <em>slot number</em> in the shared memory space, instead of the absolute addresses</p>
+<h2 id="whitebox-multicast">Whitebox Multicast</h2>
+<p><img src="https://i.imgur.com/6jfLXTB.png" alt="Result"></p>
+<blockquote>
+<blockquote>
+<p>As my understanding,  in the experiment reported in the paper there are
+ten groups, and for 2-group-destination test, the clients will share
+the load among 5 of 2-groups.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>Wrong, we use 10 of 2-groups. {(0,1),(1,2),...,(8,9),(9,0)}</p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>If that is true, could I assume that for a same 10-group cluster, I should
+have around 40k msg/s * 5 = 200k msg/s.? Do those numbers make sense to
+you?</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>In the paper, we have around 500kmsgs/sec for the aggregated throughput. Since we use 10 client hosts, each of them had around 50kmsgs/sec throughput. Your results are looking somewhat close to what we got, to me.</p>
+</blockquote>
+<h2 id="selective-signaling">Selective signaling</h2>
+<p>One may notice that, within the post_send function implementation in &quot;ib.c&quot;, we set the send_flags to be IBV_SEND_SIGNALED. As a result, each send operation also generates a completion event when it is finished (when the message has been delivered to the receiver and an acknowledgement is sent back to the sender).</p>
+<p>Since the completion events of the sends are not relevant, we can get ride of the notification of such events by not setting send_flags (the default behavior is not signaled)</p>
+<p>However, we can not use unsignaled sends all the time. Under the current libverbs implementation, a send operation is only considered to be completed when a completion event of this operation is generated and polled from the CQ. If one kept posting unsignaled sends, the send queue will eventually be full because none of these operations would be thought as completed and hence they remain in the send queue; and as a result, no more sends can be posted to the send queue. It also happens when one uses signaled sends but not polling any completion events from the CQ. As a result, a common practice is to use selective signaling, where a signaled send is posted once in a while, and then poll its completion event from the CQ. After the completion event of the signaled send is polled from CQ, all previous sends are considered to be completed and thus are removed from the send queue. Unsignaled sends have less overhead compared to signaled sends, therefore, selective signaling tends to have better performance</p>
+<p><a href="http://www.rdmamojo.com/2014/06/30/working-unsignaled-completions/">http://www.rdmamojo.com/2014/06/30/working-unsignaled-completions/</a></p>
+<p><a href="https://github.com/jcxue/RDMA-Tutorial/wiki#selective-signaling">https://github.com/jcxue/RDMA-Tutorial/wiki#selective-signaling</a></p>
+<h2 id="data-inlining">Data inlining</h2>
+<p>Sending inline'd data is an implementation extension that isn't defined in any RDMA specification: it allows send the data itself in the Work Request (instead the scatter/gather entries) that is posted to the RDMA device. The memory that holds this message doesn't have to be registered. There isn't any verb that specifies the maximum message size that can be sent inline'd in a QP. Some of the RDMA devices support it. In some RDMA devices, creating a QP with will set the value of max_inline_data to the size of messages that can be sent using the requested number of scatter/gather elements of the Send Queue. If others, one should specify explicitly the message size to be sent inline before the creation of a QP. for those devices, it is advised to try to create the QP with the required message size and continue to decrease it if the QP creation fails. While a WR is considered outstanding:</p>
+<ul>
+<li>If the WR sends data, the local memory buffers content shouldn't be changed since one doesn't know when the RDMA device will stop reading from it (one exception is inline data)</li>
+<li>If the WR reads data, the local memory buffers content shouldn't be read since one doesn't know when the RDMA device will stop writing new content to it</li>
+</ul>
+<pre><code><code><div>sequenceDiagram
+    participant CPU1
+    participant MEM1
+    participant RNIC1
+    participant RNIC2
+    participant MEM2
+    participant CPU2
+
+
+rect rgb(0,100, 0, 0.1)
+    Note over RNIC1, RNIC2: SEND / RECEIVE
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 --&gt;&gt; +MEM1: DMA
+    MEM1 --&gt;&gt; -RNIC1: 
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; +MEM2: DMA
+    MEM2 --&gt;&gt; -RNIC2: 
+    RNIC2 --&gt;&gt; CPU2: CompletionEvent
+    RNIC2 -&gt;&gt; RNIC1: RDMA ACK
+    RNIC1 --&gt;&gt; CPU1: CompletionEvent
+end
+rect rgb(255,0, 255, 0.1)
+    Note over RNIC1, RNIC2: READ, RELIABLE CHANNEL (RC)
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; +MEM2: DMA
+    MEM2 --&gt;&gt; -RNIC2: 
+    RNIC2 -&gt;&gt; RNIC1: RDMA ACK
+    RNIC1 --&gt;&gt; CPU1: CompletionEvent (CE)
+end
+
+rect rgb(0,0, 255, 0.1)
+    Note over RNIC1, RNIC2: WRITE, RC, SIGNALED
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 --&gt;&gt; +MEM1: DMA
+    MEM1 --&gt;&gt; -RNIC1: 
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; MEM2: DMA
+    RNIC2 -&gt;&gt; RNIC1: RDMA ACK
+    RNIC1 --&gt;&gt; CPU1: CompletionEvent (CE)
+end
+
+rect rgb(0,0, 255, 0.1)
+    Note over RNIC1, RNIC2: WRITE, RC, UNSIGNALED
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 --&gt;&gt; +MEM1: DMA
+    MEM1 --&gt;&gt; -RNIC1: 
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; MEM2: DMA
+    RNIC2 -&gt;&gt; RNIC1: RDMA ACK
+end
+
+
+rect rgb(0,255, 155, 0.1)
+    Note over RNIC1, RNIC2: WRITE, INLINED, UC, UNSIGNALED
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; MEM2: DMA
+end
+
+rect rgb(0,100, 155, 0.1)
+    Note over RNIC1, RNIC2: WRITE WITH IMM, INLINED, RC, SIGNALED
+    CPU1 --&gt;&gt; RNIC1: new SendRequest(SR)
+    RNIC1 -&gt;&gt; RNIC2: RDMA Data Package
+    RNIC2 --&gt;&gt; MEM2: DMA
+    RNIC2 --&gt;&gt; CPU2: Immediate value
+    RNIC2 -&gt;&gt; RNIC1: RDMA ACK
+end
+
+</div></code></code></pre>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gICAgcGFydGljaXBhbnQgQ1BVMVxuICAgIHBhcnRpY2lwYW50IE1FTTFcbiAgICBwYXJ0aWNpcGFudCBSTklDMVxuICAgIHBhcnRpY2lwYW50IFJOSUMyXG4gICAgcGFydGljaXBhbnQgTUVNMlxuICAgIHBhcnRpY2lwYW50IENQVTJcblxuXG5yZWN0IHJnYigwLDEwMCwgMCwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFNFTkQgLyBSRUNFSVZFXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLS0-PiArTUVNMTogRE1BXG4gICAgTUVNMSAtLT4-IC1STklDMTogXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gK01FTTI6IERNQVxuICAgIE1FTTIgLS0-PiAtUk5JQzI6IFxuICAgIFJOSUMyIC0tPj4gQ1BVMjogQ29tcGxldGlvbkV2ZW50XG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50XG5lbmRcbnJlY3QgcmdiKDI1NSwwLCAyNTUsIDAuMSlcbiAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBSRUFELCBSRUxJQUJMRSBDSEFOTkVMIChSQylcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiArTUVNMjogRE1BXG4gICAgTUVNMiAtLT4-IC1STklDMjogXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50IChDRSlcbmVuZFxuXG5yZWN0IHJnYigwLDAsIDI1NSwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFdSSVRFLCBSQywgU0lHTkFMRURcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtLT4-ICtNRU0xOiBETUFcbiAgICBNRU0xIC0tPj4gLVJOSUMxOiBcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiBNRU0yOiBETUFcbiAgICBSTklDMiAtPj4gUk5JQzE6IFJETUEgQUNLXG4gICAgUk5JQzEgLS0-PiBDUFUxOiBDb21wbGV0aW9uRXZlbnQgKENFKVxuZW5kXG5cbnJlY3QgcmdiKDAsMCwgMjU1LCAwLjEpXG4gICAgTm90ZSBvdmVyIFJOSUMxLCBSTklDMjogV1JJVEUsIFJDLCBVTlNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLS0-PiArTUVNMTogRE1BXG4gICAgTUVNMSAtLT4-IC1STklDMTogXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gTUVNMjogRE1BXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuZW5kXG5cblxucmVjdCByZ2IoMCwyNTUsIDE1NSwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFdSSVRFLCBJTkxJTkVELCBVQywgVU5TSUdOQUxFRFxuICAgIENQVTEgLS0-PiBSTklDMTogbmV3IFNlbmRSZXF1ZXN0KFNSKVxuICAgIFJOSUMxIC0-PiBSTklDMjogUkRNQSBEYXRhIFBhY2thZ2VcbiAgICBSTklDMiAtLT4-IE1FTTI6IERNQVxuZW5kXG5cbnJlY3QgcmdiKDAsMTAwLCAxNTUsIDAuMSlcbiAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBXUklURSBXSVRIIElNTSwgSU5MSU5FRCwgUkMsIFNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gTUVNMjogRE1BXG4gICAgUk5JQzIgLS0-PiBDUFUyOiBJbW1lZGlhdGUgdmFsdWVcbiAgICBSTklDMiAtPj4gUk5JQzE6IFJETUEgQUNLXG5lbmRcbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0IiwidGhlbWVWYXJpYWJsZXMiOnsiYmFja2dyb3VuZCI6IndoaXRlIiwicHJpbWFyeUNvbG9yIjoiI0VDRUNGRiIsInNlY29uZGFyeUNvbG9yIjoiI2ZmZmZkZSIsInRlcnRpYXJ5Q29sb3IiOiJoc2woODAsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsInByaW1hcnlCb3JkZXJDb2xvciI6ImhzbCgyNDAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwic2Vjb25kYXJ5Qm9yZGVyQ29sb3IiOiJoc2woNjAsIDYwJSwgODMuNTI5NDExNzY0NyUpIiwidGVydGlhcnlCb3JkZXJDb2xvciI6ImhzbCg4MCwgNjAlLCA4Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5VGV4dENvbG9yIjoiIzEzMTMwMCIsInNlY29uZGFyeVRleHRDb2xvciI6IiMwMDAwMjEiLCJ0ZXJ0aWFyeVRleHRDb2xvciI6InJnYig5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSwgOS41MDAwMDAwMDAxKSIsImxpbmVDb2xvciI6IiMzMzMzMzMiLCJ0ZXh0Q29sb3IiOiIjMzMzIiwibWFpbkJrZyI6IiNFQ0VDRkYiLCJzZWNvbmRCa2ciOiIjZmZmZmRlIiwiYm9yZGVyMSI6IiM5MzcwREIiLCJib3JkZXIyIjoiI2FhYWEzMyIsImFycm93aGVhZENvbG9yIjoiIzMzMzMzMyIsImZvbnRGYW1pbHkiOiJcInRyZWJ1Y2hldCBtc1wiLCB2ZXJkYW5hLCBhcmlhbCIsImZvbnRTaXplIjoiMTZweCIsImxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJub2RlQmtnIjoiI0VDRUNGRiIsIm5vZGVCb3JkZXIiOiIjOTM3MERCIiwiY2x1c3RlckJrZyI6IiNmZmZmZGUiLCJjbHVzdGVyQm9yZGVyIjoiI2FhYWEzMyIsImRlZmF1bHRMaW5rQ29sb3IiOiIjMzMzMzMzIiwidGl0bGVDb2xvciI6IiMzMzMiLCJlZGdlTGFiZWxCYWNrZ3JvdW5kIjoiI2U4ZThlOCIsImFjdG9yQm9yZGVyIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwiYWN0b3JCa2ciOiIjRUNFQ0ZGIiwiYWN0b3JUZXh0Q29sb3IiOiJibGFjayIsImFjdG9yTGluZUNvbG9yIjoiZ3JleSIsInNpZ25hbENvbG9yIjoiIzMzMyIsInNpZ25hbFRleHRDb2xvciI6IiMzMzMiLCJsYWJlbEJveEJrZ0NvbG9yIjoiI0VDRUNGRiIsImxhYmVsQm94Qm9yZGVyQ29sb3IiOiJoc2woMjU5LjYyNjE2ODIyNDMsIDU5Ljc3NjUzNjMxMjglLCA4Ny45MDE5NjA3ODQzJSkiLCJsYWJlbFRleHRDb2xvciI6ImJsYWNrIiwibG9vcFRleHRDb2xvciI6ImJsYWNrIiwibm90ZUJvcmRlckNvbG9yIjoiI2FhYWEzMyIsIm5vdGVCa2dDb2xvciI6IiNmZmY1YWQiLCJub3RlVGV4dENvbG9yIjoiYmxhY2siLCJhY3RpdmF0aW9uQm9yZGVyQ29sb3IiOiIjNjY2IiwiYWN0aXZhdGlvbkJrZ0NvbG9yIjoiI2Y0ZjRmNCIsInNlcXVlbmNlTnVtYmVyQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvciI6InJnYmEoMTAyLCAxMDIsIDI1NSwgMC40OSkiLCJhbHRTZWN0aW9uQmtnQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvcjIiOiIjZmZmNDAwIiwidGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsInRhc2tCa2dDb2xvciI6IiM4YTkwZGQiLCJ0YXNrVGV4dExpZ2h0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0RGFya0NvbG9yIjoiYmxhY2siLCJ0YXNrVGV4dE91dHNpZGVDb2xvciI6ImJsYWNrIiwidGFza1RleHRDbGlja2FibGVDb2xvciI6IiMwMDMxNjMiLCJhY3RpdmVUYXNrQm9yZGVyQ29sb3IiOiIjNTM0ZmJjIiwiYWN0aXZlVGFza0JrZ0NvbG9yIjoiI2JmYzdmZiIsImdyaWRDb2xvciI6ImxpZ2h0Z3JleSIsImRvbmVUYXNrQmtnQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JvcmRlckNvbG9yIjoiZ3JleSIsImNyaXRCb3JkZXJDb2xvciI6IiNmZjg4ODgiLCJjcml0QmtnQ29sb3IiOiJyZWQiLCJ0b2RheUxpbmVDb2xvciI6InJlZCIsImxhYmVsQ29sb3IiOiJibGFjayIsImVycm9yQmtnQ29sb3IiOiIjNTUyMjIyIiwiZXJyb3JUZXh0Q29sb3IiOiIjNTUyMjIyIiwiY2xhc3NUZXh0IjoiIzEzMTMwMCIsImZpbGxUeXBlMCI6IiNFQ0VDRkYiLCJmaWxsVHlwZTEiOiIjZmZmZmRlIiwiZmlsbFR5cGUyIjoiaHNsKDMwNCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGUzIjoiaHNsKDEyNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU0IjoiaHNsKDE3NiwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU1IjoiaHNsKC00LCAxMDAlLCA5My41Mjk0MTE3NjQ3JSkiLCJmaWxsVHlwZTYiOiJoc2woOCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU3IjoiaHNsKDE4OCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIn19fQ">Edit</a></p>
+<p><img src="https://mermaid.ink/img/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gICAgcGFydGljaXBhbnQgQ1BVMVxuICAgIHBhcnRpY2lwYW50IE1FTTFcbiAgICBwYXJ0aWNpcGFudCBSTklDMVxuICAgIHBhcnRpY2lwYW50IFJOSUMyXG4gICAgcGFydGljaXBhbnQgTUVNMlxuICAgIHBhcnRpY2lwYW50IENQVTJcblxuXG5yZWN0IHJnYigwLDEwMCwgMCwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFNFTkQgLyBSRUNFSVZFXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLS0-PiArTUVNMTogRE1BXG4gICAgTUVNMSAtLT4-IC1STklDMTogXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gK01FTTI6IERNQVxuICAgIE1FTTIgLS0-PiAtUk5JQzI6IFxuICAgIFJOSUMyIC0tPj4gQ1BVMjogQ29tcGxldGlvbkV2ZW50XG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50XG5lbmRcbnJlY3QgcmdiKDI1NSwwLCAyNTUsIDAuMSlcbiAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBSRUFELCBSRUxJQUJMRSBDSEFOTkVMIChSQylcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiArTUVNMjogRE1BXG4gICAgTUVNMiAtLT4-IC1STklDMjogXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuICAgIFJOSUMxIC0tPj4gQ1BVMTogQ29tcGxldGlvbkV2ZW50IChDRSlcbmVuZFxuXG5yZWN0IHJnYigwLDAsIDI1NSwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFdSSVRFLCBSQywgU0lHTkFMRURcbiAgICBDUFUxIC0tPj4gUk5JQzE6IG5ldyBTZW5kUmVxdWVzdChTUilcbiAgICBSTklDMSAtLT4-ICtNRU0xOiBETUFcbiAgICBNRU0xIC0tPj4gLVJOSUMxOiBcbiAgICBSTklDMSAtPj4gUk5JQzI6IFJETUEgRGF0YSBQYWNrYWdlXG4gICAgUk5JQzIgLS0-PiBNRU0yOiBETUFcbiAgICBSTklDMiAtPj4gUk5JQzE6IFJETUEgQUNLXG4gICAgUk5JQzEgLS0-PiBDUFUxOiBDb21wbGV0aW9uRXZlbnQgKENFKVxuZW5kXG5cbnJlY3QgcmdiKDAsMCwgMjU1LCAwLjEpXG4gICAgTm90ZSBvdmVyIFJOSUMxLCBSTklDMjogV1JJVEUsIFJDLCBVTlNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLS0-PiArTUVNMTogRE1BXG4gICAgTUVNMSAtLT4-IC1STklDMTogXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gTUVNMjogRE1BXG4gICAgUk5JQzIgLT4-IFJOSUMxOiBSRE1BIEFDS1xuZW5kXG5cblxucmVjdCByZ2IoMCwyNTUsIDE1NSwgMC4xKVxuICAgIE5vdGUgb3ZlciBSTklDMSwgUk5JQzI6IFdSSVRFLCBJTkxJTkVELCBVQywgVU5TSUdOQUxFRFxuICAgIENQVTEgLS0-PiBSTklDMTogbmV3IFNlbmRSZXF1ZXN0KFNSKVxuICAgIFJOSUMxIC0-PiBSTklDMjogUkRNQSBEYXRhIFBhY2thZ2VcbiAgICBSTklDMiAtLT4-IE1FTTI6IERNQVxuZW5kXG5cbnJlY3QgcmdiKDAsMTAwLCAxNTUsIDAuMSlcbiAgICBOb3RlIG92ZXIgUk5JQzEsIFJOSUMyOiBXUklURSBXSVRIIElNTSwgSU5MSU5FRCwgUkMsIFNJR05BTEVEXG4gICAgQ1BVMSAtLT4-IFJOSUMxOiBuZXcgU2VuZFJlcXVlc3QoU1IpXG4gICAgUk5JQzEgLT4-IFJOSUMyOiBSRE1BIERhdGEgUGFja2FnZVxuICAgIFJOSUMyIC0tPj4gTUVNMjogRE1BXG4gICAgUk5JQzIgLS0-PiBDUFUyOiBJbW1lZGlhdGUgdmFsdWVcbiAgICBSTklDMiAtPj4gUk5JQzE6IFJETUEgQUNLXG5lbmRcbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0IiwidGhlbWVWYXJpYWJsZXMiOnsiYmFja2dyb3VuZCI6IndoaXRlIiwicHJpbWFyeUNvbG9yIjoiI0VDRUNGRiIsInNlY29uZGFyeUNvbG9yIjoiI2ZmZmZkZSIsInRlcnRpYXJ5Q29sb3IiOiJoc2woODAsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsInByaW1hcnlCb3JkZXJDb2xvciI6ImhzbCgyNDAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwic2Vjb25kYXJ5Qm9yZGVyQ29sb3IiOiJoc2woNjAsIDYwJSwgODMuNTI5NDExNzY0NyUpIiwidGVydGlhcnlCb3JkZXJDb2xvciI6ImhzbCg4MCwgNjAlLCA4Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5VGV4dENvbG9yIjoiIzEzMTMwMCIsInNlY29uZGFyeVRleHRDb2xvciI6IiMwMDAwMjEiLCJ0ZXJ0aWFyeVRleHRDb2xvciI6InJnYig5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSwgOS41MDAwMDAwMDAxKSIsImxpbmVDb2xvciI6IiMzMzMzMzMiLCJ0ZXh0Q29sb3IiOiIjMzMzIiwibWFpbkJrZyI6IiNFQ0VDRkYiLCJzZWNvbmRCa2ciOiIjZmZmZmRlIiwiYm9yZGVyMSI6IiM5MzcwREIiLCJib3JkZXIyIjoiI2FhYWEzMyIsImFycm93aGVhZENvbG9yIjoiIzMzMzMzMyIsImZvbnRGYW1pbHkiOiJcInRyZWJ1Y2hldCBtc1wiLCB2ZXJkYW5hLCBhcmlhbCIsImZvbnRTaXplIjoiMTZweCIsImxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJub2RlQmtnIjoiI0VDRUNGRiIsIm5vZGVCb3JkZXIiOiIjOTM3MERCIiwiY2x1c3RlckJrZyI6IiNmZmZmZGUiLCJjbHVzdGVyQm9yZGVyIjoiI2FhYWEzMyIsImRlZmF1bHRMaW5rQ29sb3IiOiIjMzMzMzMzIiwidGl0bGVDb2xvciI6IiMzMzMiLCJlZGdlTGFiZWxCYWNrZ3JvdW5kIjoiI2U4ZThlOCIsImFjdG9yQm9yZGVyIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwiYWN0b3JCa2ciOiIjRUNFQ0ZGIiwiYWN0b3JUZXh0Q29sb3IiOiJibGFjayIsImFjdG9yTGluZUNvbG9yIjoiZ3JleSIsInNpZ25hbENvbG9yIjoiIzMzMyIsInNpZ25hbFRleHRDb2xvciI6IiMzMzMiLCJsYWJlbEJveEJrZ0NvbG9yIjoiI0VDRUNGRiIsImxhYmVsQm94Qm9yZGVyQ29sb3IiOiJoc2woMjU5LjYyNjE2ODIyNDMsIDU5Ljc3NjUzNjMxMjglLCA4Ny45MDE5NjA3ODQzJSkiLCJsYWJlbFRleHRDb2xvciI6ImJsYWNrIiwibG9vcFRleHRDb2xvciI6ImJsYWNrIiwibm90ZUJvcmRlckNvbG9yIjoiI2FhYWEzMyIsIm5vdGVCa2dDb2xvciI6IiNmZmY1YWQiLCJub3RlVGV4dENvbG9yIjoiYmxhY2siLCJhY3RpdmF0aW9uQm9yZGVyQ29sb3IiOiIjNjY2IiwiYWN0aXZhdGlvbkJrZ0NvbG9yIjoiI2Y0ZjRmNCIsInNlcXVlbmNlTnVtYmVyQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvciI6InJnYmEoMTAyLCAxMDIsIDI1NSwgMC40OSkiLCJhbHRTZWN0aW9uQmtnQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvcjIiOiIjZmZmNDAwIiwidGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsInRhc2tCa2dDb2xvciI6IiM4YTkwZGQiLCJ0YXNrVGV4dExpZ2h0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0RGFya0NvbG9yIjoiYmxhY2siLCJ0YXNrVGV4dE91dHNpZGVDb2xvciI6ImJsYWNrIiwidGFza1RleHRDbGlja2FibGVDb2xvciI6IiMwMDMxNjMiLCJhY3RpdmVUYXNrQm9yZGVyQ29sb3IiOiIjNTM0ZmJjIiwiYWN0aXZlVGFza0JrZ0NvbG9yIjoiI2JmYzdmZiIsImdyaWRDb2xvciI6ImxpZ2h0Z3JleSIsImRvbmVUYXNrQmtnQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JvcmRlckNvbG9yIjoiZ3JleSIsImNyaXRCb3JkZXJDb2xvciI6IiNmZjg4ODgiLCJjcml0QmtnQ29sb3IiOiJyZWQiLCJ0b2RheUxpbmVDb2xvciI6InJlZCIsImxhYmVsQ29sb3IiOiJibGFjayIsImVycm9yQmtnQ29sb3IiOiIjNTUyMjIyIiwiZXJyb3JUZXh0Q29sb3IiOiIjNTUyMjIyIiwiY2xhc3NUZXh0IjoiIzEzMTMwMCIsImZpbGxUeXBlMCI6IiNFQ0VDRkYiLCJmaWxsVHlwZTEiOiIjZmZmZmRlIiwiZmlsbFR5cGUyIjoiaHNsKDMwNCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGUzIjoiaHNsKDEyNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU0IjoiaHNsKDE3NiwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU1IjoiaHNsKC00LCAxMDAlLCA5My41Mjk0MTE3NjQ3JSkiLCJmaWxsVHlwZTYiOiJoc2woOCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU3IjoiaHNsKDE4OCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIn19LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ" alt=""></p>
+<h2 id="messages-sent">Messages sent</h2>
+<p>V1</p>
+<pre><code><code><div>             step 1        step 2               step 3
+leader    =  g * p    +    (g-1)+(p-1)    +     (p-1)*(g-1)+g*p-1
+follower  =  g * p    +    0              +     g*p-1
+</div></code></code></pre>
+<ul>
+<li>Step 1: 1 process sends messages to all involved processes (g*p)</li>
+<li>Step 2: leader process send timestamp to (g-1) leaders, and (p-1) followers of its group. Follower processes don't do anything.</li>
+<li>Step 3: leader process propagates timestamps of other leaders to its follower (g-1) * (p-1) and send acks to all other processes (g * p-1). Followers only send acks to all other processes (g * p - 1).
+With g=2, p=3, a leader needs to perform 17 writes, a follower does 11 writes</li>
+</ul>
+<blockquote>
+<p>In implementation, a leader propagates timestamp of another leader as soon as it got the timestamp in the buffer. And it does that separately for each other leaders, as those timestamps may not come at the same time. That's why it's (g-1)*(p-1) in my calculation. I can change this to let the leader wait for all timestamps to be available, and propagate them at once, so we can have (p-1).</p>
+</blockquote>
+<blockquote>
+<p>I consider leader also one process in the group, plays role of follower. That's why it also send the acks to other processes. If we separate the role of leader and follower, it doesn't need to send those acks. I've tried this way too, It could also boost up the throughput to 60k msg/p.</p>
+</blockquote>
+<p>V2</p>
+<pre><code><code><div>              step 1        step 2             step 3
+proposer  =   g * p
+leader    =   0       +     (g-1)+(p-1)   +     (p-1)
+follower  =   0       +     0             +     g*p-1
+</div></code></code></pre>
+<ul>
+<li>Step 1: the proposer sends its value to all processes, g*p messages in total</li>
+<li>Step 2: the leader of each group sends its timestamp to: (a) its followers and (b) all other leaders, (p-1)+(g-1)
+Sending to the followers is Phase 2a of Paxos; sending to all other leaders is for them to advance their local clocks, and not propose anything with a smaller timestamp</li>
+<li>Step 3: leader wait for all timestamps to be available, and propagate them at once, that makes (p-1) writes.
+Followers only send acks to all other processes (g*p-1).</li>
+</ul>
+<h2 id="leader-election">Leader Election</h2>
+<h3 id="leader-selection">Leader selection</h3>
+<p>Leader election is implemented using Apache ZooKeeper, a co-ordination service.</p>
+<p><img src="https://pocket-image-cache.com//filters:no_upscale()/http%3A%2F%2Fwww.allprogrammingtutorials.com%2Fimages%2Fleader-election-algorithm.png" alt=""></p>
+<p>To summarize, each of the node will create a ephemeral and sequential znode at start up under &quot;/election&quot; persistent znode. Since znode created by process is sequential, ZooKeeper will add a unique sequence number to its name. Once this is done, process will fetch all the child znodes of &quot;/election&quot; znode and look for child znode having smallest sequence number. If the smallest sequence number child znode is same as znode created by this process, then current process will declare itself leader by printing the message &quot;I am new leader&quot;.</p>
+<p>However, if the process znode does not have smallest sequence number, it will set a watch on the znode having sequence number just smaller than its process znode. E.g. if current process znode is &quot;p_0000234&quot; and other process znodes are &quot;p_0000123&quot;, &quot;p_0000129&quot;, &quot;p_0000223&quot;, &quot;p_0000235&quot;, &quot;p_0000245&quot; then current process znode will be setting the watch on znode with path &quot;p_0000223&quot;.</p>
+<p>As soon as the watched ephemeral znode is removed by ZooKeeper due to process being shutdown, current process gets a watchevent notification. Thereafter, current process again fetches the child znodes of &quot;/election&quot; and repeat the steps of checking whether it is leader.</p>
+<p><a href="http://www.allprogrammingtutorials.com/tutorials/leader-election-using-apache-zookeeper.php">http://www.allprogrammingtutorials.com/tutorials/leader-election-using-apache-zookeeper.php</a></p>
+<h3 id="leader-election--failure-handling">Leader election &amp; failure handling</h3>
+<ul>
+<li>
+<p>The selected leader inits only one round of Phase 1 paxos, by sending 1A message with its ballot number.</p>
+</li>
+<li>
+<p>Leader needs to include its ballot number when write its timestamp.</p>
+</li>
+<li>
+<p>Follower only ack timestamps that have ballot number &gt;= the largest ballot number that it knows</p>
+</li>
+<li>
+<p>When a leader fails, new leader is selected =&gt; increase its ballot number =&gt; send 1A message</p>
+</li>
+<li>
+<p><strong>How could a process know the leader of another group???</strong>
+=&gt; When leader sends 1A, it should includes all processes.
+=&gt; Followers sends 1B, also for all processes.</p>
+</li>
+</ul>
+<p>So these value will be includes in the write of leader:</p>
+<ul>
+<li>ballot number =&gt; follower will not accept ts with lower ballott</li>
+<li>timestamp  =&gt; the value to be decided =&gt; not related to paxos</li>
+<li>write counter =&gt; instance number</li>
+</ul>
+<p>Message structure need to be updated</p>
+<pre><code><code><div>╔════════╦════════╦════════════════╦═════════════╦═════════════╦═══════════════════════════════════════════════════════════════════════╦════════════╦════════════════════════════════════════════════╦═══════════════════════════════════════════════╗
+║ id=962 ║ len=6  ║ gCount=2       ║ AAA         ║ 0    │ 1    ║ 140665081851888 │ 140501671660992 │ 139704552803616 │ 139799176205904 ║     68     ║   1   |   4   |   0    ║   0   |   4   |   0   ║     0     │     0     │     0     │     0     ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬════════════════════════════════════════════════╬═══════════════════════════════════════════════╣
+║   4    ║   4    ║     2          ║    6        ║    2 * 2    ║                               8 * 2 * 2                               ║      4     ║                     (4+4+4) * 2                ║                  2 * r * n                    ║
+╠════════╬════════╬════════════════╬═════════════╬═════════════╬═══════════════════════════════════════════════════════════════════════╬════════════╬════════════════════════════════════════════════╬═══════════════════════════════════════════════╣
+║  id    ║ length ║ groupCount (n) ║ message (m) ║ g[0] │ g[1] ║ offset[0][0]    │ offset[0][1]    │ offset[1][0]    │ offset[1][1]    ║ lengthCheck║ ts[0] | cw[0] | bl[0] ║ ts[1] | cw[1] | bl[1]  ║ ack[0][0] │ ack[0][1] │ ack[1][0] │ ack[1][1] ║
+╚════════╩════════╩════════════════╩═════════════╩═════════════╩═══════════════════════════════════════════════════════════════════════╩═════════════════════════════════════════════════════════════╩═══════════════════════════════════════════════╝
+</div></code></code></pre>
+<p>Use RDMA Write with immediate, which will consume the Receive Request in the receiver side and generate a Work Completion.
+=&gt; need to post recv request on receiver side before receiving write</p>
+<h3 id="leader-syncing">Leader syncing</h3>
+<p>client sends synced request =&gt; wait for reply =&gt; no holes</p>
+<p>otherwise =&gt; holes in the shared buffer.</p>
+<p>Single group</p>
+<ul>
+<li>Leader process writes 2A on 1 of 4 followers then fails
+<ul>
+<li>1 of 4 followers writes back 2B</li>
+<li>All processes (new leader + 3 followers) receives one 2B</li>
+<li>New leader increases ballot number, WRITE-WITH-IMM new 1A</li>
+<li>Followers write 1B for new msg</li>
+</ul>
+</li>
+<li>Leader process writes 2A on 3 of 4 followers then fails
+<ul>
+<li>3 of 4 processes write back 2B</li>
+<li>3 of 4 processes receives 3 2B =&gt; deliver msg</li>
+<li>if leader receives 2A =&gt; deliver msg</li>
+<li>if leader does not receive 2A, but receive 3 2B  =&gt; TODO:</li>
+</ul>
+</li>
+</ul>
+
+    </body>
+    </html>

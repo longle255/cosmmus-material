@@ -1,0 +1,66 @@
+
+\begin{algorithm}
+\footnotesize
+
+\begin{distribalgo}[1]
+
+\STATE{Each server has a shared buffer $M$ and a protected buffer $T$ per client $c$;
+each slot in $M$ stores a multicast message; the corresponding slot in $T$ stores the message's timestamps}	
+\vspace{1.0mm}
+\INDENT{Each slot $M[c,i]$ contains the following information:}
+	\STATE $msg$: the message $m$ multicast by client $c$
+	\STATE $dst$: destination groups $m$ is addressed to
+	\STATE $ptr[1..k,1..n]$: for each $g$ in destination, slot with $msg$ at processes in $g$; $null$ if $g$ is not in the message's destination
+	\STATE $tmp$: the timestamp of $m$, initially $\langle 0,0 \rangle$
+	\STATE $ack[1..k,1..n]$: for each $g$ in destination, acknowledgment of timestamp in $T[c,i].tmp[g]$ from processes in $g$
+	\STATE $stat$: state of $m$: $\perp$ (initially), \mcast, \ordered\ or \done
+\ENDINDENT
+\vspace{1.0mm}
+\INDENT{Each entry $T[c,i]$ contains the following information:}
+	\STATE $tmp[1..k]$: timestamp proposed by leader of group $g$
+	\STATE $rnd[1..k]$: the round of $g$'s leader, initially $\langle 0,0 \rangle$
+\ENDINDENT
+\vspace{1.0mm}
+\STATE{Each client $c$ has vector $ptr[1..k,1..n]$, with the next available slot in buffers $M$ and $T$ per group $g$ and process $p$}
+\vspace{1.0mm}
+
+\INDENT{Each server $p$ at group $g$ also has:}
+	\STATE $clock$: logical timestamp counter at $p$, initially $\langle 0,p \rangle$
+	\STATE $round$: the round of $p$, when leader, initially $\langle 0,p \rangle$
+	\STATE $Leader[1..k]$: the leader at each group
+	\STATE $Round[1..k]$: last accepted round at each group
+\ENDINDENT
+
+\vspace{2.0mm}
+
+%\INDENT{\textbf{procedure} $Relay(c,msg,dst,ptr)$}
+%	\INDENT{for each $h$ in $dst$: for each $q$ in $h$}
+%		\STATE \rdwrite{q}{M[c,ptr[q]].msg}{msg}
+%		\STATE \rdwrite{q}{M[c,ptr[q]].dst}{dst}
+%		\STATE \rdwrite{q}{M[c,ptr[q]].ptr}{ptr}
+%		\STATE \rdwrite{q}{M[c,ptr[q]].stat}{\mcast}
+%	\ENDINDENT
+%\ENDINDENT
+%\vspace{2.0mm}
+%\INDENT{\textbf{function} $increment((cnt,pid))$}
+%	\STATE $cnt \leftarrow cnt + 1$
+%	\STATE return $(cnt,pid)$
+%\ENDINDENT
+%\vspace{2.0mm}
+%
+%\vspace{2.0mm}
+%\INDENT{\textbf{function} $max((cnt_1,pid_1),(cnt_2,pid_2))$}
+%	\IF{$cnt_1 > cnt_2$ \textbf{or} $(cnt_1=cnt_2\ \band\ pid_1 > pid_2)$}
+%		\STATE return $(cnt_1,pid_1)$
+%	\ELSE
+%		\STATE return $(cnt_2,pid_2)$
+%	\ENDIF
+%\ENDINDENT
+%\vspace{2.0mm}
+
+
+\caption{Data structures}
+\label{alg:data_struct}
+\end{distribalgo}
+\end{algorithm}
+

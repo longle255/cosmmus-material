@@ -1,0 +1,71 @@
+%!TEX root =  main.tex
+\section{Implementation}
+\label{sec:implementation}
+
+%This section presents implementation details and introduces competitor protocols.
+%
+%\subsubsection*{\libname}
+
+We implemented a prototype of \libname in Java using jVerbs,\footnote{DiSNI
+library \url{https://github.com/zrlio/disni}} an
+open-source user-level networking library developed by IBM that supports RDMA
+communication~\cite{stuedi2013jverbs}. jVerbs offers low latencies to applications running inside a Java
+Virtual Machine by exposing RDMA network hardware resources directly to the JVM.
+The source code of \libname is publicly available.\footnote{Link not yet available due to double blind review.}
+%The source code of \libname is publicly available.\footnote{\url{https://github.com/longle255/libRamcastV3}}
+
+In \libname, we applied a number of optimizations to further decrease latency
+and improve performance. When establishing the connections between hosts, we
+use two-sided operations (e.g., send and receive) to exchange memory addresses, and
+use the one-sided writes for data transfer. As the two-sided operation is only
+used for control information at the start up and in the case of failures, this procedure
+does not affect performance of normal execution.
+The one-sided operation for the actual
+transfers makes the overall data transfer efficient. In RDMA, writes and sends
+with payloads below a limit specified by devices may be written to the work
+request (WR) as inlined data, thus the RNIC does not need to fetch that payload
+via a DMA read. In \libname, we inline all writes whose payload is lower than
+the inline limit (i.e., 64 bytes).
+
+Normally, the RNICs actively poll a completion event (CE) from the CQ to ensure
+a write resides in remote memory. Polling CE is time consuming as it involves
+synchronization between the RNICs on both sides of a CQ \cite{APUS}. Thus,
+for multi-group messages, we
+employ \emph{selective signaling} \cite{Kalia2014} to reduce this overhead by
+only checking for an CE after pushing a number of writes. When using a
+selectively signaled writes with requests of size $n$, up to $n-1$ consecutive
+operations can be unsignaled, i.e., a CE will not be pushed for these
+operations. Note that if an operation ended with an error (e.g., a leader's
+write permission is revoked), it will generate a CE even if it was posted to use
+unsignaled completion.
+
+%\paragraph{Atomic message delivery}
+In a shared memory context, when a process reads entries that are
+updated by another process, it is important that the reader process does not
+read incomplete data that has not been fully updated by the writer process,
+(e.g., processes in \libname continually monitor their shared buffer for new
+messages and may be reading an incomplete entry). We resolve this issue by
+adding an extra canary value at the end of each entry, as used in previous works 
+\cite{APUS,FaRM,kalia2014using, islam2012high, Mu}. 
+%This approach leverages the left-to-right ordering of RDMA writes. When this
+%variable becomes non-zero, the ordering guarantees that the entry is complete.
+Before writing a message to remote host, a process in \libname adds the checksum of the
+entry to the end of the entry. A remote process always first checks
+the checksum value and waits for the checksum to match the entry.
+
+
+%We compared
+%\libname to White-Box Atomic Multicast~\cite{gotsman2019white} in experiments
+%with multiple groups and with Kernel Paxos~\cite{esposito2018kernel} in
+%experiments with a single group.
+%
+%\subsubsection*{White-Box Atomic Multicast}
+%White-Box Atomic Multicast, or WbCast, is a genuine atomic multicast protocol that can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
+% WbCast provides a C-language implementation\footnote{\url{https://github.com/imdea-software/atomic-multicast}} that uses libevent for communication.
+% We extended the code to split client and server and included additional statistics information.
+%
+%\subsubsection*{Kernel Paxos}
+%Kernel Paxos is a Multi-Paxos implementation that improves the performance of the original libpaxos library~\footnote{\url{https://bitbucket.org/sciasciad/libpaxos}}.
+%The main idea is to reduce system calls running Paxos logic directly into the Linux kernel and avoid the TCP/IP stack using raw sockets. 
+%We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}} to deploy a single group with three replicas and compared the performance to \libname's.
+%We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.

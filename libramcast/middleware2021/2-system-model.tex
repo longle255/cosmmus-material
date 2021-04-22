@@ -1,0 +1,13 @@
+\section{System model}
+\label{sec:system-model}
+We assume a distributed system composed of a set $\Pi = \{p_1, p_2, ...\}$  of
+processes. We assume the \emph{crash} failure model. Processes are either
+\emph{correct}, if they never fail, or \emph{faulty}, otherwise. In either case,
+processes do not experience arbitrary behavior (i.e., no Byzantine failures).
+Our protocols ensure safety under both asynchronous and synchronous execution
+periods. To ensure liveness, we assume the system is \emph{partially
+synchronous} \cite{DLS88}.
+
+Processes communication is based on remote direct memory access, through the
+message passing primitives \emph{send(p, m), receive(m)} and memory access
+primitives \emph{read(p, m), write(p, m)}.
