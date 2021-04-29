@@ -8,11 +8,12 @@ set grid xtics
 
 
 # set title "Latency CDF for single group messages with single client"
-set xrange [0:300]
+set xrange [1:300]
 set xtics 50
 set ytics 0.2 
 # set key center right
 set key at 160,0.8
+set logscale x
 
 set key samplen 2.5 spacing 1.2 font ",13"
 set xlabel "Latency (us)"
@@ -33,9 +34,9 @@ plot 'data-aggregated/ramcast/broadcast-opt/cdf-1client-64B-vs-kpaxos.dat' using
      'data-aggregated/wbcast/cdf-1c-64B-1dest.dat' using 2:3 with linespoints ls 5 title "WBCast - 64B",\
      'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 6 title "WBCast - 1KB",\
      'data-aggregated/mu/cdf-1c-64B.dat' using ($1/1000):2 with linespoints ls 7 title "Mu - 64B",\
-     'data-aggregated/mu/cdf-1c-1KB.dat' using ($1/1000):2 with linespoints ls 8 title "Mu - 1KB",\
+     'data-aggregated/mu/cdf-1c-1KB.dat' using ($1/1000):2 with linespoints ls 8 title "Mu - 1KB"
      # 'data-aggregated/wbcast/cdf-1c-64B-1dest.dat' using 2:3 with linespoints ls 5 title "TODO:Fastcast - 64B",\
-     # 'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 7 title "TODO:Fastcast - 1KB",\
+     # 'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 7 title "TODO:Fastcast - 1KB"
 
 
 system("pstopdf ./graphs/figure-compare-single-group-latency-cdf.eps -o ./graphs/figure-compare-single-group-latency-cdf.pdf && rm ./graphs/figure-compare-single-group-latency-cdf.eps")
