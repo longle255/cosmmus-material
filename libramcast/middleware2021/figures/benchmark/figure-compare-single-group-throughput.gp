@@ -19,12 +19,14 @@ set logscale y
 set ytics 10
 set xlabel "Message size"
 set key samplen 3.5 spacing 1.2 font ",13"
-set key top left
+# set key top left
+set key at 0,2500
 
 plot './data-aggregated/ramcast/tp-vs-kpaxos.dat' index 0 using ($2/1000):xtic(1) fs pattern 1 lc rgb '#888888' t "RamCast", \
      './data-aggregated/kpaxos/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 2 lc rgb '#888888' t "Kernel Paxos", \
      './data-aggregated/wbcast/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 3 lc rgb '#888888' t "WBCast", \
      './data-aggregated/mu/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 4 lc rgb '#888888' t "Mu", \
+     './data-aggregated/apus/tp.dat' index 0 using ($2/1000):xtic(1) fs pattern 5 lc rgb '#888888' t "APUS", \
 
 system("pstopdf ./graphs/figure-compare-single-group-throughput.eps -o ./graphs/figure-compare-single-group-throughput.pdf && rm ./graphs/figure-compare-single-group-throughput.eps")
 
