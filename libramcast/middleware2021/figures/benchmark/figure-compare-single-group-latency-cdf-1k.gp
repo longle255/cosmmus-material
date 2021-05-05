@@ -8,12 +8,12 @@ set grid xtics
 
 
 # set title "Latency CDF for single group messages with single client"
-set xrange [1:300]
-set xtics 50
-set ytics 0.2 
+set xrange [1:100]
+#set xtics 50
+#set ytics 0.2 
 # set key center right
-set key at 160,0.9 
-set logscale x
+#set key at 160,0.9 
+#set logscale x
 
 set key samplen 2.5 spacing 1.2 font ",13"
 set xlabel "Latency (us)"
@@ -36,9 +36,9 @@ set style line 10 lt 10 lw 1.5 pt 10 ps 1.0 pointinterval 15
 #      'data-aggregated/apus/cdf-1client-64B.dat' using 1:2 with linespoints ls 10 title "APUS - 64B"
 plot 'data-aggregated/ramcast/broadcast-opt/cdf-1client-1KB-vs-kpaxos.dat' using 1:2 with linespoints ls 2 title "RamCast - 1KB",\
      'data-aggregated/kpaxos/cdf-1client-1KB.dat' using 1:2 with linespoints ls 4 title "Kernel Paxos - 1KB",\
-     'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 6 title "WBCast - 1KB",\
      'data-aggregated/mu/cdf-1c-1KB.dat' using ($1/1000):2 with linespoints ls 8 title "Mu - 1KB",\
      'data-aggregated/apus/cdf-1client-1KB.dat' using 1:2 with linespoints ls 10 title "APUS - 1KB" 
+#    'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 6 title "WBCast - 1KB",\
      # 'data-aggregated/wbcast/cdf-1c-64B-1dest.dat' using 2:3 with linespoints ls 5 title "TODO:Fastcast - 64B",\
      # 'data-aggregated/wbcast/cdf-1c-1KB-1dest.dat' using 2:3 with linespoints ls 7 title "TODO:Fastcast - 1KB"
 

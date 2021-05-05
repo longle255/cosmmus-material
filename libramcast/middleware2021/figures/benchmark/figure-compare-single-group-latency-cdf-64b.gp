@@ -8,12 +8,12 @@ set grid xtics
 
 
 # set title "Latency CDF for single group messages with single client"
-set xrange [1:300]
-set xtics 50
+set xrange [1:50]
+#set xtics 50
 set ytics 0.2 
 # set key center right
 set key at 160,0.9 
-set logscale x
+#set logscale x
 
 set key samplen 2.5 spacing 1.2 font ",13"
 set xlabel "Latency (us)"

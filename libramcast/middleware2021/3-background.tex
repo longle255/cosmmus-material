@@ -2,13 +2,14 @@
 \section{Background}
 \label{sec:background}
 
-In this section, we present the system model (\S\ref{sec:system-model}), define the atomic multicast communication problem (\S\ref{sec:amcast}), and quickly overview RDMA, the key technology used by \libname (\S\ref{sec:rdma}).
+In this section, we present the system model (\S\ref{sec:system-model}), define the atomic multicast communication problem (\S\ref{sec:amcast}), and  overview RDMA, the key technology used by \libname (\S\ref{sec:rdma}).
 
 \subsection{System model}
 \label{sec:system-model}
 
 We assume a hybrid distributed system model in which processes can use both message-passing and shared-memory \cite{Aguilera2019}.
-The system is composed of a set of client and server processes, which communicate by exchanging messages or accessing portions of each other's memory.
+The system is composed of a set of client and server processes.
+Processes communicate by exchanging messages or accessing portions of each other's memory.
 Processes are \emph{correct}, if they do not fail, or \emph{faulty}, otherwise. 
 In either case, processes do not experience arbitrary behavior (i.e., no Byzantine failures).
 Our protocols ensure safety under both asynchronous and synchronous execution periods. 
@@ -19,8 +20,8 @@ Before GST, there are no bounds on communication and processing delays; after GS
 
 A process can share memory regions with other processes and define permissions for those shared memory regions. 
 Process $q$ can read and write a register $v$ in $p$'s memory region $mr$ with operations $\textsf{read}(p,v)$ and $\textsf{write}(p,v,value)$, respectively.
-A permission associated with memory region $mr$ defines disjoint sets of processes $R_{mr}, W_{mr}, RW_{mr}$ that can read, write, or read-write the registers in region $mr$. 
-Process $q$ has permission to read (respectively, write and read-write) $v$ in $p$'s $mr$ if $q \in R_{mr}$ (resp. $W_{mr}, RW_{mr}$).
+A permission associated with memory region $mr$ defines disjoint sets of processes, $R_{mr}, W_{mr}$, and $RW_{mr}$, that can read, write, and read-write the registers in region $mr$. 
+Process $q$ has permission to read (respectively, write and read-write) $v$ in $p$'s $mr$ if $q \in R_{mr}$ (resp., $W_{mr}, RW_{mr}$).
 A process can initially assign permissions for its shared memory regions and later change these permissions.
 
 Processes can also communicate by exchanging messages over a set of directed links using primitives \textsf{send}$(p, m)$ and \textsf{receive}$(m)$, where $p$ is the addressee of message $m$.
@@ -43,13 +44,13 @@ We define the relation $<$ on the set of messages processes deliver as follows: 
 
 Atomic multicast ensures the following properties: 
 \begin{itemize}
-\item \textit{validity}:~if a correct process $p$ multicasts a message $m$, then eventually all correct processes $q \in g$, where $g \in m.\mathit{dst}$, deliver $m$.
-\item \textit{integrity}:~for any process $p$ and any message $m$, $p$ delivers $m$ at most once, and only if $p \in g$, $g \in m.\mathit{dst}$, and $m$ was previously multicast.
-\item \textit{uniform agreement}:~if a process $p$ delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ deliver $m$.
-\item \textit{uniform prefix order}:~for any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.
-\item \textit{uniform acyclic order}:~the relation $<$ is acyclic.
+\item \textit{Validity}:~if a correct process $p$ multicasts a message $m$, then eventually all correct processes $q \in g$, where $g \in m.\mathit{dst}$, deliver $m$.
+\item \textit{Integrity}:~for any process $p$ and any message $m$, $p$ delivers $m$ at most once, and only if $p \in g$, $g \in m.\mathit{dst}$, and $m$ was previously multicast.
+\item \textit{Uniform agreement}:~if a process $p$ delivers a message $m$, then eventually all correct processes $q\in m.\mathit{dst}$ deliver $m$.
+\item \textit{Uniform prefix order}:~for any two messages $m$ and $m'$ and any two processes $p$ and $q$ such that $p \in g$, $q \in h$ and $\{ g, h \} \subseteq m.\mathit{dst} \cap m'.\mathit{dst}$, if $p$ delivers $m$ and $q$ delivers $m'$, then either $p$ delivers $m'$ before $m$ or $q$ delivers $m$ before $m'$.
+\item \textit{Uniform acyclic order}:~the relation $<$ is acyclic.
 \end{itemize}
-Atomic broadcast is a special case of atomic multicast in which every message is addressed to all groups.
+Atomic broadcast is a special case of atomic multicast in which there is a single group (i.e., $\Gamma$ is a singleton).
 
 We require atomic multicast protocols to be \emph{genuine}~\cite{GS01b}: 
 an atomic multicast algorithm is genuine if in any run in which a message $m$ is 
@@ -60,8 +61,9 @@ multicast, then for every process $p$ that participates in ordering $m$, $p$ is 
 
 Remote Direct Memory Access (RDMA) is a protocol that enables direct data access to the memory of a remote machine without involving the operating system and processor of the remote machine. 
 RDMA implements the network stack in hardware, and provides both low latency and high bandwidth by bypassing the kernel and supporting zero-copy communication.
-RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations still have CPU involvement to remote host and user-space memory copies, thus introduce an unavoidable overhead compared to one-sided RDMA verbs \cite{FaRM}.
-Besides, previous studies have established that remote write operations provide superior performance than remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
+RDMA provides two-sided operations (e.g., send, receive), one-sided operations (e.g., read, write), and atomic operations (e.g., compare-and-swap, fetch-and-increment). The two-sided operations involve the CPU of the remote host and rely on user-space memory copies.
+Thus, they introduce overhead when compared to one-sided RDMA verbs \cite{FaRM}.
+Besides, previous studies have established that remote write operations provide performance superior to remote reads, and send and receive operations, and much better performance than atomic operations \cite{kalia2014using, kalia2016design, mitchell2013using}.
 In RamCast's normal operation, processes communicate using remote write operations only.
 We refrain from using remote read operations, and resort to send and receive operations when handling failures, since they lead to simpler logic.
 

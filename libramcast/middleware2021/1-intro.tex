@@ -6,8 +6,8 @@ Today's online services are expected to operate uninterruptedly despite server f
 Many such services must also handle ever-increasing demand without performance hiccups.
 Services that match these expectations are deemed highly available and scalable.
 Many years of research in dependable distributed systems have deepened the understanding of how to design systems that can tolerate failures.
-A golden rule in the design of such systems is that abstractions can significantly reduce complexity, and avoid design and programming errors.
-For example, state machine replication, a \emph{de facto} standard to fault tolerance, requires replicas to order requests.
+A golden rule is that abstractions can significantly reduce complexity, and avoid design and programming errors.
+For example, state machine replication, a \emph{de facto} standard for fault tolerance, requires replicas to order requests.
 But ordering requests in a distributed system prone to failures is difficult \cite{FLP85}.
 By relying on atomic broadcast, an abstraction equivalent to consensus \cite{HT93,CT96}, system designers can decompose ordering from execution in state machine replication, as atomic broadcast provides reliable and ordered delivery of requests.
 
@@ -21,22 +21,22 @@ Some atomic multicast protocols address this challenge by ordering all messages 
 To be efficient, however, an atomic multicast algorithm must be \emph{genuine}: only the message sender and destination processes should communicate to propagate and order a multicast message~\cite{GS01b}.
 A genuine atomic multicast is the foundation of scalable and fault-tolerant systems, since it does not depend on a fixed group of processes, and ensures reliable communication \cite{Coelho2017}.
 
-All existing atomic multicast algorithms to date assume the message-passing system model (e.g., \cite{Coelho2017,gotsman2019white,birman1987reliable, delporte2000fault, bezerra2015ridge,
+Many atomic multicast algorithms have been designed for the message-passing system model (e.g., \cite{Coelho2017,gotsman2019white,birman1987reliable, delporte2000fault, bezerra2015ridge,
 marandi2012multi}).
 This paper presents \libname, the first atomic multicast protocol tailor-made for the shared-memory model.
-Our motivation is practical: recent years have seen widespread development of a technology known as Remote Direct Memory Access (RDMA).
+Our motivation is practical: recent years have seen widespread development and adoption of Remote Direct Memory Access (RDMA) technology.
 RDMA extends the traditional send and receive communication primitives with read and write operations on shared memory.
 Essentially, RDMA provides a node with the capability to read and write the memory of another node, without involving the processor of this node.
 In addition, RDMA offers the possibility for a process to safeguard its memory by specifying which processes can read or write which regions of its memory.
-This guarantee has been shown to be quite powerful \cite{Aguilera2019}.
+This guarantee is quite powerful \cite{Aguilera2019}.
 In particular, if every process revokes the write permission of other processes before writing to shared memory, then a process that writes successfully knows that it executed in isolation, without having to take additional steps (e.g., reading the memory). 
 Protocols can leverage this property to optimize performance \cite{Aguilera2019}.
 
-Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance.
+Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance \cite{Kalia2014,mitchell2013using}.
 Figure~\ref{fig:perfcomp} compares the latency of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
 RDMA's primitives largely outperform TCP/IP communication because they bypass the network stack.
-Shared-memory RDMA primitives deliver superior performance than message-passing primitives, although the advantage depends on the message size.
-In our environment, RDMA read and write operations have similar performance, unless the write can ``inline" data (i.e., with 64-byte messages in our case).
+Shared-memory RDMA primitives deliver performance superior to message-passing primitives, although the advantage depends on the message size.
+In our environment, RDMA read and write operations have similar performance, unless the write operation can ``inline" data (i.e., with 64-byte messages in our case) \cite{mitchell2013using}.
 This happens because the interface adapter has the data available and does not need to retrieve data from the memory.
 \libname uses remote writes only and avoids remote reads.
 There are two reasons for this design.
@@ -51,9 +51,11 @@ Consequently, process $p$ can read process $q$'s write more efficiently when $q$
   \label{fig:perfcomp}
 \end{figure}
 
-In order to deliver performance that largely outperforms the most efficient message-passing atomic multicast protocols, \libname combines ideas from Skeen's genuine atomic multicast algorithm \cite{BJ87b}, a blocking algorithm that has been used as the basis for fault-tolerant atomic multicast protocols (e.g., \cite{Coelho2017,gotsman2019white}), the leader-follower replication model, explored by atomic multicast and broadcast protocols (e.g., \cite{gotsman2019white,Junqueira2011,Mu}), and Remote Direct Memory Access technology, recently used to boost the performance of distributed systems (e.g., \cite{Aguilera2019,kalia2014using, kalia2016design, mitchell2013using}).
-
-In addition to introducing \libname, the first shared-memory genuine atomic multicast algorithm, we have implemented and evaluated \libname under various conditions. 
+In order to deliver performance that largely outperforms the most efficient message-passing atomic multicast protocols, \libname combines ideas from Skeen's genuine atomic multicast algorithm \cite{BJ87b}, a blocking algorithm that has been used as the basis for fault-tolerant atomic multicast protocols (e.g., \cite{Coelho2017,gotsman2019white}), the leader-follower replication model, explored by atomic multicast and broadcast protocols (e.g., \cite{gotsman2019white,Junqueira2011,Mu,delta4}), and Remote Direct Memory Access technology, recently used to boost the performance of distributed systems (e.g., \cite{Aguilera2019,kalia2014using, kalia2016design, mitchell2013using}).
+%
+\libname is the first shared-memory genuine atomic multicast algorithm that fully exploits RDMA capabilities.
+\libname can order messages multicast to a single group after 2 RDMA write delays, at the leader process, and order messages multicast to multiple groups after 3 RDMA write delays, at both the leader and followers. As a reference, the most delay-efficient message-passing atomic multicast algorithm orders messages after 3 communication delays at the leader process and after 4 communication delays at the followers \cite{gotsman2019white}.
+We have implemented and evaluated \libname under various conditions. 
 We show that \libname outperforms current state-of-the-art atomic multicast protocols by up to 3.7$\times$ and reduces latency by up to 20$\times$.
 %MORE DATA HERE FROM THE EXPERIMENTAL EVALUATION
 
