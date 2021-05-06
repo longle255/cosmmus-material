@@ -18,10 +18,10 @@ set key bottom right
 set key samplen 2.5 spacing 1.2 font ",13"
 set xlabel "Latency (us)"
 
-set style line 1 lt 1 lw 1 lc 0 pt 1 ps 1.0 pointinterval 10
-set style line 2 lt 2 lw 1 lc 1 pt 2 ps 1.0 pointinterval 10
-set style line 3 lt 3 lw 1 lc orange pt 3 ps 1.0 pointinterval 100
-set style line 4 lt 4 lw 1 lc 9 pt 4 ps 1.0 pointinterval 5
+set style line 1 lt 1 lw 1 lc rgb "black" pt 1 ps 1.0 pointinterval 10
+set style line 2 lt 2 lw 1 lc rgb "blue"  pt 2 ps 1.0 pointinterval 10
+set style line 3 lt 3 lw 1 lc rgb "orange" pt 3 ps 1.0 pointinterval 100
+set style line 4 lt 4 lw 1 lc rgb "red" pt 4 ps 1.0 pointinterval 5
 set style line 5 lt 5 lw 2.5 pt 5 ps 1.0 pointinterval 10
 set style line 6 lt 6 lw 2.5 pt 6 ps 1.0 pointinterval 10
 set style line 7 lt 7 lw 1.5 pt 7 ps 1.0 pointinterval 100
