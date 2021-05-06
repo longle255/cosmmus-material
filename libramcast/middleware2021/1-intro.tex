@@ -14,7 +14,7 @@ By relying on atomic broadcast, an abstraction equivalent to consensus \cite{HT9
 In order to both scale performance and tolerate failures, service state is typically sharded and each shard is replicated (e.g., \cite{CDE12,Long2019,Aguilera:2007}).
 Atomic multicast is a group communication abstraction that generalizes atomic broadcast by allowing requests to be propagated to groups of processes (in this case shards) with reliability and order guarantees.
 Intuitively, all non-faulty processes addressed by a request must deliver the request and processes must agree on the order of delivered requests.
-Atomic multicast offers strong communication guarantees and should not be confused with network-level communication primitives (e.g., IP-multicast), which offer ``best-effort" guarantees.
+Atomic multicast offers strong communication guarantees and should not be confused with network-level communication primitives (e.g., IP-multicast), which offer ``best-effort'' guarantees.
 
 Since messages can be multicast to different sets of destinations and interleave in non-obvious ways, implementing message order in a distributed setting is challenging.
 Some atomic multicast protocols address this challenge by ordering all messages using a fixed group of processes, regardless of the destination of the messages.
@@ -26,9 +26,9 @@ marandi2012multi}).
 This paper presents \libname, the first atomic multicast protocol tailor-made for the shared-memory model.
 Our motivation is practical: recent years have seen widespread development and adoption of Remote Direct Memory Access (RDMA) technology.
 RDMA extends the traditional send and receive communication primitives with read and write operations on shared memory.
-Essentially, RDMA provides a node with the capability to read and write the memory of another node, without involving the processor of this node.
+Essentially, RDMA provides a node with the capability to read and write the memory of another node, without involving its processor.
 In addition, RDMA offers the possibility for a process to safeguard its memory by specifying which processes can read or write which regions of its memory.
-This guarantee is quite powerful \cite{Aguilera2019}.
+This guarantee is quite powerful.
 In particular, if every process revokes the write permission of other processes before writing to shared memory, then a process that writes successfully knows that it executed in isolation, without having to take additional steps (e.g., reading the memory). 
 Protocols can leverage this property to optimize performance \cite{Aguilera2019}.
 
@@ -36,7 +36,7 @@ Designing an efficient RDMA-based atomic multicast protocol is not trivial, sinc
 Figure~\ref{fig:perfcomp} compares the latency of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
 RDMA's primitives largely outperform TCP/IP communication because they bypass the network stack.
 Shared-memory RDMA primitives deliver performance superior to message-passing primitives, although the advantage depends on the message size.
-In our environment, RDMA read and write operations have similar performance, unless the write operation can ``inline" data (i.e., with 64-byte messages in our case) \cite{mitchell2013using}.
+In our environment, RDMA read and write operations have similar performance, unless the write operation can ``inline'' data (i.e., with 64-byte messages in our case) \cite{mitchell2013using}.
 This happens because the interface adapter has the data available and does not need to retrieve data from the memory.
 \libname uses remote writes only and avoids remote reads.
 There are two reasons for this design.
@@ -56,7 +56,7 @@ In order to deliver performance that largely outperforms the most efficient mess
 \libname is the first shared-memory genuine atomic multicast algorithm that fully exploits RDMA capabilities.
 \libname can order messages multicast to a single group after 2 RDMA write delays, at the leader process, and order messages multicast to multiple groups after 3 RDMA write delays, at both the leader and followers. As a reference, the most delay-efficient message-passing atomic multicast algorithm orders messages after 3 communication delays at the leader process and after 4 communication delays at the followers \cite{gotsman2019white}.
 We have implemented and evaluated \libname under various conditions. 
-We show that \libname outperforms current state-of-the-art atomic multicast protocols by up to 3.7$\times$ and reduces latency by up to 20$\times$.
+We show that \libname outperforms current state-of-the-art atomic multicast protocols, increasing throughput by up to 3.7$\times$ and reducing latency by up to 20$\times$.
 %MORE DATA HERE FROM THE EXPERIMENTAL EVALUATION
 
 The remainder of the paper is structured as follows.

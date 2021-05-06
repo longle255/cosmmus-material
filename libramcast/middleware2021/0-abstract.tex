@@ -2,11 +2,11 @@
 \begin{abstract}
 Atomic multicast is a group communication abstraction useful in the design of highly available and scalable systems.
 It allows messages to be addressed to a subset of the processes in the system reliably and consistently.
-All existing atomic multicast algorithms to date are based on the message-passing model.
-The paper presents \libname, the first atomic multicast protocol that uses shared memory by means of Remote Direct Memory Access (RDMA).
-We design \libname by leveraging RDMA technology and by carefully
+Many atomic multicast algorithms have been designed for the message-passing system model.
+The paper presents \libname, the first atomic multicast protocol for the shared-memory system model.
+We design \libname by leveraging Remote Direct Memory Access (RDMA) technology and by carefully
 combining techniques from message-passing and shared-memory systems. 
-We show experimentally that \libname outperforms current state-of-the-art atomic multicast protocols by up to 3.7$\times$ and reduces latency by up to 20$\times$.
+We show experimentally that \libname outperforms current state-of-the-art atomic multicast protocols, increasing throughput by up to 3.7$\times$ and reducing latency by up to 20$\times$.
 \end{abstract}
 
 %% change in https://dl.acm.org/ccs
