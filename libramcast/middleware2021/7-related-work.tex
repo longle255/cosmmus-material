@@ -17,12 +17,13 @@ Atomic multicast is a well-studied problem. Skeen's algorithm (described in \S\r
 Even though it is not fault-tolerant, it
 is genuine: processes only communicate if they are in the destinations of the messages. 
 Later timestamp-based genuine atomic multicast algorithms 
-implemented fault-tolerant versions of Skeen's protocol. FastCast
-\cite{Coelho2017} speeds up the delivery of messages by assuming a
-spontaneous message ordering. If the
-assumption is violated, FastCast reverts to the basic Paxos protocol. White-Box Atomic Multicast \cite{gotsman2019white} further improves 
-latency with a fault-tolerant version of Skeen's protocol that combines Paxos and
-Skeen's protocol together into a single coherent protocol.
+implemented fault-tolerant versions of Skeen's protocol. 
+FastCast \cite{Coelho2017} speeds up the delivery of messages by overleaping some parts of the protocol (i.e., the order proposed by the leader and the consensus needed to decide on the proposed order).
+In good runs, FastCast delivers multi-group messages in 4 communication steps.
+White-Box Atomic Multicast \cite{gotsman2019white} further improves 
+latency with a protocol that combines Paxos and a fault-tolerant version of Skeen's protocol.
+White-Box Atomic Multicast delivers multi-group messages in 3 communication steps at the leaders of the involved groups and 4 communication steps at the followers.
+\libname improves on White-Box Atomic Multicast in that both leaders and followers can deliver a multi-group message in 3 communication steps.
 
 Ring-based protocols \cite{delporte2000fault, bezerra2015ridge,
 marandi2012multi} proposed a different approach to high throughput by
@@ -68,7 +69,7 @@ protocols, and only a few crash-tolerant replication protocols based on RDMA
 have been proposed. DARE \cite{DARE} aims to optimize for low latency in replica
 communication. The consensus leader in DARE replicates requests to its follower
 with RDMA one-sided read/write operations, and makes use of permissions when
-changing leaders. APUS \cite{APUS} improves upon DARE's throughput. APUS
+changing leaders. APUS \cite{APUS} improves upon DARE. APUS
 combines RDMA with Paxos and focuses on scalability with the number of
 connections and replicas. APUS is based on intercepting inbound socket calls, so
 it does not require modifying applications for integration. Derecho
@@ -76,7 +77,9 @@ it does not require modifying applications for integration. Derecho
 structuring applications into groups, subgroups, and shards. Derecho only needs
 a leader for group reconfiguration. 
 Mu \cite{Mu} exploits Protected Memory Paxos and colocates the client with the leader of Paxos to reach low latency.
-\libname is the first atomic multicast protocol to exploit RDMA capabilities to deliver messages efficiently.
+Similarly to Mu, \libname also relies on RDMA's protected memory to order single-group messages efficiently.
+However, \libname cannot colocate clients and leaders since it implements atomic multicast.
+This happens because clients may multicast a message to different groups and colocating all leaders in the same host defeats the purpose of atomic multicast.
 
 %However, these protocols focus on building consensus on top of RDMA primitives.
 %To our knowledge, there is no previous work that solved atomic multicast with

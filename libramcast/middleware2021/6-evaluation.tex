@@ -3,12 +3,15 @@
 \label{sec:experimental-evaluation}
 
 In this section, we present the protocols we compare \libname to (\S\ref{sec:comp}), and
-describe the environment where we conducted our experiments (\S\ref{sec:evaluation:setup}).
-We conducted three sets of experiments:
-in the first set, we seek to understand the effects of message size on \libname (\S\ref{sec:evaluation:micro});
-in the second set, we compare \libname in ``atomic broadcast mode'' (i.e., when messages are multicast to a single group) to other atomic broadcast protocols (\S\ref{sec:evaluation:broadcast});
-finally, we compare the performance of \libname to another atomic multicast protocol (\S\ref{sec:evaluation:multicast}).
+describe the experimental environment (\S\ref{sec:evaluation:setup}).
+We conducted three sets of experiments.
+In the first set, we seek to understand the effects of message size on \libname (\S\ref{sec:evaluation:micro}).
+In the second set, we compare \libname's performance to WBCast's, the best-performing message-passing atomic multicast protocol (\S\ref{sec:evaluation:multicast}).
+As we will see, \libname outperforms WBCast.
+Even though both protocols are assessed in the same environment, one may wonder whether \libname's advantage is a result of RDMA efficient writes (used by \libname) when compared to RDMA send and receive operations (used by WBCast).
+In the third set of experiments, we compare \libname's ``inherent performance'' (i.e., in the absence of contention and queueing effects) to protocols that optimize communication (\S\ref{sec:evaluation:broadcast}).
 
+%\subsection{Evaluation rationale}
 \subsection{Competing protocols}
 \label{sec:comp}
 
@@ -88,59 +91,6 @@ As the message size increases past 4KB, the maximum throughput decreases with 35
 The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 8 microseconds at $95^{th}$ percentile. At 4KB messages, the latency slightly go up to around 10 microseconds.
 
 
-\subsection{The performance of atomic broadcast}
-\label{sec:evaluation:broadcast}
-
-This experiment assesses how each protocol behaves in a scenario with a single group of three replicas, and 64-byte and 1-kilobyte messages.
-Figure~\ref{fig:broadcast} (top) shows that, for 64-byte messages, \libname outperforms the competitors with approximately 200 thousand messages per second. 
-Kernel Paxos comes close with 170 thousand messages per second, while WBCast saturates sooner, with less than 60 thousand messages per second.
-For larger messages, \libname kept the same performance, while the other protocols had the throughput reduced by half.
-Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. The median latency for WBCast with small messages and a single client is twenty times greater than the same measurement for \libname.
-
-\begin{figure}[htp!]
-  \begin{subfigure}{\columnwidth}
-    \advance\leftskip-0.0cm
-    \includegraphics[width=1\columnwidth]{figures/benchmark/graphs/figure-compare-single-group-latency-cdf-64b}
-  \end{subfigure}
-  \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=1\columnwidth]{figures/benchmark/graphs/figure-compare-single-group-latency-cdf-1k}
-  \end{subfigure}
-  \caption{Latency cumulative distribution function for atomic broadcast protocols with a single client: 64-byte messages (top) and 1K-byte messages (bottom).}
-  \label{fig:broadcast}
-\end{figure}
-
-\begin{figure*}[ht]
-  \begin{subfigure}{\columnwidth}
-    \advance\leftskip-0.25cm
-    \includegraphics[width=1.01\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-throughput}
-  \end{subfigure}
-  \begin{subfigure}{\columnwidth}
-    \advance\leftskip-0.1cm
-    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-throughput}
-  \end{subfigure}
-
-  \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
-  \end{subfigure}
-  \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-ramcast}
-  \end{subfigure}
-
-  \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
-  \end{subfigure}
-  \begin{subfigure}{\columnwidth}
-    \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-WBCast}
-  \end{subfigure}
-  \caption{Performance of atomic multicast when messages are multicast to a single group (graphs on the left) and to all groups (graphs on the right). In each case, we show: throughput (top) and latency cumulative distribution function with one client of \libname (middle) and WBCast (bottom).}
-  \label{fig:1group_message_size}
-\end{figure*}
-
 \subsection{The performance of atomic multicast}
 \label{sec:evaluation:multicast}
 
@@ -187,6 +137,59 @@ The equivalent values for WBCast are 214, 445, 673, and 1055~microseconds, repre
 %  \label{fig:multicast-multi-group}
 %\end{figure}
 
+\begin{figure*}[ht]
+  \begin{subfigure}{\columnwidth}
+    \advance\leftskip-0.25cm
+    \includegraphics[width=1.01\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-throughput}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \advance\leftskip-0.1cm
+    \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-throughput}
+  \end{subfigure}
 
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-ramcast}
+  \end{subfigure}
+
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-WBCast}
+  \end{subfigure}
+  \caption{Performance of atomic multicast when messages are multicast to a single group (graphs on the left) and to all groups (graphs on the right). In each case, we show: throughput (top) and latency cumulative distribution function with one client of \libname (middle) and WBCast (bottom).}
+  \label{fig:1group_message_size}
+\end{figure*}
+
+\begin{figure}[htp!]
+  \begin{subfigure}{\columnwidth}
+    \advance\leftskip-0.0cm
+    \includegraphics[width=1\columnwidth]{figures/benchmark/graphs/figure-compare-single-group-latency-cdf-64b}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \centering
+    \includegraphics[width=1\columnwidth]{figures/benchmark/graphs/figure-compare-single-group-latency-cdf-1k}
+  \end{subfigure}
+  \caption{Latency cumulative distribution function for \libname and atomic broadcast protocols with a single client: 64-byte messages (top) and 1K-byte messages (bottom).}
+  \label{fig:broadcast}
+\end{figure}
+
+
+
+\subsection{\libname's inherent performance}
+\label{sec:evaluation:broadcast}
+
+This experiment assesses how each protocol behaves in a scenario with a single group of three replicas, and 64-byte and 1-kilobyte messages.
+Figure~\ref{fig:broadcast} (top) shows that, for 64-byte messages, \libname outperforms the competitors with approximately 200 thousand messages per second. 
+Kernel Paxos comes close with 170 thousand messages per second, while WBCast saturates sooner, with less than 60 thousand messages per second.
+For larger messages, \libname kept the same performance, while the other protocols had the throughput reduced by half.
+Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. The median latency for WBCast with small messages and a single client is twenty times greater than the same measurement for \libname.
 
 
