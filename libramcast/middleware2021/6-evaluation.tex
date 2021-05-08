@@ -96,10 +96,10 @@ The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_mes
 
 The last set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 machines.
 The first experiment comprises executions in which clients send single-group 64-byte messages in setups with 1, 2, 4, and 8 groups.
-Figure~\ref{fig:multicast-single-group} (top) shows the aggregated throughput results when the system is saturated. 
+Figure~\ref{fig:multicast-single-multi-group} (top left) shows the aggregated throughput results when the system is saturated. 
 \libname outperforms WBCast by a factor of 3.6$\times$ in all configurations.
 These results highlight the benefit of genuine atomic multicast algorithms and show that the throughput grows linearly with the number of groups for single-group messages. 
-Since groups do not exchange any information when dealing with single-group messages, the latency CDF is the same for a single client, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-group} (bottom).
+Since groups do not exchange any information when dealing with single-group messages, the latency CDF is the same for a single client, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-multi-group} (middle and bottom left).
 
 %\begin{figure}[htp!]
 %  \begin{subfigure}{\columnwidth}
@@ -115,10 +115,10 @@ Since groups do not exchange any information when dealing with single-group mess
 %\end{figure}
 
 The next experiment evaluates the protocols with multi-group messages of 64 bytes addressed to all the groups.
-\libname's maximum throughput is greater than WBCast's in every configuration with 233, 145, 80, and 40 thousand messages per second for 1, 2, 4, and 8 destination groups against 63, 50, 35, and 27 thousand for WBCast, as shown in Figure~\ref{fig:multicast-multi-group} (top).
+\libname's maximum throughput is greater than WBCast's in every configuration with 233, 145, 80, and 40 thousand messages per second for 1, 2, 4, and 8 destination groups against 63, 50, 35, and 27 thousand for WBCast, as shown in Figure~\ref{fig:multicast-single-multi-group} (top right).
 The values correspond to improvements of 3.7$\times$, 2.9$\times$, 2.3$\times$ and 1.5$\times$, respectively.
-The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-multi-group} (middle) shows that the latency CDF for \libname with values of 8, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
-The equivalent values for WBCast are 214, 445, 673, and 1055~microseconds, representing 20$\times$ to 7$\times$ slower delivery times when compared to \libname's.
+The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-single-multi-group} (middle right) shows that the latency CDF for \libname with values of 8, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
+The equivalent values for WBCast, as depicted in Figure~\ref{fig:multicast-single-multi-group} (bottom right), are 214, 445, 673, and 1055~microseconds, representing 20$\times$ to 7$\times$ slower delivery times when compared to \libname's.
 
 %\begin{figure}[htp!]
 %  \begin{subfigure}{\columnwidth}
@@ -158,14 +158,14 @@ The equivalent values for WBCast are 214, 445, 673, and 1055~microseconds, repre
 
   \begin{subfigure}{\columnwidth}
     \centering
-    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf}
+    \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-genuine-compare-latency-cdf-wbcast}
   \end{subfigure}
   \begin{subfigure}{\columnwidth}
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-WBCast}
   \end{subfigure}
   \caption{Performance of atomic multicast when messages are multicast to a single group (graphs on the left) and to all groups (graphs on the right). In each case, we show: throughput (top) and latency cumulative distribution function with one client of \libname (middle) and WBCast (bottom).}
-  \label{fig:1group_message_size}
+  \label{fig:multicast-single-multi-group}
 \end{figure*}
 
 \begin{figure}[htp!]
