@@ -2,32 +2,40 @@
 \section{Experimental evaluation}
 \label{sec:experimental-evaluation}
 
-In this section, we present the protocols we compare \libname to (\S\ref{sec:comp}), and
-describe the experimental environment (\S\ref{sec:evaluation:setup}).
-We conducted three sets of experiments.
-In the first set, we seek to understand the effects of message size on \libname (\S\ref{sec:evaluation:micro}).
-In the second set, we compare \libname's performance to WBCast's, the best-performing message-passing atomic multicast protocol (\S\ref{sec:evaluation:multicast}).
-As we will see, \libname outperforms WBCast.
-Even though both protocols are assessed in the same environment, one may wonder whether \libname's advantage is a result of RDMA efficient writes (used by \libname) when compared to RDMA send and receive operations (used by WBCast).
-In the third set of experiments, we compare \libname's ``inherent performance'' (i.e., in the absence of contention and queueing effects) to protocols that optimize communication (\S\ref{sec:evaluation:broadcast}).
+In this section, we discuss the evaluation rationale (\S\ref{sec:comp}), 
+describe the experimental environment (\S\ref{sec:evaluation:setup}), and present
+the three sets of experiments we conducted (\S\ref{sec:evaluation:micro}--\ref{sec:evaluation:broadcast}).
 
-%\subsection{Evaluation rationale}
-\subsection{Competing protocols}
+%In this section, we present the protocols we compare \libname to (\S\ref{sec:comp}), and
+%describe the experimental environment (\S\ref{sec:evaluation:setup}).
+
+\subsection{Evaluation rationale}
+%\subsection{Competing protocols}
 \label{sec:comp}
 
-We experimentally compare \libname to protocols in two categories:
-In the first category, we consider high-performance atomic broadcast protocols that rely on RDMA technology (APUS and Mu) or bypass the network stack (Kernel Paxos).
-In the second category, we consider a message-passing genuine atomic multicast protocol (WBCast).
+We conducted three sets of experiments.
+In the first set (\S\ref{sec:evaluation:micro}), we seek to understand the effects of message size on \libname's performance.
+In the second set (\S\ref{sec:evaluation:multicast}), we compare \libname's performance to WBCast's, an efficient message-passing atomic multicast protocol.
+As we will see, \libname largely outperforms WBCast in both throughput and latency.
+Even though both protocols are assessed in the same environment, one may wonder whether \libname's advantage is a result of RDMA's efficient write operations (used by \libname) when compared to message-passing operations (used by WBCast).
+In the third set of experiments (\S\ref{sec:evaluation:broadcast}), we compare \libname's ``inherent performance'' (i.e., in the absence of contention and queueing effects) to high-performance atomic broadcast protocols that rely on RDMA technology (APUS and Mu) or bypass the network stack (Kernel Paxos).
+
 In the following, we briefly comment on these protocols and their configuration in the experimental study.
 We provide more details about each protocol in Section~\ref{sec:related-work}.
 
+White-Box Atomic Multicast (WBCast)~\cite{gotsman2019white} is a genuine atomic multicast protocol that delivers exceptional performance, thanks to some algorithmic optimizations.
+%can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
+ WBCast provides a C-language implementation that uses libevent for communication.\footnote{\url{https://github.com/imdea-software/atomic-multicast}}
+ We extended the code to include additional statistics information.
+We include WBCast in our evaluation because it is currently the best-performing message-passing atomic multicast protocol.
+
 APUS is a general-purpose atomic broadcast protocol that implements Paxos.
 As part of the execution, nodes store ordered messages on stable storage (e.g., SSD).
-In order to ensure a fair comparison among the various protocols, we configured APUS with a RAM disk storage instead.
+In order to ensure a fair comparison among the various protocols, which store messages in main memory only, we configured APUS with a RAM disk storage instead.
 
 Mu \cite{Aguilera2019} implements Protected Memory Paxos.
 It was designed to replicate micro services and optimizes atomic broadcast in one important aspect: by co-locating clients and the Paxos's leader on the same host.
-As a consequence, the leader can order a broadcast message after one RDMA write delay, needed to place the message in the memory of the followers.
+As a consequence, a broadcast message can be ordered after one RDMA write delay (i.e., done by the leader to place the message in the memory of the followers).
 As described in Section~\ref{sec:PMP}, this is enough to ensure that the message is ordered.
 Unfortunately, co-locating clients and leaders on the same host is not possible in atomic multicast: the motivation and scalability of atomic multicast stem from the fact that one can create multiple groups, each one operating independently.
 We consider Mu in our evaluation since it is the best-performing RDMA-based atomic broadcast protocol.
@@ -38,22 +46,16 @@ We used the original code\footnote{\url{https://github.com/esposem/Kernel_Paxos}
 We compare \libname to Kernel Paxos because both systems avoid the overhead of the communication stack.
 %We have chosen such an implementation because we believe that it has similar features to our library, with optimizations for high throughput and low latency.
 
-White-Box Atomic Multicast (WBCast)~\cite{gotsman2019white} is a genuine atomic multicast protocol that delivers exceptional performance, thanks to some algorithmic optimizations.
-%can deliver multi-group messages to the leader of each destination group in three communication steps (four communication steps to the remaining replicas in the destination groups).
- WBCast provides a C-language implementation that uses libevent for communication.\footnote{\url{https://github.com/imdea-software/atomic-multicast}}
- We extended the code to include additional statistics information.
 
-
-\subsection{Environment setup and configuration parameters}
+\subsection{Environment and configuration}
 \label{sec:evaluation:setup}
 
-We conducted all experiments using the CloudLab infrastructure~\cite{DuplyakinATC19cloudlab} with two sets of nodes: 
-(a) R320 node for the single-group experiments, equipped with one eight-core Xeon E5-2450 processor running at 2.1GHz, 16 GB of main memory, and a Mellanox FDR CX3 NIC; and (b) XL170 nodes for the other experiments, equipped with one ten-core Intel E5-2640v4 processor running at 2.4GHz, 64 GB of main memory, and a Mellanox ConnectX-4 NIC. 
+We conducted all experiments in CloudLab~\cite{DuplyakinATC19cloudlab} with two sets of nodes: 
+(a) R320 nodes, equipped with one eight-core Xeon E5-2450 processor running at 2.1GHz, 16 GB of main memory, and a Mellanox FDR CX3 NIC; and (b) XL170 nodes, equipped with one ten-core Intel E5-2640v4 processor running at 2.4GHz, 64 GB of main memory, and a Mellanox ConnectX-4 NIC. 
 A 10 Gbps network link with around 0.1ms round-trip time connects all nodes running Ubuntu Linux 18.04 with kernel 4.15 an Oracle Java SE Runtime Environment 11. 
-
-In all our experiments, clients and servers are independent processes. 
-Clients submit requests in a closed-loop, i.e., each client multicasts a message to servers and waits for a response before multicasting the next message. 
-In every protocol, each group has 3 processes with in-memory storage.
+In all experiments, clients and servers are independent processes. 
+Clients submit requests in a closed-loop (i.e., a client multicasts a message to servers and waits for a response before multicasting the next message). 
+In all protocols, each group has 3 processes with in-memory storage.
 
 %We defined three experimental setups:
 %in~\S\ref{sec:evaluation:micro} we deployed \libname with a single group and increasing message size;
@@ -87,19 +89,20 @@ In every protocol, each group has 3 processes with in-memory storage.
 In this experiment, conducted on XL170 nodes, we measure \libname throughput and latency for different message sizes.
 For each message size, we increase the number of clients until the system is saturated, i.e., throughput stops improving while latency raises.
 Figure~\ref{fig:1group_message_size} (left) shows that up to 4KB messages, the impact of message size on the system throughput is negligible, with nearly 250 thousand messages delivered per second. 
-As the message size increases past 4KB, the maximum throughput decreases with 35 thousand messages per second for 64KB messages.
-The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 8 microseconds at $95^{th}$ percentile. At 4KB messages, the latency slightly go up to around 10 microseconds.
+As the message size increases past 4KB, the maximum throughput decreases with 70 thousand messages per second for 32KB messages.
+The latency cumulative distribution function (CDF) in Figure~\ref{fig:1group_message_size} (right) exhibits minimum latency variation for messages with up to 2KB, around 8 microseconds at $95^{th}$ percentile. At 4KB messages, the latency slightly goes up to around 10 microseconds.
 
 
 \subsection{The performance of atomic multicast}
 \label{sec:evaluation:multicast}
 
-The last set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 machines.
-The first experiment comprises executions in which clients send single-group 64-byte messages in setups with 1, 2, 4, and 8 groups.
+The next set of experiments assess \libname behavior in scenarios with up to 8 groups of 3 replicas each, deployed on XL170 nodes.
+The first experiment comprises executions in which clients multicast single-group 64-byte messages in setups with 1, 2, 4, and 8 groups.
 Figure~\ref{fig:multicast-single-multi-group} (top left) shows the aggregated throughput results when the system is saturated. 
-\libname outperforms WBCast by a factor of 3.6$\times$ in all configurations.
-These results highlight the benefit of genuine atomic multicast algorithms and show that the throughput grows linearly with the number of groups for single-group messages. 
-Since groups do not exchange any information when dealing with single-group messages, the latency CDF is the same for a single client, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-multi-group} (middle and bottom left).
+The results show that the throughput of both \libname and WBCast grow linearly with the number of groups for single-group messages. 
+\libname outperforms WBCast, however, by a factor of 3.6$\times$ in all configurations.
+Since groups do not exchange any information when dealing with single-group messages, the latency CDF is similar for all configurations, no matter the number of groups in the system, as depicted in Figure~\ref{fig:multicast-single-multi-group} (middle and bottom left).
+\libname's efficient single-group multicast (see \S\ref{sec:extensions}) together with RDMA's high-performance writes grant \libname a 28$\times$ median latency advantage to WBCast (i.e., $\sim$7 us against $\sim$200 us).
 
 %\begin{figure}[htp!]
 %  \begin{subfigure}{\columnwidth}
@@ -115,9 +118,12 @@ Since groups do not exchange any information when dealing with single-group mess
 %\end{figure}
 
 The next experiment evaluates the protocols with multi-group messages of 64 bytes addressed to all the groups.
+This is the most stressful case for a genuine atomic multicast protocol, since to order a multicast message, all groups addressed by the message must interact.
+Therefore, the more groups addressed by a message, the lower the expected performance.
 \libname's maximum throughput is greater than WBCast's in every configuration with 233, 145, 80, and 40 thousand messages per second for 1, 2, 4, and 8 destination groups against 63, 50, 35, and 27 thousand for WBCast, as shown in Figure~\ref{fig:multicast-single-multi-group} (top right).
 The values correspond to improvements of 3.7$\times$, 2.9$\times$, 2.3$\times$ and 1.5$\times$, respectively.
-The difference is even more expressive if we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-single-multi-group} (middle right) shows that the latency CDF for \libname with values of 8, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
+
+The difference is more expressive when we consider the latency for a single client, i.e., when both protocols are contention-free. Figure~\ref{fig:multicast-single-multi-group} (middle right) shows that the latency CDF for \libname with values of 8, 46, 78 and 150~microseconds for 1, 2, 4, and 8 destination groups if we consider the $95^{th}$ percentile. 
 The equivalent values for WBCast, as depicted in Figure~\ref{fig:multicast-single-multi-group} (bottom right), are 214, 445, 673, and 1055~microseconds, representing 20$\times$ to 7$\times$ slower delivery times when compared to \libname's.
 
 %\begin{figure}[htp!]
@@ -164,7 +170,7 @@ The equivalent values for WBCast, as depicted in Figure~\ref{fig:multicast-singl
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/benchmark/graphs/figure-multi-dest-compare-latency-cdf-WBCast}
   \end{subfigure}
-  \caption{Performance of atomic multicast when messages are multicast to a single group (graphs on the left) and to all groups (graphs on the right). In each case, we show: throughput (top) and latency cumulative distribution function with one client of \libname (middle) and WBCast (bottom).}
+  \caption{Performance of atomic multicast when messages are multicast to a single group (graphs on the left) and to all groups (graphs on the right). In each case, we show: throughput (top) and latency cumulative distribution function with one client for \libname (middle) and WBCast (bottom).}
   \label{fig:multicast-single-multi-group}
 \end{figure*}
 
@@ -186,10 +192,14 @@ The equivalent values for WBCast, as depicted in Figure~\ref{fig:multicast-singl
 \subsection{\libname's inherent performance}
 \label{sec:evaluation:broadcast}
 
-This experiment assesses how each protocol behaves in a scenario with a single group of three replicas, and 64-byte and 1-kilobyte messages.
-Figure~\ref{fig:broadcast} (top) shows that, for 64-byte messages, \libname outperforms the competitors with approximately 200 thousand messages per second. 
-Kernel Paxos comes close with 170 thousand messages per second, while WBCast saturates sooner, with less than 60 thousand messages per second.
-For larger messages, \libname kept the same performance, while the other protocols had the throughput reduced by half.
-Figure~\ref{fig:broadcast} (bottom) confirms the superior results for \libname. The median latency for WBCast with small messages and a single client is twenty times greater than the same measurement for \libname.
+We now compare \libname to atomic broadcast protocols using a single group of three replicas, and 64-byte and 1-kilobyte messages, on R320 nodes.
+Figure~\ref{fig:broadcast} shows a similar trend for both message sizes.
+Mu's co-location of clients and leader on the same host (with the resulting single RDMA write delay) significantly pays off:
+4.8$\times$ and 3.1$\times$ reduction in the median latency with respect to \libname for 64-byte and 1-kilobyte messages, respectively.
+However, co-locating the clients and the leaders on the same host hampers atomic multicast scalability (see \S\ref{sec:comp}).
+When compared to APUS, \libname reduces the median latency by 4.7$\times$ and 5.6$\times$, with messages with 64-byte and 1-kilobyte messages, respectively.
+Compared to to Kernel Paxos, the improvements are in the range of 4.4$\times$ and 4.7$\times$.
+
+
 
 

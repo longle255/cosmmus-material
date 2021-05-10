@@ -34,8 +34,8 @@ Protocols can leverage this property to optimize performance \cite{Aguilera2019}
 
 Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance \cite{Kalia2014,mitchell2013using}.
 Figure~\ref{fig:perfcomp} compares the latency of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
-RDMA's primitives largely outperform TCP/IP communication because they bypass the network stack.
-Shared-memory RDMA primitives deliver performance superior to message-passing primitives, although the advantage depends on the message size.
+RDMA primitives largely outperform TCP/IP communication because they bypass the network stack.
+RDMA shared-memory primitives deliver performance superior to message-passing primitives, although the advantage depends on the message size.
 In our environment, RDMA read and write operations have similar performance, unless the write operation can ``inline'' data (i.e., with 64-byte messages in our case) \cite{mitchell2013using}.
 This happens because the interface adapter has the data available and does not need to retrieve data from the memory.
 \libname uses remote writes only and avoids remote reads.
@@ -47,16 +47,16 @@ Consequently, process $p$ can read process $q$'s write more efficiently when $q$
 \begin{figure}[htp!]
     \centering
     \includegraphics[width=0.99\columnwidth]{figures/benchmark/graphs/figure-protocol-bench.pdf}
-  \caption{Performance comparison between communication primitives}
+  \caption{Performance comparison between communication primitives.}
   \label{fig:perfcomp}
 \end{figure}
 
-In order to deliver performance that largely outperforms the most efficient message-passing atomic multicast protocols, \libname combines ideas from Skeen's genuine atomic multicast algorithm \cite{BJ87b}, a blocking algorithm that has been used as the basis for fault-tolerant atomic multicast protocols (e.g., \cite{Coelho2017,gotsman2019white}), the leader-follower replication model, explored by atomic multicast and broadcast protocols (e.g., \cite{gotsman2019white,Junqueira2011,Mu,delta4}), and Remote Direct Memory Access technology, recently used to boost the performance of distributed systems (e.g., \cite{Aguilera2019,kalia2014using, kalia2016design, mitchell2013using}).
+In order to deliver performance that largely outperforms the most efficient message-passing atomic multicast protocols, \libname combines ideas from Skeen's genuine atomic multicast algorithm \cite{BJ87b}, a blocking algorithm that has been used as the basis for fault-tolerant atomic multicast protocols (e.g., \cite{Coelho2017,gotsman2019white}), the leader-follower replication model, explored by atomic multicast and broadcast protocols (e.g., \cite{gotsman2019white,Junqueira2011,Mu,delta4}), and RDMA technology, recently used to boost the performance of distributed systems (e.g., \cite{Aguilera2019,kalia2014using, kalia2016design, mitchell2013using}).
 %
 \libname is the first shared-memory genuine atomic multicast algorithm that fully exploits RDMA capabilities.
 \libname can order messages multicast to a single group after 2 RDMA write delays, at the leader process, and order messages multicast to multiple groups after 3 RDMA write delays, at both the leader and followers. As a reference, the most delay-efficient message-passing atomic multicast algorithm orders messages after 3 communication delays at the leader process and after 4 communication delays at the followers \cite{gotsman2019white}.
 We have implemented and evaluated \libname under various conditions. 
-We show that \libname outperforms current state-of-the-art atomic multicast protocols, increasing throughput by up to 3.7$\times$ and reducing latency by up to 20$\times$.
+We show that \libname outperforms current state-of-the-art atomic multicast protocols, increasing throughput by up to 3.7$\times$ and reducing latency by up to 28$\times$.
 %MORE DATA HERE FROM THE EXPERIMENTAL EVALUATION
 
 The remainder of the paper is structured as follows.
