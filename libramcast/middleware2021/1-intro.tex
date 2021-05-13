@@ -32,7 +32,7 @@ This guarantee is quite powerful.
 In particular, if every process revokes the write permission of other processes before writing to shared memory, then a process that writes successfully knows that it executed in isolation, without having to take additional steps (e.g., reading the memory). 
 Protocols can leverage this property to optimize performance \cite{Aguilera2019}.
 
-Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance \cite{Kalia2014,mitchell2013using}.
+Designing an efficient RDMA-based atomic multicast protocol is not trivial, since RDMA's communication primitives vary substantially in performance \cite{kalia2014using,mitchell2013using}.
 Figure~\ref{fig:perfcomp} compares the latency of TCP/IP to RDMA's send/receive and read/write operations (setup details are presented in \S\ref{sec:evaluation:setup}).
 RDMA primitives largely outperform TCP/IP communication because they bypass the network stack.
 RDMA shared-memory primitives deliver performance superior to message-passing primitives, although the advantage depends on the message size.

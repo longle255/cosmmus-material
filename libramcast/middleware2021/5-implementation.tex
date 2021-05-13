@@ -31,7 +31,7 @@ Normally, the RNICs actively poll a completion event (CE) from the CQ to ensure
 a write resides in remote memory. Polling CE is time consuming as it involves
 synchronization between the RNICs on both sides of a CQ \cite{APUS}. Thus,
 for multi-group messages, we
-employ \emph{selective signaling} \cite{Kalia2014} to reduce this overhead by
+employ \emph{selective signaling} \cite{kalia2014using} to reduce this overhead by
 only checking for a CE after pushing a number of writes. When using 
 selectively signaled writes with requests of size $n$, up to $n-1$ consecutive
 operations can be unsignaled, i.e., a CE will not be pushed for these
